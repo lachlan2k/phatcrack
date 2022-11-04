@@ -1,0 +1,6 @@
+Dockerfile
+Dockerfile.dev
+.git
+docker-compose.yml
+docker-compose.dev.yml
+tmp/
