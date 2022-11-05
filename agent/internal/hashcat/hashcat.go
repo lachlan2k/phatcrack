@@ -177,6 +177,14 @@ func (sess *HashcatSession) Start() error {
 	}
 
 	go func() {
+		defer func() {
+			close(sess.CrackedHashes)
+			close(sess.StatusUpdates)
+			close(sess.StderrMessages)
+			close(sess.StdoutLines)
+			close(sess.DoneChan)
+		}()
+
 		scanner := bufio.NewScanner(pStdout)
 		for scanner.Scan() {
 			line := scanner.Text()

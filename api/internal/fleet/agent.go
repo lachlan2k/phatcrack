@@ -42,7 +42,7 @@ func (a *Agent) handleMessage(msg *wstypes.Message) error {
 		return a.handleJobStatusUpdate(msg)
 
 	default:
-		return fmt.Errorf("unreconized message type: %s", msg.Type)
+		return fmt.Errorf("unrecognized message type: %s", msg.Type)
 	}
 }
 

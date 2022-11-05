@@ -45,6 +45,7 @@ func (a *Agent) handleJobStdLine(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't cast %v to job stdline dto", msg.Payload)
 	}
 
+	notifyObservers(payload.JobID, *msg)
 	return db.AddJobStdline(payload.JobID, payload.Line, payload.Stream)
 }
 
@@ -54,6 +55,7 @@ func (a *Agent) handleJobStatusUpdate(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't cast %v to job status update dto", msg.Payload)
 	}
 
+	notifyObservers(payload.JobID, *msg)
 	return db.AddJobStatusUpdate(payload.JobID, payload.Status)
 }
 
@@ -67,6 +69,9 @@ func (a *Agent) handleJobExited(msg *wstypes.Message) error {
 	if payload.Error != nil {
 		reason = db.JobStopReasonFailed
 	}
+
+	notifyObservers(payload.JobID, *msg)
+	closeObservers(payload.JobID)
 
 	return db.SetJobExited(payload.JobID, reason, payload.Time)
 }
