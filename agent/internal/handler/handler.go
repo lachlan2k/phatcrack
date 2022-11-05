@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,6 +28,10 @@ type Handler struct {
 }
 
 func (h *Handler) sendMessage(msgType string, payload interface{}) error {
+	if h.conn == nil {
+		return errors.New("connection closed")
+	}
+
 	return h.conn.WriteJSON(wstypes.Message{
 		Type:    msgType,
 		Payload: payload,
@@ -57,7 +63,7 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 	}
 }
 
-func (h *Handler) handleLoop() error {
+func (h *Handler) readLoop(ctx context.Context) error {
 	for {
 		var msg wstypes.Message
 		err := h.conn.ReadJSON(&msg)
@@ -71,38 +77,71 @@ func (h *Handler) handleLoop() error {
 		}
 
 		log.Printf("Received: %v", msg)
+
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+		}
 	}
 }
 
-func (h *Handler) Handle() error {
-	go h.handleLoop()
-
+func (h *Handler) writeLoop(ctx context.Context) error {
 	for {
 		if err := h.sendHeartbeat(); err != nil {
 			return fmt.Errorf("failed to send heartbeat: %v", err)
 		}
 
-		time.Sleep(30 * time.Second)
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-time.After(30 * time.Second):
+		}
 	}
 }
 
-func Run(conf *config.Config) error {
-	log.Printf("Dialing %s...", conf.WSEndpoint)
+func (h *Handler) Handle() error {
+	errs := make(chan error, 2)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
+	go func() {
+		errs <- h.readLoop(ctx)
+	}()
+
+	go func() {
+		errs <- h.writeLoop(ctx)
+	}()
+
+	err := <-errs
+	return err
+}
+
+func Run(conf *config.Config) {
 	headers := http.Header{
 		"X-Agent-Key": []string{conf.AuthKey},
 	}
 
-	conn, _, err := websocket.DefaultDialer.Dial(conf.WSEndpoint, headers)
-	if err != nil {
-		return fmt.Errorf("failed to dial ws endpoint: %v", err)
-	}
-
-	defer conn.Close()
 	h := &Handler{
-		conn: conn,
-		conf: conf,
+		conn:       nil,
+		conf:       conf,
+		activeJobs: make(map[string]ActiveJob),
 	}
 
-	return h.Handle()
+	for {
+		log.Printf("Dialing %s...", conf.WSEndpoint)
+
+		conn, _, err := websocket.DefaultDialer.Dial(conf.WSEndpoint, headers)
+		if err != nil {
+			log.Printf("failed to dial ws endpoint: %v", err)
+		}
+
+		h.conn = conn
+		err = h.Handle()
+		if err != nil {
+			log.Printf("Error when running agent, reconnecting: %v", err)
+		}
+		h.conn.Close()
+		time.Sleep(time.Second)
+	}
 }

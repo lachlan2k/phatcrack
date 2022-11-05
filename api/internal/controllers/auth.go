@@ -1,4 +1,4 @@
-package webserver
+package controllers
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func hookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
+func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong auth")
 	})

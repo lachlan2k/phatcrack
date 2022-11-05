@@ -1,4 +1,4 @@
-package webserver
+package controllers
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func hookAdminEndpoints(api *echo.Group) {
+func HookAdminEndpoints(api *echo.Group) {
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong auth")
 	})

@@ -1,4 +1,4 @@
-package webserver
+package controllers
 
 import (
 	"net/http"
@@ -10,7 +10,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/pkg/apitypes"
 )
 
-func hookAgentEndpoints(api *echo.Group) {
+func HookAgentEndpoints(api *echo.Group) {
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong agent")
 	})

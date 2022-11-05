@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
+	"github.com/lachlan2k/phatcrack/api/internal/controllers"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
@@ -42,13 +43,13 @@ func Listen(port string) error {
 		return c.String(http.StatusOK, "pong")
 	})
 
-	hookAuthEndpoints(api.Group("/auth"), &authHandler)
-	hookJobEndpoints(api.Group("/job"))
-	hookAgentEndpoints(api.Group("/agent"))
+	controllers.HookAuthEndpoints(api.Group("/auth"), &authHandler)
+	controllers.HookJobEndpoints(api.Group("/job"))
+	controllers.HookAgentEndpoints(api.Group("/agent"))
 
 	adminAPI := api.Group("/admin")
 	adminAPI.Use(authHandler.AdminOnlyMiddleware())
-	hookAdminEndpoints(adminAPI)
+	controllers.HookAdminEndpoints(adminAPI)
 
 	return e.Start(":" + port)
 }

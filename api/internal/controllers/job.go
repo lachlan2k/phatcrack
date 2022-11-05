@@ -1,4 +1,4 @@
-package webserver
+package controllers
 
 import (
 	"net/http"
@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func hookJobEndpoints(api *echo.Group) {
+func HookJobEndpoints(api *echo.Group) {
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong job")
 	})
