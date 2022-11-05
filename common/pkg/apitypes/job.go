@@ -1,7 +1,7 @@
 package apitypes
 
 import (
-	"github.com/lachlan2k/phatcrack/agent/pkg/hashcattypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 )
 
 type JobCreateRequestDTO struct {

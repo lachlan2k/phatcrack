@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
-	"github.com/lachlan2k/phatcrack/agent/pkg/apitypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"go.mongodb.org/mongo-driver/mongo"

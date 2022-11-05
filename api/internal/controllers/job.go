@@ -9,7 +9,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
-	"github.com/lachlan2k/phatcrack/api/pkg/apitypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

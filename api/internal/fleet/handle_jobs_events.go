@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/lachlan2k/phatcrack/api/internal/db"
-	"github.com/lachlan2k/phatcrack/api/pkg/wstypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
 func (a *Agent) handleJobStarted(msg *wstypes.Message) error {

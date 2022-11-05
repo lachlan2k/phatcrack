@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lachlan2k/phatcrack/agent/pkg/hashcattypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

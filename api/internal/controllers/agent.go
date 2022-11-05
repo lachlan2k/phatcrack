@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
-	"github.com/lachlan2k/phatcrack/api/pkg/apitypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
 func HookAgentEndpoints(api *echo.Group) {

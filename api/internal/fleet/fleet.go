@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/lachlan2k/phatcrack/api/pkg/wstypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
 var ErrJobDoesntExist = errors.New("job doesn't exist")

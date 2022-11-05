@@ -6,7 +6,6 @@ import (
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/agent/internal/handler"
-	_ "github.com/lachlan2k/phatcrack/agent/pkg/apitypes"
 )
 
 func main() {

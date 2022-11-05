@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
-	"github.com/lachlan2k/phatcrack/agent/pkg/hashcattypes"
-	"github.com/lachlan2k/phatcrack/agent/pkg/wstypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
 func (h *Handler) handleJobStart(msg *wstypes.Message) error {

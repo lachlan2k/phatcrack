@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
-	"github.com/lachlan2k/phatcrack/agent/pkg/wstypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
 type ActiveJob struct {

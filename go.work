@@ -5,3 +5,5 @@ use (
 	./api
 	./common
 )
+
+replace github.com/lachlan2k/phatcrack/common v0.0.0 => ./common

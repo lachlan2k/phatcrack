@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
-	"github.com/lachlan2k/phatcrack/agent/pkg/hashcattypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 )
 
 type HashcatParams hashcattypes.HashcatParams

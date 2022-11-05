@@ -3,7 +3,7 @@ package wstypes
 import (
 	"time"
 
-	"github.com/lachlan2k/phatcrack/agent/pkg/hashcattypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 )
 
 const (

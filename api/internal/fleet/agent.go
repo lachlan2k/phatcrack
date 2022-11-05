@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
-	"github.com/lachlan2k/phatcrack/api/pkg/wstypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
 type Agent struct {
