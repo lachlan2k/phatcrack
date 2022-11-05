@@ -183,7 +183,7 @@ func GetJobHashtype(jobId string) (int, error) {
 
 	err := res.Err()
 	if err != nil {
-		return 0, fmt.Errorf("couldn't get job hashtype: %v", err)
+		return 0, err
 	}
 
 	var out struct {
@@ -196,6 +196,26 @@ func GetJobHashtype(jobId string) (int, error) {
 	}
 
 	return out.HashType, nil
+}
+
+func GetJob(jobId string) (*Job, error) {
+	res := GetJobsColl().FindOne(
+		context.Background(),
+		bson.D{{Key: "_id", Value: jobId}},
+	)
+
+	err := res.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	job := new(Job)
+	err = res.Decode(job)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode job result (%v): %v", res, err)
+	}
+
+	return job, nil
 }
 
 func CreateJob(job Job) (newJobId string, err error) {

@@ -12,6 +12,10 @@ type JobCreateRequestDTO struct {
 	Description      string                     `json:"description"`
 }
 
+type JobCreateResponseDTO struct {
+	ID string `json:"id"`
+}
+
 type JobStartResponseDTO struct {
 	AgentID string `json:"agent_id"`
 }

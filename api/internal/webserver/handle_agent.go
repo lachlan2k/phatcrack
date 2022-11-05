@@ -53,6 +53,9 @@ func handleAgentWs(c echo.Context) error {
 	}
 
 	ws, err := (&websocket.Upgrader{}).Upgrade(c.Response(), c.Request(), nil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't upgrade websocket").SetInternal(err)
+	}
 
 	defer ws.Close()
 

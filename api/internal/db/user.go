@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -53,8 +54,8 @@ func LookupUserByUsername(username string) (*User, error) {
 	)
 
 	err := res.Err()
-	if err != nil {
-		return nil, fmt.Errorf("failed to lookup user %s in database: %v", username, err)
+	if err == mongo.ErrNoDocuments {
+		return nil, err
 	}
 
 	user := new(User)

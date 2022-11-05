@@ -2,12 +2,15 @@ package webserver
 
 import (
 	"net/http"
+	"net/url"
 
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/api/pkg/apitypes"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func hookJobEndpoints(api *echo.Group) {
@@ -17,6 +20,44 @@ func hookJobEndpoints(api *echo.Group) {
 
 	api.POST("/create", handleJobCreate)
 	api.POST("/:id/start", handleJobStart)
+	api.GET("/:id/watch", handleJobWatch)
+}
+
+func handleJobWatch(c echo.Context) error {
+	origin := c.Request().Header.Get("origin")
+	originU, err := url.Parse(origin)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid origin header").SetInternal(err)
+	}
+
+	if len(originU.Host) == 0 || c.Request().Header.Get("host") != originU.Host {
+		return echo.NewHTTPError(http.StatusBadRequest, "Cross-origin request are not allowed")
+	}
+
+	job, err := db.GetJob(c.Param("id"))
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return echo.NewHTTPError(http.StatusNotFound, "Job couldn't be found")
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error fetching job")
+		}
+	}
+
+	ws, err := (&websocket.Upgrader{}).Upgrade(c.Response(), c.Request(), nil)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't upgrade websocket").SetInternal(err)
+	}
+	defer ws.Close()
+	notifs := fleet.Observe(job.ID.String())
+	defer fleet.RemoveObserver(notifs, job.ID.String())
+
+	for {
+		notif := <-notifs
+		err := ws.WriteJSON(notif)
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func handleJobStart(c echo.Context) error {
@@ -26,7 +67,7 @@ func handleJobStart(c echo.Context) error {
 
 	switch err {
 	case nil:
-		return c.JSON(http.StatusCreated, apitypes.JobStartResponseDTO{
+		return c.JSON(http.StatusOK, apitypes.JobStartResponseDTO{
 			AgentID: agentId,
 		})
 
@@ -80,5 +121,7 @@ func handleJobCreate(c echo.Context) error {
 		fleet.ScheduleJob(newJobId)
 	}
 
-	return nil
+	return c.JSON(http.StatusCreated, apitypes.JobCreateResponseDTO{
+		ID: newJobId,
+	})
 }
