@@ -7,9 +7,9 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 )
 
-const UserRoleAdmin = "admin"
 const TokenCookieName = "auth"
 const TokenLifetime = 15 * time.Minute
 
@@ -19,6 +19,7 @@ type AuthHandler struct {
 }
 
 type UserClaims struct {
+	ID       string `json:"id"`
 	Username string `json:"username"`
 	Role     string `json:"role"`
 }
@@ -26,6 +27,16 @@ type UserClaims struct {
 type AuthClaims struct {
 	UserClaims
 	jwt.StandardClaims
+}
+
+func UserToClaims(user *db.User) AuthClaims {
+	return AuthClaims{
+		UserClaims: UserClaims{
+			ID:       user.ID.String(),
+			Username: user.Username,
+			Role:     user.Role,
+		},
+	}
 }
 
 func (a *AuthHandler) SignJwt(claims AuthClaims) (string, time.Time, error) {
@@ -95,7 +106,7 @@ func (a *AuthHandler) AdminOnlyMiddleware() echo.MiddlewareFunc {
 				return echo.ErrUnauthorized
 			}
 
-			if claims.Role != UserRoleAdmin {
+			if claims.Role != db.UserRoleAdmin {
 				return echo.ErrUnauthorized
 			}
 

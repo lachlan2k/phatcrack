@@ -12,7 +12,7 @@ type RequestValidator struct {
 }
 
 func (v *RequestValidator) Init() {
-	// register other validators
+	// Register other validators
 }
 
 // Validate Data

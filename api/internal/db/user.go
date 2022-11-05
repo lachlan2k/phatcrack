@@ -7,7 +7,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -47,6 +46,26 @@ func RegisterUser(username, password, role string) error {
 	return nil
 }
 
+func LookupUserByID(id string) (*User, error) {
+	res := GetUsersColl().FindOne(
+		context.Background(),
+		bson.D{{Key: "_id", Value: id}},
+	)
+
+	err := res.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	user := new(User)
+	err = res.Decode(user)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode user result (%v): %v", res, err)
+	}
+
+	return user, nil
+}
+
 func LookupUserByUsername(username string) (*User, error) {
 	res := GetUsersColl().FindOne(
 		context.Background(),
@@ -54,7 +73,7 @@ func LookupUserByUsername(username string) (*User, error) {
 	)
 
 	err := res.Err()
-	if err == mongo.ErrNoDocuments {
+	if err != nil {
 		return nil, err
 	}
 

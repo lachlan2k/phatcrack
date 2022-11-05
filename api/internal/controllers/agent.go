@@ -22,7 +22,7 @@ func HookAgentEndpoints(api *echo.Group) {
 func handleAgentCreate(c echo.Context) error {
 	var req apitypes.AgentCreateRequestDTO
 	if err := c.Bind(&req); err != nil {
-		return c.String(http.StatusBadRequest, "bad request")
+		return echo.ErrBadRequest
 	}
 	if err := c.Validate(&req); err != nil {
 		return err
@@ -30,8 +30,7 @@ func handleAgentCreate(c echo.Context) error {
 
 	agentId, key, err := db.CreateAgent(req.Name)
 	if err != nil {
-		// TODO: err
-		return c.String(http.StatusInternalServerError, "couldn't make agent")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't create agent").SetInternal(err)
 	}
 
 	return c.JSON(http.StatusCreated, apitypes.AgentCreateResponseDTO{
@@ -44,12 +43,12 @@ func handleAgentCreate(c echo.Context) error {
 func handleAgentWs(c echo.Context) error {
 	authKey := c.Request().Header.Get("X-Agent-Key")
 	if len(authKey) == 0 {
-		return c.NoContent(http.StatusUnauthorized)
+		return echo.ErrBadRequest
 	}
 
 	agentData, err := db.FindAgentByAuthKey(authKey)
 	if err != nil {
-		return c.NoContent(http.StatusUnauthorized)
+		return echo.ErrBadRequest
 	}
 
 	ws, err := (&websocket.Upgrader{}).Upgrade(c.Response(), c.Request(), nil)

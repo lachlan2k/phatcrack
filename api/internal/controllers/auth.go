@@ -18,22 +18,39 @@ func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 		return c.String(http.StatusOK, "pong auth")
 	})
 
-	api.PUT("/refresh", func(c echo.Context) error {
-		u := c.Get("user").(*jwt.Token)
-		claims := u.Claims.(*auth.AuthClaims)
-		err := authHandler.SignAndSetJWT(c, *claims)
-		if err != nil {
-			return err
-		}
-		return c.NoContent(http.StatusOK)
-	})
-
+	api.PUT("/refresh", handleRefresh(authHandler))
 	api.POST("/login", handleLogin)
 
 	api.POST("/whoami", func(c echo.Context) error {
 		user := c.Get("user")
 		return c.JSON(http.StatusOK, user)
 	})
+}
+
+func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		u, ok := c.Get("user").(*jwt.Token)
+		if !ok {
+			return echo.ErrUnauthorized
+		}
+		claims, ok := u.Claims.(*auth.AuthClaims)
+		if !ok || claims.ID == "" {
+			return echo.ErrUnauthorized
+		}
+
+		user, err := db.LookupUserByID(claims.ID)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to refresh user data").SetInternal(err)
+		}
+
+		newClaims := auth.UserToClaims(user)
+
+		err = authHandler.SignAndSetJWT(c, newClaims)
+		if err != nil {
+			return err
+		}
+		return c.NoContent(http.StatusOK)
+	}
 }
 
 func handleLogin(c echo.Context) error {
@@ -45,7 +62,7 @@ func handleLogin(c echo.Context) error {
 		return err
 	}
 
-	// Todo: was there a better way of doing this?
+	// TODO: was there a better way of doing this?
 	minTime := time.After(time.Second)
 	defer func() { <-minTime }()
 
