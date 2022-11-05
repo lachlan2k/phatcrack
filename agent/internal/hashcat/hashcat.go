@@ -15,57 +15,18 @@ import (
 	"time"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
-	"github.com/lachlan2k/phatcrack/agent/pkg/apitypes"
+	"github.com/lachlan2k/phatcrack/agent/pkg/hashcattypes"
 )
 
-type HashcatParams struct {
-	apitypes.HashcatParamsDTO
-	tempHashFile string
-}
+type HashcatParams hashcattypes.HashcatParams
 
-type HashcatStatusGuess struct {
-	GuessBase        string  `json:"guess_base"`
-	GuessBaseCount   uint64  `json:"guess_base_count"`
-	GuessBaseOffset  uint64  `json:"guess_base_offset"`
-	GuessBasePercent float32 `json:"guess_base_percent"`
+type HashcatStatusGuess hashcattypes.HashcatStatusGuess
 
-	GuessMod        string  `json:"guess_mod"`
-	GuessModCount   uint64  `json:"guess_mod_count"`
-	GuessModOffset  uint64  `json:"guess_mod_offset"`
-	GuessModPercent float32 `json:"guess_mod_percent"`
+type HashcatStatusDevice hashcattypes.HashcatStatusDevice
 
-	GuessMode int `json:"guess_mode"`
-}
+type HashcatStatus = hashcattypes.HashcatStatus
 
-type HashcatStatusDevice struct {
-	DeviceID   int    `json:"device_id"`
-	DeviceName string `json:"device_name"`
-	DeviceType string `json:"device_type"`
-	Speed      int    `json:"speed"`
-	Util       int    `json:"util"`
-	Temp       int    `json:"temp"`
-}
-
-type HashcatStatus struct {
-	OriginalLine string
-
-	Session         string                `json:"session"`
-	Guess           HashcatStatusGuess    `json:"guess"`
-	Status          int                   `json:"status"`
-	Target          string                `json:"target"`
-	Progress        []int                 `json:"progress"`
-	RestorePoint    int                   `json:"restore_point"`
-	RecoveredHashes []int                 `json:"recovered_hashes"`
-	RecoveredSalts  []int                 `json:"recovered_salts"`
-	Rejected        int                   `json:"rejected"`
-	Devices         []HashcatStatusDevice `json:"devices"`
-}
-
-type HashcatResult struct {
-	Timestamp    time.Time
-	Hash         string
-	PlaintextHex string
-}
+type HashcatResult hashcattypes.HashcatResult
 
 const (
 	AttackModeDictionary = 0
@@ -80,10 +41,12 @@ func (params HashcatParams) Validate() error {
 		if len(params.WordlistFilenames) != 1 {
 			return fmt.Errorf("expected 1 wordlist for dictionary attack (0), but %d given", len(params.WordlistFilenames))
 		}
+
 	case AttackModeMask:
 		if params.Mask == "" {
 			return errors.New("using mask attack (1), but no mask was given")
 		}
+
 	case AttackModeHybridDM, AttackModeHybridMD:
 		if params.Mask == "" {
 			return fmt.Errorf("using hybrid attack (%d), but no mask was given", params.AttackMode)
@@ -91,6 +54,7 @@ func (params HashcatParams) Validate() error {
 		if len(params.WordlistFilenames) != 1 {
 			return fmt.Errorf("using hybrid attack (%d), but no wordlist was given", params.AttackMode)
 		}
+
 	default:
 		return fmt.Errorf("unsupported attack mode %d", params.AttackMode)
 	}
@@ -98,15 +62,16 @@ func (params HashcatParams) Validate() error {
 	return nil
 }
 
-func (params HashcatParams) ToCmdArgs(conf config.Config) (args []string, err error) {
+func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile string) (args []string, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
 
 	args = append(
 		args,
-		"--outfile-format", "1,3,5",
 		"--quiet",
+		"--session", session,
+		"--outfile-format", "1,3,5",
 		"--status-json",
 		"--status-timer", "1",
 		"--potfile-disable",
@@ -118,6 +83,10 @@ func (params HashcatParams) ToCmdArgs(conf config.Config) (args []string, err er
 
 	if params.OptimizedKernels {
 		args = append(args, "-O")
+	}
+
+	if params.SlowCandidates {
+		args = append(args, "-S")
 	}
 
 	wordlists := make([]string, len(params.WordlistFilenames))
@@ -138,7 +107,7 @@ func (params HashcatParams) ToCmdArgs(conf config.Config) (args []string, err er
 		}
 	}
 
-	args = append(args, params.tempHashFile)
+	args = append(args, tempHashFile)
 
 	switch params.AttackMode {
 	case AttackModeDictionary:
@@ -146,10 +115,13 @@ func (params HashcatParams) ToCmdArgs(conf config.Config) (args []string, err er
 			args = append(args, "-r", rule)
 		}
 		args = append(args, wordlists[0])
+
 	case AttackModeMask:
 		args = append(args, params.Mask)
+
 	case AttackModeHybridDM:
 		args = append(args, wordlists[0], params.Mask)
+
 	case AttackModeHybridMD:
 		args = append(args, params.Mask, wordlists[0])
 	}
@@ -157,7 +129,7 @@ func (params HashcatParams) ToCmdArgs(conf config.Config) (args []string, err er
 	return
 }
 
-func findBinary(conf config.Config) (path string, err error) {
+func findBinary(conf *config.Config) (path string, err error) {
 	if conf.HashcatBinary != "" {
 		_, err = os.Stat(conf.HashcatBinary)
 		if err != nil {
@@ -184,6 +156,7 @@ type HashcatSession struct {
 	CrackedHashes  chan HashcatResult
 	StatusUpdates  chan HashcatStatus
 	StderrMessages chan string
+	StdoutLines    chan string
 	DoneChan       chan error
 }
 
@@ -208,11 +181,18 @@ func (sess *HashcatSession) Start() error {
 		for scanner.Scan() {
 			line := scanner.Text()
 
+			sess.StdoutLines <- line
+
 			switch line[0] {
 			case '{':
 				var status HashcatStatus
-				json.Unmarshal([]byte(line), &status)
+				err := json.Unmarshal([]byte(line), &status)
+				if err != nil {
+					fmt.Printf("WARN: couldn't unmarshal hashcat status: %v", err)
+					continue
+				}
 				sess.StatusUpdates <- status
+
 			default:
 				values := strings.Split(line, ":")
 				if len(values) != 3 {
@@ -254,7 +234,7 @@ func (sess *HashcatSession) Kill() error {
 	return sess.proc.Process.Kill()
 }
 
-func NewHashcatSession(hashes []string, params HashcatParams, conf config.Config) (*HashcatSession, error) {
+func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *config.Config) (*HashcatSession, error) {
 	binaryPath, err := findBinary(conf)
 	if err != nil {
 		return nil, err
@@ -265,9 +245,7 @@ func NewHashcatSession(hashes []string, params HashcatParams, conf config.Config
 		return nil, fmt.Errorf("couldn't make a temp file to store hashes: %v", err)
 	}
 
-	params.tempHashFile = hashFile.Name()
-
-	args, err := params.ToCmdArgs(conf)
+	args, err := params.ToCmdArgs(conf, id, hashFile.Name())
 	if err != nil {
 		return nil, err
 	}

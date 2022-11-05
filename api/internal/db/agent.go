@@ -31,6 +31,18 @@ type Agent struct {
 	Info    AgentInfo          `bson:"agent_info,omitempty"`
 }
 
+func UpdateAgentCheckin(agentId string) error {
+	_, err := GetAgentsColl().UpdateOne(
+		context.Background(),
+		bson.D{{Key: "_id", Value: agentId}},
+		bson.D{{Key: "$set", Value: bson.D{{Key: "agent_info.last_checkin", Value: util.MongoNow()}}}},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to save new agent status in database: %v", err)
+	}
+	return nil
+}
+
 func UpdateAgentStatus(newStatus, agentId string) error {
 	_, err := GetAgentsColl().UpdateOne(
 		context.Background(),

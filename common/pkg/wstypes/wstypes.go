@@ -8,5 +8,6 @@ type Message struct {
 const HeartbeatType = "Heartbeat"
 
 type HeartbeatDTO struct {
-	Time int64 `json:"time,omitempty"`
+	Time         int64 `json:"time"`
+	ActiveJobIDs []string
 }

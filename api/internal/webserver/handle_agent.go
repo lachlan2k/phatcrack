@@ -1,15 +1,13 @@
 package webserver
 
 import (
-	"log"
 	"net/http"
-	"strings"
 
+	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/pkg/apitypes"
-	"golang.org/x/net/websocket"
 )
 
 func hookAgentEndpoints(api *echo.Group) {
@@ -44,33 +42,30 @@ func handleAgentCreate(c echo.Context) error {
 }
 
 func handleAgentWs(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	if len(authHeader) == 0 || !strings.HasPrefix(strings.ToLower(authHeader), "bearer ") {
+	authKey := c.Request().Header.Get("X-Agent-Key")
+	if len(authKey) == 0 {
 		return c.NoContent(http.StatusUnauthorized)
 	}
-
-	authKey := authHeader[len("bearer "):]
 
 	agentData, err := db.FindAgentByAuthKey(authKey)
 	if err != nil {
 		return c.NoContent(http.StatusUnauthorized)
 	}
 
-	websocket.Handler(func(ws *websocket.Conn) {
-		defer ws.Close()
+	ws, err := (&websocket.Upgrader{}).Upgrade(c.Response(), c.Request(), nil)
 
-		agent, err := fleet.RegisterAgentFromWebsocket(ws, agentData.ID.String())
-		if err != nil {
-			// TODO: c.logger?
-			log.Printf("failed to register agent: %v", err)
-			return
-		}
+	defer ws.Close()
 
-		err = agent.Handle()
-		if err != nil {
-			c.Logger().Warnf("Error from agent: %v", err)
-		}
+	agent, err := fleet.RegisterAgentFromWebsocket(ws, agentData.ID.String())
+	if err != nil {
+		c.Logger().Warnf("Failed to register agent: %v", err)
+		return nil
+	}
 
-	}).ServeHTTP(c.Response(), c.Request())
+	err = agent.Handle()
+	if err != nil {
+		c.Logger().Warnf("Error from agent: %v", err)
+	}
+
 	return nil
 }
