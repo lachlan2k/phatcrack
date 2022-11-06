@@ -1,11 +1,14 @@
 package fleet
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 
 	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
@@ -22,6 +25,8 @@ func (a *Agent) Kill() {
 }
 
 func (a *Agent) handleMessage(msg *wstypes.Message) error {
+	log.Printf("received: %v", msg)
+
 	switch msg.Type {
 	case wstypes.HeartbeatType:
 		return a.handleHeartbeat(msg)
@@ -46,15 +51,33 @@ func (a *Agent) handleMessage(msg *wstypes.Message) error {
 	}
 }
 
+func (a *Agent) sendMessage(msgType string, payload interface{}) error {
+	if a.conn == nil {
+		return errors.New("connection closed")
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Sending %v %v\n", msgType, string(payloadBytes))
+
+	return a.conn.WriteJSON(wstypes.Message{
+		Type:    msgType,
+		Payload: string(payloadBytes),
+	})
+}
+
 func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
-	payload, ok := msg.Payload.(wstypes.HeartbeatDTO)
-	if !ok {
-		return fmt.Errorf("couldn't cast %v to heartbeat dto", msg.Payload)
+	payload, err := util.UnmarshalJSON[wstypes.HeartbeatDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to hearbeat dto: %v", msg.Payload, err)
 	}
 
 	a.activeJobIDs = payload.ActiveJobIDs
 
-	err := db.UpdateAgentCheckin(a.agentId)
+	err = db.UpdateAgentCheckin(a.agentId)
 	if err != nil {
 		return err
 	}
@@ -79,7 +102,7 @@ func (a *Agent) Handle() error {
 
 		err = a.handleMessage(&msg)
 		if err != nil {
-			return fmt.Errorf("error when handling message: %v", err)
+			return fmt.Errorf("error when handling %s message: %v", msg.Type, err)
 		}
 
 		log.Printf("Received: %v", msg)

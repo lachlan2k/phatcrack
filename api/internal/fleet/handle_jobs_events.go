@@ -4,25 +4,26 @@ import (
 	"fmt"
 
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
 func (a *Agent) handleJobStarted(msg *wstypes.Message) error {
-	payload, ok := msg.Payload.(wstypes.JobStartedDTO)
-	if !ok {
-		return fmt.Errorf("couldn't cast %v to job started dto", msg.Payload)
+	payload, err := util.UnmarshalJSON[wstypes.JobStartedDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to job started dto: %v", msg.Payload, err)
 	}
 
 	return db.SetJobStarted(payload.JobID, payload.Time)
 }
 
 func (a *Agent) handleJobCrackedHash(msg *wstypes.Message) error {
-	payload, ok := msg.Payload.(wstypes.JobCrackedHashDTO)
-	if !ok {
-		return fmt.Errorf("couldn't cast %v to heartbeat dto", msg.Payload)
+	payload, err := util.UnmarshalJSON[wstypes.JobCrackedHashDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to cracked hash dto: %v", msg.Payload, err)
 	}
 
-	err := db.AddJobCrackedHash(payload.JobID, payload.Result.Hash, payload.Result.PlaintextHex)
+	err = db.AddJobCrackedHash(payload.JobID, payload.Result.Hash, payload.Result.PlaintextHex)
 	if err != nil {
 		return err
 	}
@@ -40,9 +41,9 @@ func (a *Agent) handleJobCrackedHash(msg *wstypes.Message) error {
 }
 
 func (a *Agent) handleJobStdLine(msg *wstypes.Message) error {
-	payload, ok := msg.Payload.(wstypes.JobStdLineDTO)
-	if !ok {
-		return fmt.Errorf("couldn't cast %v to job stdline dto", msg.Payload)
+	payload, err := util.UnmarshalJSON[wstypes.JobStdLineDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to job stdline dto: %v", msg.Payload, err)
 	}
 
 	notifyObservers(payload.JobID, *msg)
@@ -50,9 +51,9 @@ func (a *Agent) handleJobStdLine(msg *wstypes.Message) error {
 }
 
 func (a *Agent) handleJobStatusUpdate(msg *wstypes.Message) error {
-	payload, ok := msg.Payload.(wstypes.JobStatusUpdateDTO)
-	if !ok {
-		return fmt.Errorf("couldn't cast %v to job status update dto", msg.Payload)
+	payload, err := util.UnmarshalJSON[wstypes.JobStatusUpdateDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to job status update dto: %v", msg.Payload, err)
 	}
 
 	notifyObservers(payload.JobID, *msg)
@@ -60,9 +61,9 @@ func (a *Agent) handleJobStatusUpdate(msg *wstypes.Message) error {
 }
 
 func (a *Agent) handleJobExited(msg *wstypes.Message) error {
-	payload, ok := msg.Payload.(wstypes.JobExitedDTO)
-	if !ok {
-		return fmt.Errorf("couldn't cast %v to job exited dto", msg.Payload)
+	payload, err := util.UnmarshalJSON[wstypes.JobExitedDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to job exited dto: %v", msg.Payload, err)
 	}
 
 	reason := db.JobStopReasonFinished
@@ -74,4 +75,16 @@ func (a *Agent) handleJobExited(msg *wstypes.Message) error {
 	closeObservers(payload.JobID)
 
 	return db.SetJobExited(payload.JobID, reason, payload.Time)
+}
+
+func (a *Agent) handleJobFailedToStart(msg *wstypes.Message) error {
+	payload, err := util.UnmarshalJSON[wstypes.JobFailedToStartDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to job failed to start dto: %v", msg.Payload, err)
+	}
+
+	notifyObservers(payload.JobID, *msg)
+	closeObservers(payload.JobID)
+
+	return db.SetJobExited(payload.JobID, db.JobStopReasonFailedToStart, payload.Time)
 }

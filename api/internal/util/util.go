@@ -4,12 +4,23 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+func UnmarshalJSON[T interface{}](jsonBlob string) (out T, err error) {
+	err = json.Unmarshal([]byte(jsonBlob), &out)
+	return
+}
+
+func IDToString(id primitive.ObjectID) string {
+	str, _ := id.MarshalText()
+	return string(str)
+}
 
 func MongoNow() primitive.Timestamp {
 	return primitive.Timestamp{T: uint32(time.Now().Unix())}

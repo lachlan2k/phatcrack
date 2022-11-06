@@ -2,17 +2,19 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
+	"github.com/lachlan2k/phatcrack/agent/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
 func (h *Handler) handleJobStart(msg *wstypes.Message) error {
-	payload, ok := msg.Payload.(wstypes.JobStartDTO)
-	if !ok {
-		return fmt.Errorf("couldn't cast body to JobStartDTO: %v", msg.Payload)
+	payload, err := util.UnmarshalJSON[wstypes.JobStartDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to job start dto: %v", msg.Payload, err)
 	}
 
 	return h.runJob(payload)
@@ -20,7 +22,8 @@ func (h *Handler) handleJobStart(msg *wstypes.Message) error {
 
 func (h *Handler) sendJobStarted(jobId string) {
 	h.sendMessage(wstypes.JobStartedType, wstypes.JobStartedDTO{
-		Time: time.Now(),
+		JobID: jobId,
+		Time:  time.Now(),
 	})
 }
 
@@ -42,6 +45,7 @@ func (h *Handler) sendJobStderrLine(jobId, line string) {
 
 func (h *Handler) sendJobExited(jobId string, err error) {
 	h.sendMessage(wstypes.JobExitedType, wstypes.JobExitedDTO{
+		JobID: jobId,
 		Error: err,
 	})
 }
@@ -57,6 +61,14 @@ func (h *Handler) sendJobStatusUpdate(jobId string, status hashcattypes.HashcatS
 	h.sendMessage(wstypes.JobStatusUpdateType, wstypes.JobStatusUpdateDTO{
 		JobID:  jobId,
 		Status: status,
+	})
+}
+
+func (h *Handler) sendJobFailedToStart(jobId string, err error) {
+	h.sendMessage(wstypes.JobFailedToStartType, wstypes.JobFailedToStartDTO{
+		JobID: jobId,
+		Time:  time.Now(),
+		Error: err,
 	})
 }
 
@@ -79,7 +91,15 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 		OptimizedKernels:  job.HashcatParams.OptimizedKernels,
 	}
 
-	sess, _ := hashcat.NewHashcatSession(job.ID, job.Hashes, params, h.conf)
+	sess, err := hashcat.NewHashcatSession(job.ID, job.Hashes, params, h.conf)
+	if err != nil {
+		h.sendJobFailedToStart(job.ID, err)
+		return err
+	}
+
+	log.Printf("Job is %v", job)
+	log.Printf("Starting job %s", job.ID)
+
 	sess.Start()
 
 	go func() {
@@ -88,6 +108,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 
 	procLoop:
 		for {
+			log.Printf("proc loop")
 			select {
 			case stdoutLine := <-sess.StdoutLines:
 				h.sendJobStdoutLine(job.ID, stdoutLine)

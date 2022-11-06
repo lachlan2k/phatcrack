@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
 func HookAdminEndpoints(api *echo.Group) {
@@ -14,5 +16,28 @@ func HookAdminEndpoints(api *echo.Group) {
 	api.POST("/whoami", func(c echo.Context) error {
 		user := c.Get("user")
 		return c.JSON(http.StatusOK, user)
+	})
+
+	api.POST("/agent/create", handleAgentCreate)
+}
+
+func handleAgentCreate(c echo.Context) error {
+	var req apitypes.AgentCreateRequestDTO
+	if err := c.Bind(&req); err != nil {
+		return echo.ErrBadRequest
+	}
+	if err := c.Validate(&req); err != nil {
+		return err
+	}
+
+	agentId, key, err := db.CreateAgent(req.Name)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't create agent").SetInternal(err)
+	}
+
+	return c.JSON(http.StatusCreated, apitypes.AgentCreateResponseDTO{
+		Name: req.Name,
+		ID:   agentId,
+		Key:  key,
 	})
 }

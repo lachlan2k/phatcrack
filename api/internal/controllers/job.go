@@ -19,8 +19,21 @@ func HookJobEndpoints(api *echo.Group) {
 	})
 
 	api.POST("/create", handleJobCreate)
+	api.GET("/:id", handleJobGet)
 	api.POST("/:id/start", handleJobStart)
 	api.GET("/:id/watch", handleJobWatch)
+}
+
+func handleJobGet(c echo.Context) error {
+	id := c.Param("id")
+	job, err := db.GetJob(id)
+	if err == mongo.ErrNoDocuments {
+		return echo.ErrNotFound
+	} else if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get job").SetInternal(err)
+	}
+
+	return c.JSON(http.StatusOK, job)
 }
 
 func handleJobWatch(c echo.Context) error {
@@ -34,7 +47,8 @@ func handleJobWatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Cross-origin request are not allowed")
 	}
 
-	job, err := db.GetJob(c.Param("id"))
+	jobId := c.Param("id")
+	_, err = db.GetJob(jobId)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return echo.NewHTTPError(http.StatusNotFound, "Job couldn't be found")
@@ -48,8 +62,8 @@ func handleJobWatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't upgrade websocket").SetInternal(err)
 	}
 	defer ws.Close()
-	notifs := fleet.Observe(job.ID.String())
-	defer fleet.RemoveObserver(notifs, job.ID.String())
+	notifs := fleet.Observe(jobId)
+	defer fleet.RemoveObserver(notifs, jobId)
 
 	for {
 		notif := <-notifs

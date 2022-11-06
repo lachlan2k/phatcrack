@@ -7,7 +7,10 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var ErrJobDoesntExist = errors.New("job doesn't exist")
@@ -140,6 +143,30 @@ func ScheduleJob(jobId string) (string, error) {
 			leastBusyAgent = agent
 		}
 	}
+
+	job, err := db.GetJob(jobId)
+	if err == mongo.ErrNoDocuments {
+		return "", ErrJobDoesntExist
+	}
+
+	if job.RuntimeData.Status != db.JobStatusCreated {
+		return "", ErrJobAlreadyScheduled
+	}
+
+	leastBusyAgent.sendMessage(wstypes.JobStartType, wstypes.JobStartDTO{
+		ID: jobId,
+		HashcatParams: hashcattypes.HashcatParams{
+			AttackMode:        job.HashcatParams.AttackMode,
+			HashType:          job.HashcatParams.HashType,
+			Mask:              job.HashcatParams.Mask,
+			WordlistFilenames: job.HashcatParams.WordlistFilenames,
+			RulesFilenames:    job.HashcatParams.RulesFilenames,
+			AdditionalArgs:    job.HashcatParams.AdditionalArgs,
+			OptimizedKernels:  job.HashcatParams.OptimizedKernels,
+			SlowCandidates:    job.HashcatParams.SlowCandidates,
+		},
+		Hashes: job.Hashes,
+	})
 
 	// TODO: maybe check if it's healthy?
 

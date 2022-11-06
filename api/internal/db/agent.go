@@ -32,9 +32,13 @@ type Agent struct {
 }
 
 func UpdateAgentCheckin(agentId string) error {
-	_, err := GetAgentsColl().UpdateOne(
+	objId, err := primitive.ObjectIDFromHex(agentId)
+	if err != nil {
+		return err
+	}
+	_, err = GetAgentsColl().UpdateOne(
 		context.Background(),
-		bson.D{{Key: "_id", Value: agentId}},
+		bson.M{"_id": objId},
 		bson.D{{Key: "$set", Value: bson.D{{Key: "agent_info.last_checkin", Value: util.MongoNow()}}}},
 	)
 	if err != nil {
@@ -44,9 +48,13 @@ func UpdateAgentCheckin(agentId string) error {
 }
 
 func UpdateAgentStatus(newStatus, agentId string) error {
-	_, err := GetAgentsColl().UpdateOne(
+	objId, err := primitive.ObjectIDFromHex(agentId)
+	if err != nil {
+		return err
+	}
+	_, err = GetAgentsColl().UpdateOne(
 		context.Background(),
-		bson.D{{Key: "_id", Value: agentId}},
+		bson.M{"_id": objId},
 		bson.D{{Key: "$set", Value: bson.D{{Key: "agent_info.status", Value: newStatus}}}},
 	)
 	if err != nil {

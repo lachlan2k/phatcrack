@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -32,9 +33,14 @@ func (h *Handler) sendMessage(msgType string, payload interface{}) error {
 		return errors.New("connection closed")
 	}
 
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
 	return h.conn.WriteJSON(wstypes.Message{
 		Type:    msgType,
-		Payload: payload,
+		Payload: string(payloadBytes),
 	})
 }
 
@@ -133,7 +139,9 @@ func Run(conf *config.Config) {
 
 		conn, _, err := websocket.DefaultDialer.Dial(conf.WSEndpoint, headers)
 		if err != nil {
-			log.Printf("failed to dial ws endpoint: %v", err)
+			log.Printf("failed to dial ws endpoint: %v, %v", conn, err)
+			time.Sleep(time.Second)
+			continue
 		}
 
 		h.conn = conn

@@ -189,7 +189,9 @@ func (sess *HashcatSession) Start() error {
 		for scanner.Scan() {
 			line := scanner.Text()
 
+			log.Printf("read line %v", line)
 			sess.StdoutLines <- line
+			log.Printf("Channel received")
 
 			switch line[0] {
 			case '{':
@@ -231,6 +233,7 @@ func (sess *HashcatSession) Start() error {
 	go func() {
 		scanner := bufio.NewScanner(pStderr)
 		for scanner.Scan() {
+			log.Printf("read stderr: %s", scanner.Text())
 			sess.StderrMessages <- scanner.Text()
 		}
 	}()
@@ -269,8 +272,10 @@ func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *c
 	return &HashcatSession{
 		proc:           exec.Command(binaryPath, args...),
 		hashFile:       hashFile,
-		CrackedHashes:  make(chan HashcatResult),
-		StatusUpdates:  make(chan HashcatStatus),
-		StderrMessages: make(chan string),
+		CrackedHashes:  make(chan HashcatResult, 5),
+		StatusUpdates:  make(chan HashcatStatus, 5),
+		StderrMessages: make(chan string, 5),
+		StdoutLines:    make(chan string, 5),
+		DoneChan:       make(chan error),
 	}, nil
 }

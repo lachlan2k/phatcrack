@@ -19,8 +19,8 @@ func FindInPotfile(hash string, hashType uint) (*PotfileEntry, error) {
 	filter := bson.D{{
 		Key: "$and",
 		Value: bson.A{
-			bson.D{{Key: "hash", Value: hash}},
-			bson.D{{Key: "hash_type", Value: hashType}},
+			bson.M{"hash": hash},
+			bson.M{"hash_type": hashType},
 		},
 	}}
 

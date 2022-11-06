@@ -1,8 +1,8 @@
 package wstypes
 
 type Message struct {
-	Type    string
-	Payload interface{}
+	Type    string `json:"type"`
+	Payload string `json:"payload"` // json blob
 }
 
 const (

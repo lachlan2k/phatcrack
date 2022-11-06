@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
-	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
 func HookAgentEndpoints(api *echo.Group) {
@@ -15,29 +15,7 @@ func HookAgentEndpoints(api *echo.Group) {
 		return c.String(http.StatusOK, "pong agent")
 	})
 
-	api.POST("/create", handleAgentCreate)
 	api.GET("/handle/ws", handleAgentWs)
-}
-
-func handleAgentCreate(c echo.Context) error {
-	var req apitypes.AgentCreateRequestDTO
-	if err := c.Bind(&req); err != nil {
-		return echo.ErrBadRequest
-	}
-	if err := c.Validate(&req); err != nil {
-		return err
-	}
-
-	agentId, key, err := db.CreateAgent(req.Name)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't create agent").SetInternal(err)
-	}
-
-	return c.JSON(http.StatusCreated, apitypes.AgentCreateResponseDTO{
-		Name: req.Name,
-		ID:   agentId,
-		Key:  key,
-	})
 }
 
 func handleAgentWs(c echo.Context) error {
@@ -48,7 +26,7 @@ func handleAgentWs(c echo.Context) error {
 
 	agentData, err := db.FindAgentByAuthKey(authKey)
 	if err != nil {
-		return echo.ErrBadRequest
+		return echo.ErrUnauthorized
 	}
 
 	ws, err := (&websocket.Upgrader{}).Upgrade(c.Response(), c.Request(), nil)
@@ -58,15 +36,15 @@ func handleAgentWs(c echo.Context) error {
 
 	defer ws.Close()
 
-	agent, err := fleet.RegisterAgentFromWebsocket(ws, agentData.ID.String())
+	agent, err := fleet.RegisterAgentFromWebsocket(ws, util.IDToString(agentData.ID))
 	if err != nil {
-		c.Logger().Warnf("Failed to register agent: %v", err)
+		c.Logger().Printf("Failed to register agent: %v", err)
 		return nil
 	}
 
 	err = agent.Handle()
 	if err != nil {
-		c.Logger().Warnf("Error from agent: %v", err)
+		c.Logger().Printf("Error from agent: %v", err)
 	}
 
 	return nil

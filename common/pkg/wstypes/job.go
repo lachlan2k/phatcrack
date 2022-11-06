@@ -11,11 +11,12 @@ const (
 	JobStartType = "JobStart"
 
 	// agent -> server types
-	JobStartedType      = "JobStarted"
-	JobCrackedHashType  = "JobCrackedHash"
-	JobStdLineType      = "JobStdLine"
-	JobExitedType       = "JobExited"
-	JobStatusUpdateType = "JobStatusUpdate"
+	JobStartedType       = "JobStarted"
+	JobFailedToStartType = "JobFailedToStart"
+	JobCrackedHashType   = "JobCrackedHash"
+	JobStdLineType       = "JobStdLine"
+	JobExitedType        = "JobExited"
+	JobStatusUpdateType  = "JobStatusUpdate"
 )
 
 // JobStart
@@ -23,6 +24,13 @@ type JobStartDTO struct {
 	ID            string                     `json:"id"`
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_parms"`
 	Hashes        []string                   `json:"hashes"`
+}
+
+// JobFailedToStart
+type JobFailedToStartDTO struct {
+	JobID string
+	Time  time.Time `json:"time"`
+	Error error
 }
 
 // JobStarted

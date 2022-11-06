@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,6 +21,21 @@ type User struct {
 	Username     string             `bson:"username"`
 	PasswordHash string             `bson:"password_hash"`
 	Role         string             `bson:"role"`
+}
+
+func seedUser() error {
+	count, err := GetUsersColl().CountDocuments(context.Background(), bson.D{})
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	log.Printf("Seeding default admin user (admin:changeme)")
+
+	return RegisterUser("admin", "changeme", "admin")
 }
 
 func NormalizeUsername(username string) string {
@@ -47,12 +63,17 @@ func RegisterUser(username, password, role string) error {
 }
 
 func LookupUserByID(id string) (*User, error) {
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
 	res := GetUsersColl().FindOne(
 		context.Background(),
-		bson.D{{Key: "_id", Value: id}},
+		bson.M{"_id": objId},
 	)
 
-	err := res.Err()
+	err = res.Err()
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +90,7 @@ func LookupUserByID(id string) (*User, error) {
 func LookupUserByUsername(username string) (*User, error) {
 	res := GetUsersColl().FindOne(
 		context.Background(),
-		bson.D{{Key: "username", Value: NormalizeUsername(username)}},
+		bson.M{"username": username},
 	)
 
 	err := res.Err()

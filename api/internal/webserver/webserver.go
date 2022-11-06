@@ -32,12 +32,12 @@ func Listen(port string) error {
 
 	authHandler := auth.AuthHandler{
 		Secret:         jwtKey,
-		WhitelistPaths: []string{"/api/v1/agent/handler/ws", "/api/v1/auth/login"},
+		WhitelistPaths: []string{"/api/v1/agent/handle/ws", "/api/v1/auth/login"},
 	}
 
-	e.Use(authHandler.Middleware())
-
 	api := e.Group("/api/v1")
+
+	api.Use(authHandler.Middleware())
 
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")

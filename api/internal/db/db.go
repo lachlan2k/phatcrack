@@ -37,6 +37,7 @@ func Connect(uri string) error {
 	dbClient = client
 
 	upsertIndexes()
+	seedUser()
 
 	return nil
 }

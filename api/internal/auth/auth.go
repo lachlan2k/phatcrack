@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
 const TokenCookieName = "auth"
@@ -29,17 +30,17 @@ type AuthClaims struct {
 	jwt.StandardClaims
 }
 
-func UserToClaims(user *db.User) AuthClaims {
-	return AuthClaims{
+func UserToClaims(user *db.User) *AuthClaims {
+	return &AuthClaims{
 		UserClaims: UserClaims{
-			ID:       user.ID.String(),
+			ID:       util.IDToString(user.ID),
 			Username: user.Username,
 			Role:     user.Role,
 		},
 	}
 }
 
-func (a *AuthHandler) SignJwt(claims AuthClaims) (string, time.Time, error) {
+func (a *AuthHandler) SignJwt(claims *AuthClaims) (string, time.Time, error) {
 	now := time.Now()
 	expires := now.Add(TokenLifetime)
 
@@ -57,7 +58,7 @@ func (a *AuthHandler) SignJwt(claims AuthClaims) (string, time.Time, error) {
 	return tokenString, expires, nil
 }
 
-func (a *AuthHandler) SignAndSetJWT(c echo.Context, claims AuthClaims) error {
+func (a *AuthHandler) SignAndSetJWT(c echo.Context, claims *AuthClaims) error {
 	token, expires, err := a.SignJwt(claims)
 	if err != nil {
 		return err
@@ -81,6 +82,7 @@ func (a *AuthHandler) Middleware() echo.MiddlewareFunc {
 		SigningMethod: middleware.AlgorithmHS256,
 		SigningKey:    a.Secret,
 		TokenLookup:   "cookie:" + TokenCookieName,
+		Claims:        &AuthClaims{},
 		Skipper: func(c echo.Context) bool {
 			path := c.Request().URL.Path
 			for _, bypassPath := range a.WhitelistPaths {
