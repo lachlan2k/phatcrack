@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - MONGO_URI=mongodb://phatcrack:${DB_PASS:-phatcrack}@mongo:27017/
+    ports:
+      - ${APP_PORT:-3000}:3000
+
+  mongo:
+    image: mongo:6
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=phatcrack
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASS:-phatcrack}
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
