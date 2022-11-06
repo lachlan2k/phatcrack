@@ -35,20 +35,21 @@ func seedUser() error {
 
 	log.Printf("Seeding default admin user (admin:changeme)")
 
-	return RegisterUser("admin", "changeme", "admin")
+	_, err = RegisterUser("admin", "changeme", "admin")
+	return err
 }
 
 func NormalizeUsername(username string) string {
 	return strings.ToLower(strings.TrimSpace(username))
 }
 
-func RegisterUser(username, password, role string) error {
+func RegisterUser(username, password, role string) (newUserId string, err error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	_, err = GetUsersColl().InsertOne(
+	res, err := GetUsersColl().InsertOne(
 		context.Background(),
 		User{
 			Username:     NormalizeUsername(username),
@@ -57,9 +58,14 @@ func RegisterUser(username, password, role string) error {
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("couldn't register user in database: %v", err)
+		return "", fmt.Errorf("couldn't register user in database: %v", err)
 	}
-	return nil
+	if objectId, ok := res.InsertedID.(primitive.ObjectID); ok {
+		newUserId = objectId.Hex()
+	} else {
+		return "", fmt.Errorf("couldn't cast new object id: %v", res.InsertedID)
+	}
+	return
 }
 
 func LookupUserByID(id string) (*User, error) {

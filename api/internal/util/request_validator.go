@@ -13,6 +13,14 @@ type RequestValidator struct {
 
 func (v *RequestValidator) Init() {
 	// Register other validators
+	v.Validator.RegisterValidation("userrole", func(fl validator.FieldLevel) bool {
+		switch fl.Field().String() {
+		case "admin", "standard":
+			return true
+		default:
+			return false
+		}
+	})
 }
 
 // Validate Data

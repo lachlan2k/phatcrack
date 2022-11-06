@@ -18,7 +18,31 @@ func HookAdminEndpoints(api *echo.Group) {
 		return c.JSON(http.StatusOK, user)
 	})
 
+	api.POST("/user/create", handleCreateUser)
 	api.POST("/agent/create", handleAgentCreate)
+}
+
+func handleCreateUser(c echo.Context) error {
+	var req apitypes.UserCreateRequestDTO
+	if err := c.Bind(&req); err != nil {
+		return echo.ErrBadRequest
+	}
+	if err := c.Validate(&req); err != nil {
+		return err
+	}
+
+	username := db.NormalizeUsername(req.Username)
+
+	userId, err := db.RegisterUser(username, req.Password, req.Role)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create user").SetInternal(err)
+	}
+
+	return c.JSON(http.StatusCreated, apitypes.UserCreateResponseDTO{
+		ID:       userId,
+		Username: username,
+		Role:     req.Role,
+	})
 }
 
 func handleAgentCreate(c echo.Context) error {
