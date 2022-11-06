@@ -16,6 +16,8 @@ import (
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
+
+	"github.com/hpcloud/tail"
 )
 
 type HashcatParams hashcattypes.HashcatParams
@@ -62,7 +64,7 @@ func (params HashcatParams) Validate() error {
 	return nil
 }
 
-func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile string) (args []string, err error) {
+func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile string, outFile string) (args []string, err error) {
 	if err = params.Validate(); err != nil {
 		return
 	}
@@ -72,6 +74,7 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 		"--quiet",
 		"--session", session,
 		"--outfile-format", "1,3,5",
+		"--outfile", outFile,
 		"--status-json",
 		"--status-timer", "1",
 		"--potfile-disable",
@@ -153,6 +156,7 @@ func findBinary(conf *config.Config) (path string, err error) {
 type HashcatSession struct {
 	proc           *exec.Cmd
 	hashFile       *os.File
+	outFile        *os.File
 	CrackedHashes  chan HashcatResult
 	StatusUpdates  chan HashcatStatus
 	StderrMessages chan string
@@ -176,22 +180,49 @@ func (sess *HashcatSession) Start() error {
 		return fmt.Errorf("couldn't start hashcat: %v", err)
 	}
 
-	go func() {
-		defer func() {
-			close(sess.CrackedHashes)
-			close(sess.StatusUpdates)
-			close(sess.StderrMessages)
-			close(sess.StdoutLines)
-			close(sess.DoneChan)
-		}()
+	tailer, err := tail.TailFile(sess.outFile.Name(), tail.Config{Follow: true})
+	if err != nil {
+		sess.Kill()
+		return fmt.Errorf("couldn't tail outfile %s: %v", sess.outFile.Name(), err)
+	}
 
+	go func() {
+		for tLine := range tailer.Lines {
+			line := tLine.Text
+			values := strings.Split(line, ":")
+			if len(values) != 3 {
+				log.Printf("unexpected line contents: %s", line)
+				continue
+			}
+			timestamp := values[0]
+			hash := values[1]
+			plainHex := values[2]
+
+			timestampI, err := strconv.ParseInt(timestamp, 10, 64)
+			if err != nil {
+				log.Printf("couldn't parse hashcat timestamp %s: %v", timestamp, err)
+				continue
+			}
+
+			sess.CrackedHashes <- HashcatResult{
+				Timestamp:    time.Unix(timestampI, 0),
+				Hash:         hash,
+				PlaintextHex: plainHex,
+			}
+		}
+	}()
+
+	go func() {
 		scanner := bufio.NewScanner(pStdout)
 		for scanner.Scan() {
 			line := scanner.Text()
 
 			log.Printf("read line %v", line)
 			sess.StdoutLines <- line
-			log.Printf("Channel received")
+
+			if len(line) == 0 {
+				continue
+			}
 
 			switch line[0] {
 			case '{':
@@ -204,26 +235,7 @@ func (sess *HashcatSession) Start() error {
 				sess.StatusUpdates <- status
 
 			default:
-				values := strings.Split(line, ":")
-				if len(values) != 3 {
-					log.Printf("unexpected lien contents: %s", line)
-					continue
-				}
-				timestamp := values[0]
-				hash := values[1]
-				plainHex := values[2]
-
-				timestampI, err := strconv.ParseInt(timestamp, 10, 64)
-				if err != nil {
-					log.Printf("couldn't parse hashcat timestamp %s: %v", timestamp, err)
-					continue
-				}
-
-				sess.CrackedHashes <- HashcatResult{
-					Timestamp:    time.Unix(timestampI, 0),
-					Hash:         hash,
-					PlaintextHex: plainHex,
-				}
+				log.Printf("Unexpected stdout line: %v", line)
 			}
 		}
 
@@ -255,13 +267,19 @@ func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *c
 	if err != nil {
 		return nil, fmt.Errorf("couldn't make a temp file to store hashes: %v", err)
 	}
+	hashFile.Chmod(0600)
 
-	args, err := params.ToCmdArgs(conf, id, hashFile.Name())
+	outFile, err := ioutil.TempFile("/tmp", "phatcrack-output")
+	if err != nil {
+		return nil, fmt.Errorf("couldn't make a temp file to store output: %v", err)
+	}
+	outFile.Chmod(0600)
+
+	args, err := params.ToCmdArgs(conf, id, hashFile.Name(), outFile.Name())
 	if err != nil {
 		return nil, err
 	}
 
-	hashFile.Chmod(0600)
 	for _, hash := range hashes {
 		_, err = hashFile.WriteString(hash + "\n")
 		if err != nil {
@@ -272,6 +290,7 @@ func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *c
 	return &HashcatSession{
 		proc:           exec.Command(binaryPath, args...),
 		hashFile:       hashFile,
+		outFile:        outFile,
 		CrackedHashes:  make(chan HashcatResult, 5),
 		StatusUpdates:  make(chan HashcatStatus, 5),
 		StderrMessages: make(chan string, 5),

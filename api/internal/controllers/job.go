@@ -108,19 +108,28 @@ func handleJobCreate(c echo.Context) error {
 		return err
 	}
 
+	cleanedWordlists := make([]string, len(req.HashcatParams.WordlistFilenames))
+	for i, wordlist := range req.HashcatParams.WordlistFilenames {
+		cleanedWordlists[i] = util.CleanPath(wordlist)
+	}
+
+	cleanedRules := make([]string, len(req.HashcatParams.RulesFilenames))
+	for i, rule := range req.HashcatParams.RulesFilenames {
+		cleanedRules[i] = util.CleanPath(rule)
+	}
+
 	newJobId, err := db.CreateJob(db.Job{
 		HashcatParams: db.HashcatParams{
 			AttackMode:        req.HashcatParams.AttackMode,
 			HashType:          req.HashcatParams.HashType,
 			Mask:              req.HashcatParams.Mask,
-			WordlistFilenames: req.HashcatParams.WordlistFilenames,
-			RulesFilenames:    req.HashcatParams.RulesFilenames,
+			WordlistFilenames: cleanedWordlists,
+			RulesFilenames:    cleanedRules,
 			AdditionalArgs:    req.HashcatParams.AdditionalArgs,
 			OptimizedKernels:  req.HashcatParams.OptimizedKernels,
 		},
 		RuntimeData: db.RuntimeData{
-			StartRequestTime: util.MongoNow(),
-			Status:           db.JobStatusCreated,
+			Status: db.JobStatusCreated,
 		},
 		Hashes:      req.Hashes,
 		Name:        req.Name,

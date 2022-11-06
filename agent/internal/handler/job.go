@@ -97,7 +97,6 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 		return err
 	}
 
-	log.Printf("Job is %v", job)
 	log.Printf("Starting job %s", job.ID)
 
 	sess.Start()
@@ -108,12 +107,11 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 
 	procLoop:
 		for {
-			log.Printf("proc loop")
 			select {
 			case stdoutLine := <-sess.StdoutLines:
 				h.sendJobStdoutLine(job.ID, stdoutLine)
 
-			case stderrLine := <-sess.StdoutLines:
+			case stderrLine := <-sess.StderrMessages:
 				h.sendJobStderrLine(job.ID, stderrLine)
 
 			case result := <-sess.CrackedHashes:

@@ -57,13 +57,14 @@ type RuntimeData struct {
 	// when we ask the job to start
 	StartRequestTime primitive.Timestamp `bson:"start_request_time,omitempty"`
 	// when it actually starts on the agent
-	StartedTime   primitive.Timestamp          `bson:"started_time,omitempty"`
-	StoppedTime   primitive.Timestamp          `bson:"stopped_time,omitempty"`
-	Status        string                       `bson:"status,omitempty"`
-	StopReason    string                       `bson:"stop_reason,omitempty"`
-	ErrorString   string                       `bson:"error_string,omitempty"`
-	OutputLines   []JobOutputLine              `bson:"output_line,omitempty"`
-	StatusUpdates []hashcattypes.HashcatStatus `bson:"status_updates,omitempty"`
+	StartedTime     primitive.Timestamp          `bson:"started_time,omitempty"`
+	StoppedTime     primitive.Timestamp          `bson:"stopped_time,omitempty"`
+	Status          string                       `bson:"status,omitempty"`
+	StopReason      string                       `bson:"stop_reason,omitempty"`
+	ErrorString     string                       `bson:"error_string,omitempty"`
+	AssignedAgentID primitive.ObjectID           `bson:"assigned_agent_id,omitempty"`
+	OutputLines     []JobOutputLine              `bson:"output_lines,omitempty"`
+	StatusUpdates   []hashcattypes.HashcatStatus `bson:"status_updates,omitempty"`
 }
 
 type JobCrackedHash struct {
@@ -72,16 +73,45 @@ type JobCrackedHash struct {
 }
 
 type Job struct {
-	ID              primitive.ObjectID  `bson:"_id,omitempty"`
-	CreatedTime     primitive.Timestamp `bson:"created_time,omitempty"`
-	HashcatParams   HashcatParams       `bson:"hashcat_params"`
-	Hashes          []string            `bson:"hashes"`
-	HashType        int                 `bson:"hash_type"`
-	Name            string              `bson:"name"`
-	Description     string              `bson:"description"`
-	AssignedAgentID primitive.ObjectID  `bson:"assigned_agent_id,omitempty"`
-	RuntimeData     RuntimeData         `bson:"runtime_data"`
-	CrackedHashes   []JobCrackedHash    `bson:"cracked_hashes,omitempty"`
+	ID            primitive.ObjectID  `bson:"_id,omitempty"`
+	CreatedTime   primitive.Timestamp `bson:"created_time,omitempty"`
+	HashcatParams HashcatParams       `bson:"hashcat_params"`
+	Hashes        []string            `bson:"hashes"`
+	HashType      int                 `bson:"hash_type"`
+	Name          string              `bson:"name"`
+	Description   string              `bson:"description"`
+	RuntimeData   RuntimeData         `bson:"runtime_data"`
+	CrackedHashes []JobCrackedHash    `bson:"cracked_hashes,omitempty"`
+}
+
+func SetJobScheduled(jobId, agentId string) error {
+	objId, err := primitive.ObjectIDFromHex(jobId)
+	if err != nil {
+		return err
+	}
+
+	agentObjId, err := primitive.ObjectIDFromHex(agentId)
+	if err != nil {
+		return err
+	}
+
+	_, err = GetJobsColl().UpdateOne(
+		context.Background(),
+		bson.M{"_id": objId},
+
+		bson.D{{
+			Key: "$set",
+			Value: bson.D{
+				{Key: "runtime_data.status", Value: JobStatusAwaitingStart},
+				{Key: "runtime_data.assigned_agent_id", Value: agentObjId},
+				{Key: "runtime_data.start_request_time", Value: primitive.Timestamp{T: uint32(time.Now().Unix())}},
+			},
+		}},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to set job as started in db: %v", err)
+	}
+	return nil
 }
 
 func SetJobStarted(jobId string, timestamp time.Time) error {

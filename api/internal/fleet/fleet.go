@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -124,6 +125,15 @@ func ScheduleJob(jobId string) (string, error) {
 		return "", ErrNoAgentsOnline
 	}
 
+	job, err := db.GetJob(jobId)
+	if err == mongo.ErrNoDocuments {
+		return "", ErrJobDoesntExist
+	}
+
+	if job.RuntimeData.Status != db.JobStatusCreated {
+		return "", ErrJobAlreadyScheduled
+	}
+
 	var leastBusyAgent *Agent = nil
 	for _, agent := range fleet {
 		if leastBusyAgent == nil {
@@ -143,14 +153,11 @@ func ScheduleJob(jobId string) (string, error) {
 			leastBusyAgent = agent
 		}
 	}
+	// TODO: maybe check if the agent is healthy?
 
-	job, err := db.GetJob(jobId)
-	if err == mongo.ErrNoDocuments {
-		return "", ErrJobDoesntExist
-	}
-
-	if job.RuntimeData.Status != db.JobStatusCreated {
-		return "", ErrJobAlreadyScheduled
+	err = db.SetJobScheduled(util.IDToString(job.ID), leastBusyAgent.agentId)
+	if err != nil {
+		return "", fmt.Errorf("failed to set job as scheduled in db: %v", err)
 	}
 
 	leastBusyAgent.sendMessage(wstypes.JobStartType, wstypes.JobStartDTO{
@@ -167,8 +174,6 @@ func ScheduleJob(jobId string) (string, error) {
 		},
 		Hashes: job.Hashes,
 	})
-
-	// TODO: maybe check if it's healthy?
 
 	return leastBusyAgent.agentId, nil
 }

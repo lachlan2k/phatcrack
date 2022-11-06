@@ -6,11 +6,17 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"path"
 	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+func CleanPath(filePath string) string {
+	_, file := path.Split(path.Clean(filePath))
+	return file
+}
 
 func UnmarshalJSON[T interface{}](jsonBlob string) (out T, err error) {
 	err = json.Unmarshal([]byte(jsonBlob), &out)
