@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
@@ -23,11 +24,8 @@ func HookAdminEndpoints(api *echo.Group) {
 }
 
 func handleCreateUser(c echo.Context) error {
-	var req apitypes.UserCreateRequestDTO
-	if err := c.Bind(&req); err != nil {
-		return echo.ErrBadRequest
-	}
-	if err := c.Validate(&req); err != nil {
+	req, err := util.BindAndValidate[apitypes.UserCreateRequestDTO](c)
+	if err != nil {
 		return err
 	}
 
@@ -46,11 +44,8 @@ func handleCreateUser(c echo.Context) error {
 }
 
 func handleAgentCreate(c echo.Context) error {
-	var req apitypes.AgentCreateRequestDTO
-	if err := c.Bind(&req); err != nil {
-		return echo.ErrBadRequest
-	}
-	if err := c.Validate(&req); err != nil {
+	req, err := util.BindAndValidate[apitypes.AgentCreateRequestDTO](c)
+	if err != nil {
 		return err
 	}
 

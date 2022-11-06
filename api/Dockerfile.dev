@@ -1,14 +1,7 @@
 FROM golang:1.18
 
 RUN go install github.com/cosmtrek/air@latest
-# RUN go install github.com/codegangsta/gin@latest
-
-# WORKDIR /app/phatcrack/common
-# COPY 
 
 WORKDIR /app/phatcrack/api
-# COPY go.mod go.sum .
-# RUN go mod download
 
-# Mount phatcrack source directory to /app/phatcrack
 ENTRYPOINT ["air", "main.go"]

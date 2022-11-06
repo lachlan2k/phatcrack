@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
@@ -39,7 +40,7 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			return echo.ErrUnauthorized
 		}
 
-		user, err := db.LookupUserByID(claims.ID)
+		user, err := db.GetUserByID(claims.ID)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to refresh user data").SetInternal(err)
 		}
@@ -60,11 +61,8 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 
 func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var req apitypes.LoginRequestDTO
-		if err := c.Bind(&req); err != nil {
-			return echo.ErrBadRequest
-		}
-		if err := c.Validate(&req); err != nil {
+		req, err := util.BindAndValidate[apitypes.LoginRequestDTO](c)
+		if err != nil {
 			return err
 		}
 
@@ -74,7 +72,7 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 
 		username := db.NormalizeUsername(req.Username)
 
-		user, err := db.LookupUserByUsername(username)
+		user, err := db.GetUserByUsername(username)
 		if err == mongo.ErrNoDocuments {
 			return echo.ErrUnauthorized
 		} else if err != nil {

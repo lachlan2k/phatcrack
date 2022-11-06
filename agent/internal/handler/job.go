@@ -72,6 +72,29 @@ func (h *Handler) sendJobFailedToStart(jobId string, err error) {
 	})
 }
 
+var backoffTable = []util.BackoffEntry{
+	{
+		AfterTime: time.Duration(0),
+		TimeApart: time.Duration(0),
+	},
+	{
+		AfterTime: time.Minute,
+		TimeApart: 10 * time.Second,
+	},
+	{
+		AfterTime: 10 * time.Minute,
+		TimeApart: 30 * time.Second,
+	},
+	{
+		AfterTime: time.Hour,
+		TimeApart: time.Minute,
+	},
+	{
+		AfterTime: 8 * time.Hour,
+		TimeApart: 5 * time.Minute,
+	},
+}
+
 func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 	h.jobsLock.Lock()
 	defer h.jobsLock.Unlock()
@@ -105,11 +128,24 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 
 		h.sendJobStarted(job.ID)
 
+		statusBackoff := util.Backoff{
+			Entries: backoffTable,
+		}
+		stdoutBackoff := util.Backoff{
+			Entries: backoffTable,
+		}
+
+		statusBackoff.Start()
+		stdoutBackoff.Start()
+
 	procLoop:
 		for {
 			select {
 			case stdoutLine := <-sess.StdoutLines:
-				h.sendJobStdoutLine(job.ID, stdoutLine)
+				// If it's a json status update, use our rate limit
+				if len(stdoutLine) == 0 || stdoutLine[0] != '{' || stdoutBackoff.Ready() {
+					h.sendJobStdoutLine(job.ID, stdoutLine)
+				}
 
 			case stderrLine := <-sess.StderrMessages:
 				h.sendJobStderrLine(job.ID, stderrLine)
@@ -122,7 +158,9 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 				})
 
 			case status := <-sess.StatusUpdates:
-				h.sendJobStatusUpdate(job.ID, status)
+				if statusBackoff.Ready() {
+					h.sendJobStatusUpdate(job.ID, status)
+				}
 
 			case err := <-sess.DoneChan:
 				h.sendJobExited(job.ID, err)

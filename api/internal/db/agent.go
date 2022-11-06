@@ -19,9 +19,17 @@ type AgentLastCheckIn struct {
 	Time primitive.Timestamp `bson:"time,omitempty"`
 }
 
+type AgentFile struct {
+	Name string `bson:"name"`
+	Size int64  `bson:"size"`
+}
+
 type AgentInfo struct {
-	Status      string           `bson:"status,omitempty"`
-	LastCheckIn AgentLastCheckIn `bson:"last_checkin,omitempty"`
+	Status             string               `bson:"status,omitempty"`
+	LastCheckIn        AgentLastCheckIn     `bson:"last_checkin,omitempty"`
+	AvailableWordlists []AgentFile          `bson:"available_wordlists,omitempty"`
+	AvailableRuleFiles []AgentFile          `bson:"available_wordlists,omitempty"`
+	ActiveJobIDs       []primitive.ObjectID `bson:"active_job_ids,omitempty"`
 }
 
 type Agent struct {
@@ -31,7 +39,7 @@ type Agent struct {
 	Info    AgentInfo          `bson:"agent_info,omitempty"`
 }
 
-func UpdateAgentCheckin(agentId string) error {
+func UpdateAgentInfo(agentId string, info AgentInfo) error {
 	objId, err := primitive.ObjectIDFromHex(agentId)
 	if err != nil {
 		return err
@@ -39,7 +47,7 @@ func UpdateAgentCheckin(agentId string) error {
 	_, err = GetAgentsColl().UpdateOne(
 		context.Background(),
 		bson.M{"_id": objId},
-		bson.D{{Key: "$set", Value: bson.D{{Key: "agent_info.last_checkin", Value: util.MongoNow()}}}},
+		bson.D{{Key: "$set", Value: bson.M{"agent_info": info}}},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to save new agent status in database: %v", err)

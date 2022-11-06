@@ -19,7 +19,7 @@ var ErrJobAlreadyScheduled = errors.New("job already scheduled to start")
 
 var ErrNoAgentsOnline = errors.New("no agents online")
 
-var mapLock sync.Mutex
+var fleetLock sync.Mutex
 var fleet = make(map[string]*Agent)
 
 var observerMapLock sync.Mutex
@@ -95,12 +95,14 @@ func closeObservers(jobId string) {
 
 func RegisterAgentFromWebsocket(conn *websocket.Conn, agentId string) (*Agent, error) {
 	agent := &Agent{
-		conn:    conn,
-		agentId: agentId,
+		conn:            conn,
+		agentId:         agentId,
+		ready:           false,
+		latestAgentInfo: nil,
 	}
 
-	mapLock.Lock()
-	defer mapLock.Unlock()
+	fleetLock.Lock()
+	defer fleetLock.Unlock()
 
 	if _, agentExists := fleet[agent.agentId]; agentExists {
 		return nil, fmt.Errorf("Agent %s was already active", agent.agentId)
@@ -111,15 +113,15 @@ func RegisterAgentFromWebsocket(conn *websocket.Conn, agentId string) (*Agent, e
 }
 
 func RemoveAgentByID(projectId string) {
-	mapLock.Lock()
-	defer mapLock.Unlock()
+	fleetLock.Lock()
+	defer fleetLock.Unlock()
 
 	delete(fleet, projectId)
 }
 
 func ScheduleJob(jobId string) (string, error) {
-	mapLock.Lock()
-	defer mapLock.Unlock()
+	fleetLock.Lock()
+	defer fleetLock.Unlock()
 
 	if len(fleet) == 0 {
 		return "", ErrNoAgentsOnline
@@ -136,12 +138,19 @@ func ScheduleJob(jobId string) (string, error) {
 
 	var leastBusyAgent *Agent = nil
 	for _, agent := range fleet {
+		if !agent.IsHealthy() {
+			continue
+		}
+
 		if leastBusyAgent == nil {
 			leastBusyAgent = agent
 			continue
 		}
 
-		if len(agent.activeJobIDs) == len(leastBusyAgent.activeJobIDs) {
+		aJobs := agent.ActiveJobCount()
+		lJobs := leastBusyAgent.ActiveJobCount()
+
+		if aJobs == lJobs {
 			// Biased semi-random assignment as tie-braker
 			// TODO: do some tie-breaker calculations based on time left on jobs?
 			if rand.Intn(2) == 1 {
@@ -149,11 +158,14 @@ func ScheduleJob(jobId string) (string, error) {
 			}
 		}
 
-		if len(agent.activeJobIDs) < len(leastBusyAgent.activeJobIDs) {
+		if aJobs < lJobs {
 			leastBusyAgent = agent
 		}
 	}
-	// TODO: maybe check if the agent is healthy?
+
+	if leastBusyAgent == nil {
+		return "", ErrNoAgentsOnline
+	}
 
 	err = db.SetJobScheduled(util.IDToString(job.ID), leastBusyAgent.agentId)
 	if err != nil {

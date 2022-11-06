@@ -14,10 +14,12 @@ import (
 const (
 	DatabaseName = "phatcrack"
 
-	UsersCollectionName   = "users"
-	AgentsCollectionName  = "agents"
-	PotfileCollectionName = "potfile"
-	JobsCollectionName    = "jobs"
+	UsersCollectionName    = "users"
+	AgentsCollectionName   = "agents"
+	PotfileCollectionName  = "potfile"
+	JobsCollectionName     = "jobs"
+	WordlistCollectionName = "wordlists"
+	RulesCollectionName    = "rules"
 )
 
 var dbClient *mongo.Client
@@ -74,4 +76,12 @@ func GetPotfileColl() *mongo.Collection {
 
 func GetJobsColl() *mongo.Collection {
 	return GetDatabase().Collection(JobsCollectionName)
+}
+
+func GetRulesColl() *mongo.Collection {
+	return GetDatabase().Collection(RulesCollectionName)
+}
+
+func GetWordlistColl() *mongo.Collection {
+	return GetDatabase().Collection(WordlistCollectionName)
 }

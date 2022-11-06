@@ -7,6 +7,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func BindAndValidate[DTO interface{}](c echo.Context) (DTO, error) {
+	var req DTO
+	if err := c.Bind(&req); err != nil {
+		return req, echo.NewHTTPError(http.StatusBadRequest, "Bad request").SetInternal(err)
+	}
+	if err := c.Validate(&req); err != nil {
+		return req, err
+	}
+	return req, nil
+}
+
 type RequestValidator struct {
 	Validator *validator.Validate
 }

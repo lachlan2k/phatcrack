@@ -68,7 +68,7 @@ func RegisterUser(username, password, role string) (newUserId string, err error)
 	return
 }
 
-func LookupUserByID(id string) (*User, error) {
+func GetUserByID(id string) (*User, error) {
 	objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func LookupUserByID(id string) (*User, error) {
 	return user, nil
 }
 
-func LookupUserByUsername(username string) (*User, error) {
+func GetUserByUsername(username string) (*User, error) {
 	res := GetUsersColl().FindOne(
 		context.Background(),
 		bson.M{"username": username},

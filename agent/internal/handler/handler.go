@@ -44,21 +44,6 @@ func (h *Handler) sendMessage(msgType string, payload interface{}) error {
 	})
 }
 
-func (h *Handler) sendHeartbeat() error {
-	h.jobsLock.Lock()
-	defer h.jobsLock.Unlock()
-
-	jobIds := make([]string, len(h.activeJobs))
-	for id := range h.activeJobs {
-		jobIds = append(jobIds, id)
-	}
-
-	return h.sendMessage(wstypes.HeartbeatType, wstypes.HeartbeatDTO{
-		Time:         time.Now().Unix(),
-		ActiveJobIDs: jobIds,
-	})
-}
-
 func (h *Handler) handleMessage(msg *wstypes.Message) error {
 	switch msg.Type {
 	case wstypes.JobStartType:
@@ -107,6 +92,8 @@ func (h *Handler) writeLoop(ctx context.Context) error {
 }
 
 func (h *Handler) Handle() error {
+	log.Printf("Agent connected")
+
 	errs := make(chan error, 2)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

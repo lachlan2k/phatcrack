@@ -95,7 +95,7 @@ func (a *AuthHandler) Middleware() echo.MiddlewareFunc {
 	})
 }
 
-func (a *AuthHandler) AdminOnlyMiddleware() echo.MiddlewareFunc {
+func (a *AuthHandler) RoleRestrictedMiddleware(allowedRoles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			user, ok := c.Get("user").(*jwt.Token)
@@ -108,11 +108,17 @@ func (a *AuthHandler) AdminOnlyMiddleware() echo.MiddlewareFunc {
 				return echo.ErrUnauthorized
 			}
 
-			if claims.Role != db.UserRoleAdmin {
-				return echo.ErrUnauthorized
+			for _, role := range allowedRoles {
+				if claims.Role == role {
+					return next(c)
+				}
 			}
 
-			return next(c)
+			return echo.ErrUnauthorized
 		}
 	}
+}
+
+func (a *AuthHandler) AdminOnlyMiddleware() echo.MiddlewareFunc {
+	return a.RoleRestrictedMiddleware([]string{"admin"})
 }

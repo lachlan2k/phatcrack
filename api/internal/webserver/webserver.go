@@ -49,6 +49,7 @@ func Listen(port string) error {
 
 	adminAPI := api.Group("/admin")
 	adminAPI.Use(authHandler.AdminOnlyMiddleware())
+
 	controllers.HookAdminEndpoints(adminAPI)
 
 	return e.Start(":" + port)

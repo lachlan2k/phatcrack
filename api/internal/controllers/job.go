@@ -100,11 +100,8 @@ func handleJobStart(c echo.Context) error {
 }
 
 func handleJobCreate(c echo.Context) error {
-	var req apitypes.JobCreateRequestDTO
-	if err := c.Bind(&req); err != nil {
-		return c.String(http.StatusBadRequest, "bad request")
-	}
-	if err := c.Validate(&req); err != nil {
+	req, err := util.BindAndValidate[apitypes.JobCreateRequestDTO](c)
+	if err != nil {
 		return err
 	}
 
