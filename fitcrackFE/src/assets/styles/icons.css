@@ -1,0 +1,35 @@
+/* https://google.com/design/icons/ */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url(../fonts/icons/google/MaterialIcons-Regular.eot); /* For IE6-8 */
+  src: local('Material Icons'),
+  local('MaterialIcons-Regular'),
+  url(../fonts/icons/google/MaterialIcons-Regular.woff2) format('woff2'),
+  url(../fonts/icons/google/MaterialIcons-Regular.woff) format('woff'),
+  url(../fonts/icons/google/MaterialIcons-Regular.ttf) format('truetype');
+}
+
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  color: rgba(0,0,0,.54);
+}
+
+
+.list__tile--active .material-icons {
+  color: inherit;
+}
+
