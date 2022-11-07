@@ -8,6 +8,10 @@ import (
 )
 
 func getFileDTOs(dir string) ([]wstypes.FileDTO, error) {
+	if dir == "" {
+		return []wstypes.FileDTO{}, nil
+	}
+
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil, err

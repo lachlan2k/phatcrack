@@ -140,8 +140,8 @@ func (a *Agent) IsHealthy() bool {
 
 	lastHeard := time.Unix(int64(a.latestAgentInfo.LastCheckIn.Time.T), 0)
 
-	// If we've not heard from it for 30 seconds, consider it unhealthy
-	return lastHeard.Add(30 * time.Second).After(time.Now())
+	// If we've not heard from it for 60 seconds, consider it unhealthy
+	return lastHeard.Add(time.Minute).After(time.Now())
 }
 
 func (a *Agent) ActiveJobCount() int {

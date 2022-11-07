@@ -28,7 +28,7 @@ type AgentInfo struct {
 	Status             string               `bson:"status,omitempty"`
 	LastCheckIn        AgentLastCheckIn     `bson:"last_checkin,omitempty"`
 	AvailableWordlists []AgentFile          `bson:"available_wordlists,omitempty"`
-	AvailableRuleFiles []AgentFile          `bson:"available_wordlists,omitempty"`
+	AvailableRuleFiles []AgentFile          `bson:"available_rulefiles,omitempty"`
 	ActiveJobIDs       []primitive.ObjectID `bson:"active_job_ids,omitempty"`
 }
 
