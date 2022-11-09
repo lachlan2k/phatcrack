@@ -9,6 +9,7 @@ services:
     environment:
       - JWT_KEY=hunter2
       - PORT=3000
+      - CORS_ALLOWED
       - MONGO_URI=mongodb://phatcrack:${DB_PASS:-phatcrack}@mongo:27017/
     volumes:
       - ./:/app/phatcrack:z

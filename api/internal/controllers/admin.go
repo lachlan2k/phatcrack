@@ -14,7 +14,7 @@ func HookAdminEndpoints(api *echo.Group) {
 		return c.String(http.StatusOK, "pong auth")
 	})
 
-	api.POST("/whoami", func(c echo.Context) error {
+	api.GET("/whoami", func(c echo.Context) error {
 		user := c.Get("user")
 		return c.JSON(http.StatusOK, user)
 	})

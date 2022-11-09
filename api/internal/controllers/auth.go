@@ -23,21 +23,47 @@ func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 	api.POST("/login", handleLogin(authHandler))
 
 	api.GET("/whoami", func(c echo.Context) error {
-		u := c.Get("user").(*jwt.Token)
-		claims := u.Claims.(*auth.AuthClaims)
-		return c.JSON(http.StatusOK, claims)
+		u, ok := c.Get("user").(*jwt.Token)
+		if u == nil || !ok {
+			return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
+				IsLoggedIn: false,
+				User:       nil,
+			})
+		}
+		claims, ok := u.Claims.(*auth.AuthClaims)
+		if claims == nil || !ok {
+			return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
+				IsLoggedIn: false,
+				User:       nil,
+			})
+		}
+
+		return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
+			IsLoggedIn: true,
+			User: &apitypes.UserMeDTO{
+				ID:       claims.ID,
+				Username: claims.Username,
+				Role:     claims.Role,
+			},
+		})
 	})
 }
 
 func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		u, ok := c.Get("user").(*jwt.Token)
-		if !ok {
-			return echo.ErrUnauthorized
+		if u == nil || !ok {
+			return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
+				IsLoggedIn: false,
+				User:       nil,
+			})
 		}
 		claims, ok := u.Claims.(*auth.AuthClaims)
-		if !ok || claims.ID == "" {
-			return echo.ErrUnauthorized
+		if claims == nil || !ok {
+			return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
+				IsLoggedIn: false,
+				User:       nil,
+			})
 		}
 
 		user, err := db.GetUserByID(claims.ID)
@@ -52,9 +78,13 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			return err
 		}
 
-		return c.JSON(http.StatusOK, apitypes.LoginResponseDTO{
-			Username: user.Username,
-			Role:     user.Role,
+		return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
+			IsLoggedIn: true,
+			User: &apitypes.UserMeDTO{
+				ID:       user.ID.Hex(),
+				Username: user.Username,
+				Role:     user.Role,
+			},
 		})
 	}
 }
@@ -88,8 +118,11 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 		authHandler.SignAndSetJWT(c, claims)
 
 		return c.JSON(http.StatusOK, apitypes.LoginResponseDTO{
-			Username: username,
-			Role:     user.Role,
+			User: apitypes.UserMeDTO{
+				ID:       user.ID.Hex(),
+				Username: user.Username,
+				Role:     user.Role,
+			},
 		})
 	}
 }

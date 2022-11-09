@@ -20,6 +20,15 @@ func Listen(port string) error {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	if os.Getenv("CORS_ALLOWED") != "" {
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{os.Getenv("CORS_ALLOWED")},
+			// AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			// AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+			AllowCredentials: true,
+		}))
+	}
+
 	jwtKey := []byte(os.Getenv("JWT_KEY"))
 	if len(jwtKey) == 0 {
 		keyBuf := make([]byte, 32)
@@ -31,8 +40,13 @@ func Listen(port string) error {
 	}
 
 	authHandler := auth.AuthHandler{
-		Secret:         jwtKey,
-		WhitelistPaths: []string{"/api/v1/agent/handle/ws", "/api/v1/auth/login"},
+		Secret: jwtKey,
+		WhitelistPaths: []string{
+			"/api/v1/agent/handle/ws",
+			"/api/v1/auth/login",
+			"/api/v1/auth/refresh",
+			"/api/v1/auth/whoami",
+		},
 	}
 
 	api := e.Group("/api/v1")
@@ -45,6 +59,7 @@ func Listen(port string) error {
 
 	controllers.HookAuthEndpoints(api.Group("/auth"), &authHandler)
 	controllers.HookJobEndpoints(api.Group("/job"))
+	controllers.HookResourceEndpoints(api.Group("/resources"))
 	controllers.HookAgentEndpoints(api.Group("/agent"))
 
 	adminAPI := api.Group("/admin")

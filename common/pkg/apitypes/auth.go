@@ -5,7 +5,17 @@ type LoginRequestDTO struct {
 	Password string `json:"password" validate:"required"`
 }
 
-type LoginResponseDTO struct {
+type UserMeDTO struct {
+	ID       string `json:"id"`
 	Username string `json:"username"`
 	Role     string `json:"role"`
+}
+
+type LoginResponseDTO struct {
+	User UserMeDTO `json:"user"`
+}
+
+type WhoamiResponseDTO struct {
+	IsLoggedIn bool       `json:"is_logged_in"`
+	User       *UserMeDTO `json:"user,omitempty"`
 }
