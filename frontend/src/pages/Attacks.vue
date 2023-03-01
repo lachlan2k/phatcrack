@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import RecentAttacks from '@/components/RecentAttacks.vue'
+</script>
+
 <template>
   <main class="w-full p-6">
     <div class="prose">

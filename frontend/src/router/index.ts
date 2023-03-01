@@ -22,6 +22,11 @@ const router = createRouter({
       name: 'login',
       component: () => import('@/pages/Login.vue')
     },
+    {
+      path: '/',
+      name: 'login-home',
+      component: () => import('@/pages/Login.vue')
+    },
     route('/agents', 'Agents', () => import('@/pages/Agents.vue')),
     route('/attacks', 'Attacks', () => import('@/pages/Attacks.vue')),
     route('/dashboard', 'Dashboard', () => import('@/pages/Dashboard.vue')),

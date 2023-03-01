@@ -1,6 +1,18 @@
 version: '3'
 
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      - DEV_API_URL=http://api:3000
+    ports:
+      - ${FE_PORT:-3000}:5173
+    volumes:
+      - ./frontend:/app:z
+
   api:
     build:
       context: ./api
@@ -14,7 +26,7 @@ services:
     volumes:
       - ./:/app/phatcrack:z
     ports:
-      - ${APP_PORT:-3000}:3000
+      - ${API_PORT:-3001}:3000
 
   mongo:
     image: mongo:6

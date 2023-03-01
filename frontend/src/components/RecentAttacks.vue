@@ -34,3 +34,11 @@
     </tbody>
   </table>
 </template>
+
+<style scoped>
+thead > tr > th {
+  background: none !important;
+  border-bottom-width: 1px;
+  /* border-bottom: 1px solid black; */
+}
+</style>

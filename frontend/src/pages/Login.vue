@@ -1,13 +1,27 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
+const router = useRouter()
+
+const { isLoggedIn } = storeToRefs(authStore)
+
+watch(isLoggedIn, newIsLoggedIn => {
+  if (newIsLoggedIn) {
+    router.push('/dashboard')
+  }
+})
 
 const username = ref('')
 const password = ref('')
 
-function doLogin () {
+function doLogin (event) {
+  if (event) {
+    event.preventDefault()
+  }
   authStore.login(username.value, password.value)
 }
 </script>
@@ -20,21 +34,23 @@ function doLogin () {
           <h2>Login to Phatcrack</h2>
         </div>
 
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Username</span>
-          </label>
-          <input type="text" placeholder="john.doe" class="input-bordered input" v-model="username" />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Password</span>
-          </label>
-          <input type="password" placeholder="hunter2" class="input-bordered input" v-model="password" />
-        </div>
-        <div class="form-control mt-6">
-          <button class="btn-primary btn" @click="doLogin">Login</button>
-        </div>
+        <form @submit="doLogin">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Username</span>
+            </label>
+            <input type="text" placeholder="john.doe" class="input-bordered input" v-model="username" />
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Password</span>
+            </label>
+            <input type="password" placeholder="hunter2" class="input-bordered input" v-model="password" />
+          </div>
+          <div class="form-control mt-6">
+            <button type="submit" class="btn-primary btn" @click="doLogin">Login</button>
+          </div>
+        </form>
       </div>
     </div>
   </main>
