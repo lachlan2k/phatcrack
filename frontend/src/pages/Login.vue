@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router'
 const authStore = useAuthStore()
 const router = useRouter()
 
-const { isLoggedIn } = storeToRefs(authStore)
+const { isLoggedIn, loginError } = storeToRefs(authStore)
 
 watch(isLoggedIn, newIsLoggedIn => {
   if (newIsLoggedIn) {
@@ -15,14 +15,17 @@ watch(isLoggedIn, newIsLoggedIn => {
   }
 })
 
+const isLoading = ref(false)
 const username = ref('')
 const password = ref('')
 
-function doLogin (event) {
+async function doLogin (event) {
   if (event) {
     event.preventDefault()
   }
-  authStore.login(username.value, password.value)
+  isLoading.value = true
+  await authStore.login(username.value, password.value)
+  isLoading.value = false
 }
 </script>
 
@@ -47,8 +50,11 @@ function doLogin (event) {
             </label>
             <input type="password" placeholder="hunter2" class="input-bordered input" v-model="password" />
           </div>
+          <div v-if="loginError != null" class="mt-4 text-center text-red-500">
+            <p>{{loginError}}</p>
+          </div>
           <div class="form-control mt-6">
-            <button type="submit" class="btn-primary btn" @click="doLogin">Login</button>
+            <button type="submit" class="btn-primary btn" :disabled="isLoading">Login</button>
           </div>
         </form>
       </div>
