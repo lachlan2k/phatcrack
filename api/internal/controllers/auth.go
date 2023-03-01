@@ -104,14 +104,14 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 
 		user, err := db.GetUserByUsername(username)
 		if err == mongo.ErrNoDocuments {
-			return echo.ErrUnauthorized
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		} else if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, "Database error").SetInternal(err)
 		}
 
 		hashingTest := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 		if hashingTest != nil {
-			return echo.ErrUnauthorized
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		}
 
 		claims := auth.UserToClaims(user)
