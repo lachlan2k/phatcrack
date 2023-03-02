@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -38,6 +39,18 @@ func UserToClaims(user *db.User) *AuthClaims {
 			Role:     user.Role,
 		},
 	}
+}
+
+func ClaimsFromReq(c echo.Context) (*AuthClaims, error) {
+	u, ok := c.Get("user").(*jwt.Token)
+	if u == nil || !ok {
+		return nil, fmt.Errorf("couldn't cast token %v", c.Get("user"))
+	}
+	claims, ok := u.Claims.(*AuthClaims)
+	if claims == nil || !ok {
+		return nil, fmt.Errorf("couldn't cast token claims %v", u.Claims)
+	}
+	return claims, nil
 }
 
 func (a *AuthHandler) SignJwt(claims *AuthClaims) (string, time.Time, error) {

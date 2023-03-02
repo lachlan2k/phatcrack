@@ -1,28 +1,19 @@
 import { client } from '.'
+import type { AuthLoginResponseDTO, AuthWhoamiResponseDTO } from './types'
 
-export type APILoggedInUserDetailsT = {
-    username: string
-    id: string
-    role: string
-}
-
-export type APILoginResponse = {
-    user: APILoggedInUserDetailsT | null
-}
-
-export async function login(username: string, password: string) : Promise<APILoginResponse | null> {
-    const res = await client.post('/api/v1/auth/login', {
-        username, password
+export function login(username: string, password: string): Promise<AuthLoginResponseDTO> {
+  return client
+    .post('/api/v1/auth/login', {
+      username,
+      password
     })
-    
-    return res.data
+    .then((res) => res.data)
 }
 
-export function refreshAuth(): Promise<APILoginResponse | null> {
-    // return client.put('/api/v1/auth/refresh')
-    return client.get('/api/v1/auth/whoami')
+export function refreshAuth(): Promise<AuthWhoamiResponseDTO> {
+  return client.put('/api/v1/auth/refresh').then((res) => res.data)
 }
 
-export function logout() : Promise<null> {
-    return client.post('/api/v1/auth/logout')
+export function logout(): Promise<null> {
+  return client.post('/api/v1/auth/logout').then((res) => res.data)
 }

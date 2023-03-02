@@ -35,7 +35,7 @@ func handleGetWordlist(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch wordlist").SetInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, apitypes.WordlistResponseDTO{
+	return c.JSON(http.StatusOK, apitypes.ListsWordlistResponseDTO{
 		Name:        list.Name,
 		Description: list.Description,
 		Filename:    list.Filename,
@@ -54,7 +54,7 @@ func handlGetRuleFile(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch wordlist").SetInternal(err)
 	}
 
-	return c.JSON(http.StatusOK, apitypes.RuleFileResponseDTO{
+	return c.JSON(http.StatusOK, apitypes.ListsRuleFileResponseDTO{
 		Name:        list.Name,
 		Description: list.Description,
 		Filename:    list.Filename,
@@ -69,10 +69,10 @@ func handleGetAllWordlists(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to load wordlists").SetInternal(err)
 	}
 
-	var res apitypes.GetAllWordlistsDTO
-	res.Wordlists = make([]apitypes.WordlistResponseDTO, len(lists))
+	var res apitypes.ListsGetAllWordlistsDTO
+	res.Wordlists = make([]apitypes.ListsWordlistResponseDTO, len(lists))
 	for i, list := range lists {
-		res.Wordlists[i] = apitypes.WordlistResponseDTO{
+		res.Wordlists[i] = apitypes.ListsWordlistResponseDTO{
 			Name:        list.Name,
 			Description: list.Description,
 			Filename:    list.Filename,
@@ -90,10 +90,10 @@ func handleGetAllRuleFiles(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to load wordlists").SetInternal(err)
 	}
 
-	var res apitypes.GetAllRuleFilesDTO
-	res.RuleFiles = make([]apitypes.RuleFileResponseDTO, len(lists))
+	var res apitypes.ListsGetAllRuleFilesDTO
+	res.RuleFiles = make([]apitypes.ListsRuleFileResponseDTO, len(lists))
 	for i, list := range lists {
-		res.RuleFiles[i] = apitypes.RuleFileResponseDTO{
+		res.RuleFiles[i] = apitypes.ListsRuleFileResponseDTO{
 			Name:        list.Name,
 			Description: list.Description,
 			Filename:    list.Filename,
@@ -106,7 +106,7 @@ func handleGetAllRuleFiles(c echo.Context) error {
 }
 
 func handleWordlistCreate(c echo.Context) error {
-	req, err := util.BindAndValidate[apitypes.WordlistCreateDTO](c)
+	req, err := util.BindAndValidate[apitypes.ListsWordlistCreateDTO](c)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func handleWordlistCreate(c echo.Context) error {
 }
 
 func handleRuleFileCreate(c echo.Context) error {
-	req, err := util.BindAndValidate[apitypes.RuleFileCreateDTO](c)
+	req, err := util.BindAndValidate[apitypes.ListsRuleFileCreateDTO](c)
 	if err != nil {
 		return err
 	}

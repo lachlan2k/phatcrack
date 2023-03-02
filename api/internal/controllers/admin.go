@@ -24,7 +24,7 @@ func HookAdminEndpoints(api *echo.Group) {
 }
 
 func handleCreateUser(c echo.Context) error {
-	req, err := util.BindAndValidate[apitypes.UserCreateRequestDTO](c)
+	req, err := util.BindAndValidate[apitypes.AdminUserCreateRequestDTO](c)
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func handleCreateUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create user").SetInternal(err)
 	}
 
-	return c.JSON(http.StatusCreated, apitypes.UserCreateResponseDTO{
+	return c.JSON(http.StatusCreated, apitypes.AdminUserCreateResponseDTO{
 		ID:       userId,
 		Username: username,
 		Role:     req.Role,
@@ -44,7 +44,7 @@ func handleCreateUser(c echo.Context) error {
 }
 
 func handleAgentCreate(c echo.Context) error {
-	req, err := util.BindAndValidate[apitypes.AgentCreateRequestDTO](c)
+	req, err := util.BindAndValidate[apitypes.AdminAgentCreateRequestDTO](c)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func handleAgentCreate(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't create agent").SetInternal(err)
 	}
 
-	return c.JSON(http.StatusCreated, apitypes.AgentCreateResponseDTO{
+	return c.JSON(http.StatusCreated, apitypes.AdminAgentCreateResponseDTO{
 		Name: req.Name,
 		ID:   agentId,
 		Key:  key,

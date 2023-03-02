@@ -1,22 +1,22 @@
 package apitypes
 
-type AgentCreateRequestDTO struct {
+type AdminAgentCreateRequestDTO struct {
 	Name string `json:"name" validate:"required,min=5,max=30"`
 }
 
-type AgentCreateResponseDTO struct {
+type AdminAgentCreateResponseDTO struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
 	Key  string `json:"key"`
 }
 
-type UserCreateRequestDTO struct {
+type AdminUserCreateRequestDTO struct {
 	Username string `json:"username" validate:"required,min=4,max=64"`
 	Password string `json:"password" validate:"required,min=8,max=128"`
 	Role     string `json:"role" validate:"required,userrole"`
 }
 
-type UserCreateResponseDTO struct {
+type AdminUserCreateResponseDTO struct {
 	Username string `json:"username"`
 	ID       string `json:"id"`
 	Role     string `json:"role"`

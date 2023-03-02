@@ -9,7 +9,7 @@ const router = useRouter()
 
 const { isLoggedIn, loginError } = storeToRefs(authStore)
 
-watch(isLoggedIn, newIsLoggedIn => {
+watch(isLoggedIn, (newIsLoggedIn) => {
   if (newIsLoggedIn) {
     router.push('/dashboard')
   }
@@ -19,7 +19,7 @@ const isLoading = ref(false)
 const username = ref('')
 const password = ref('')
 
-async function doLogin (event) {
+async function doLogin(event: Event) {
   if (event) {
     event.preventDefault()
   }
@@ -42,16 +42,26 @@ async function doLogin (event) {
             <label class="label">
               <span class="label-text">Username</span>
             </label>
-            <input type="text" placeholder="john.doe" class="input-bordered input" v-model="username" />
+            <input
+              type="text"
+              placeholder="john.doe"
+              class="input-bordered input"
+              v-model="username"
+            />
           </div>
           <div class="form-control">
             <label class="label">
               <span class="label-text">Password</span>
             </label>
-            <input type="password" placeholder="hunter2" class="input-bordered input" v-model="password" />
+            <input
+              type="password"
+              placeholder="hunter2"
+              class="input-bordered input"
+              v-model="password"
+            />
           </div>
           <div v-if="loginError != null" class="mt-4 text-center text-red-500">
-            <p>{{loginError}}</p>
+            <p>{{ loginError }}</p>
           </div>
           <div class="form-control mt-6">
             <button type="submit" class="btn-primary btn" :disabled="isLoading">Login</button>

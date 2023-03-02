@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useRoute } from 'vue-router';
-
-const route = useRoute()
 
 const authStore = useAuthStore()
+// const router = useRouter()
 
-onMounted(() => {
-  authStore.refreshAuth()
-})
+// const { isLoggedIn } = storeToRefs(authStore)
+
+// watch(isLoggedIn, newIsLoggedIn => {
+//   if (!newIsLoggedIn) {
+//     router.push('/login')
+//   }
+// })
+
+// onMounted(() => {
+//   if (!isLoggedIn.value) {
+//     router.push('/login')
+//   }
+//   authStore.refreshAuth()
+// })
+
+const route = useRoute()
 
 const pageLinks = [
   { name: 'Dashboard', icon: 'fa-gauge', to: '/dashboard' },
@@ -37,20 +48,18 @@ const pageLinks = [
             <span>
               <font-awesome-icon icon="fa-solid fa-pencil" />
             </span>
-            New Project
+            Get Cracking
           </a>
         </RouterLink>
         <div class="h-8"></div>
         <ul class="menu text-lg">
           <li class="menu-title pb-2"><span>Pages</span></li>
 
-          <!-- <li
-            v-for="link in pageLinks"
-            :key="link.name"> -->
           <li
             v-for="link in pageLinks"
             :key="link.name"
-            :class="route.path == link.to ? 'bordered' : 'hover-bordered'">
+            :class="route.path == link.to ? 'bordered' : 'hover-bordered'"
+          >
             <RouterLink :to="link.to">
               <span><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
 
@@ -62,7 +71,11 @@ const pageLinks = [
         <div></div>
 
         <ul class="menu mt-auto text-lg">
-          <li class="hover-bordered">
+          <li
+            class="hover-bordered"
+            v-if="authStore.isAdmin"
+            :class="route.path == 'admin' ? 'bordered' : 'hover-bordered'"
+          >
             <a>
               <span><font-awesome-icon icon="fa-solid fa-lock" /></span>
               Admin
@@ -71,7 +84,9 @@ const pageLinks = [
           <li class="hover-bordered">
             <a>
               <span><font-awesome-icon icon="fa-solid fa-user" /></span>
-              <span>Welcome, <strong>{{ authStore.loggedInUser?.username }}</strong></span>
+              <span
+                >Welcome, <strong>{{ authStore.loggedInUser?.username }}</strong></span
+              >
             </a>
           </li>
         </ul>

@@ -1,6 +1,6 @@
 package apitypes
 
-type WordlistCreateDTO struct {
+type ListsWordlistCreateDTO struct {
 	Name        string `json:"name" validate:"required,min=4,max=64"`
 	Description string `json:"description" validate:"required,max=1000"`
 	Filename    string `json:"filename" validate:"required,min=5"`
@@ -8,7 +8,7 @@ type WordlistCreateDTO struct {
 	Lines       uint64 `json:"lines"`
 }
 
-type RuleFileCreateDTO struct {
+type ListsRuleFileCreateDTO struct {
 	Name        string `json:"name" validate:"required,min=4,max=64"`
 	Description string `json:"description" validate:"required,max=1000"`
 	Filename    string `json:"filename" validate:"required,min=5"`
@@ -16,7 +16,7 @@ type RuleFileCreateDTO struct {
 	Lines       uint64 `json:"lines"`
 }
 
-type WordlistResponseDTO struct {
+type ListsWordlistResponseDTO struct {
 	Name        string `json:"name" validate:"required,min=4,max=64"`
 	Description string `json:"description" validate:"required,max=1000"`
 	Filename    string `json:"filename" validate:"required,min=5"`
@@ -24,7 +24,7 @@ type WordlistResponseDTO struct {
 	Lines       uint64 `json:"lines"`
 }
 
-type RuleFileResponseDTO struct {
+type ListsRuleFileResponseDTO struct {
 	Name        string `json:"name" validate:"required,min=4,max=64"`
 	Description string `json:"description" validate:"required,max=1000"`
 	Filename    string `json:"filename" validate:"required,min=5"`
@@ -32,10 +32,10 @@ type RuleFileResponseDTO struct {
 	Lines       uint64 `json:"lines"`
 }
 
-type GetAllWordlistsDTO struct {
-	Wordlists []WordlistResponseDTO `json:"wordlists"`
+type ListsGetAllWordlistsDTO struct {
+	Wordlists []ListsWordlistResponseDTO `json:"wordlists"`
 }
 
-type GetAllRuleFilesDTO struct {
-	RuleFiles []RuleFileResponseDTO `json:"rulefiles"`
+type ListsGetAllRuleFilesDTO struct {
+	RuleFiles []ListsRuleFileResponseDTO `json:"rulefiles"`
 }

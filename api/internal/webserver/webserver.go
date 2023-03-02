@@ -49,6 +49,16 @@ func Listen(port string) error {
 		},
 	}
 
+	// Slightly annoying, the auth middleware, by default, uses a 400 error when the auth is missing
+	// We want a 401
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		if err == middleware.ErrJWTMissing {
+			c.Error(echo.NewHTTPError(http.StatusUnauthorized, "Login required"))
+			return
+		}
+		c.Echo().DefaultHTTPErrorHandler(err, c)
+	}
+
 	api := e.Group("/api/v1")
 
 	api.Use(authHandler.Middleware())
@@ -61,6 +71,7 @@ func Listen(port string) error {
 	controllers.HookJobEndpoints(api.Group("/job"))
 	controllers.HookResourceEndpoints(api.Group("/resources"))
 	controllers.HookAgentEndpoints(api.Group("/agent"))
+	controllers.HookProjectEndpoints(api.Group("/project"))
 
 	adminAPI := api.Group("/admin")
 	adminAPI.Use(authHandler.AdminOnlyMiddleware())

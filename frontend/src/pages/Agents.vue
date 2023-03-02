@@ -59,7 +59,9 @@
             <tbody class="first-col-bold">
               <tr class="hover">
                 <td>jimbob.lan</td>
-                <td><font-awesome-icon icon="fa-solid fa-microchip" /> Intel Core i7 7700k (93°c)</td>
+                <td>
+                  <font-awesome-icon icon="fa-solid fa-microchip" /> Intel Core i7 7700k (93°c)
+                </td>
                 <td>
                   <font-awesome-icon icon="fa-solid fa-memory" /> RTX 3080 Ti (78°c)
                   <br />
@@ -76,7 +78,9 @@
 
               <tr class="hover">
                 <td>workhorse.lan</td>
-                <td><font-awesome-icon icon="fa-solid fa-microchip" /> AMD Radeon Ryzen 7 5800X (83°c)</td>
+                <td>
+                  <font-awesome-icon icon="fa-solid fa-microchip" /> AMD Radeon Ryzen 7 5800X (83°c)
+                </td>
                 <td><font-awesome-icon icon="fa-solid fa-memory" /> RTX 3070 Ti (74°c)</td>
                 <td>704w</td>
                 <td class="text-center">

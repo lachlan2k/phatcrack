@@ -20,6 +20,7 @@ const (
 	JobsCollectionName     = "jobs"
 	WordlistCollectionName = "wordlists"
 	RulesCollectionName    = "rules"
+	ProjectCollectionName  = "projects"
 )
 
 var dbClient *mongo.Client
@@ -84,4 +85,8 @@ func GetRulesColl() *mongo.Collection {
 
 func GetWordlistColl() *mongo.Collection {
 	return GetDatabase().Collection(WordlistCollectionName)
+}
+
+func GetProjectColl() *mongo.Collection {
+	return GetDatabase().Collection(ProjectCollectionName)
 }

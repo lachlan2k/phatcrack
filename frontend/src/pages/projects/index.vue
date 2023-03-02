@@ -1,8 +1,19 @@
+<script setup lang="ts">
+import { getAllProjects } from '@/api/project'
+import { useApi } from '@/composables/useApi'
+
+const { data: projects, isLoading } = useApi(getAllProjects)
+</script>
+
 <template>
   <main class="w-full p-6">
     <div class="prose">
       <h1>Projects</h1>
     </div>
+    <p v-if="isLoading">Loading</p>
+    <pre>
+      {{ JSON.stringify(projects) }}
+    </pre>
     <div class="mt-6 flex flex-col flex-wrap gap-6">
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
@@ -47,7 +58,9 @@
             </tbody>
           </table>
           <p class="mt-2">
-            <span class="text-sm text-slate-500"> <font-awesome-icon icon="fa-solid fa-link" /> = Shared </span>
+            <span class="text-sm text-slate-500">
+              <font-awesome-icon icon="fa-solid fa-link" /> = Shared
+            </span>
           </p>
         </div>
       </div>

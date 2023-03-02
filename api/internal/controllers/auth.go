@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
@@ -23,24 +22,13 @@ func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 	api.POST("/login", handleLogin(authHandler))
 
 	api.GET("/whoami", func(c echo.Context) error {
-		u, ok := c.Get("user").(*jwt.Token)
-		if u == nil || !ok {
-			return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
-				IsLoggedIn: false,
-				User:       nil,
-			})
-		}
-		claims, ok := u.Claims.(*auth.AuthClaims)
-		if claims == nil || !ok {
-			return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
-				IsLoggedIn: false,
-				User:       nil,
-			})
+		claims, err := auth.ClaimsFromReq(c)
+		if err != nil {
+			return err
 		}
 
-		return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
-			IsLoggedIn: true,
-			User: &apitypes.UserMeDTO{
+		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
+			User: apitypes.AuthCurrentUserDTO{
 				ID:       claims.ID,
 				Username: claims.Username,
 				Role:     claims.Role,
@@ -51,19 +39,9 @@ func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 
 func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		u, ok := c.Get("user").(*jwt.Token)
-		if u == nil || !ok {
-			return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
-				IsLoggedIn: false,
-				User:       nil,
-			})
-		}
-		claims, ok := u.Claims.(*auth.AuthClaims)
-		if claims == nil || !ok {
-			return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
-				IsLoggedIn: false,
-				User:       nil,
-			})
+		claims, err := auth.ClaimsFromReq(c)
+		if err != nil {
+			return err
 		}
 
 		user, err := db.GetUserByID(claims.ID)
@@ -78,9 +56,8 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			return err
 		}
 
-		return c.JSON(http.StatusOK, apitypes.WhoamiResponseDTO{
-			IsLoggedIn: true,
-			User: &apitypes.UserMeDTO{
+		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
+			User: apitypes.AuthCurrentUserDTO{
 				ID:       user.ID.Hex(),
 				Username: user.Username,
 				Role:     user.Role,
@@ -91,7 +68,7 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 
 func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		req, err := util.BindAndValidate[apitypes.LoginRequestDTO](c)
+		req, err := util.BindAndValidate[apitypes.AuthLoginRequestDTO](c)
 		if err != nil {
 			return err
 		}
@@ -117,8 +94,8 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 		claims := auth.UserToClaims(user)
 		authHandler.SignAndSetJWT(c, claims)
 
-		return c.JSON(http.StatusOK, apitypes.LoginResponseDTO{
-			User: apitypes.UserMeDTO{
+		return c.JSON(http.StatusOK, apitypes.AuthLoginResponseDTO{
+			User: apitypes.AuthCurrentUserDTO{
 				ID:       user.ID.Hex(),
 				Username: user.Username,
 				Role:     user.Role,

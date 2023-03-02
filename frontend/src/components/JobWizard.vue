@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { createProject } from '@/api/project'
 
 const props = defineProps<{
   // Set to 0 for full wizard, 1 if project is already made, 2 if hashlist is already made...
@@ -20,7 +21,9 @@ const steps = [
 const projectName = ref('')
 const projectDesc = ref('')
 
-async function saveUptoProject() {}
+async function saveUptoProject() {
+  createProject(projectName.value, projectDesc.value)
+}
 
 async function saveUptoHashlist() {
   await saveUptoProject()
@@ -34,13 +37,22 @@ async function saveUptoAttack() {
 <template>
   <div class="mt-6 flex flex-col flex-wrap gap-6">
     <ul class="steps my-8">
-      <li v-for="(step, index) in steps" :key="index" :class="index <= activeStep ? 'step-primary step' : 'step'">
+      <li
+        v-for="(step, index) in steps"
+        :key="index"
+        :class="index <= activeStep ? 'step-primary step' : 'step'"
+      >
         {{ step.name }}
       </li>
     </ul>
-    <div class="card min-w-max self-center bg-base-100 shadow-xl" style="min-width: 800px; max-width: 80%">
+    <div
+      class="card min-w-max self-center bg-base-100 shadow-xl"
+      style="min-width: 800px; max-width: 80%"
+    >
       <div class="card-body">
-        <h2 class="card-title mb-8 w-96">Step {{ activeStep + 1 }}. {{ steps[activeStep].name }}</h2>
+        <h2 class="card-title mb-8 w-96">
+          Step {{ activeStep + 1 }}. {{ steps[activeStep].name }}
+        </h2>
 
         <template v-if="activeStep == 0">
           <input

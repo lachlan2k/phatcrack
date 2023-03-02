@@ -1,16 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '@/layouts/default.vue'
 
-function withDefaultLayout(component: { (): Promise<any>; (): Promise<any> }) {
+function withDefaultLayout(component: () => any) {
   return {
     component: DefaultLayout,
     children: [{ path: '', component }]
   }
 }
 
-function route(path, name, component) {
+function route(path: string, name: string, component: () => any) {
   return {
-    path, name, ...withDefaultLayout(component)
+    path,
+    name,
+    ...withDefaultLayout(component)
   }
 }
 
