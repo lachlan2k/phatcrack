@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SearchableDropdown from '@/components/SearchableDropdown.vue'
 import { computed, watch, reactive } from 'vue'
 import { createProject } from '@/api/project'
 import { useResourcesStore } from '@/stores/resources'
@@ -39,8 +40,8 @@ const inputs = reactive({
   projectName: '',
   projectDesc: '',
 
-  hashTypeFilter: '',
-  hashType: 0,
+  hashlistName: '',
+  hashType: '0',
   hashes: '',
 
   activeStep: 0
@@ -64,7 +65,7 @@ watch(suggestedHashTypes, (newHashTypes) => {
   if (!types || types.length == 0) {
     return
   }
-  inputs.hashType = types.sort()[0]
+  inputs.hashType = types.sort()[0].toString()
 })
 
 const filteredHashTypes = computed(() => {
@@ -73,16 +74,12 @@ const filteredHashTypes = computed(() => {
     return allHashTypes.value.filter((hashType) => suggested.includes(hashType.id))
   }
 
-  const filterStr = inputs.hashTypeFilter.toLowerCase()
-  if (inputs.hashTypeFilter === '') {
-    return allHashTypes.value
-  }
-
-  return allHashTypes.value.filter(
-    (hashType) =>
-      hashType.id.toString().includes(filterStr) || hashType.name.toLowerCase().includes(filterStr)
-  )
+  return []
 })
+
+const hashTypeOptionsToShow = computed(() => filteredHashTypes.value.map(type => ({ value: type.id.toString(), text: `${type.id} - ${type.name}` })))
+
+const selectedHashType = computed(() => allHashTypes.value.find(x => x.id.toString() === inputs.hashType))
 
 async function saveUptoProject() {
   createProject(inputs.projectName, inputs.projectDesc)
@@ -130,6 +127,7 @@ async function saveUptoAttack() {
             placeholder="Project Description (optional)"
             class="input-bordered input w-full max-w-xs"
           />
+          <!-- <SearchableDropdown /> -->
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
@@ -145,42 +143,16 @@ async function saveUptoAttack() {
         <template v-if="inputs.activeStep == 1">
           <div class="form-control">
             <label class="label font-bold">
-              <span class="label-text">Filter Hash Type</span>
+              <span class="label-text">Hashlist Name</span>
             </label>
             <input
               type="text"
-              placeholder="Search hash types"
-              v-model="inputs.hashTypeFilter"
+              placeholder="Dumped Admin NTLM Hashes"
+              v-model="inputs.hashlistName"
               class="input-bordered input w-full max-w-xs"
             />
-            <label class="label mt-4 font-bold">
-              <span class="label-text">Hash Types ({{ filteredHashTypes.length }})</span>
-            </label>
-            <div>
-              <select class="input-bordered input w-full max-w-xs" v-model="inputs.hashType">
-                <option
-                  v-for="thisHashType in filteredHashTypes"
-                  :key="thisHashType.id"
-                  :value="thisHashType.id"
-                >
-                  {{ thisHashType.id }} - {{ thisHashType.name }}
-                </option>
-              </select>
-            </div>
-
-            <div class="my-4">
-              <button
-                class="btn-sm btn"
-                :class="detectButtonClass"
-                :disabled="isLoadingSuggestions || hashesArr.length == 0"
-                @click="detectButtonClick"
-              >
-                {{ detectButtonText }}
-              </button>
-              <span class="ml-2">{{ detectStatusText }}</span>
-            </div>
-
-            <label class="label font-bold">
+            <hr class="my-8">
+                    <label class="label font-bold">
               <span class="label-text">Hashes (one per line)</span>
             </label>
             <textarea
@@ -189,6 +161,23 @@ async function saveUptoAttack() {
               rows="12"
               v-model="inputs.hashes"
             ></textarea>
+            <label class="label font-bold mt-4">
+                <span class="label-text">Hash Type ({{ filteredHashTypes.length }} options)</span>
+              </label>
+
+              <SearchableDropdown v-model="inputs.hashType" :options="hashTypeOptionsToShow" />
+
+              <div class="my-4">
+                <button
+                  class="btn-sm btn"
+                  :class="detectButtonClass"
+                  :disabled="isLoadingSuggestions || hashesArr.length == 0"
+                  @click="detectButtonClick"
+                >
+                  {{ detectButtonText }}
+                </button>
+                <span class="ml-2">{{ detectStatusText }}</span>
+              </div>
 
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
@@ -243,7 +232,7 @@ async function saveUptoAttack() {
               </tr>
               <tr>
                 <td>Hashlist Type</td>
-                <td>{{ allHashTypes.find((x) => x.id === inputs.hashType)?.name }}</td>
+                <td>{{ selectedHashType?.id }} - {{ selectedHashType?.name }}</td>
               </tr>
               <tr>
                 <td>Number of Hashes</td>
