@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, reactive } from 'vue'
 import { createProject } from '@/api/project'
 import { detectHashType } from '@/api/resources'
 import { useResourcesStore } from '@/stores/resources'
@@ -25,25 +25,20 @@ resourcesStore.loadHashTypes()
  * User Inputs
  */
 
-// Project parameters
-const projectName = ref('')
-const projectDesc = ref('')
+const inputs = reactive({
+  projectName: '',
+  projectDesc: '',
 
-// Hashlist parameters
-const hashTypeFilter = ref('')
-const hashType = ref(0)
-const hashes = ref('')
+  hashTypeFilter: '',
+  hashType: 0,
+  hashes: '',
 
-const hashesArr = computed(() => {
-  return hashes.value.split(/\s+/).filter((x) => !!x)
+  activeStep: 0,
 })
 
-/*
- * Computed/helpers/state
- */
-
-// Wizard steps
-const activeStep = ref(0)
+const hashesArr = computed(() => {
+  return inputs.hashes.split(/\s+/).filter((x) => !!x)
+})
 
 const steps = [
   { name: 'Name Project' },
@@ -51,6 +46,12 @@ const steps = [
   { name: 'Configure Attack Settings' },
   { name: 'Review & Start Attack' }
 ].slice(props.firstStep ?? 0)
+
+const attackModes = [
+  { name : 'Dictionary' },
+  { name : 'Dictionary + Mask' },
+  { name: 'Mask + Dictionary' }
+]
 
 // Hash type list
 const {
@@ -61,7 +62,6 @@ const {
 
 function detectButtonClick() {
   // Reset
-  console.log('doing the thing')
   if (suggestedHashTypes.value != null) {
     suggestedHashTypes.value = null
     return
@@ -112,8 +112,8 @@ const filteredHashTypes = computed(() => {
     return allHashTypes.value.filter((hashType) => suggested.includes(hashType.id))
   }
 
-  const filterStr = hashTypeFilter.value.toLowerCase()
-  if (hashTypeFilter.value === '') {
+  const filterStr = inputs.hashTypeFilter.toLowerCase()
+  if (inputs.hashTypeFilter === '') {
     return allHashTypes.value
   }
 
@@ -128,11 +128,11 @@ watch(suggestedHashTypes, (newHashTypes) => {
   if (!types || types.length == 0) {
     return
   }
-  hashType.value = types.sort()[0]
+  inputs.hashType = types.sort()[0]
 })
 
 async function saveUptoProject() {
-  createProject(projectName.value, projectDesc.value)
+  createProject(inputs.projectName, inputs.projectDesc)
 }
 
 async function saveUptoHashlist() {
@@ -147,36 +147,21 @@ async function saveUptoAttack() {
 <template>
   <div class="mt-6 flex flex-col flex-wrap gap-6">
     <ul class="steps my-8">
-      <li
-        v-for="(step, index) in steps"
-        :key="index"
-        :class="index <= activeStep ? 'step-primary step' : 'step'"
-      >
+      <li v-for="(step, index) in steps" :key="index" :class="index <= inputs.activeStep ? 'step-primary step' : 'step'">
         {{ step.name }}
       </li>
     </ul>
-    <div
-      class="card min-w-max self-center bg-base-100 shadow-xl"
-      style="min-width: 800px; max-width: 80%"
-    >
+    <div class="card min-w-max self-center bg-base-100 shadow-xl" style="min-width: 800px; max-width: 80%">
       <div class="card-body">
-        <h2 class="card-title mb-8 w-96">
-          Step {{ activeStep + 1 }}. {{ steps[activeStep].name }}
+        <h2 class="card-title mb-8 w-96 text-center self-center justify-center">
+          Step {{ inputs.activeStep + 1 }}. {{ steps[inputs.activeStep].name }}
         </h2>
 
-        <template v-if="activeStep == 0">
-          <input
-            v-model="projectName"
-            type="text"
-            placeholder="Project Name"
-            class="input-bordered input w-full max-w-xs"
-          />
-          <input
-            v-model="projectDesc"
-            type="text"
-            placeholder="Project Description (optional)"
-            class="input-bordered input w-full max-w-xs"
-          />
+        <template v-if="inputs.activeStep == 0">
+          <input v-model="inputs.projectName" type="text" placeholder="Project Name"
+            class="input-bordered input w-full max-w-xs" />
+          <input v-model="inputs.projectDesc" type="text" placeholder="Project Description (optional)"
+            class="input-bordered input w-full max-w-xs" />
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
@@ -184,27 +169,23 @@ async function saveUptoAttack() {
             </div>
 
             <div class="card-actions justify-end">
-              <button class="btn-primary btn" @click="activeStep++">Next</button>
+              <button class="btn-primary btn" @click="inputs.activeStep++">Next</button>
             </div>
           </div>
         </template>
 
-        <template v-if="activeStep == 1">
+        <template v-if="inputs.activeStep == 1">
           <div class="form-control">
-            <label class="label">
+            <label class="label font-bold">
               <span class="label-text">Filter Hash Type</span>
             </label>
-            <input
-              type="text"
-              placeholder="Search hash types"
-              v-model="hashTypeFilter"
-              class="input-bordered input w-full max-w-xs"
-            />
-            <label class="label mt-4">
+            <input type="text" placeholder="Search hash types" v-model="inputs.hashTypeFilter"
+              class="input-bordered input w-full max-w-xs" />
+            <label class="label font-bold mt-4">
               <span class="label-text">Hash Types ({{ filteredHashTypes.length }})</span>
             </label>
             <div>
-              <select class="input-bordered input w-full max-w-xs" v-model="hashType">
+              <select class="input-bordered input w-full max-w-xs" v-model="inputs.hashType">
                 <option v-for="thisHashType in filteredHashTypes" :key="thisHashType.id" :value="thisHashType.id">
                   {{ thisHashType.id }} - {{ thisHashType.name }}
                 </option>
@@ -212,41 +193,36 @@ async function saveUptoAttack() {
             </div>
 
             <div class="my-4">
-              <button
-                class="btn-sm btn"
-                :class="detectButtonClass"
-                :disabled="isLoadingSuggestions || hashesArr.length == 0"
-                @click="detectButtonClick"
-              >
+              <button class="btn-sm btn" :class="detectButtonClass"
+                :disabled="isLoadingSuggestions || hashesArr.length == 0" @click="detectButtonClick">
                 {{ detectButtonText }}
               </button>
               <span class="ml-2">{{ detectStatusText }}</span>
             </div>
 
-            <label class="label">
+            <label class="label font-bold">
               <span class="label-text">Hashes (one per line)</span>
             </label>
-            <textarea
-              placeholder="Hashes"
-              class="textarea-bordered textarea max-w-xs hashes-input"
-              v-model="hashes"
-            ></textarea>
+            <textarea placeholder="Hashes" class="textarea-bordered textarea hashes-input w-full" rows="12"
+              v-model="inputs.hashes"></textarea>
+
 
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
                 <button class="link" @click="saveUptoHashlist">Save hashlist and finish</button>
               </div>
               <div class="card-actions justify-end">
-                <button class="btn-ghost btn" @click="activeStep--">Previous</button>
-                <button class="btn-primary btn" @click="activeStep++">Next</button>
+                <button class="btn-ghost btn" @click="inputs.activeStep--">Previous</button>
+                <button class="btn-primary btn" @click="inputs.activeStep++">Next</button>
               </div>
             </div>
           </div>
         </template>
 
-        <template v-if="activeStep == 2">
-          <input type="text" placeholder="Hash Type" class="input-bordered input w-full max-w-xs" />
-          <textarea placeholder="Hashes" class="textarea-bordered textarea max-w-xs"></textarea>
+        <template v-if="inputs.activeStep == 2">
+          <div class="btn-group self-center">
+             <input type="radio" name="options" :data-title="attackMode.name" class="btn" v-for="attackMode in attackModes" />
+          </div>
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
@@ -254,14 +230,38 @@ async function saveUptoAttack() {
             </div>
 
             <div class="card-actions justify-end">
-              <button class="btn-ghost btn" @click="activeStep--">Previous</button>
-              <button class="btn-primary btn" @click="activeStep++">Next</button>
+              <button class="btn-ghost btn" @click="inputs.activeStep--">Previous</button>
+              <button class="btn-primary btn" @click="inputs.activeStep++">Next</button>
             </div>
           </div>
         </template>
 
-        <template v-if="activeStep == 3">
-          <p><strong>Project Name</strong> {{ projectName }}</p>
+        <template v-if="inputs.activeStep == 3">
+
+          <table class="table w-full first-col-bold">
+            <tbody>
+              <tr>
+                <td>Project Name</td>
+                <td>{{ inputs.projectName }}</td>
+              </tr>
+              <tr>
+                <td>Project Description</td>
+                <td>{{ inputs.projectDesc }}</td>
+              </tr>
+              <tr>
+                <td>Hashlist Name</td>
+                <td>TODO</td>
+              </tr>
+              <tr>
+                <td>Hashlist Type</td>
+                <td>{{ allHashTypes.find(x => x.id === inputs.hashType)?.name }}</td>
+              </tr>
+              <tr>
+                  <td>Number of Hashes</td>
+                  <td>{{ hashesArr.length }}</td>
+                </tr>
+            </tbody>
+          </table>
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
@@ -269,8 +269,8 @@ async function saveUptoAttack() {
             </div>
 
             <div class="card-actions justify-end">
-              <button class="btn-ghost btn" @click="activeStep--">Previous</button>
-              <button class="btn-success btn" @click="activeStep++">Start Attack</button>
+              <button class="btn-ghost btn" @click="inputs.activeStep--">Previous</button>
+              <button class="btn-success btn" @click="inputs.activeStep++">Start Attack</button>
             </div>
           </div>
         </template>
@@ -281,14 +281,24 @@ async function saveUptoAttack() {
 
 <style scoped>
 textarea.hashes-input {
-  background-image: linear-gradient(to bottom, rgba(0,0,0,.05) 50%, transparent 50%);
-  background-size: 100% 56px;
-  line-height: 28px;
-  /* line-height: 3em; */
+  background-image: linear-gradient(to bottom, rgba(87, 87, 87, 0.05) 50%, transparent 50%);
   background-repeat: repeat-y;
-  /* background-position-y: -1em; */
+
+  background-size: 100% 56px;
+
+  line-height: 28px;
+  font-size: 18px;
+
   padding: 0;
   padding-left: 3px;
-  font-size: 18px;
+
+  white-space: pre;
+  resize: none;
+
+  background-attachment: local;
+}
+
+table.first-col-bold tr > td:first-of-type {
+  font-weight: bold;
 }
 </style>

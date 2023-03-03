@@ -5,10 +5,18 @@ export function loadHashTypes(): Promise<HashTypesDTO> {
   return client.get('/api/v1/resources/hashtypes').then((res) => res.data)
 }
 
-export function detectHashType(exampleHash: string): Promise<DetectHashTypeResponseDTO> {
-  return client
-    .post('/api/v1/resources/detect_hashtype', {
+const detectMemoMap = new Map<string, DetectHashTypeResponseDTO>()
+
+export async function detectHashType(exampleHash: string): Promise<DetectHashTypeResponseDTO> {
+  if (detectMemoMap.has(exampleHash)) {
+    return detectMemoMap.get(exampleHash) as DetectHashTypeResponseDTO
+  }
+
+  const results = await client.post('/api/v1/resources/detect_hashtype', {
       test_hash: exampleHash
-    } as DetectHashTypeRequestDTO)
-    .then((res) => res.data)
+  } as DetectHashTypeRequestDTO).then((res) => res.data as DetectHashTypeResponseDTO)
+
+  detectMemoMap.set(exampleHash, results)
+
+  return results
 }
