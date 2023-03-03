@@ -133,12 +133,14 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 }
 
 func findBinary(conf *config.Config) (path string, err error) {
-	if conf.HashcatBinary != "" {
-		_, err = os.Stat(conf.HashcatBinary)
+	path = conf.HashcatBinary
+	if path != "" {
+		_, err = os.Stat(path)
 		if err != nil {
 			err = fmt.Errorf("failed to stat the specified hashcat binary (%s): %v (check path and permissions?)", path, err)
-			return
+			path = ""
 		}
+		return
 	}
 
 	path, err = exec.LookPath("hashcat")

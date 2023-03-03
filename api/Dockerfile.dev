@@ -2,24 +2,19 @@ FROM golang:1.18
 
 RUN apt-get update -y
 RUN apt-get upgrade -y
-RUN apt-get install -y unzip
+RUN apt-get install -y p7zip-full
 
 WORKDIR /opt/
 
-RUN wget https://github.com/hashcat/hashcat/archive/refs/tags/v6.2.6.zip -q -O hashcat.zip
-RUN unzip hashcat.zip
-RUN rm hashcat.zip
-RUN mv hashcat-* hashcat
-
-WORKDIR /opt/hashcat
-RUN make install_library
-RUN make install_library_dev
+RUN wget https://github.com/hashcat/hashcat/releases/download/v6.2.6/hashcat-6.2.6.7z -q -O hashcat.7z
+RUN 7z x hashcat.7z
 
 WORKDIR /app
-RUN rm -rf /opt/hashcat
 
 RUN go install github.com/cosmtrek/air@latest
 
 WORKDIR /app/phatcrack/api
+
+ENV HC_PATH=/opt/hashcat-6.2.6/hashcat.bin
 
 ENTRYPOINT ["air", "main.go"]

@@ -1,6 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { createProject } from '@/api/project'
+import { detectHashType } from '@/api/resources'
+import { useResourcesStore } from '@/stores/resources'
+import { storeToRefs } from 'pinia'
+import { useApi } from '@/composables/useApi'
+
+/*
+ * Props
+ */
 
 const props = defineProps<{
   // Set to 0 for full wizard, 1 if project is already made, 2 if hashlist is already made...
@@ -9,6 +17,32 @@ const props = defineProps<{
   existingHashlistId?: string
 }>()
 
+const resourcesStore = useResourcesStore()
+const { hashTypes: allHashTypes } = storeToRefs(resourcesStore)
+resourcesStore.loadHashTypes()
+
+/*
+ * User Inputs
+ */
+
+// Project parameters
+const projectName = ref('')
+const projectDesc = ref('')
+
+// Hashlist parameters
+const hashTypeFilter = ref('')
+const hashType = ref(0)
+const hashes = ref('')
+
+const hashesArr = computed(() => {
+  return hashes.value.split(/\s+/).filter((x) => !!x)
+})
+
+/*
+ * Computed/helpers/state
+ */
+
+// Wizard steps
 const activeStep = ref(0)
 
 const steps = [
@@ -18,8 +52,75 @@ const steps = [
   { name: 'Review & Start Attack' }
 ].slice(props.firstStep ?? 0)
 
-const projectName = ref('')
-const projectDesc = ref('')
+// Hash type list
+const {
+  fetchData: fetchHashTypeSuggestions,
+  isLoading: isLoadingSuggestions,
+  data: suggestedHashTypes
+} = useApi(() => detectHashType(hashesArr.value[0]))
+
+function detectButtonClick() {
+  // Reset
+  if (suggestedHashTypes.value != null) {
+    suggestedHashTypes.value = null
+    return
+  }
+
+  fetchHashTypeSuggestions()
+}
+
+const detectStatusText = computed(() => {
+  if (suggestedHashTypes.value == null) {
+    return ''
+  }
+
+  if (suggestedHashTypes.value.possible_types.length > 0) {
+    return `Filtered down to ${suggestedHashTypes.value.possible_types.length} possible hash types`
+  }
+
+  return 'No suggestions found, check your hashes are valid'
+})
+
+const detectButtonClass = computed(() => {
+  if (isLoadingSuggestions.value) {
+    return 'btn-secondary'
+  }
+
+  if (suggestedHashTypes.value != null) {
+    return ''
+  }
+
+  return 'btn-primary'
+})
+
+const detectButtonText = computed(() => {
+  if (isLoadingSuggestions.value) {
+    return 'Loading suggestions...'
+  }
+
+  if (suggestedHashTypes.value != null) {
+    return 'Reset Filter'
+  }
+
+  return 'Detect hash type'
+})
+
+const filteredHashTypes = computed(() => {
+  const suggested = suggestedHashTypes.value?.possible_types
+  if (suggested != null) {
+    return allHashTypes.value.filter((hashType) => suggested.includes(hashType.id))
+  }
+
+  const filterStr = hashTypeFilter.value.toLowerCase()
+  if (hashTypeFilter.value === '') {
+    return allHashTypes.value
+  }
+
+  return allHashTypes.value.filter(
+    (hashType) =>
+      hashType.id.toString().includes(filterStr) || hashType.name.toLowerCase().includes(filterStr)
+  )
+})
 
 async function saveUptoProject() {
   createProject(projectName.value, projectDesc.value)
@@ -80,17 +181,56 @@ async function saveUptoAttack() {
         </template>
 
         <template v-if="activeStep == 1">
-          <input type="text" placeholder="Hash Type" class="input-bordered input w-full max-w-xs" />
-          <textarea placeholder="Hashes" class="textarea-bordered textarea max-w-xs"></textarea>
-
-          <div class="mt-8 flex justify-between">
-            <div class="flex justify-start">
-              <button class="link" @click="saveUptoHashlist">Save hashlist and finish</button>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Filter Hash Type</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Search hash types"
+              v-model="hashTypeFilter"
+              class="input-bordered input w-full max-w-xs"
+            />
+            <label class="label">
+              <span class="label-text">Hash Types ({{ filteredHashTypes.length }})</span>
+            </label>
+            <div>
+              <select class="input-bordered input w-full max-w-xs" v-model="hashType">
+                <option v-for="thisHashType in filteredHashTypes" :key="thisHashType.id">
+                  {{ thisHashType.id }} - {{ thisHashType.name }}
+                </option>
+              </select>
             </div>
 
-            <div class="card-actions justify-end">
-              <button class="btn-ghost btn" @click="activeStep--">Previous</button>
-              <button class="btn-primary btn" @click="activeStep++">Next</button>
+            <div class="my-4">
+              <button
+                class="btn-sm btn"
+                :class="detectButtonClass"
+                :disabled="isLoadingSuggestions || hashesArr.length == 0"
+                @click="detectButtonClick"
+              >
+                {{ detectButtonText }}
+              </button>
+              <span class="ml-2">{{ detectStatusText }}</span>
+            </div>
+
+            <label class="label">
+              <span class="label-text">Hashes (one per line)</span>
+            </label>
+            <textarea
+              placeholder="Hashes"
+              class="textarea-bordered textarea max-w-xs"
+              v-model="hashes"
+            ></textarea>
+
+            <div class="mt-8 flex justify-between">
+              <div class="flex justify-start">
+                <button class="link" @click="saveUptoHashlist">Save hashlist and finish</button>
+              </div>
+              <div class="card-actions justify-end">
+                <button class="btn-ghost btn" @click="activeStep--">Previous</button>
+                <button class="btn-primary btn" @click="activeStep++">Next</button>
+              </div>
             </div>
           </div>
         </template>
