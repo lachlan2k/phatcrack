@@ -163,7 +163,7 @@ async function saveUptoAttack() {
             </label>
             <textarea
               placeholder="Hashes"
-              class="hashes-input textarea-bordered textarea w-full"
+              class="hashes-input textarea-bordered textarea w-full font-mono focus:outline-none"
               rows="12"
               v-model="inputs.hashes"
             ></textarea>
@@ -268,9 +268,9 @@ textarea.hashes-input {
   background-image: linear-gradient(to bottom, rgba(87, 87, 87, 0.05) 50%, transparent 50%);
   background-repeat: repeat-y;
 
-  background-size: 100% 56px;
+  background-size: 100% 60px;
 
-  line-height: 28px;
+  line-height: 30px;
   font-size: 18px;
 
   padding: 0;

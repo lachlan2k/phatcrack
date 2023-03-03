@@ -22,10 +22,10 @@ const filteredOptions = computed(() =>
 
 const optionsVisible = ref(false)
 
-function selectIndex(index: number) {
+function selectOption(option: OptionT) {
   optionsVisible.value = false
-  inputText.value = props.options[index].text
-  emit('update:modelValue', props.options[index].value)
+  emit('update:modelValue', option.value)
+  inputText.value = option.text
 }
 
 function focus() {
@@ -42,7 +42,7 @@ function unfocus() {
   <div class="relative">
     <input
       type="text"
-      class="input-bordered input w-full cursor-pointer"
+      class="input-bordered input w-full cursor-pointer focus:outline-none"
       :placeholder="props.placeholderText"
       v-model="inputText"
       @focus="focus"
@@ -50,12 +50,13 @@ function unfocus() {
     />
     <div
       v-if="optionsVisible"
-      class="floating-dropdown-content absolute w-full border-solid border-black"
+      class="floating-dropdown-content absolute w-full border-solid border-black shadow-md"
     >
       <div
-        v-for="(option, optionIndex) in filteredOptions"
+        :key="option.value"
+        v-for="option in filteredOptions"
         class="dropdown-content-option hover mx-1 my-1 cursor-pointer px-2 py-1"
-        @mousedown="selectIndex(optionIndex)"
+        @mousedown="selectOption(option)"
       >
         {{ option.text }}
       </div>
