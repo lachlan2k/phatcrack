@@ -6,7 +6,6 @@ import { timeSince } from '@/util/timeSince'
 
 const { data, isLoading } = useApi(getAllProjects)
 const projects = computed(() => data.value?.projects)
-
 </script>
 
 <template>
@@ -37,12 +36,12 @@ const projects = computed(() => data.value?.projects)
                 <td>8</td>
                 <td><div class="badge-info badge">4 attacks running</div></td>
               </tr>
-              <tr class="hover" v-for="project in projects">
-                  <td>{{ project.name }}</td>
-                  <td>{{ timeSince(project.time_created) }}</td>
-                  <td>8</td>
-                  <td><div class="badge-info badge">4 attacks running</div></td>
-                </tr>
+              <tr class="hover" v-for="project in projects" :key="project.id">
+                <td>{{ project.name }}</td>
+                <td>{{ timeSince(project.time_created) }}</td>
+                <td>8</td>
+                <td><div class="badge-info badge">4 attacks running</div></td>
+              </tr>
               <!-- row 2 -->
               <tr class="hover">
                 <td>

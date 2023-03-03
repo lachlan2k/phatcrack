@@ -12,9 +12,11 @@ export async function detectHashType(exampleHash: string): Promise<DetectHashTyp
     return detectMemoMap.get(exampleHash) as DetectHashTypeResponseDTO
   }
 
-  const results = await client.post('/api/v1/resources/detect_hashtype', {
+  const results = await client
+    .post('/api/v1/resources/detect_hashtype', {
       test_hash: exampleHash
-  } as DetectHashTypeRequestDTO).then((res) => res.data as DetectHashTypeResponseDTO)
+    } as DetectHashTypeRequestDTO)
+    .then((res) => res.data as DetectHashTypeResponseDTO)
 
   detectMemoMap.set(exampleHash, results)
 
