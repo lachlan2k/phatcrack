@@ -74,12 +74,19 @@ const filteredHashTypes = computed(() => {
     return allHashTypes.value.filter((hashType) => suggested.includes(hashType.id))
   }
 
-  return []
+  return allHashTypes.value
 })
 
-const hashTypeOptionsToShow = computed(() => filteredHashTypes.value.map(type => ({ value: type.id.toString(), text: `${type.id} - ${type.name}` })))
+const hashTypeOptionsToShow = computed(() =>
+  filteredHashTypes.value.map((type) => ({
+    value: type.id.toString(),
+    text: `${type.id} - ${type.name}`
+  }))
+)
 
-const selectedHashType = computed(() => allHashTypes.value.find(x => x.id.toString() === inputs.hashType))
+const selectedHashType = computed(() =>
+  allHashTypes.value.find((x) => x.id.toString() === inputs.hashType)
+)
 
 async function saveUptoProject() {
   createProject(inputs.projectName, inputs.projectDesc)
@@ -127,7 +134,6 @@ async function saveUptoAttack() {
             placeholder="Project Description (optional)"
             class="input-bordered input w-full max-w-xs"
           />
-          <!-- <SearchableDropdown /> -->
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
@@ -151,8 +157,8 @@ async function saveUptoAttack() {
               v-model="inputs.hashlistName"
               class="input-bordered input w-full max-w-xs"
             />
-            <hr class="my-8">
-                    <label class="label font-bold">
+            <hr class="my-8" />
+            <label class="label font-bold">
               <span class="label-text">Hashes (one per line)</span>
             </label>
             <textarea
@@ -161,23 +167,23 @@ async function saveUptoAttack() {
               rows="12"
               v-model="inputs.hashes"
             ></textarea>
-            <label class="label font-bold mt-4">
-                <span class="label-text">Hash Type ({{ filteredHashTypes.length }} options)</span>
-              </label>
+            <label class="label mt-4 font-bold">
+              <span class="label-text">Hash Type ({{ filteredHashTypes.length }} options)</span>
+            </label>
 
-              <SearchableDropdown v-model="inputs.hashType" :options="hashTypeOptionsToShow" />
+            <SearchableDropdown v-model="inputs.hashType" :options="hashTypeOptionsToShow" placeholder-text="Search for a hashtype..." />
 
-              <div class="my-4">
-                <button
-                  class="btn-sm btn"
-                  :class="detectButtonClass"
-                  :disabled="isLoadingSuggestions || hashesArr.length == 0"
-                  @click="detectButtonClick"
-                >
-                  {{ detectButtonText }}
-                </button>
-                <span class="ml-2">{{ detectStatusText }}</span>
-              </div>
+            <div class="my-4">
+              <button
+                class="btn-sm btn"
+                :class="detectButtonClass"
+                :disabled="isLoadingSuggestions || hashesArr.length == 0"
+                @click="detectButtonClick"
+              >
+                {{ detectButtonText }}
+              </button>
+              <span class="ml-2">{{ detectStatusText }}</span>
+            </div>
 
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
