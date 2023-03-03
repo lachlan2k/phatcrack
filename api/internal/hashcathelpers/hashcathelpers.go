@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -45,7 +44,7 @@ func hashcatCommand(args ...string) (*exec.Cmd, error) {
 }
 
 func IdentifyHashTypes(exampleHash string) ([]int, error) {
-	tmpFile, err := ioutil.TempFile("/tmp", "phatcrack-hash-identify")
+	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-identify")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %v", err)
 	}

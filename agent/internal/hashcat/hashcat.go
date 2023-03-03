@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -265,13 +264,13 @@ func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *c
 		return nil, err
 	}
 
-	hashFile, err := ioutil.TempFile("/tmp", "phatcrack-hashes")
+	hashFile, err := os.CreateTemp("/tmp", "phatcrack-hashes")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't make a temp file to store hashes: %v", err)
 	}
 	hashFile.Chmod(0600)
 
-	outFile, err := ioutil.TempFile("/tmp", "phatcrack-output")
+	outFile, err := os.CreateTemp("/tmp", "phatcrack-output")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't make a temp file to store output: %v", err)
 	}

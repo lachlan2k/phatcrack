@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
@@ -12,7 +12,7 @@ func getFileDTOs(dir string) ([]wstypes.FileDTO, error) {
 		return []wstypes.FileDTO{}, nil
 	}
 
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -22,9 +22,13 @@ func getFileDTOs(dir string) ([]wstypes.FileDTO, error) {
 		if file.IsDir() {
 			continue
 		}
+		info, err := file.Info()
+		if err != nil {
+			continue
+		}
 		dtos = append(dtos, wstypes.FileDTO{
 			Name: file.Name(),
-			Size: file.Size(),
+			Size: info.Size(),
 		})
 	}
 
