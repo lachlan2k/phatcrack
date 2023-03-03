@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { createProject } from '@/api/project'
 import { detectHashType } from '@/api/resources'
 import { useResourcesStore } from '@/stores/resources'
@@ -57,10 +57,11 @@ const {
   fetchData: fetchHashTypeSuggestions,
   isLoading: isLoadingSuggestions,
   data: suggestedHashTypes
-} = useApi(() => detectHashType(hashesArr.value[0]))
+} = useApi(() => detectHashType(hashesArr.value[0]), { immediate: false })
 
 function detectButtonClick() {
   // Reset
+  console.log('doing the thing')
   if (suggestedHashTypes.value != null) {
     suggestedHashTypes.value = null
     return
@@ -120,6 +121,14 @@ const filteredHashTypes = computed(() => {
     (hashType) =>
       hashType.id.toString().includes(filterStr) || hashType.name.toLowerCase().includes(filterStr)
   )
+})
+
+watch(suggestedHashTypes, (newHashTypes) => {
+  const types = newHashTypes?.possible_types
+  if (!types || types.length == 0) {
+    return
+  }
+  hashType.value = types.sort()[0]
 })
 
 async function saveUptoProject() {
@@ -191,12 +200,12 @@ async function saveUptoAttack() {
               v-model="hashTypeFilter"
               class="input-bordered input w-full max-w-xs"
             />
-            <label class="label">
+            <label class="label mt-4">
               <span class="label-text">Hash Types ({{ filteredHashTypes.length }})</span>
             </label>
             <div>
               <select class="input-bordered input w-full max-w-xs" v-model="hashType">
-                <option v-for="thisHashType in filteredHashTypes" :key="thisHashType.id">
+                <option v-for="thisHashType in filteredHashTypes" :key="thisHashType.id" :value="thisHashType.id">
                   {{ thisHashType.id }} - {{ thisHashType.name }}
                 </option>
               </select>
@@ -219,7 +228,7 @@ async function saveUptoAttack() {
             </label>
             <textarea
               placeholder="Hashes"
-              class="textarea-bordered textarea max-w-xs"
+              class="textarea-bordered textarea max-w-xs hashes-input"
               v-model="hashes"
             ></textarea>
 
@@ -269,3 +278,17 @@ async function saveUptoAttack() {
     </div>
   </div>
 </template>
+
+<style scoped>
+textarea.hashes-input {
+  background-image: linear-gradient(to bottom, rgba(0,0,0,.05) 50%, transparent 50%);
+  background-size: 100% 56px;
+  line-height: 28px;
+  /* line-height: 3em; */
+  background-repeat: repeat-y;
+  /* background-position-y: -1em; */
+  padding: 0;
+  padding-left: 3px;
+  font-size: 18px;
+}
+</style>

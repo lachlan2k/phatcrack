@@ -17,7 +17,7 @@ export function useApi<DTOType>(
   options: UseAPIOptions = { immediate: true }
 ) {
   const state = reactive<UseAPIState<DTOType>>({
-    isLoading: true,
+    isLoading: options.immediate,
     data: null,
     errorMessage: null
   })

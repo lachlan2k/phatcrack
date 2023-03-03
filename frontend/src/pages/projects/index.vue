@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { getAllProjects } from '@/api/project'
 import { useApi } from '@/composables/useApi'
+import { computed } from 'vue'
+import { timeSince } from '@/util/timeSince'
 
-const { data: projects, isLoading } = useApi(getAllProjects)
+const { data, isLoading } = useApi(getAllProjects)
+const projects = computed(() => data.value?.projects)
+
 </script>
 
 <template>
@@ -11,10 +15,7 @@ const { data: projects, isLoading } = useApi(getAllProjects)
       <h1>Projects</h1>
     </div>
     <p v-if="isLoading">Loading</p>
-    <pre>
-      {{ JSON.stringify(projects) }}
-    </pre>
-    <div class="mt-6 flex flex-col flex-wrap gap-6">
+    <div class="mt-6 flex flex-col flex-wrap gap-6" v-else>
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">My Projects & Projects Shared with Me</h2>
@@ -36,6 +37,12 @@ const { data: projects, isLoading } = useApi(getAllProjects)
                 <td>8</td>
                 <td><div class="badge-info badge">4 attacks running</div></td>
               </tr>
+              <tr class="hover" v-for="project in projects">
+                  <td>{{ project.name }}</td>
+                  <td>{{ timeSince(project.time_created) }}</td>
+                  <td>8</td>
+                  <td><div class="badge-info badge">4 attacks running</div></td>
+                </tr>
               <!-- row 2 -->
               <tr class="hover">
                 <td>

@@ -17,7 +17,7 @@ func HookProjectEndpoints(api *echo.Group) {
 	})
 
 	api.GET("", handleProjectGetAll)
-	api.POST("", handleProjectCreate)
+	api.POST("/create", handleProjectCreate)
 	api.GET("/:id", handleProjectGet)
 	// api.POST("/:id/hashlist", handleProjectGet)
 	// api.GET("/:id/hashlist/:list-id", handleProjectGet)
