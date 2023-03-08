@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
+import HrOr from '@/components/HrOr.vue'
 import { computed, watch, reactive } from 'vue'
 import { createProject } from '@/api/project'
 import { useResourcesStore } from '@/stores/resources'
@@ -28,9 +29,11 @@ const steps = [
 ].slice(props.firstStep ?? 0)
 
 const attackModes = [
-  { name: 'Dictionary' },
-  { name: 'Dictionary + Mask' },
-  { name: 'Mask + Dictionary' }
+  { name: 'Wordlist', value: 0 },
+  { name: 'Combinator', value: 1 },
+  { name: 'Brute-force/Mask', value: 3 },
+  { name: 'Wordlist + Mask', value: 6 },
+  { name: 'Mask + Wordlist', value: 7 }
 ]
 
 /*
@@ -43,6 +46,8 @@ const inputs = reactive({
   hashlistName: '',
   hashType: '0',
   hashes: '',
+
+  attackMode: 0,
 
   activeStep: 0
 })
@@ -121,6 +126,7 @@ async function saveUptoAttack() {
           Step {{ inputs.activeStep + 1 }}. {{ steps[inputs.activeStep].name }}
         </h2>
 
+        <!-- Create/Select Project -->
         <template v-if="inputs.activeStep == 0">
           <input
             v-model="inputs.projectName"
@@ -135,6 +141,8 @@ async function saveUptoAttack() {
             class="input-bordered input w-full max-w-xs"
           />
 
+          <HrOr />
+
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
               <button class="link" @click="saveUptoProject">Create empty project and finish</button>
@@ -146,6 +154,7 @@ async function saveUptoAttack() {
           </div>
         </template>
 
+        <!-- Create Hashlist -->
         <template v-if="inputs.activeStep == 1">
           <div class="form-control">
             <label class="label font-bold">
@@ -171,7 +180,11 @@ async function saveUptoAttack() {
               <span class="label-text">Hash Type ({{ filteredHashTypes.length }} options)</span>
             </label>
 
-            <SearchableDropdown v-model="inputs.hashType" :options="hashTypeOptionsToShow" placeholder-text="Search for a hashtype..." />
+            <SearchableDropdown
+              v-model="inputs.hashType"
+              :options="hashTypeOptionsToShow"
+              placeholder-text="Search for a hashtype..."
+            />
 
             <div class="my-4">
               <button
@@ -197,6 +210,7 @@ async function saveUptoAttack() {
           </div>
         </template>
 
+        <!-- Attack settings -->
         <template v-if="inputs.activeStep == 2">
           <div class="btn-group self-center">
             <input
@@ -204,7 +218,9 @@ async function saveUptoAttack() {
               name="options"
               :data-title="attackMode.name"
               class="btn"
-              :key="attackMode.name"
+              :key="attackMode.value"
+              :value="attackMode.value"
+              v-model="inputs.attackMode"
               v-for="attackMode in attackModes"
             />
           </div>
@@ -221,6 +237,7 @@ async function saveUptoAttack() {
           </div>
         </template>
 
+        <!-- Review/start -->
         <template v-if="inputs.activeStep == 3">
           <table class="first-col-bold table w-full">
             <tbody>
