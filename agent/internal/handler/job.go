@@ -169,6 +169,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 		}
 
 		sess.Kill()
+		sess.Cleanup()
 
 		h.jobsLock.Lock()
 		defer h.jobsLock.Unlock()

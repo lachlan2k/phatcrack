@@ -241,6 +241,7 @@ func (sess *HashcatSession) Start() error {
 		}
 
 		sess.DoneChan <- sess.proc.Wait()
+		tailer.Kill(nil)
 	}()
 
 	go func() {
@@ -256,6 +257,18 @@ func (sess *HashcatSession) Start() error {
 
 func (sess *HashcatSession) Kill() error {
 	return sess.proc.Process.Kill()
+}
+
+func (sess *HashcatSession) Cleanup() {
+	if sess.hashFile != nil {
+		os.Remove(sess.hashFile.Name())
+		sess.hashFile = nil
+	}
+
+	if sess.outFile != nil {
+		os.Remove(sess.outFile.Name())
+		sess.outFile = nil
+	}
 }
 
 func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *config.Config) (*HashcatSession, error) {
