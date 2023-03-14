@@ -78,7 +78,7 @@ func GetAllWordlists() ([]Wordlist, error) {
 }
 
 func AddRuleFile(r RuleFile) error {
-	_, err := GetWordlistColl().InsertOne(context.Background(), r)
+	_, err := GetRulesColl().InsertOne(context.Background(), r)
 	if err != nil {
 		return fmt.Errorf("couldn't insert wordlist: %v", err)
 	}

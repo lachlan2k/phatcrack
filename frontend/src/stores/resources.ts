@@ -1,4 +1,4 @@
-import { loadHashTypes } from '@/api/resources'
+import { loadHashTypes } from '@/api/hashcat'
 import type { HashType } from '@/api/types'
 import { defineStore } from 'pinia'
 

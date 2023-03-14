@@ -36,6 +36,46 @@ export interface AuthWhoamiResponseDTO {
 export interface AuthRefreshResponseDTO {
   user: AuthCurrentUserDTO
 }
+export interface HashType {
+  id: number
+  name: string
+  category: string
+  slow_hash: boolean
+  password_len_min: number
+  password_len_max: number
+  is_salted: boolean
+  kernel_types: string[]
+  example_hash_format: string
+  example_hash: string
+  example_pass: string
+  benchmark_mask: string
+  benchmark_charset1: string
+  autodetect_enabled: boolean
+  self_test_enabled: boolean
+  potfile_enabled: boolean
+  custom_plugin: boolean
+  plaintext_encoding: string[]
+}
+export interface HashTypesDTO {
+  hashtypes: { [key: number]: HashType }
+}
+export interface DetectHashTypeRequestDTO {
+  test_hash: string
+}
+export interface DetectHashTypeResponseDTO {
+  possible_types: number[]
+}
+export interface VerifyHashesRequestDTO {
+  hashes: string[]
+  hash_type: number
+}
+export interface VerifyHashesResponseDTO {
+  valid: boolean
+}
+export interface NormalizeHashesResponseDTO {
+  valid: boolean
+  normalized_hashes: string[]
+}
 export interface HashcatParams {
   attack_mode: number
   hash_type: number
@@ -74,6 +114,7 @@ export interface ListsRuleFileCreateDTO {
   lines: number
 }
 export interface ListsWordlistResponseDTO {
+  id: string
   name: string
   description: string
   filename: string
@@ -81,6 +122,7 @@ export interface ListsWordlistResponseDTO {
   lines: number
 }
 export interface ListsRuleFileResponseDTO {
+  id: string
   name: string
   description: string
   filename: string
@@ -111,33 +153,4 @@ export interface ProjectsFullDetailsDTO {
 }
 export interface ProjectResponseMultipleDTO {
   projects: ProjectSimpleDetailsDTO[]
-}
-export interface HashType {
-  id: number
-  name: string
-  category: string
-  slow_hash: boolean
-  password_len_min: number
-  password_len_max: number
-  is_salted: boolean
-  kernel_types: string[]
-  example_hash_format: string
-  example_hash: string
-  example_pass: string
-  benchmark_mask: string
-  benchmark_charset1: string
-  autodetect_enabled: boolean
-  self_test_enabled: boolean
-  potfile_enabled: boolean
-  custom_plugin: boolean
-  plaintext_encoding: string[]
-}
-export interface HashTypesDTO {
-  hashtypes: { [key: number]: HashType }
-}
-export interface DetectHashTypeRequestDTO {
-  test_hash: string
-}
-export interface DetectHashTypeResponseDTO {
-  possible_types: number[]
 }

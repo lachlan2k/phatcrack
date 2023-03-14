@@ -18,8 +18,8 @@ func HookListsEndpoints(api *echo.Group) {
 	api.POST("/wordlist/create", handleWordlistCreate)
 	api.POST("/rulefile/create", handleRuleFileCreate)
 
-	api.GET("/wordlists", handleGetAllWordlists)
-	api.GET("/rulefiles", handleGetAllRuleFiles)
+	api.GET("/wordlist/all", handleGetAllWordlists)
+	api.GET("/rulefile/all", handleGetAllRuleFiles)
 
 	api.GET("/wordlist/:id", handleGetWordlist)
 	api.GET("/rulefile/:id", handlGetRuleFile)
@@ -73,6 +73,8 @@ func handleGetAllWordlists(c echo.Context) error {
 	res.Wordlists = make([]apitypes.ListsWordlistResponseDTO, len(lists))
 	for i, list := range lists {
 		res.Wordlists[i] = apitypes.ListsWordlistResponseDTO{
+			ID: list.ID.Hex(),
+
 			Name:        list.Name,
 			Description: list.Description,
 			Filename:    list.Filename,
@@ -94,6 +96,7 @@ func handleGetAllRuleFiles(c echo.Context) error {
 	res.RuleFiles = make([]apitypes.ListsRuleFileResponseDTO, len(lists))
 	for i, list := range lists {
 		res.RuleFiles[i] = apitypes.ListsRuleFileResponseDTO{
+			ID:          list.ID.Hex(),
 			Name:        list.Name,
 			Description: list.Description,
 			Filename:    list.Filename,

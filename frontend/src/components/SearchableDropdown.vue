@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 interface OptionT {
   value: string
@@ -14,7 +14,18 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
-const inputText = ref('')
+function textForValue(val: string) {
+  return props.options.find((x) => x.value === val)?.text ?? ''
+}
+
+const inputText = ref(textForValue(props.modelValue))
+
+watch(
+  () => props.modelValue,
+  (newModelVal) => {
+    inputText.value = textForValue(newModelVal)
+  }
+)
 
 const filteredOptions = computed(() =>
   props.options.filter((x) => x.text.toLowerCase().includes(inputText.value.toLowerCase()))
@@ -35,6 +46,7 @@ function focus() {
 
 function unfocus() {
   optionsVisible.value = false
+  inputText.value = textForValue(props.modelValue)
 }
 </script>
 
@@ -54,6 +66,7 @@ function unfocus() {
     >
       <div
         :key="option.value"
+        :class="modelValue == option.value ? 'active' : ''"
         v-for="option in filteredOptions"
         class="dropdown-content-option hover mx-1 my-1 cursor-pointer px-2 py-1"
         @mousedown="selectOption(option)"
@@ -77,7 +90,10 @@ function unfocus() {
 }
 
 .dropdown-content-option:hover {
-  width: 100%;
   background: #eee;
+}
+
+.dropdown-content-option.active {
+  background: #ddd;
 }
 </style>

@@ -43,18 +43,17 @@ export const useAuthStore = defineStore({
     async refreshAuth() {
       try {
         const details = await apiRefreshAuth()
-        console.log('refreshed', details)
         this.loggedInUser = details.user
         this.loginError = null
       } catch (err: any) {
-        console.log('rip, error')
         // We were logged in before, and now we're not
         if (this.loggedInUser != null) {
           this.loginError = 'Session timeout'
+        } else {
+          this.loginError = err.response.data.message
         }
 
         this.loggedInUser = null
-        // this.loginError = err.response.data.message
       } finally {
         this.hasTriedAuth = true
       }

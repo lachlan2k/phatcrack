@@ -124,7 +124,10 @@ func NormalizeHashes(hashes []string, hashMode int) ([]string, error) {
 	reader := bytes.NewReader(out)
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		normalizedHashes = append(normalizedHashes, scanner.Text())
+		hash := strings.TrimSpace(scanner.Text())
+		if hash != "" {
+			normalizedHashes = append(normalizedHashes, scanner.Text())
+		}
 	}
 
 	return normalizedHashes, nil
