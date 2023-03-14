@@ -3,22 +3,6 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
-// const router = useRouter()
-
-// const { isLoggedIn } = storeToRefs(authStore)
-
-// watch(isLoggedIn, newIsLoggedIn => {
-//   if (!newIsLoggedIn) {
-//     router.push('/login')
-//   }
-// })
-
-// onMounted(() => {
-//   if (!isLoggedIn.value) {
-//     router.push('/login')
-//   }
-//   authStore.refreshAuth()
-// })
 
 const route = useRoute()
 
