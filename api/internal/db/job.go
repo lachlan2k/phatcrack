@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -73,15 +72,14 @@ type JobCrackedHash struct {
 }
 
 type Job struct {
-	ID            primitive.ObjectID  `bson:"_id,omitempty"`
-	CreatedTime   primitive.Timestamp `bson:"created_time,omitempty"`
-	HashcatParams HashcatParams       `bson:"hashcat_params"`
-	Hashes        []string            `bson:"hashes"`
-	HashType      int                 `bson:"hash_type"`
-	Name          string              `bson:"name"`
-	Description   string              `bson:"description"`
-	RuntimeData   RuntimeData         `bson:"runtime_data"`
-	CrackedHashes []JobCrackedHash    `bson:"cracked_hashes,omitempty"`
+	ID            primitive.ObjectID `bson:"_id,omitempty"`
+	HashcatParams HashcatParams      `bson:"hashcat_params"`
+	Hashes        []string           `bson:"hashes"`
+	HashType      int                `bson:"hash_type"`
+	Name          string             `bson:"name"`
+	Description   string             `bson:"description"`
+	RuntimeData   RuntimeData        `bson:"runtime_data"`
+	CrackedHashes []JobCrackedHash   `bson:"cracked_hashes,omitempty"`
 }
 
 func SetJobScheduled(jobId, agentId string) error {
@@ -290,7 +288,6 @@ func GetJob(jobId string) (*Job, error) {
 }
 
 func CreateJob(job Job) (newJobId string, err error) {
-	job.CreatedTime = util.MongoNow()
 	result, err := GetJobsColl().InsertOne(context.Background(), job)
 
 	if err != nil {
