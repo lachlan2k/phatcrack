@@ -42,8 +42,15 @@ func hashcatCommand(args ...string) (*exec.Cmd, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command(binPath, "--session", uuid.New().String(), args...)
+	cmd := exec.Command(binPath, args...)
 	return cmd, nil
+}
+
+func hashcatCommandWithRandSession(args ...string) (*exec.Cmd, error) {
+	fullArgs := []string{"--session", uuid.New().String()}
+	fullArgs = append(fullArgs, args...)
+
+	return hashcatCommand(fullArgs...)
 }
 
 func IdentifyHashTypes(exampleHash string) ([]int, error) {
@@ -61,7 +68,7 @@ func IdentifyHashTypes(exampleHash string) ([]int, error) {
 		return nil, fmt.Errorf("failed to write example hash to file: %v", err)
 	}
 
-	cmd, err := hashcatCommand("--identify", tmpFile.Name(), "--machine-readable")
+	cmd, err := hashcatCommandWithRandSession("--identify", tmpFile.Name(), "--machine-readable")
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +118,7 @@ func NormalizeHashes(hashes []string, hashMode int) ([]string, error) {
 		}
 	}
 
-	cmd, err := hashcatCommand("-m", strconv.Itoa(hashMode), tmpFile.Name(), "--left", "--potfile-path", "/dev/null")
+	cmd, err := hashcatCommandWithRandSession("-m", strconv.Itoa(hashMode), tmpFile.Name(), "--left", "--potfile-path", "/dev/null")
 	if err != nil {
 		return nil, err
 	}
