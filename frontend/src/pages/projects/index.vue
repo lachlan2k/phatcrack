@@ -11,7 +11,7 @@ const projects = computed(() => data.value?.projects)
 <template>
   <main class="w-full p-6">
     <div class="prose">
-      <h1>Projects</h1>
+      <h1>Project Folders</h1>
     </div>
     <p v-if="isLoading">Loading</p>
     <div class="mt-6 flex flex-col flex-wrap gap-6" v-else>

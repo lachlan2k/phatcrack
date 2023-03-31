@@ -8,7 +8,7 @@ const route = useRoute()
 
 const pageLinks = [
   { name: 'Dashboard', icon: 'fa-gauge', to: '/dashboard' },
-  { name: 'Projects', icon: 'fa-folder', to: '/projects' },
+  { name: 'Project Folders', icon: 'fa-folder', to: '/projects' },
   { name: 'Attacks', icon: 'fa-bars-progress', to: '/attacks' },
   { name: 'Potfile', icon: 'fa-trophy', to: '/potfile' },
   { name: 'Agents', icon: 'fa-robot', to: '/agents' }
