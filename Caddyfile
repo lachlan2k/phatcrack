@@ -1,0 +1,12 @@
+{$HOST_NAME} {
+    log
+
+    # This technically allows any caddy entry to be added here
+    # But we'll just use it for TLS
+    ${TLS_OPTS}
+    
+    reverse_proxy /api/* http://api:3000
+    file_server {
+        root /srv
+    }
+}

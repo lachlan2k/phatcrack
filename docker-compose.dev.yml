@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  frontend:
+  webserver:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
@@ -9,7 +9,7 @@ services:
     environment:
       - DEV_API_URL=http://api:3000
     ports:
-      - ${FE_PORT:-3000}:5173
+      - ${APP_PORT:-3000}:5173
     volumes:
       - ./frontend:/app:z
 
@@ -21,12 +21,9 @@ services:
     environment:
       - JWT_KEY=hunter2
       - PORT=3000
-      - CORS_ALLOWED
       - MONGO_URI=mongodb://phatcrack:${DB_PASS:-phatcrack}@mongo:27017/
     volumes:
       - ./:/app/phatcrack:z
-    ports:
-      - ${API_PORT:-3001}:3000
 
   mongo:
     image: mongo:6

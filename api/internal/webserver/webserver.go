@@ -20,15 +20,6 @@ func Listen(port string) error {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	if os.Getenv("CORS_ALLOWED") != "" {
-		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins: []string{os.Getenv("CORS_ALLOWED")},
-			// AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			// AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-			AllowCredentials: true,
-		}))
-	}
-
 	jwtKey := []byte(os.Getenv("JWT_KEY"))
 	if len(jwtKey) == 0 {
 		keyBuf := make([]byte, 32)

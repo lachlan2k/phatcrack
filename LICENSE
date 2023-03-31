@@ -1,29 +1,6 @@
-Preamble:
-
-This project is inspired by the hard work of the nesfit/fitcrack team (https://github.com/nesfit/fitcrack/), and borrows many parts from the webadmin component.
-At the time of forking these components, they are licensed under the MIT license, and as such, Phatcrack is also MIT licensed.
-
-I extend my sincere thanks to the Fitcrack team for their project, and publishing it under an open-source license.
-
-The original LICENSE & AUTHORS of the Fitcrack webadmin can be found here:
-* https://github.com/nesfit/fitcrack/blob/f3d8a5b20664f2cf02c257364d147964d5a99314/webadmin/LICENSE
-* https://github.com/nesfit/fitcrack/blob/f3d8a5b20664f2cf02c257364d147964d5a99314/webadmin/AUTHORS
-
-The Docker images also install dev libraries, headers and dependencies from the Hashcat project, which is also MIT licensed.
-
-Hashcat's LICENSE & AUTHORS can be found here:
-* https://github.com/hashcat/hashcat/blob/8f0d69ea9c4a2bfce3d763d9ea46a70b20350679/docs/license.txt
-* https://github.com/hashcat/hashcat/blob/8f0d69ea9c4a2bfce3d763d9ea46a70b20350679/docs/credits.txt
-
-==========================
-
-The license for the Phatcrack project is as follows:
-
-==========================
-
 MIT License
 
-Copyright (c) 2022- Lachlan Davidson
+Copyright (c) 2022-2023 Lachlan Davidson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

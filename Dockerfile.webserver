@@ -1,0 +1,18 @@
+# The Dockerfile builds and packages the frontend, and serves it with the Caddy web server.
+# Caddy also proxies to the API for production delpoyments.
+
+FROM node:lts AS builder
+
+WORKDIR /app
+
+# Dependencies first to cache
+COPY ./frontend/package.json ./frontend/package-lock.json ./
+RUN npm install
+
+COPY ./frontend ./
+RUN npm run build-only
+
+FROM caddy:2-alpine
+
+COPY --from=builder /app/dist /srv
+COPY Caddyfile /etc/caddy/Caddyfile
