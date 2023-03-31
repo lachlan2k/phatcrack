@@ -9,7 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
-	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
 const TokenCookieName = "auth"
@@ -34,7 +33,7 @@ type AuthClaims struct {
 func UserToClaims(user *db.User) *AuthClaims {
 	return &AuthClaims{
 		UserClaims: UserClaims{
-			ID:       util.IDToString(user.ID),
+			ID:       user.ID.Hex(),
 			Username: user.Username,
 			Role:     user.Role,
 		},

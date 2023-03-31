@@ -73,6 +73,7 @@ type JobCrackedHash struct {
 
 type Job struct {
 	ID            primitive.ObjectID `bson:"_id,omitempty"`
+	ProjectID     primitive.ObjectID `bson:"project_id"`
 	HashcatParams HashcatParams      `bson:"hashcat_params"`
 	Hashes        []string           `bson:"hashes"`
 	HashType      int                `bson:"hash_type"`

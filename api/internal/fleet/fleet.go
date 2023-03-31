@@ -8,7 +8,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
-	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -167,7 +166,7 @@ func ScheduleJob(jobId string) (string, error) {
 		return "", ErrNoAgentsOnline
 	}
 
-	err = db.SetJobScheduled(util.IDToString(job.ID), leastBusyAgent.agentId)
+	err = db.SetJobScheduled(job.ID.Hex(), leastBusyAgent.agentId)
 	if err != nil {
 		return "", fmt.Errorf("failed to set job as scheduled in db: %v", err)
 	}

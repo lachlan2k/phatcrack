@@ -23,11 +23,6 @@ func UnmarshalJSON[T interface{}](jsonBlob string) (out T, err error) {
 	return
 }
 
-func IDToString(id primitive.ObjectID) string {
-	str, _ := id.MarshalText()
-	return string(str)
-}
-
 func MongoNow() primitive.Timestamp {
 	return primitive.Timestamp{T: uint32(time.Now().Unix())}
 }

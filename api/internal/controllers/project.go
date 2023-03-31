@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
@@ -66,6 +67,11 @@ func handleProjectGet(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch project").SetInternal(err)
 	}
 
+	// Even though our DB query should've constrained it, sanity check with access control regardless
+	if !accesscontrol.CanGetProject(&user.UserClaims, proj) {
+		return echo.ErrForbidden
+	}
+
 	return c.JSON(http.StatusOK, apitypes.ProjectsFullDetailsDTO{
 		ID:          proj.ID.Hex(),
 		TimeCreated: proj.ID.Timestamp().UnixMilli(),
@@ -90,15 +96,21 @@ func handleProjectGetAll(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch projects").SetInternal(err)
 	}
 
-	res.Projects = make([]apitypes.ProjectSimpleDetailsDTO, len(projects))
+	res.Projects = make([]apitypes.ProjectSimpleDetailsDTO, 0, len(projects))
 
-	for i, project := range projects {
-		res.Projects[i] = apitypes.ProjectSimpleDetailsDTO{
+	for _, project := range projects {
+		// Sanity check access control
+		if !accesscontrol.CanGetProject(&user.UserClaims, &project) {
+			c.Logger().Warnf("Something went wrong with getting all projects for user %s, the database query returned project %s, which the user should NOT have access to", user.ID, project.ID.String())
+			continue
+		}
+
+		res.Projects = append(res.Projects, apitypes.ProjectSimpleDetailsDTO{
 			ID:          project.ID.Hex(),
 			TimeCreated: project.ID.Timestamp().UnixMilli(),
 			Name:        project.Name,
 			Description: project.Description,
-		}
+		})
 	}
 
 	return c.JSON(http.StatusOK, res)

@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
-	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
 func HookAgentEndpoints(api *echo.Group) {
@@ -36,7 +35,7 @@ func handleAgentWs(c echo.Context) error {
 
 	defer ws.Close()
 
-	agent, err := fleet.RegisterAgentFromWebsocket(ws, util.IDToString(agentData.ID))
+	agent, err := fleet.RegisterAgentFromWebsocket(ws, agentData.ID.Hex())
 	if err != nil {
 		c.Logger().Printf("Failed to register agent: %v", err)
 		return nil
