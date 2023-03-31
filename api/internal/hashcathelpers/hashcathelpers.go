@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 func findBinary() (path string, err error) {
@@ -40,7 +42,7 @@ func hashcatCommand(args ...string) (*exec.Cmd, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command(binPath, args...)
+	cmd := exec.Command(binPath, "--session", uuid.New().String(), args...)
 	return cmd, nil
 }
 

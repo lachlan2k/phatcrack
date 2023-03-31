@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 
@@ -71,7 +72,7 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 	args = append(
 		args,
 		"--quiet",
-		"--session", session,
+		"--session", "sess-"+session+"_"+uuid.New().String(),
 		"--outfile-format", "1,3,5",
 		"--outfile", outFile,
 		"--status-json",
