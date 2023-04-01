@@ -15,8 +15,9 @@ func HookListsEndpoints(api *echo.Group) {
 		return c.String(http.StatusOK, "pong lists")
 	})
 
-	api.POST("/wordlist/create", handleWordlistCreate)
-	api.POST("/rulefile/create", handleRuleFileCreate)
+	// TODO: disabling these until I figure out the permissions and workflowuser, err := auth.ClaimsFromReq(c)
+	// api.POST("/wordlist/create", handleWordlistCreate)
+	// api.POST("/rulefile/create", handleRuleFileCreate)
 
 	api.GET("/wordlist/all", handleGetAllWordlists)
 	api.GET("/rulefile/all", handleGetAllRuleFiles)
