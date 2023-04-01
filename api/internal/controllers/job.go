@@ -20,9 +20,11 @@ func HookJobEndpoints(api *echo.Group) {
 		return c.String(http.StatusOK, "pong job")
 	})
 
-	api.POST("/create", handleJobCreate)
+	// TODO: review how/if these are needed
+	// api.POST("/create", handleJobCreate)
 	api.GET("/:id", handleJobGet)
-	api.POST("/:id/start", handleJobStart)
+	api.PUT("/:id/start", handleJobStart)
+
 	api.GET("/:id/watch", handleJobWatch)
 }
 
@@ -109,6 +111,18 @@ func handleJobWatch(c echo.Context) error {
 
 func handleJobStart(c echo.Context) error {
 	id := c.Param("id")
+	user, err := auth.ClaimsFromReq(c)
+	if err != nil {
+		return err
+	}
+
+	allowed, err := accesscontrol.CanAccessJobID(&user.UserClaims, id)
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return echo.ErrForbidden
+	}
 
 	agentId, err := fleet.ScheduleJob(id)
 

@@ -32,3 +32,14 @@ func HasRightsToProjectID(user *auth.UserClaims, projID string) (bool, error) {
 	}
 	return CanGetProject(user, proj), nil
 }
+
+func CanAccessJobID(user *auth.UserClaims, jobID string) (bool, error) {
+	projID, err := db.GetJobProjID(jobID)
+	if projID == "" || err == mongo.ErrNoDocuments {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("failed to get underlying job to check access control: %v", err)
+	}
+	return HasRightsToProjectID(user, projID)
+}
