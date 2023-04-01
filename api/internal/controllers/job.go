@@ -42,7 +42,7 @@ func handleJobGet(c echo.Context) error {
 	}
 
 	// Access control
-	allowed, err := accesscontrol.CanGetJob(&user.UserClaims, job.ProjectID.Hex())
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, job.ProjectID.Hex())
 	if err != nil {
 		return util.ServerError("Error fetching job", err)
 	}
@@ -80,7 +80,8 @@ func handleJobWatch(c echo.Context) error {
 		}
 	}
 
-	allowed, err := accesscontrol.CanGetJob(&user.UserClaims, jobProjId)
+	// Access control
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, jobProjId)
 	if err != nil {
 		return util.ServerError("Error fetching job", err)
 	}

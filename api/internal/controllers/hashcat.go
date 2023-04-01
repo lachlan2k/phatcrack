@@ -27,7 +27,7 @@ func HookHashcatEndpoints(api *echo.Group) {
 			return err
 		}
 
-		possibleTypes, err := hashcathelpers.IdentifyHashTypes(req.TestHash)
+		possibleTypes, err := hashcathelpers.IdentifyHashTypes(req.TestHash, req.HasUsername)
 		if err != nil {
 			return util.ServerError("Failed to find hash candidates", err)
 		}
@@ -44,7 +44,7 @@ func HookHashcatEndpoints(api *echo.Group) {
 		}
 
 		// TODO: Do more investigation as to what happens when hashcat rejects hashes
-		normalized, err := hashcathelpers.NormalizeHashes(req.Hashes, int(req.HashType))
+		normalized, err := hashcathelpers.NormalizeHashes(req.Hashes, req.HashType, req.HasUsernames)
 
 		isValid := len(normalized) > 0 && err != nil
 		return c.JSON(http.StatusOK, apitypes.VerifyHashesResponseDTO{
@@ -59,7 +59,7 @@ func HookHashcatEndpoints(api *echo.Group) {
 		}
 
 		// TODO: Do more investigation as to what happens when hashcat rejects hashes
-		normalized, err := hashcathelpers.NormalizeHashes(req.Hashes, int(req.HashType))
+		normalized, err := hashcathelpers.NormalizeHashes(req.Hashes, req.HashType, req.HasUsernames)
 
 		isValid := len(normalized) > 0 && err != nil
 		if !isValid {

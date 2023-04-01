@@ -22,8 +22,8 @@ func CanGetProject(user *auth.UserClaims, project *db.Project) bool {
 	return false
 }
 
-func CanGetJob(user *auth.UserClaims, jobProjId string) (bool, error) {
-	proj, err := db.GetProjectForUser(jobProjId, user.ID)
+func HasRightsToProjectID(user *auth.UserClaims, projID string) (bool, error) {
+	proj, err := db.GetProjectForUser(projID, user.ID)
 	if proj == nil || err == mongo.ErrNoDocuments {
 		return false, nil
 	}

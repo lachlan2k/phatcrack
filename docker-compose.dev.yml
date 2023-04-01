@@ -24,6 +24,8 @@ services:
       - MONGO_URI=mongodb://phatcrack:${DB_PASS:-phatcrack}@mongo:27017/
     volumes:
       - ./:/app/phatcrack:z
+    ports:
+      - ${DB_DEV_PORT:-27017}:27017
 
   mongo:
     image: mongo:6

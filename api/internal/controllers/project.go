@@ -20,15 +20,16 @@ func HookProjectEndpoints(api *echo.Group) {
 	api.GET("", handleProjectGetAll)
 	api.POST("/create", handleProjectCreate)
 	api.GET("/:id", handleProjectGet)
-	// api.POST("/:id/hashlist", handleProjectGet)
-	// api.GET("/:id/hashlist/:list-id", handleProjectGet)
-	// api.GET("/:id/hashlist", handleProjectGet)
+
+	api.GET("/:proj-id/hashlist", handleHashlistGetAllForProj)
+	api.GET("/:proj-id/hashlist/:list-id", handleHashlistGet)
+	api.POST("/:proj-id/hashlist/create", handleHashlistCreate)
 }
 
 func handleProjectCreate(c echo.Context) error {
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
-		return util.ServerError("Failed to create project", err)
+		return err
 	}
 
 	req, err := util.BindAndValidate[apitypes.ProjectCreateDTO](c)

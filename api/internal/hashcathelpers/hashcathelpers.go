@@ -53,7 +53,7 @@ func hashcatCommandWithRandSession(args ...string) (*exec.Cmd, error) {
 	return hashcatCommand(fullArgs...)
 }
 
-func IdentifyHashTypes(exampleHash string) ([]int, error) {
+func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-identify")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %v", err)
@@ -62,6 +62,10 @@ func IdentifyHashTypes(exampleHash string) ([]int, error) {
 	defer os.Remove(tmpFile.Name())
 
 	_ = tmpFile.Chmod(0600)
+
+	if hasUsername {
+		_, exampleHash, _ = strings.Cut(exampleHash, ":")
+	}
 
 	_, err = tmpFile.WriteString(exampleHash)
 	if err != nil {
@@ -101,7 +105,7 @@ func IdentifyHashTypes(exampleHash string) ([]int, error) {
 	return candidates, nil
 }
 
-func NormalizeHashes(hashes []string, hashMode int) ([]string, error) {
+func NormalizeHashes(hashes []string, hashType uint, hasUsernames bool) ([]string, error) {
 	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-normalize")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %v", err)
@@ -111,14 +115,19 @@ func NormalizeHashes(hashes []string, hashMode int) ([]string, error) {
 
 	_ = tmpFile.Chmod(0600)
 
-	for _, hash := range hashes {
-		_, err = tmpFile.WriteString(strings.TrimSpace(hash) + "\n")
+	for index, hash := range hashes {
+		if hasUsernames {
+			_, hash, _ = strings.Cut(hash, ":")
+		}
+
+		// Use the list index as a "username" so hashcat outputs them in a nice way
+		_, err = tmpFile.WriteString(strconv.Itoa(index) + ":" + strings.TrimSpace(hash) + "\n")
 		if err != nil {
 			return nil, fmt.Errorf("failed to write example hash to file: %v", err)
 		}
 	}
 
-	cmd, err := hashcatCommandWithRandSession("-m", strconv.Itoa(hashMode), tmpFile.Name(), "--left", "--potfile-path", "/dev/null")
+	cmd, err := hashcatCommandWithRandSession("-m", strconv.FormatUint(uint64(hashType), 10), tmpFile.Name(), "--left", "--potfile-path", "--username", "/dev/null")
 	if err != nil {
 		return nil, err
 	}
@@ -128,15 +137,26 @@ func NormalizeHashes(hashes []string, hashMode int) ([]string, error) {
 		return nil, fmt.Errorf("couldn't normalize hashes: %v", err)
 	}
 
-	normalizedHashes := make([]string, 0)
+	normalizedHashes := make([]string, 0, len(hashes))
 
 	reader := bytes.NewReader(out)
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
-		hash := strings.TrimSpace(scanner.Text())
-		if hash != "" {
-			normalizedHashes = append(normalizedHashes, scanner.Text())
+		hashline := strings.TrimSpace(scanner.Text())
+		usernameField, hash, found := strings.Cut(hashline, ":")
+		if !found {
+			return nil, fmt.Errorf("username delim (:) not found in hashline: %s", hashline)
 		}
+
+		index, err := strconv.Atoi(usernameField)
+		if err != nil {
+			return nil, fmt.Errorf("found invalid index in hashline: %s", hashline)
+		}
+		if index >= len(hashes) || index < 0 {
+			return nil, fmt.Errorf("hashcat gave us back an index out of range in hashline (%d): %s", index, hashline)
+		}
+
+		normalizedHashes[index] = hash
 	}
 
 	return normalizedHashes, nil

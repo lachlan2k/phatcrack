@@ -8,18 +8,24 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Hashlist struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	Algorithm string             `bson:"algorithm"`
-	Hashes    []string           `bson:"hashes"`
-	Version   int                `bson:"version"`
+type ProjectHashlistHash struct {
+	InputHash      string `bson:"input_hash"`
+	NormalizedHash string `bson:"normalized_hash"`
+}
+
+type ProjectHashlist struct {
+	ID       primitive.ObjectID    `bson:"_id,omitempty"`
+	Name     string                `bson:"name"`
+	HashType uint                  `bson:"hash_type"`
+	Hashes   []ProjectHashlistHash `bson:"hashes"`
+	Version  uint                  `bson:"version"`
 }
 
 type Project struct {
 	ID                primitive.ObjectID   `bson:"_id,omitempty"`
 	Name              string               `bson:"name"`
 	Description       string               `bson:"description"`
-	Hashlists         []Hashlist           `bson:"hashlists"`
+	Hashlists         []ProjectHashlist    `bson:"hashlists"`
 	OwnerUserID       primitive.ObjectID   `bson:"owner_user_id,omitempty"`
 	SharedWithUserIDs []primitive.ObjectID `bson:"shared_with_user_ids,omitempty"`
 }
@@ -147,11 +153,13 @@ func CreateProject(proj Project, ownerId string) (newProjectId string, err error
 	return
 }
 
-func AddHashlistToProject(projectId string, hashlist Hashlist) (newHashlistId, err error) {
+func AddHashlistToProject(projectId string, hashlist ProjectHashlist) (newHashlistId string, err error) {
 	projectObjId, err := primitive.ObjectIDFromHex(projectId)
 	if err != nil {
 		return
 	}
+
+	hashlist.ID = primitive.NewObjectID()
 
 	output, err := GetProjectColl().UpdateOne(
 		context.Background(),
@@ -164,10 +172,10 @@ func AddHashlistToProject(projectId string, hashlist Hashlist) (newHashlistId, e
 	)
 	if err != nil {
 		err = fmt.Errorf("failed to add new hashlist to project %s: %v", projectId, err)
+		return
 	}
 
 	// TODO
 	fmt.Printf("Added new hashlist: %v\n", output)
-
-	return
+	return hashlist.ID.Hex(), nil
 }
