@@ -46,7 +46,7 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 
 		user, err := db.GetUserByID(claims.ID)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to refresh user data").SetInternal(err)
+			return util.ServerError("Failed to refresh user data", err)
 		}
 
 		newClaims := auth.UserToClaims(user)
@@ -83,7 +83,7 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 		if err == mongo.ErrNoDocuments {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		} else if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Database error").SetInternal(err)
+			return util.ServerError("Database error", err)
 		}
 
 		hashingTest := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))

@@ -33,7 +33,7 @@ func handleCreateUser(c echo.Context) error {
 
 	userId, err := db.RegisterUser(username, req.Password, req.Role)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create user").SetInternal(err)
+		return util.ServerError("Failed to create user", err)
 	}
 
 	return c.JSON(http.StatusCreated, apitypes.AdminUserCreateResponseDTO{
@@ -51,7 +51,7 @@ func handleAgentCreate(c echo.Context) error {
 
 	agentId, key, err := db.CreateAgent(req.Name)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't create agent").SetInternal(err)
+		return util.ServerError("Failed to create agent", err)
 	}
 
 	return c.JSON(http.StatusCreated, apitypes.AdminAgentCreateResponseDTO{

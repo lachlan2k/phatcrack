@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
 func HookAgentEndpoints(api *echo.Group) {
@@ -30,7 +31,7 @@ func handleAgentWs(c echo.Context) error {
 
 	ws, err := (&websocket.Upgrader{}).Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Couldn't upgrade websocket").SetInternal(err)
+		return util.ServerError("Couldn't upgrade websocket", err)
 	}
 
 	defer ws.Close()

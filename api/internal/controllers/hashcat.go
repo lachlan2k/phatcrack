@@ -29,7 +29,7 @@ func HookHashcatEndpoints(api *echo.Group) {
 
 		possibleTypes, err := hashcathelpers.IdentifyHashTypes(req.TestHash)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to find hash candidates").SetInternal(err)
+			return util.ServerError("Failed to find hash candidates", err)
 		}
 
 		return c.JSON(http.StatusOK, apitypes.DetectHashTypeResponseDTO{

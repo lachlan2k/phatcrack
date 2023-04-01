@@ -288,6 +288,32 @@ func GetJob(jobId string) (*Job, error) {
 	return job, nil
 }
 
+func GetJobProjID(jobId string) (string, error) {
+	objId, err := primitive.ObjectIDFromHex(jobId)
+	if err != nil {
+		return "", err
+	}
+
+	res := GetJobsColl().FindOne(
+		context.Background(),
+		bson.M{"_id": objId},
+		options.FindOne().SetProjection(bson.M{"project_id": 1}),
+	)
+
+	err = res.Err()
+	if err != nil {
+		return "", err
+	}
+
+	job := new(Job)
+	err = res.Decode(job)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode job result (%v): %v", res, err)
+	}
+
+	return job.ID.Hex(), nil
+}
+
 func CreateJob(job Job) (newJobId string, err error) {
 	result, err := GetJobsColl().InsertOne(context.Background(), job)
 

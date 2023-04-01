@@ -32,7 +32,7 @@ func handleGetWordlist(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch wordlist").SetInternal(err)
+		return util.ServerError("Failed to fetch wordlist", err)
 	}
 
 	return c.JSON(http.StatusOK, apitypes.ListsWordlistResponseDTO{
@@ -51,7 +51,7 @@ func handlGetRuleFile(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch wordlist").SetInternal(err)
+		return util.ServerError("Failed to fetch rulefile", err)
 	}
 
 	return c.JSON(http.StatusOK, apitypes.ListsRuleFileResponseDTO{
@@ -66,7 +66,7 @@ func handlGetRuleFile(c echo.Context) error {
 func handleGetAllWordlists(c echo.Context) error {
 	lists, err := db.GetAllWordlists()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to load wordlists").SetInternal(err)
+		return util.ServerError("Failed to fetch wordlists", err)
 	}
 
 	var res apitypes.ListsGetAllWordlistsDTO
@@ -89,7 +89,7 @@ func handleGetAllWordlists(c echo.Context) error {
 func handleGetAllRuleFiles(c echo.Context) error {
 	lists, err := db.GetAllRuleFiles()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to load wordlists").SetInternal(err)
+		return util.ServerError("Failed to fetch rulefiles", err)
 	}
 
 	var res apitypes.ListsGetAllRuleFilesDTO
@@ -123,7 +123,7 @@ func handleWordlistCreate(c echo.Context) error {
 	})
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create wordlist").SetInternal(err)
+		return util.ServerError("Couldn't create wordlist", err)
 	}
 
 	return c.NoContent(http.StatusCreated)
@@ -144,7 +144,7 @@ func handleRuleFileCreate(c echo.Context) error {
 	})
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to add rulefile").SetInternal(err)
+		return util.ServerError("Couldn't create rulefile", err)
 	}
 
 	return c.NoContent(http.StatusCreated)

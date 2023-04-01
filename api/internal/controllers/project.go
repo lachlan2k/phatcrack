@@ -28,7 +28,7 @@ func HookProjectEndpoints(api *echo.Group) {
 func handleProjectCreate(c echo.Context) error {
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error").SetInternal(err)
+		return util.ServerError("Failed to create project", err)
 	}
 
 	req, err := util.BindAndValidate[apitypes.ProjectCreateDTO](c)
@@ -42,7 +42,7 @@ func handleProjectCreate(c echo.Context) error {
 	}, user.ID)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create project").SetInternal(err)
+		return util.ServerError("Failed to create project", err)
 	}
 
 	return c.JSON(http.StatusCreated, apitypes.ProjectCreateResponseDTO{
@@ -64,7 +64,7 @@ func handleProjectGet(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch project").SetInternal(err)
+		return util.ServerError("Failed to fetch project", err)
 	}
 
 	// Even though our DB query should've constrained it, sanity check with access control regardless
@@ -93,7 +93,7 @@ func handleProjectGetAll(c echo.Context) error {
 		return c.JSON(http.StatusOK, res)
 	}
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to fetch projects").SetInternal(err)
+		return util.ServerError("Failed to fetch projects", err)
 	}
 
 	res.Projects = make([]apitypes.ProjectSimpleDetailsDTO, 0, len(projects))

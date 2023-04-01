@@ -6,12 +6,18 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"path"
 	"strings"
 	"time"
 
+	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+func ServerError(message string, internal error) *echo.HTTPError {
+	return echo.NewHTTPError(http.StatusInternalServerError, message).SetInternal(internal)
+}
 
 func CleanPath(filePath string) string {
 	_, file := path.Split(path.Clean(filePath))
