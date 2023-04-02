@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CanGetProject(user *auth.UserClaims, project *db.Project) bool {
+func HasRightsToProject(user *auth.UserClaims, project *db.Project) bool {
 	if project.OwnerUserID.Hex() == user.ID {
 		return true
 	}
@@ -30,10 +30,10 @@ func HasRightsToProjectID(user *auth.UserClaims, projID string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("failed to get underlying project to check access control: %v", err)
 	}
-	return CanGetProject(user, proj), nil
+	return HasRightsToProject(user, proj), nil
 }
 
-func CanAccessJobID(user *auth.UserClaims, jobID string) (bool, error) {
+func HasRightsToJobID(user *auth.UserClaims, jobID string) (bool, error) {
 	projID, err := db.GetJobProjID(jobID)
 	if projID == "" || err == mongo.ErrNoDocuments {
 		return false, nil

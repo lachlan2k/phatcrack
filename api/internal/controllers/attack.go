@@ -28,7 +28,7 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.CanGetProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
 		return echo.ErrForbidden
 	}
 
@@ -66,7 +66,7 @@ func handleAttackGet(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.CanGetProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
 		return echo.ErrForbidden
 	}
 

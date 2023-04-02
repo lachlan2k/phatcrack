@@ -79,7 +79,7 @@ func handleProjectGet(c echo.Context) error {
 	}
 
 	// Even though our DB query should've constrained it, sanity check with access control regardless
-	if !accesscontrol.CanGetProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
 		return echo.ErrForbidden
 	}
 
@@ -111,7 +111,7 @@ func handleProjectGetAll(c echo.Context) error {
 
 	for _, project := range projects {
 		// Sanity check access control
-		if !accesscontrol.CanGetProject(&user.UserClaims, &project) {
+		if !accesscontrol.HasRightsToProject(&user.UserClaims, &project) {
 			c.Logger().Warnf("Something went wrong with getting all projects for user %s, the database query returned project %s, which the user should NOT have access to", user.ID, project.ID.String())
 			continue
 		}

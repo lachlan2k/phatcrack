@@ -32,7 +32,7 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.CanGetProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
 		return echo.ErrForbidden
 	}
 
@@ -130,7 +130,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.CanGetProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
 		return echo.ErrForbidden
 	}
 
@@ -172,7 +172,7 @@ func handleAttackJobGet(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.CanGetProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
 		return echo.ErrForbidden
 	}
 
