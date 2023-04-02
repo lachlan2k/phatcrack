@@ -27,7 +27,7 @@ func handleHashlistCreate(c echo.Context) error {
 		return err
 	}
 
-	req, err := util.BindAndValidate[apitypes.ProjectHashlistCreateDTO](c)
+	req, err := util.BindAndValidate[apitypes.HashlistCreateRequestDTO](c)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func handleHashlistCreate(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate and normalize hashes. Please ensure your hashes are valid for the given hash type.").SetInternal(err)
 	}
 
-	hashes := make([]db.ProjectHashlistHash, 0, len(normalizedHashes))
+	hashes := make([]db.HashlistHash, 0, len(normalizedHashes))
 	for i, inputHash := range req.InputHashes {
 		hashes[i].InputHash = inputHash
 		hashes[i].NormalizedHash = normalizedHashes[i]
@@ -64,7 +64,7 @@ func handleHashlistCreate(c echo.Context) error {
 		return util.ServerError("Failed to create hashlist", err)
 	}
 
-	return c.JSON(http.StatusCreated, apitypes.ProjectHashlistCreateResponseDTO{
+	return c.JSON(http.StatusCreated, apitypes.HashlistCreateResponseDTO{
 		ID: newHashlistId,
 	})
 }

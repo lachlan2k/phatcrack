@@ -11,50 +11,8 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
-	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-func HookJobEndpoints(api *echo.Group) {
-	api.GET("/ping", func(c echo.Context) error {
-		return c.String(http.StatusOK, "pong job")
-	})
-
-	// TODO: review how/if these are needed
-	// api.POST("/create", handleJobCreate)
-	api.GET("/:id", handleJobGet)
-	api.PUT("/:id/start", handleJobStart)
-
-	api.GET("/:id/watch", handleJobWatch)
-}
-
-func handleJobGet(c echo.Context) error {
-	id := c.Param("id")
-
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
-	}
-
-	job, err := db.GetJob(id)
-	if err == mongo.ErrNoDocuments {
-		return echo.ErrNotFound
-	} else if err != nil {
-		return util.ServerError("Error fetching job", err)
-	}
-
-	// Access control
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, job.ProjectID.Hex())
-	if err != nil {
-		return util.ServerError("Error fetching job", err)
-	}
-
-	if !allowed {
-		return echo.ErrForbidden
-	}
-
-	return c.JSON(http.StatusOK, job)
-}
 
 func handleJobWatch(c echo.Context) error {
 	origin := c.Request().Header.Get("origin")
@@ -107,88 +65,4 @@ func handleJobWatch(c echo.Context) error {
 			return err
 		}
 	}
-}
-
-func handleJobStart(c echo.Context) error {
-	id := c.Param("id")
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
-	}
-
-	allowed, err := accesscontrol.CanAccessJobID(&user.UserClaims, id)
-	if err != nil {
-		return err
-	}
-	if !allowed {
-		return echo.ErrForbidden
-	}
-
-	agentId, err := fleet.ScheduleJob(id)
-
-	switch err {
-	case nil:
-		return c.JSON(http.StatusOK, apitypes.JobStartResponseDTO{
-			AgentID: agentId,
-		})
-
-	case fleet.ErrJobDoesntExist:
-		return echo.NewHTTPError(http.StatusNotFound, "Job doesn't exist")
-
-	case fleet.ErrJobAlreadyScheduled:
-		return echo.NewHTTPError(http.StatusBadRequest, "Job already scheduled")
-
-	case fleet.ErrNoAgentsOnline:
-		return echo.NewHTTPError(http.StatusServiceUnavailable, "No agents are online")
-
-	default:
-		return util.ServerError("Unexpected error occured when scheduling job", err)
-	}
-}
-
-func handleJobCreate(c echo.Context) error {
-	req, err := util.BindAndValidate[apitypes.JobCreateRequestDTO](c)
-	if err != nil {
-		return err
-	}
-
-	cleanedWordlists := make([]string, len(req.HashcatParams.WordlistFilenames))
-	for i, wordlist := range req.HashcatParams.WordlistFilenames {
-		cleanedWordlists[i] = util.CleanPath(wordlist)
-	}
-
-	cleanedRules := make([]string, len(req.HashcatParams.RulesFilenames))
-	for i, rule := range req.HashcatParams.RulesFilenames {
-		cleanedRules[i] = util.CleanPath(rule)
-	}
-
-	newJobId, err := db.CreateJob(db.Job{
-		HashcatParams: db.HashcatParams{
-			AttackMode:        req.HashcatParams.AttackMode,
-			HashType:          req.HashcatParams.HashType,
-			Mask:              req.HashcatParams.Mask,
-			WordlistFilenames: cleanedWordlists,
-			RulesFilenames:    cleanedRules,
-			AdditionalArgs:    req.HashcatParams.AdditionalArgs,
-			OptimizedKernels:  req.HashcatParams.OptimizedKernels,
-		},
-		RuntimeData: db.RuntimeData{
-			Status: db.JobStatusCreated,
-		},
-		Hashes:      req.Hashes,
-		Name:        req.Name,
-		Description: req.Description,
-	})
-
-	if err != nil {
-		return err
-	}
-
-	if req.StartImmediately {
-		fleet.ScheduleJob(newJobId)
-	}
-
-	return c.JSON(http.StatusCreated, apitypes.JobCreateResponseDTO{
-		ID: newJobId,
-	})
 }

@@ -22,8 +22,18 @@ func HookProjectEndpoints(api *echo.Group) {
 	api.GET("/:id", handleProjectGet)
 
 	api.GET("/:proj-id/hashlist", handleHashlistGetAllForProj)
-	api.GET("/:proj-id/hashlist/:list-id", handleHashlistGet)
+	api.GET("/:proj-id/hashlist/:hashlist-id", handleHashlistGet)
 	api.POST("/:proj-id/hashlist/create", handleHashlistCreate)
+
+	api.GET("/:proj-id/hashlist/:hashlist-id/attack", handleAttackGetAllForHashlist)
+	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id", handleAttackGet)
+	api.PUT("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/start", handleAttackStart)
+	api.POST("/:proj-id/hashlist/:hashlist-id/attack/create", handleAttackCreate)
+
+	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job", handleAttackJobGetAll)
+	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job/:job-id", handleAttackJobGet)
+	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job/:job-id", handleAttackJobWatch)
+
 }
 
 func handleProjectCreate(c echo.Context) error {
@@ -62,7 +72,7 @@ func handleProjectGet(c echo.Context) error {
 
 	proj, err := db.GetProjectForUser(id, user.ID)
 	if err == mongo.ErrNoDocuments {
-		return echo.ErrNotFound
+		return echo.ErrForbidden
 	}
 	if err != nil {
 		return util.ServerError("Failed to fetch project", err)

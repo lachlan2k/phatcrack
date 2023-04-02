@@ -11,17 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type HashcatParams struct {
-	AttackMode        uint8    `bson:"attack_mode"`
-	HashType          uint     `bson:"hash_type"`
-	Mask              string   `bson:"mask"`
-	WordlistFilenames []string `bson:"wordlist_filenames"`
-	RulesFilenames    []string `bson:"rules_filenames"`
-	AdditionalArgs    []string `bson:"additional_args"`
-	OptimizedKernels  bool     `bson:"optimized_kernels"`
-	SlowCandidates    bool     `bson:"slow_candidates"`
-}
-
 const (
 	JobStatusCreated       = "JobStatus-Created"
 	JobStatusAwaitingStart = "JobStatus-AwaitingStart"
@@ -72,15 +61,16 @@ type JobCrackedHash struct {
 }
 
 type Job struct {
-	ID            primitive.ObjectID `bson:"_id,omitempty"`
-	ProjectID     primitive.ObjectID `bson:"project_id"`
-	HashcatParams HashcatParams      `bson:"hashcat_params"`
-	Hashes        []string           `bson:"hashes"`
-	HashType      int                `bson:"hash_type"`
-	Name          string             `bson:"name"`
-	Description   string             `bson:"description"`
-	RuntimeData   RuntimeData        `bson:"runtime_data"`
-	CrackedHashes []JobCrackedHash   `bson:"cracked_hashes,omitempty"`
+	ID         primitive.ObjectID `bson:"_id,omitempty"`
+	ProjectID  primitive.ObjectID `bson:"project_id"`
+	HashlistID primitive.ObjectID `bson:"hashlist_id"`
+	AttackID   primitive.ObjectID `bson:"attack_id"`
+
+	HashcatParams HashcatParams    `bson:"hashcat_params"`
+	Hashes        []string         `bson:"hashes"`
+	HashType      uint             `bson:"hash_type"`
+	RuntimeData   RuntimeData      `bson:"runtime_data"`
+	CrackedHashes []JobCrackedHash `bson:"cracked_hashes,omitempty"`
 }
 
 func SetJobScheduled(jobId, agentId string) error {
@@ -312,6 +302,96 @@ func GetJobProjID(jobId string) (string, error) {
 	}
 
 	return job.ID.Hex(), nil
+}
+
+func GetJobsForAttack(projId string, hashlistId string, attackId string) ([]Job, error) {
+	projObjId, err := primitive.ObjectIDFromHex(projId)
+	if err != nil {
+		return nil, err
+	}
+
+	hashlistObjId, err := primitive.ObjectIDFromHex(hashlistId)
+	if err != nil {
+		return nil, err
+	}
+
+	attackObjId, err := primitive.ObjectIDFromHex(attackId)
+	if err != nil {
+		return nil, err
+	}
+
+	cursor, err := GetJobsColl().Find(
+		context.Background(),
+		bson.M{
+			"$and": []bson.M{
+				{"project_id": projObjId},
+				{"hashlist_id": hashlistObjId},
+				{"attack_id": attackObjId},
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	jobs := make([]Job, 0)
+	err = cursor.All(context.Background(), &jobs)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, job := range jobs {
+		cursor.Decode(&job)
+	}
+
+	return jobs, nil
+}
+
+func GetJobForAttack(projId string, hashlistId string, attackId string, jobId string) (*Job, error) {
+	projObjId, err := primitive.ObjectIDFromHex(projId)
+	if err != nil {
+		return nil, err
+	}
+
+	hashlistObjId, err := primitive.ObjectIDFromHex(hashlistId)
+	if err != nil {
+		return nil, err
+	}
+
+	attackObjId, err := primitive.ObjectIDFromHex(attackId)
+	if err != nil {
+		return nil, err
+	}
+
+	objId, err := primitive.ObjectIDFromHex(jobId)
+	if err != nil {
+		return nil, err
+	}
+
+	res := GetJobsColl().FindOne(
+		context.Background(),
+		bson.M{
+			"$and": []bson.M{
+				{"_id": objId},
+				{"project_id": projObjId},
+				{"hashlist_id": hashlistObjId},
+				{"attack_id": attackObjId},
+			},
+		},
+	)
+
+	err = res.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	job := new(Job)
+	err = res.Decode(job)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode job result (%v): %v", res, err)
+	}
+
+	return job, nil
 }
 
 func CreateJob(job Job) (newJobId string, err error) {

@@ -4,21 +4,39 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ProjectHashlistHash struct {
-	InputHash      string `bson:"input_hash"`
-	NormalizedHash string `bson:"normalized_hash"`
+type HashlistAttack struct {
+	ID            primitive.ObjectID `bson:"_id,omitempty"`
+	HashType      uint               `bson:"hash_type"`
+	Hashes        []HashlistHash     `bson:"hashes"`
+	HashcatParams HashcatParams      `bson:"hashcat_params"`
+}
+
+func (a *HashlistAttack) ToDTO() apitypes.AttackDTO {
+	hashes := make([]apitypes.HashlistHashDTO, len(a.Hashes))
+	for i, hash := range a.Hashes {
+		hashes[i] = hash.ToDTO()
+	}
+
+	return apitypes.AttackDTO{
+		ID:            a.ID.Hex(),
+		HashType:      a.HashType,
+		Hashes:        hashes,
+		HashcatParams: a.HashcatParams.ToDTO(),
+	}
 }
 
 type ProjectHashlist struct {
-	ID       primitive.ObjectID    `bson:"_id,omitempty"`
-	Name     string                `bson:"name"`
-	HashType uint                  `bson:"hash_type"`
-	Hashes   []ProjectHashlistHash `bson:"hashes"`
-	Version  uint                  `bson:"version"`
+	ID       primitive.ObjectID `bson:"_id,omitempty"`
+	Name     string             `bson:"name"`
+	HashType uint               `bson:"hash_type"`
+	Hashes   []HashlistHash     `bson:"hashes"`
+	Version  uint               `bson:"version"`
+	Attacks  []HashlistAttack   `bson:"attacks"`
 }
 
 type Project struct {
@@ -160,7 +178,6 @@ func AddHashlistToProject(projectId string, hashlist ProjectHashlist) (newHashli
 	}
 
 	hashlist.ID = primitive.NewObjectID()
-
 	output, err := GetProjectColl().UpdateOne(
 		context.Background(),
 		bson.M{"_id": projectObjId},
@@ -178,4 +195,38 @@ func AddHashlistToProject(projectId string, hashlist ProjectHashlist) (newHashli
 	// TODO
 	fmt.Printf("Added new hashlist: %v\n", output)
 	return hashlist.ID.Hex(), nil
+}
+
+func AddAttackToHashlist(projectId string, hashlistId string, attack HashlistAttack) (newAttackId string, err error) {
+	projectObjId, err := primitive.ObjectIDFromHex(projectId)
+	if err != nil {
+		return
+	}
+
+	hashlistObjId, err := primitive.ObjectIDFromHex(hashlistId)
+	if err != nil {
+		return
+	}
+
+	attack.ID = primitive.NewObjectID()
+	output, err := GetProjectColl().UpdateOne(
+		context.Background(),
+		bson.M{
+			"_id":           projectObjId,
+			"hashlists._id": hashlistObjId,
+		},
+		bson.M{
+			"$push": bson.M{
+				"hashlists.$.attacks": attack,
+			},
+		},
+	)
+
+	if err != nil {
+		err = fmt.Errorf("failed to add attack to hashlist %s (proj %s): %v", hashlistId, projectId, err)
+		return
+	}
+
+	fmt.Printf("Added new attack: %v\n", output)
+	return attack.ID.Hex(), nil
 }
