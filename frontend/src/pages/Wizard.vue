@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import JobWizard from '@/components/JobWizard.vue'
+import JobWizard from '@/components/Wizard/JobWizard.vue'
 </script>
 
 <template>

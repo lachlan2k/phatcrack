@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import FileSelectModal from '@/components/Wizard/FileSelectModal.vue'
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
+import MaskInput from './MaskInput.vue'
+import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import HrOr from '@/components/HrOr.vue'
 import { computed, watch, reactive } from 'vue'
 import { createProject } from '@/api/project'
@@ -30,7 +31,7 @@ const { projects } = storeToRefs(projectsStore)
 projectsStore.load()
 
 const projectSelectOptions = computed(() => [
-  { value: '', text: 'Create new project' },
+  { value: '', text: 'Create new project 🖋' },
   ...projects.value.map((project) => ({
     value: project.id,
     text: project.name
@@ -51,8 +52,14 @@ const attackModes = [
   { name: 'Wordlist', value: 0 },
   { name: 'Combinator', value: 1 },
   { name: 'Brute-force/Mask', value: 3 },
-  { name: 'Wordlist + Mask', value: 6 },
-  { name: 'Mask + Wordlist', value: 7 }
+  {
+    name: 'Wordlist + Mask',
+    value: 6
+  },
+  {
+    name: 'Mask + Wordlist',
+    value: 7
+  }
 ]
 
 /*
@@ -70,29 +77,28 @@ const inputs = reactive({
   attackMode: 0,
   selectedWordlists: [] as string[],
   selectedRulefiles: [] as string[],
+  mask: '',
   optimizedKernels: false,
   slowCandidates: false,
   enableLoopback: true,
 
+  combinatorLeft: [] as string[],
+  combinatorRight: [] as string[],
+
   activeStep: 2
 })
 
-function toggledSelectWordlist(id: string) {
-  if (inputs.selectedWordlists.includes(id)) {
-    inputs.selectedWordlists = inputs.selectedWordlists.filter((x) => x != id)
-  } else {
-    inputs.selectedWordlists.push(id)
-  }
-}
+// TODO: refactor so that selectedWordlists isn't the source of truth
+watch(
+  () => inputs.combinatorLeft,
+  (newLeft) => (inputs.selectedWordlists = [...newLeft, ...inputs.combinatorRight])
+)
+watch(
+  () => inputs.combinatorRight,
+  (newRight) => (inputs.selectedWordlists = [...inputs.combinatorLeft, ...newRight])
+)
 
-function toggledSelectRulefile(id: string) {
-  if (inputs.selectedRulefiles.includes(id)) {
-    inputs.selectedRulefiles = inputs.selectedRulefiles.filter((x) => x != id)
-  } else {
-    inputs.selectedRulefiles.push(id)
-  }
-}
-
+// If a user starts typing in a new project name, then de-select existing project
 watch(
   () => inputs.projectName,
   (newProjName) => {
@@ -102,6 +108,7 @@ watch(
   }
 )
 
+// If a user selects an existing project, remove the project name they've typed
 watch(
   () => inputs.selectedProjectId,
   (newSelectedProj) => {
@@ -153,6 +160,10 @@ const selectedHashType = computed(() =>
   allHashTypes.value.find((x) => x.id.toString() === inputs.hashType)
 )
 
+const selectedAttackMode = computed(
+  () => attackModes.find((x) => x.value === inputs.attackMode) ?? attackModes[0]
+)
+
 /*
  * Step validations
  */
@@ -178,7 +189,8 @@ const hashlistStepValidationError = computed(() => {
  * API Helpers
  */
 async function saveUptoProject() {
-  createProject(inputs.projectName, inputs.projectDesc)
+  await createProject(inputs.projectName, inputs.projectDesc)
+  alert('Created project!')
 }
 
 async function saveUptoHashlist() {
@@ -349,69 +361,75 @@ async function saveUptoAttack() {
             />
           </div>
 
-          <!-- <FileSelectModal v-model="inputs.selectedRulefiles" open-button-text="Select Wordlists" :allow-multiple="true" :files="allRulefiles.rulefiles" v-if="allRulefiles != null" /> -->
-          <!-- <FileSelectModal v-model="inputs.selectedRulefiles" open-button-text="Select Rulefiles" :allow-multiple="true" :files="allRulefiles.rulefiles" v-if="allRulefiles != null" /> -->
-
           <div class="my-2"></div>
 
-          <label class="label font-bold">Select Wordlist(s)</label>
-          <table class="table w-full">
-            <tbody>
-              <tr>
-                <td>Select</td>
-                <td>Name</td>
-                <td>Number of lines</td>
-              </tr>
-              <tr
-                v-for="file in allWordlists?.wordlists ?? []"
-                :key="file.id"
-                @click="toggledSelectWordlist(file.id)"
-                class="cursor-pointer"
-              >
-                <td>
-                  <input
-                    type="checkbox"
-                    class="checkbox-primary checkbox checkbox-xs align-middle"
-                    :checked="inputs.selectedWordlists.includes(file.id)"
-                  />
-                </td>
-                <td>{{ file.name }}</td>
-                <td>{{ file.lines }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Wordlist -->
+          <div v-if="inputs.attackMode === 0">
+            <WordlistSelect
+              label-text="Select Wordlist"
+              :list="allWordlists?.wordlists ?? []"
+              v-model="inputs.selectedWordlists"
+              :limit="1"
+            />
+            <hr class="my-4" />
+            <WordlistSelect
+              label-text="Select Rule File(s)"
+              :list="allRulefiles?.rulefiles ?? []"
+              v-model="inputs.selectedRulefiles"
+              :limit="Infinity"
+            />
+            <hr class="my-4" />
+          </div>
 
-          <hr class="my-4" />
+          <!-- Combinator -->
+          <div v-if="inputs.attackMode === 1">
+            <WordlistSelect
+              label-text="Select Left Wordlist"
+              :list="allWordlists?.wordlists ?? []"
+              v-model="inputs.combinatorLeft"
+              :limit="1"
+            />
+            <hr class="my-4" />
+            <WordlistSelect
+              label-text="Select Right Wordlist"
+              :list="allWordlists?.wordlists ?? []"
+              v-model="inputs.combinatorRight"
+              :limit="1"
+            />
+            <hr class="my-4" />
+          </div>
 
-          <label class="label font-bold">Select Rule File(s)</label>
+          <!-- Brute-force/Mask -->
+          <div v-if="inputs.attackMode === 3">
+            <MaskInput v-model="inputs.mask" />
+            <hr class="my-4" />
+          </div>
 
-          <table class="table w-full">
-            <tbody>
-              <tr>
-                <td>Select</td>
-                <td>Name</td>
-                <td>Number of lines</td>
-              </tr>
-              <tr
-                v-for="file in allRulefiles?.rulefiles ?? []"
-                :key="file.id"
-                @click="toggledSelectRulefile(file.id)"
-                class="cursor-pointer"
-              >
-                <td>
-                  <input
-                    type="checkbox"
-                    class="checkbox-primary checkbox checkbox-xs align-middle"
-                    :checked="inputs.selectedRulefiles.includes(file.id)"
-                  />
-                </td>
-                <td>{{ file.name }}</td>
-                <td>{{ file.lines }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <!-- Wordlist + Mask -->
+          <div v-if="inputs.attackMode === 6">
+            <WordlistSelect
+              label-text="Select Wordlist"
+              :list="allWordlists?.wordlists ?? []"
+              v-model="inputs.selectedWordlists"
+              :limit="1"
+            />
+            <hr class="my-4" />
+            <MaskInput v-model="inputs.mask" />
+            <hr class="my-4" />
+          </div>
 
-          <hr class="my-4" />
+          <!-- Mask + Wordlist -->
+          <div v-if="inputs.attackMode === 7">
+            <MaskInput v-model="inputs.mask" />
+            <hr class="my-4" />
+            <WordlistSelect
+              label-text="Select Wordlist"
+              :list="allWordlists?.wordlists ?? []"
+              v-model="inputs.selectedWordlists"
+              :limit="1"
+            />
+            <hr class="my-4" />
+          </div>
 
           <label class="label font-bold">Additional Options</label>
           <div class="pl-3">
@@ -467,7 +485,7 @@ async function saveUptoAttack() {
               </tr>
               <tr>
                 <td>Hashlist Name</td>
-                <td>TODO</td>
+                <td>{{ inputs.hashlistName }}</td>
               </tr>
               <tr>
                 <td>Hashlist Type</td>
