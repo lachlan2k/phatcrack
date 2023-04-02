@@ -18,6 +18,49 @@ export interface AdminUserCreateResponseDTO {
   id: string
   role: string
 }
+export interface HashcatParams {
+  attack_mode: number
+  hash_type: number
+  mask: string
+  wordlist_filenames: string[]
+  rules_filenames: string[]
+  additional_args: string[]
+  optimized_kernels: boolean
+  slow_candidates: boolean
+}
+export interface HashlistHashDTO {
+  input_hash: string
+  normalized_hash: string
+}
+export interface AttackDTO {
+  id: string
+  hash_type: number
+  hashes: HashlistHashDTO[]
+  hashcat_params: HashcatParams
+}
+export interface AttackMultipleDTO {
+  attacks: AttackDTO[]
+}
+export interface AttackCreateDTO {
+  hashcat_params: HashcatParams
+  hashes: string[]
+  start_immediately: boolean
+  name: string
+  description: string
+}
+export interface AttackStartResponseDTO {
+  new_job_id: string
+  agent_id: string
+}
+export interface AttackJobSimpleDTO {
+  id: string
+  project_id: string
+  hashlist_id: string
+  attack_id: string
+}
+export interface AttackJobMultipleDTO {
+  jobs: AttackJobSimpleDTO[]
+}
 export interface AuthLoginRequestDTO {
   username: string
   password: string
@@ -61,6 +104,7 @@ export interface HashTypesDTO {
 }
 export interface DetectHashTypeRequestDTO {
   test_hash: string
+  has_username: boolean
 }
 export interface DetectHashTypeResponseDTO {
   possible_types: number[]
@@ -68,6 +112,7 @@ export interface DetectHashTypeResponseDTO {
 export interface VerifyHashesRequestDTO {
   hashes: string[]
   hash_type: number
+  has_usernames: boolean
 }
 export interface VerifyHashesResponseDTO {
   valid: boolean
@@ -76,15 +121,24 @@ export interface NormalizeHashesResponseDTO {
   valid: boolean
   normalized_hashes: string[]
 }
-export interface HashcatParams {
-  attack_mode: number
+export interface HashlistCreateRequestDTO {
+  project_id: string
+  name: string
   hash_type: number
-  mask: string
-  wordlist_filenames: string[]
-  rules_filenames: string[]
-  additional_args: string[]
-  optimized_kernels: boolean
-  slow_candidates: boolean
+  input_hashes: string[]
+  has_usernames: boolean
+}
+export interface HashlistCreateResponseDTO {
+  id: string
+}
+
+export interface HashlistDTO {
+  id: string
+  name: string
+  time_created: number
+  hash_type: number
+  hashes: HashlistHashDTO[]
+  version: number
 }
 export interface JobCreateRequestDTO {
   hashcat_params: HashcatParams

@@ -8,7 +8,7 @@ type HashlistCreateRequestDTO struct {
 	HasUsernames bool     `json:"has_usernames"`
 }
 
-type HashlistCreateResponseDTO = struct {
+type HashlistCreateResponseDTO struct {
 	ID string `json:"id"`
 }
 
