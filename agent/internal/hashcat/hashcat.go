@@ -32,7 +32,8 @@ type HashcatResult hashcattypes.HashcatResult
 
 const (
 	AttackModeDictionary = 0
-	AttackModeMask       = 1
+	AttackModeCombinator = 1
+	AttackModeMask       = 3
 	AttackModeHybridDM   = 6
 	AttackModeHybridMD   = 7
 )
@@ -41,12 +42,17 @@ func (params HashcatParams) Validate() error {
 	switch params.AttackMode {
 	case AttackModeDictionary:
 		if len(params.WordlistFilenames) != 1 {
-			return fmt.Errorf("expected 1 wordlist for dictionary attack (0), but %d given", len(params.WordlistFilenames))
+			return fmt.Errorf("expected 1 wordlist for dictionary attack (%d), but %d given", AttackModeDictionary, len(params.WordlistFilenames))
+		}
+
+	case AttackModeCombinator:
+		if len(params.WordlistFilenames) != 2 {
+			return fmt.Errorf("expected 2 wordlists for combinator attack (%d), but %d given", AttackModeCombinator, len(params.WordlistFilenames))
 		}
 
 	case AttackModeMask:
 		if params.Mask == "" {
-			return errors.New("using mask attack (1), but no mask was given")
+			return fmt.Errorf("using mask attack (%d), but no mask was given", AttackModeMask)
 		}
 
 	case AttackModeHybridDM, AttackModeHybridMD:
@@ -54,11 +60,17 @@ func (params HashcatParams) Validate() error {
 			return fmt.Errorf("using hybrid attack (%d), but no mask was given", params.AttackMode)
 		}
 		if len(params.WordlistFilenames) != 1 {
-			return fmt.Errorf("using hybrid attack (%d), but no wordlist was given", params.AttackMode)
+			return fmt.Errorf("using hybrid attack (%d), but %d wordlist were given", params.AttackMode, len(params.WordlistFilenames))
 		}
 
 	default:
 		return fmt.Errorf("unsupported attack mode %d", params.AttackMode)
+	}
+
+	if params.MaskIncrement {
+		if params.AttackMode != AttackModeMask && params.AttackMode != AttackModeHybridMD && params.AttackMode != AttackModeHybridDM {
+			return fmt.Errorf("mask increment was enabled, but not supported in attack mode %d", params.AttackMode)
+		}
 	}
 
 	return nil
@@ -81,6 +93,18 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 		"-a", strconv.Itoa(int(params.AttackMode)),
 		"-m", strconv.Itoa(int(params.HashType)),
 	)
+
+	if params.MaskIncrement {
+		args = append(args, "--increment")
+
+		if params.MaskIncrementMin > 0 {
+			args = append(args, "--increment-min", strconv.Itoa(int(params.MaskIncrementMin)))
+		}
+
+		if params.MaskIncrementMax > 0 {
+			args = append(args, "--increment-max", strconv.Itoa(int(params.MaskIncrementMax)))
+		}
+	}
 
 	args = append(args, params.AdditionalArgs...)
 
@@ -112,12 +136,16 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 
 	args = append(args, tempHashFile)
 
+	// TODO: sanity check we have all the correct parameters
 	switch params.AttackMode {
 	case AttackModeDictionary:
 		for _, rule := range rules {
 			args = append(args, "-r", rule)
 		}
 		args = append(args, wordlists[0])
+
+	case AttackModeCombinator:
+		args = append(args, wordlists[0], wordlists[1])
 
 	case AttackModeMask:
 		args = append(args, params.Mask)

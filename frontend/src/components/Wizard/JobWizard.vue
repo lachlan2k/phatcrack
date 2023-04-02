@@ -378,7 +378,6 @@ async function saveUptoAttack() {
               v-model="inputs.selectedRulefiles"
               :limit="Infinity"
             />
-            <hr class="my-4" />
           </div>
 
           <!-- Combinator -->
@@ -396,13 +395,11 @@ async function saveUptoAttack() {
               v-model="inputs.combinatorRight"
               :limit="1"
             />
-            <hr class="my-4" />
           </div>
 
           <!-- Brute-force/Mask -->
           <div v-if="inputs.attackMode === 3">
             <MaskInput v-model="inputs.mask" />
-            <hr class="my-4" />
           </div>
 
           <!-- Wordlist + Mask -->
@@ -415,7 +412,6 @@ async function saveUptoAttack() {
             />
             <hr class="my-4" />
             <MaskInput v-model="inputs.mask" />
-            <hr class="my-4" />
           </div>
 
           <!-- Mask + Wordlist -->
@@ -428,8 +424,9 @@ async function saveUptoAttack() {
               v-model="inputs.selectedWordlists"
               :limit="1"
             />
-            <hr class="my-4" />
           </div>
+
+          <hr class="my-4" />
 
           <label class="label font-bold">Additional Options</label>
           <div class="pl-3">

@@ -6,6 +6,9 @@ type HashcatParams struct {
 	AttackMode        uint8    `json:"attack_mode"`
 	HashType          uint     `json:"hash_type"`
 	Mask              string   `json:"mask"`
+	MaskIncrement     bool     `json:"mask_increment"`
+	MaskIncrementMin  uint     `json:"mask_increment_min"`
+	MaskIncrementMax  uint     `json:"mask_increment_max"`
 	WordlistFilenames []string `json:"wordlist_filenames"`
 	RulesFilenames    []string `json:"rules_filenames"`
 	AdditionalArgs    []string `json:"additional_args"`

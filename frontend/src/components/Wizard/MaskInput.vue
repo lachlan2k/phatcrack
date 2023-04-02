@@ -7,7 +7,7 @@ const emit = defineEmits(['update:modelValue'])
 </script>
 
 <template>
-  <label class="label font-bold">Mask</label>
+  <label class="label font-bold">Select Mask</label>
   <input
     type="text"
     placeholder="Mask"
