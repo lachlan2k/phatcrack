@@ -59,7 +59,6 @@ func Listen(port string) error {
 	})
 
 	controllers.HookAuthEndpoints(api.Group("/auth"), &authHandler)
-	controllers.HookJobEndpoints(api.Group("/job"))
 	controllers.HookHashcatEndpoints(api.Group("/hashcat"))
 	controllers.HookAgentEndpoints(api.Group("/agent"))
 	controllers.HookProjectEndpoints(api.Group("/project"))
