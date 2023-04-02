@@ -63,9 +63,10 @@ func handleAttackStart(c echo.Context) error {
 
 	// Create a job to start the attack
 	newJobId, err := db.CreateJob(db.Job{
-		ProjectID:  proj.ID,
-		HashlistID: foundHashlist.ID,
-		AttackID:   attackToStart.ID,
+		ProjectID:       proj.ID,
+		HashlistID:      foundHashlist.ID,
+		AttackID:        attackToStart.ID,
+		HashlistVersion: foundHashlist.Version,
 
 		HashcatParams: db.HashcatParams{
 			AttackMode:        attackToStart.HashcatParams.AttackMode,
@@ -110,8 +111,6 @@ func handleAttackStart(c echo.Context) error {
 	default:
 		return util.ServerError("Unexpected error occured when scheduling job", err)
 	}
-
-	return echo.ErrForbidden
 }
 
 func handleAttackJobGetAll(c echo.Context) error {

@@ -61,10 +61,11 @@ type JobCrackedHash struct {
 }
 
 type Job struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	ProjectID  primitive.ObjectID `bson:"project_id"`
-	HashlistID primitive.ObjectID `bson:"hashlist_id"`
-	AttackID   primitive.ObjectID `bson:"attack_id"`
+	ID              primitive.ObjectID `bson:"_id,omitempty"`
+	ProjectID       primitive.ObjectID `bson:"project_id"`
+	HashlistID      primitive.ObjectID `bson:"hashlist_id"`
+	HashlistVersion uint               `bson:"hashlist_version"`
+	AttackID        primitive.ObjectID `bson:"attack_id"`
 
 	HashcatParams HashcatParams    `bson:"hashcat_params"`
 	Hashes        []string         `bson:"hashes"`
