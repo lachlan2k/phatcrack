@@ -13,7 +13,7 @@ type AttackMultipleDTO struct {
 	Attacks []AttackDTO `json:"attacks"`
 }
 
-type AttackCreateDTO struct {
+type AttackCreateRequestDTO struct {
 	HashcatParams    hashcattypes.HashcatParams `json:"hashcat_params" validate:"required"`
 	Hashes           []string                   `json:"hashes" validate:"required"`
 	StartImmediately bool                       `json:"start_immediately"`
@@ -22,8 +22,7 @@ type AttackCreateDTO struct {
 }
 
 type AttackStartResponseDTO struct {
-	NewJobID string `json:"new_job_id"`
-	AgentID  string `json:"agent_id"`
+	JobIDs []string `json:"new_job_id"`
 }
 
 type AttackJobSimpleDTO struct {

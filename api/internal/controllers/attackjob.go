@@ -90,13 +90,12 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Couldn't create attack job", err)
 	}
 
-	agentId, err := fleet.ScheduleJob(newJobId)
+	_, err = fleet.ScheduleJob(newJobId)
 
 	switch err {
 	case nil:
 		return c.JSON(http.StatusOK, apitypes.AttackStartResponseDTO{
-			NewJobID: newJobId,
-			AgentID:  agentId,
+			JobIDs: []string{newJobId},
 		})
 
 	case fleet.ErrJobDoesntExist:
