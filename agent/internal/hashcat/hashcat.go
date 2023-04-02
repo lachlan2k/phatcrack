@@ -76,6 +76,33 @@ func (params HashcatParams) Validate() error {
 	return nil
 }
 
+func (params HashcatParams) maskArgs() ([]string, error) {
+	if len(params.MaskCustomCharsets) > 4 {
+		return nil, fmt.Errorf("too many custom charsets supplied (%d), the max is 4", len(params.MaskCustomCharsets))
+	}
+
+	args := []string{}
+
+	for i, charset := range params.MaskCustomCharsets {
+		// Hashcat accepts paramters --custom-charset1 to --custom-charset4
+		args = append(args, fmt.Sprintf("--custom-charset%d", i+1), charset)
+	}
+
+	if params.MaskIncrement {
+		args = append(args, "--increment")
+
+		if params.MaskIncrementMin > 0 {
+			args = append(args, "--increment-min", strconv.Itoa(int(params.MaskIncrementMin)))
+		}
+
+		if params.MaskIncrementMax > 0 {
+			args = append(args, "--increment-max", strconv.Itoa(int(params.MaskIncrementMax)))
+		}
+	}
+
+	return args, nil
+}
+
 func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile string, outFile string) (args []string, err error) {
 	if err = params.Validate(); err != nil {
 		return
@@ -93,18 +120,6 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 		"-a", strconv.Itoa(int(params.AttackMode)),
 		"-m", strconv.Itoa(int(params.HashType)),
 	)
-
-	if params.MaskIncrement {
-		args = append(args, "--increment")
-
-		if params.MaskIncrementMin > 0 {
-			args = append(args, "--increment-min", strconv.Itoa(int(params.MaskIncrementMin)))
-		}
-
-		if params.MaskIncrementMax > 0 {
-			args = append(args, "--increment-max", strconv.Itoa(int(params.MaskIncrementMax)))
-		}
-	}
 
 	args = append(args, params.AdditionalArgs...)
 
@@ -155,6 +170,15 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 
 	case AttackModeHybridMD:
 		args = append(args, params.Mask, wordlists[0])
+	}
+
+	switch params.AttackMode {
+	case AttackModeMask, AttackModeHybridDM, AttackModeHybridMD:
+		maskArgs, err := params.maskArgs()
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, maskArgs...)
 	}
 
 	return
