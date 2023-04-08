@@ -23,15 +23,15 @@ services:
     environment:
       - JWT_KEY
       - PORT=3000
-      - MONGO_URI=mongodb://phatcrack:${DB_PASS:-phatcrack}@mongo:27017/
+      - DB_DSN=host=db user=phatcrack password=${DB_PASS:-phatcrack} dbname=phatcrack
 
-  mongo:
-    image: mongo:6
+  db:
+    image: postgres:15
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=phatcrack
-      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASS:-phatcrack}
+      - POSTGRES_USER=phatcrack
+      - POSTGRES_PASSWORD=${DB_PASS:-phatcrack}
     volumes:
-      - mongo-data:/data/db
+      - db-data:/var/lib/postgresql/data
 
 volumes:
-  mongo-data:
+  db-data:

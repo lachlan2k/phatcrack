@@ -5,14 +5,7 @@ type ProjectCreateDTO struct {
 	Description string `json:"description" validate:"required,max=1000"`
 }
 
-type ProjectSimpleDetailsDTO struct {
-	ID          string `json:"id"`
-	TimeCreated int64  `json:"time_created"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
-type ProjectsFullDetailsDTO struct {
+type ProjectDTO struct {
 	ID          string `json:"id"`
 	TimeCreated int64  `json:"time_created"`
 	Name        string `json:"name"`
@@ -20,7 +13,7 @@ type ProjectsFullDetailsDTO struct {
 }
 
 type ProjectResponseMultipleDTO struct {
-	Projects []ProjectSimpleDetailsDTO `json:"projects"`
+	Projects []ProjectDTO `json:"projects"`
 }
 
-type ProjectCreateResponseDTO = ProjectSimpleDetailsDTO
+type ProjectCreateResponseDTO = ProjectDTO

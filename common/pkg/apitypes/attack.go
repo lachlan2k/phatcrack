@@ -24,14 +24,3 @@ type AttackCreateRequestDTO struct {
 type AttackStartResponseDTO struct {
 	JobIDs []string `json:"new_job_id"`
 }
-
-type AttackJobSimpleDTO struct {
-	ID         string `json:"id"`
-	ProjectID  string `json:"project_id"`
-	HashlistID string `json:"hashlist_id"`
-	AttackID   string `json:"attack_id"`
-}
-
-type AttackJobMultipleDTO struct {
-	Jobs []AttackJobSimpleDTO `json:"jobs"`
-}

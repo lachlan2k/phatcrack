@@ -4,19 +4,22 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func handleAttackStart(c echo.Context) error {
-	projId := c.Param("proj-id")
+	projUuid, err := uuid.Parse(c.Param("proj-id"))
+	if err != nil {
+		return echo.ErrBadRequest
+	}
 	hashlistId := c.Param("hashlist-id")
 	attackId := c.Param("attack-id")
 	user, err := auth.ClaimsFromReq(c)
@@ -24,8 +27,8 @@ func handleAttackStart(c echo.Context) error {
 		return err
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
-	if err == mongo.ErrNoDocuments {
+	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -36,66 +39,27 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	var foundHashlist *db.ProjectHashlist = nil
-	var attackToStart *db.HashlistAttack = nil
-
-	for _, hashlist := range proj.Hashlists {
-		if hashlist.ID.Hex() == hashlistId {
-			foundHashlist = &hashlist
-			for _, attack := range hashlist.Attacks {
-				if attack.ID.Hex() == attackId {
-					attackToStart = &attack
-					break
-				}
-			}
-			break
-		}
-	}
-
-	if attackToStart == nil {
+	// TODO: tidy up when I understand gorm better
+	var hashlist dbnew.Hashlist
+	err = dbnew.GetInstance().Joins("HashlistAttack").Joins("HashlistHash").Where("ID = ?", hashlistId).Where("ProjectID = ?", projUuid).Where("HashlistAttack.ID = ?", attackId).First(&hashlist).Error
+	if err == dbnew.ErrNotFound {
 		return echo.ErrNotFound
 	}
 
-	normalizedHashes := make([]string, len(attackToStart.Hashes))
-	for i, hash := range attackToStart.Hashes {
-		normalizedHashes[i] = hash.NormalizedHash
-	}
-
-	// Create a job to start the attack
-	newJobId, err := db.CreateJob(db.Job{
-		ProjectID:       proj.ID,
-		HashlistID:      foundHashlist.ID,
-		AttackID:        attackToStart.ID,
-		HashlistVersion: foundHashlist.Version,
-
-		HashcatParams: db.HashcatParams{
-			AttackMode:        attackToStart.HashcatParams.AttackMode,
-			HashType:          attackToStart.HashcatParams.HashType,
-			Mask:              attackToStart.HashcatParams.Mask,
-			WordlistFilenames: attackToStart.HashcatParams.WordlistFilenames,
-			RulesFilenames:    attackToStart.HashcatParams.RulesFilenames,
-			AdditionalArgs:    attackToStart.HashcatParams.AdditionalArgs,
-			OptimizedKernels:  attackToStart.HashcatParams.OptimizedKernels,
-		},
-
-		Hashes:   normalizedHashes,
-		HashType: attackToStart.HashType,
-
-		RuntimeData: db.RuntimeData{
-			Status: db.JobStatusCreated,
-		},
+	newJob, err := dbnew.CreateJob(&dbnew.Job{
+		// TODO
 	})
 
 	if err != nil {
 		return util.ServerError("Couldn't create attack job", err)
 	}
 
-	_, err = fleet.ScheduleJob(newJobId)
+	_, err = fleet.ScheduleJob(newJob.ID.String())
 
 	switch err {
 	case nil:
 		return c.JSON(http.StatusOK, apitypes.AttackStartResponseDTO{
-			JobIDs: []string{newJobId},
+			JobIDs: []string{newJob.ID.String()},
 		})
 
 	case fleet.ErrJobDoesntExist:
@@ -113,16 +77,19 @@ func handleAttackStart(c echo.Context) error {
 }
 
 func handleAttackJobGetAll(c echo.Context) error {
-	projId := c.Param("proj-id")
-	hashlistId := c.Param("hashlist-id")
+	projUuid, err := uuid.Parse(c.Param("proj-id"))
+	if err != nil {
+		return echo.ErrBadRequest
+	}
+
 	attackId := c.Param("attack-id")
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
-	if err == mongo.ErrNoDocuments {
+	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -133,38 +100,38 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	jobs, err := db.GetJobsForAttack(projId, hashlistId, attackId)
+	jobs, err := dbnew.GetJobsForAttack(attackId)
 	if err != nil {
 		return util.ServerError("Failed to get jobs for attack", err)
 	}
 
-	jobDTOs := make([]apitypes.AttackJobSimpleDTO, len(jobs))
+	jobDTOs := make([]apitypes.JobSimpleDTO, len(jobs))
 	for i, job := range jobs {
-		jobDTOs[i] = apitypes.AttackJobSimpleDTO{
-			ID:         job.ID.Hex(),
-			ProjectID:  job.ProjectID.Hex(),
-			HashlistID: job.HashlistID.Hex(),
-			AttackID:   job.AttackID.Hex(),
-		}
+		jobDTOs[i] = job.ToSimpleDTO()
 	}
 
-	return c.JSON(http.StatusOK, apitypes.AttackJobMultipleDTO{
+	return c.JSON(http.StatusOK, apitypes.JobMultipleDTO{
 		Jobs: jobDTOs,
 	})
 }
 
 func handleAttackJobGet(c echo.Context) error {
 	projId := c.Param("proj-id")
-	hashlistId := c.Param("hashlist-id")
-	attackId := c.Param("attack-id")
+	projUuid, err := uuid.Parse(projId)
+	if err != nil {
+		return echo.ErrBadRequest
+	}
+
+	// hashlistId := c.Param("hashlist-id")
+	// attackId := c.Param("attack-id")
 	jobId := c.Param("job-id")
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
-	if err == mongo.ErrNoDocuments {
+	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -175,8 +142,8 @@ func handleAttackJobGet(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	job, err := db.GetJobForAttack(projId, hashlistId, attackId, jobId)
-	if err == mongo.ErrNoDocuments {
+	job, err := dbnew.GetJob(jobId)
+	if err == dbnew.ErrNotFound {
 		return echo.ErrNotFound
 	}
 
@@ -184,12 +151,7 @@ func handleAttackJobGet(c echo.Context) error {
 		return util.ServerError("Failed to get job", err)
 	}
 
-	return c.JSON(http.StatusOK, apitypes.AttackJobSimpleDTO{
-		ID:         job.ID.Hex(),
-		ProjectID:  job.ProjectID.Hex(),
-		HashlistID: job.HashlistID.Hex(),
-		AttackID:   job.AttackID.Hex(),
-	})
+	return c.JSON(http.StatusOK, job.ToDTO())
 }
 
 func handleAttackJobWatch(c echo.Context) error {
@@ -209,9 +171,9 @@ func handleAttackJobWatch(c echo.Context) error {
 	}
 
 	jobId := c.Param("job-id")
-	jobProjId, err := db.GetJobProjID(jobId)
+	jobProjId, err := dbnew.GetJobProjID(jobId)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if err == dbnew.ErrNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "Job couldn't be found")
 		} else {
 			return util.ServerError("Error fetching job", err)
@@ -219,7 +181,7 @@ func handleAttackJobWatch(c echo.Context) error {
 	}
 
 	// Access control
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, jobProjId)
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, *jobProjId)
 	if err != nil {
 		return util.ServerError("Error fetching job", err)
 	}

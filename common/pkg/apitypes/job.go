@@ -19,3 +19,34 @@ type JobCreateResponseDTO struct {
 type JobStartResponseDTO struct {
 	AgentID string `json:"agent_id"`
 }
+
+type JobRuntimeDataDTO struct{}
+
+type JobCrackedHashDTO struct {
+	Hash         string
+	PlaintextHex string
+}
+
+type JobDTO struct {
+	ID              string                     `json:"id"`
+	HashlistVersion uint                       `json:"hashlist_version"`
+	AttackID        string                     `json:"attack_id"`
+	HashcatParams   hashcattypes.HashcatParams `json:"hashcat_params"`
+	TargetHashes    []string                   `json:"target_hashes"`
+	HashType        uint                       `json:"hash_type"`
+	RuntimeData     JobRuntimeDataDTO          `json:"runtime_data"`
+	AssignedAgentID string                     `json:"assigned_agent_id"`
+	CrackedHashes   []JobCrackedHashDTO        `json:"cracked_hashes"`
+}
+
+type JobSimpleDTO struct {
+	ID              string `json:"id"`
+	HashlistVersion uint   `json:"hashlist_version"`
+	AttackID        string `json:"attack_id"`
+	HashType        uint   `json:"hash_type"`
+	AssignedAgentID string `json:"assigned_agent_id"`
+}
+
+type JobMultipleDTO struct {
+	Jobs []JobSimpleDTO `json:"jobs"`
+}

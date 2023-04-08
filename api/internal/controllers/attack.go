@@ -3,25 +3,30 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func handleAttackGetAllForHashlist(c echo.Context) error {
 	projId := c.Param("proj-id")
+	projUuid, err := uuid.Parse(projId)
+	if err != nil {
+		return echo.ErrBadRequest
+	}
+
 	hashlistId := c.Param("hashlist-id")
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
-	if err == mongo.ErrNoDocuments {
+	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -36,7 +41,7 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 
 	// TODO: stop being lazy and write a db query for this
 	for _, hashlist := range proj.Hashlists {
-		if hashlist.ID.Hex() == hashlistId {
+		if hashlist.ID.String() == hashlistId {
 			res.Attacks = make([]apitypes.AttackDTO, len(hashlist.Attacks))
 			for i, attack := range hashlist.Attacks {
 				res.Attacks[i] = attack.ToDTO()
@@ -51,6 +56,11 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 
 func handleAttackGet(c echo.Context) error {
 	projId := c.Param("proj-id")
+	projUuid, err := uuid.Parse(projId)
+	if err != nil {
+		return echo.ErrBadRequest
+	}
+
 	hashlistId := c.Param("hashlist-id")
 	attackId := c.Param("attack-id")
 	user, err := auth.ClaimsFromReq(c)
@@ -58,8 +68,8 @@ func handleAttackGet(c echo.Context) error {
 		return err
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
-	if err == mongo.ErrNoDocuments {
+	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -71,9 +81,9 @@ func handleAttackGet(c echo.Context) error {
 	}
 
 	for _, hashlist := range proj.Hashlists {
-		if hashlist.ID.Hex() == hashlistId {
+		if hashlist.ID.String() == hashlistId {
 			for _, attack := range hashlist.Attacks {
-				if attack.ID.Hex() == attackId {
+				if attack.ID.String() == attackId {
 					return c.JSON(http.StatusOK, attack.ToDTO())
 				}
 			}

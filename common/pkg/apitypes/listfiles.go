@@ -1,6 +1,6 @@
 package apitypes
 
-type ListsWordlistCreateDTO struct {
+type WordlistCreateDTO struct {
 	Name        string `json:"name" validate:"required,min=4,max=64"`
 	Description string `json:"description" validate:"required,max=1000"`
 	Filename    string `json:"filename" validate:"required,min=5"`
@@ -8,7 +8,7 @@ type ListsWordlistCreateDTO struct {
 	Lines       uint64 `json:"lines"`
 }
 
-type ListsRuleFileCreateDTO struct {
+type RuleFileCreateDTO struct {
 	Name        string `json:"name" validate:"required,min=4,max=64"`
 	Description string `json:"description" validate:"required,max=1000"`
 	Filename    string `json:"filename" validate:"required,min=5"`
@@ -16,28 +16,28 @@ type ListsRuleFileCreateDTO struct {
 	Lines       uint64 `json:"lines"`
 }
 
-type ListsWordlistResponseDTO struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Filename    string `json:"filename"`
-	Size        uint64 `json:"size"`
-	Lines       uint64 `json:"lines"`
+type WordlistDTO struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	FilenameOnDisk string `json:"filename_on_disk"`
+	SizeInBytes    uint64 `json:"size_in_bytes"`
+	Lines          uint64 `json:"lines"`
 }
 
-type ListsRuleFileResponseDTO struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Filename    string `json:"filename"`
-	Size        uint64 `json:"size"`
-	Lines       uint64 `json:"lines"`
+type RuleFileDTO struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	FilenameOnDisk string `json:"filename_on_disk"`
+	SizeInBytes    uint64 `json:"size_in_bytes"`
+	Lines          uint64 `json:"lines"`
 }
 
-type ListsGetAllWordlistsDTO struct {
-	Wordlists []ListsWordlistResponseDTO `json:"wordlists"`
+type GetAllWordlistsDTO struct {
+	Wordlists []WordlistDTO `json:"wordlists"`
 }
 
-type ListsGetAllRuleFilesDTO struct {
-	RuleFiles []ListsRuleFileResponseDTO `json:"rulefiles"`
+type GetAllRuleFilesDTO struct {
+	RuleFiles []RuleFileDTO `json:"rulefiles"`
 }

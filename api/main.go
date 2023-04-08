@@ -4,19 +4,23 @@ import (
 	"log"
 	"os"
 
-	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 	"github.com/lachlan2k/phatcrack/api/internal/webserver"
 )
 
 func main() {
-	if os.Getenv("MONGO_URI") == "" {
-		log.Fatal("MONGO_URI was not specified")
+	if os.Getenv("DB_DSN") == "" {
+		log.Fatal("DB_DSN was not specified")
 	}
 
-	err := db.Connect(os.Getenv("MONGO_URI"))
+	err := dbnew.Connect(os.Getenv("DB_DSN"))
 	if err != nil {
 		log.Fatalf("database connection failed: %v", err)
 	}
+
+	// dbnew.RegisterUser("admin", "changeme", "admin")
+	// dbnew.RegisterUser("bobby", "changeme", "admin")
+	// dbnew.RegisterUser("lachlan", "changeme", "admin")
 
 	port := "3000"
 	if os.Getenv("PORT") != "" {

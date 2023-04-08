@@ -3,7 +3,7 @@ package fleet
 import (
 	"fmt"
 
-	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
@@ -14,7 +14,7 @@ func (a *Agent) handleJobStarted(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to job started dto: %v", msg.Payload, err)
 	}
 
-	return db.SetJobStarted(payload.JobID, payload.Time)
+	return dbnew.SetJobStarted(payload.JobID, payload.Time)
 }
 
 func (a *Agent) handleJobCrackedHash(msg *wstypes.Message) error {
@@ -23,21 +23,22 @@ func (a *Agent) handleJobCrackedHash(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to cracked hash dto: %v", msg.Payload, err)
 	}
 
-	err = db.AddJobCrackedHash(payload.JobID, payload.Result.Hash, payload.Result.PlaintextHex)
+	err = dbnew.AddJobCrackedHash(payload.JobID, payload.Result.Hash, payload.Result.PlaintextHex)
 	if err != nil {
 		return err
 	}
 
-	hashType, err := db.GetJobHashtype(payload.JobID)
+	hashType, err := dbnew.GetJobHashtype(payload.JobID)
 	if err != nil {
 		return err
 	}
 
-	return db.AddPotfileEntry(db.PotfileEntry{
+	_, err = dbnew.AddPotfileEntry(&dbnew.PotfileEntry{
 		Hash:         payload.Result.Hash,
 		PlaintextHex: payload.Result.PlaintextHex,
 		HashType:     uint(hashType),
 	})
+	return err
 }
 
 func (a *Agent) handleJobStdLine(msg *wstypes.Message) error {
@@ -47,7 +48,7 @@ func (a *Agent) handleJobStdLine(msg *wstypes.Message) error {
 	}
 
 	notifyObservers(payload.JobID, *msg)
-	return db.AddJobStdline(payload.JobID, payload.Line, payload.Stream)
+	return dbnew.AddJobStdline(payload.JobID, payload.Line, payload.Stream)
 }
 
 func (a *Agent) handleJobStatusUpdate(msg *wstypes.Message) error {
@@ -57,7 +58,7 @@ func (a *Agent) handleJobStatusUpdate(msg *wstypes.Message) error {
 	}
 
 	notifyObservers(payload.JobID, *msg)
-	return db.AddJobStatusUpdate(payload.JobID, payload.Status)
+	return dbnew.AddJobStatusUpdate(payload.JobID, payload.Status)
 }
 
 func (a *Agent) handleJobExited(msg *wstypes.Message) error {
@@ -66,15 +67,15 @@ func (a *Agent) handleJobExited(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to job exited dto: %v", msg.Payload, err)
 	}
 
-	reason := db.JobStopReasonFinished
+	reason := dbnew.JobStopReasonFinished
 	if payload.Error != nil {
-		reason = db.JobStopReasonFailed
+		reason = dbnew.JobStopReasonFailed
 	}
 
 	notifyObservers(payload.JobID, *msg)
 	closeObservers(payload.JobID)
 
-	return db.SetJobExited(payload.JobID, reason, payload.Time)
+	return dbnew.SetJobExited(payload.JobID, reason, payload.Time)
 }
 
 func (a *Agent) handleJobFailedToStart(msg *wstypes.Message) error {
@@ -86,5 +87,5 @@ func (a *Agent) handleJobFailedToStart(msg *wstypes.Message) error {
 	notifyObservers(payload.JobID, *msg)
 	closeObservers(payload.JobID)
 
-	return db.SetJobExited(payload.JobID, db.JobStopReasonFailedToStart, payload.Time)
+	return dbnew.SetJobExited(payload.JobID, dbnew.JobStopReasonFailedToStart, payload.Time)
 }

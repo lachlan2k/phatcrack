@@ -7,10 +7,8 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/lachlan2k/phatcrack/api/internal/db"
-	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
+	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var ErrJobDoesntExist = errors.New("job doesn't exist")
@@ -126,14 +124,16 @@ func ScheduleJob(jobId string) (string, error) {
 		return "", ErrNoAgentsOnline
 	}
 
-	job, err := db.GetJob(jobId)
-	if err == mongo.ErrNoDocuments {
+	jobDb, err := dbnew.GetJob(jobId)
+	if err == dbnew.ErrNotFound {
 		return "", ErrJobDoesntExist
 	}
+	job := jobDb.ToDTO()
 
-	if job.RuntimeData.Status != db.JobStatusCreated {
-		return "", ErrJobAlreadyScheduled
-	}
+	// TOOD
+	// if job.RuntimeData.Status != dbnew.JobStatusCreated {
+	// return "", ErrJobAlreadyScheduled
+	// }
 
 	var leastBusyAgent *Agent = nil
 	for _, agent := range fleet {
@@ -166,24 +166,15 @@ func ScheduleJob(jobId string) (string, error) {
 		return "", ErrNoAgentsOnline
 	}
 
-	err = db.SetJobScheduled(job.ID.Hex(), leastBusyAgent.agentId)
+	err = dbnew.SetJobScheduled(job.ID, leastBusyAgent.agentId)
 	if err != nil {
 		return "", fmt.Errorf("failed to set job as scheduled in db: %v", err)
 	}
 
 	leastBusyAgent.sendMessage(wstypes.JobStartType, wstypes.JobStartDTO{
-		ID: jobId,
-		HashcatParams: hashcattypes.HashcatParams{
-			AttackMode:        job.HashcatParams.AttackMode,
-			HashType:          job.HashcatParams.HashType,
-			Mask:              job.HashcatParams.Mask,
-			WordlistFilenames: job.HashcatParams.WordlistFilenames,
-			RulesFilenames:    job.HashcatParams.RulesFilenames,
-			AdditionalArgs:    job.HashcatParams.AdditionalArgs,
-			OptimizedKernels:  job.HashcatParams.OptimizedKernels,
-			SlowCandidates:    job.HashcatParams.SlowCandidates,
-		},
-		Hashes: job.Hashes,
+		ID:            job.ID,
+		HashcatParams: job.HashcatParams,
+		TargetHashes:  job.TargetHashes,
 	})
 
 	return leastBusyAgent.agentId, nil

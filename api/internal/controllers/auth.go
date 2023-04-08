@@ -6,10 +6,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,7 +28,7 @@ func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 
 		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       claims.ID,
+				ID:       claims.ID.String(),
 				Username: claims.Username,
 				Role:     claims.Role,
 			},
@@ -44,7 +43,7 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			return err
 		}
 
-		user, err := db.GetUserByID(claims.ID)
+		user, err := dbnew.GetUserByID(claims.ID)
 		if err != nil {
 			return util.ServerError("Failed to refresh user data", err)
 		}
@@ -58,7 +57,7 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 
 		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       user.ID.Hex(),
+				ID:       user.ID.String(),
 				Username: user.Username,
 				Role:     user.Role,
 			},
@@ -77,10 +76,10 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 		minTime := time.After(250 * time.Millisecond)
 		defer func() { <-minTime }()
 
-		username := db.NormalizeUsername(req.Username)
+		username := dbnew.NormalizeUsername(req.Username)
 
-		user, err := db.GetUserByUsername(username)
-		if err == mongo.ErrNoDocuments {
+		user, err := dbnew.GetUserByUsername(username)
+		if err == dbnew.ErrNotFound {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		} else if err != nil {
 			return util.ServerError("Database error", err)
@@ -96,7 +95,7 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 
 		return c.JSON(http.StatusOK, apitypes.AuthLoginResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       user.ID.Hex(),
+				ID:       user.ID.String(),
 				Username: user.Username,
 				Role:     user.Role,
 			},

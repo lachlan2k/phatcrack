@@ -9,10 +9,8 @@ import (
 	"net/http"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func ServerError(message string, internal error) *echo.HTTPError {
@@ -27,10 +25,6 @@ func CleanPath(filePath string) string {
 func UnmarshalJSON[T interface{}](jsonBlob string) (out T, err error) {
 	err = json.Unmarshal([]byte(jsonBlob), &out)
 	return
-}
-
-func MongoNow() primitive.Timestamp {
-	return primitive.Timestamp{T: uint32(time.Now().Unix())}
 }
 
 const agentKeyLen = 32 // 256-bit

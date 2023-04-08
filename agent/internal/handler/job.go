@@ -114,7 +114,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 		OptimizedKernels:  job.HashcatParams.OptimizedKernels,
 	}
 
-	sess, err := hashcat.NewHashcatSession(job.ID, job.Hashes, params, h.conf)
+	sess, err := hashcat.NewHashcatSession(job.ID, job.TargetHashes, params, h.conf)
 	if err != nil {
 		h.sendJobFailedToStart(job.ID, err)
 		return err

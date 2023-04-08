@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 )
 
 const TokenCookieName = "auth"
@@ -20,9 +21,9 @@ type AuthHandler struct {
 }
 
 type UserClaims struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
+	Role     string    `json:"role"`
 }
 
 type AuthClaims struct {
@@ -30,10 +31,10 @@ type AuthClaims struct {
 	jwt.StandardClaims
 }
 
-func UserToClaims(user *db.User) *AuthClaims {
+func UserToClaims(user *dbnew.User) *AuthClaims {
 	return &AuthClaims{
 		UserClaims: UserClaims{
-			ID:       user.ID.Hex(),
+			ID:       user.ID,
 			Username: user.Username,
 			Role:     user.Role,
 		},

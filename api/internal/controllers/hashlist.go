@@ -3,10 +3,11 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 	"github.com/lachlan2k/phatcrack/api/internal/hashcathelpers"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
@@ -22,6 +23,11 @@ func handleHashlistGet(c echo.Context) error {
 
 func handleHashlistCreate(c echo.Context) error {
 	projId := c.Param("proj-id")
+	projIdUuid, err := uuid.Parse(projId)
+	if err != nil {
+		return echo.ErrBadRequest
+	}
+
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
@@ -33,7 +39,7 @@ func handleHashlistCreate(c echo.Context) error {
 	}
 
 	// Access control
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, projId)
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, projIdUuid)
 	if err != nil {
 		return err
 	}
@@ -47,17 +53,20 @@ func handleHashlistCreate(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate and normalize hashes. Please ensure your hashes are valid for the given hash type.").SetInternal(err)
 	}
 
-	hashes := make([]db.HashlistHash, 0, len(normalizedHashes))
+	hashes := make([]dbnew.HashlistHash, 0, len(normalizedHashes))
 	for i, inputHash := range req.InputHashes {
 		hashes[i].InputHash = inputHash
 		hashes[i].NormalizedHash = normalizedHashes[i]
 	}
 
-	newHashlistId, err := db.AddHashlistToProject(projId, db.ProjectHashlist{
-		Name:     req.Name,
+	newHashlist, err := dbnew.CreateHashlist(&dbnew.Hashlist{
+		ProjectID: projIdUuid,
+
+		Name:    req.Name,
+		Version: 1,
+
 		HashType: req.HashType,
 		Hashes:   hashes,
-		Version:  1,
 	})
 
 	if err != nil {
@@ -65,6 +74,6 @@ func handleHashlistCreate(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, apitypes.HashlistCreateResponseDTO{
-		ID: newHashlistId,
+		ID: newHashlist.ID.String(),
 	})
 }

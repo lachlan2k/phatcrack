@@ -23,7 +23,7 @@ const (
 type JobStartDTO struct {
 	ID            string                     `json:"id"`
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_parms"`
-	Hashes        []string                   `json:"hashes"`
+	TargetHashes  []string                   `json:"target_hashes"`
 }
 
 // JobFailedToStart
