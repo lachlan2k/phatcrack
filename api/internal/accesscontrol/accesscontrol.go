@@ -3,18 +3,17 @@ package accesscontrol
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 )
 
 func HasRightsToProject(user *auth.UserClaims, project *dbnew.Project) bool {
-	if project.OwnerUserID == user.ID {
+	if project.OwnerUserID.String() == user.ID {
 		return true
 	}
 
-	for _, id := range project.ProjectShare {
-		if id.UserID == user.ID {
+	for _, share := range project.ProjectShare {
+		if share.UserID.String() == user.ID {
 			return true
 		}
 	}
@@ -22,7 +21,7 @@ func HasRightsToProject(user *auth.UserClaims, project *dbnew.Project) bool {
 	return false
 }
 
-func HasRightsToProjectID(user *auth.UserClaims, projId uuid.UUID) (bool, error) {
+func HasRightsToProjectID(user *auth.UserClaims, projId string) (bool, error) {
 	proj, err := dbnew.GetProjectForUser(projId, user.ID)
 	if proj == nil || err == dbnew.ErrNotFound {
 		return false, nil
@@ -41,5 +40,5 @@ func HasRightsToJobID(user *auth.UserClaims, jobID string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("failed to get underlying job to check access control: %v", err)
 	}
-	return HasRightsToProjectID(user, *projId)
+	return HasRightsToProjectID(user, projId)
 }

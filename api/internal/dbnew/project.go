@@ -95,7 +95,7 @@ func (a *Attack) ToDTO() apitypes.AttackDTO {
 	}
 }
 
-func GetProjectForUser(projId, userId uuid.UUID) (*Project, error) {
+func GetProjectForUser(projId, userId string) (*Project, error) {
 	proj := new(Project)
 
 	accessControlQuery := GetInstance().Where(
@@ -104,8 +104,10 @@ func GetProjectForUser(projId, userId uuid.UUID) (*Project, error) {
 		"project_shares.user_id = ?", userId,
 	)
 
-	err := GetInstance().Select("distinct on (projects.id) projects.*, project_shares.*").Preload("ProjectShare").Joins(
-		"JOIN project_shares on project_shares.project_id = projects.id",
+	err := GetInstance().Preload("ProjectShare").Select(
+		"distinct on (projects.id) projects.*, project_shares.*",
+	).Joins(
+		"join project_shares on project_shares.project_id = projects.id",
 	).Where(
 		"projects.id = ?", projId,
 	).Where(accessControlQuery).First(proj).Error
@@ -116,15 +118,19 @@ func GetProjectForUser(projId, userId uuid.UUID) (*Project, error) {
 	return proj, err
 }
 
-func GetAllProjectsForUser(userId uuid.UUID) ([]Project, error) {
+func GetAllProjectsForUser(userId string) ([]Project, error) {
 	projs := []Project{}
-	err := GetInstance().Select("distinct on (projects.id) projects.*").Preload("ProjectShare").Joins(
-		"JOIN project_shares on project_shares.project_id = projects.id",
+
+	err := GetInstance().Preload("ProjectShare").Select(
+		"distinct on (projects.id) projects.*",
+	).Joins(
+		"join project_shares on project_shares.project_id = projects.id",
 	).Where(
 		"owner_user_id = ?", userId,
 	).Or(
 		"project_shares.user_id = ?", userId,
 	).Find(&projs).Error
+
 	if err != nil {
 		return nil, err
 	}

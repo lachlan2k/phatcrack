@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
@@ -16,10 +15,7 @@ import (
 )
 
 func handleAttackStart(c echo.Context) error {
-	projUuid, err := uuid.Parse(c.Param("proj-id"))
-	if err != nil {
-		return echo.ErrBadRequest
-	}
+	projId := c.Param("proj-id")
 	hashlistId := c.Param("hashlist-id")
 	attackId := c.Param("attack-id")
 	user, err := auth.ClaimsFromReq(c)
@@ -27,7 +23,7 @@ func handleAttackStart(c echo.Context) error {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	proj, err := dbnew.GetProjectForUser(projId, user.ID)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -41,7 +37,7 @@ func handleAttackStart(c echo.Context) error {
 
 	// TODO: tidy up when I understand gorm better
 	var hashlist dbnew.Hashlist
-	err = dbnew.GetInstance().Joins("HashlistAttack").Joins("HashlistHash").Where("ID = ?", hashlistId).Where("ProjectID = ?", projUuid).Where("HashlistAttack.ID = ?", attackId).First(&hashlist).Error
+	err = dbnew.GetInstance().Joins("HashlistAttack").Joins("HashlistHash").Where("ID = ?", hashlistId).Where("ProjectID = ?", projId).Where("HashlistAttack.ID = ?", attackId).First(&hashlist).Error
 	if err == dbnew.ErrNotFound {
 		return echo.ErrNotFound
 	}
@@ -77,18 +73,15 @@ func handleAttackStart(c echo.Context) error {
 }
 
 func handleAttackJobGetAll(c echo.Context) error {
-	projUuid, err := uuid.Parse(c.Param("proj-id"))
-	if err != nil {
-		return echo.ErrBadRequest
-	}
-
+	projId := c.Param("proj-id")
 	attackId := c.Param("attack-id")
+
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	proj, err := dbnew.GetProjectForUser(projId, user.ID)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -100,7 +93,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	jobs, err := dbnew.GetJobsForAttack(attackId)
+	jobs, err := dbnew.GetJobsForAttack(attackId, projId)
 	if err != nil {
 		return util.ServerError("Failed to get jobs for attack", err)
 	}
@@ -117,20 +110,13 @@ func handleAttackJobGetAll(c echo.Context) error {
 
 func handleAttackJobGet(c echo.Context) error {
 	projId := c.Param("proj-id")
-	projUuid, err := uuid.Parse(projId)
-	if err != nil {
-		return echo.ErrBadRequest
-	}
-
-	// hashlistId := c.Param("hashlist-id")
-	// attackId := c.Param("attack-id")
 	jobId := c.Param("job-id")
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	proj, err := dbnew.GetProjectForUser(projId, user.ID)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -181,7 +167,7 @@ func handleAttackJobWatch(c echo.Context) error {
 	}
 
 	// Access control
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, *jobProjId)
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, jobProjId)
 	if err != nil {
 		return util.ServerError("Error fetching job", err)
 	}

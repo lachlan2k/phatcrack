@@ -3,7 +3,6 @@ package dbnew
 import (
 	"strings"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,7 +17,7 @@ func NormalizeUsername(username string) string {
 	return strings.ToLower(strings.TrimSpace(username))
 }
 
-func GetUserByID(id uuid.UUID) (*User, error) {
+func GetUserByID(id string) (*User, error) {
 	var user User
 	err := GetInstance().First(&user, "id = ?", id).Error
 	if err != nil {
@@ -27,9 +26,9 @@ func GetUserByID(id uuid.UUID) (*User, error) {
 	return &user, nil
 }
 
-func GetUserByUsername(id string) (*User, error) {
+func GetUserByUsername(username string) (*User, error) {
 	var user User
-	err := GetInstance().First(&user, "username = ?", id).Error
+	err := GetInstance().First(&user, "username = ?", NormalizeUsername(username)).Error
 	if err != nil {
 		return nil, err
 	}

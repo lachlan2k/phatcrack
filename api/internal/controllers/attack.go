@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
@@ -14,18 +13,14 @@ import (
 
 func handleAttackGetAllForHashlist(c echo.Context) error {
 	projId := c.Param("proj-id")
-	projUuid, err := uuid.Parse(projId)
-	if err != nil {
-		return echo.ErrBadRequest
-	}
-
 	hashlistId := c.Param("hashlist-id")
+
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	proj, err := dbnew.GetProjectForUser(projId, user.ID)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -56,19 +51,15 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 
 func handleAttackGet(c echo.Context) error {
 	projId := c.Param("proj-id")
-	projUuid, err := uuid.Parse(projId)
-	if err != nil {
-		return echo.ErrBadRequest
-	}
-
 	hashlistId := c.Param("hashlist-id")
 	attackId := c.Param("attack-id")
+
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	proj, err := dbnew.GetProjectForUser(projId, user.ID)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -80,6 +71,7 @@ func handleAttackGet(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
+	// TODO
 	for _, hashlist := range proj.Hashlists {
 		if hashlist.ID.String() == hashlistId {
 			for _, attack := range hashlist.Attacks {

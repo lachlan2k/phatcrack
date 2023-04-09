@@ -50,7 +50,7 @@ func handleProjectCreate(c echo.Context) error {
 	newProj, err := dbnew.CreateProject(&dbnew.Project{
 		Name:        req.Name,
 		Description: req.Description,
-		OwnerUserID: user.ID,
+		OwnerUserID: uuid.MustParse(user.ID),
 	})
 	if err != nil {
 		return util.ServerError("Failed to create project", err)
@@ -60,17 +60,14 @@ func handleProjectCreate(c echo.Context) error {
 }
 
 func handleProjectGet(c echo.Context) error {
-	projUuid, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return echo.ErrBadRequest
-	}
+	projId := c.Param("id")
 
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projUuid, user.ID)
+	proj, err := dbnew.GetProjectForUser(projId, user.ID)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrForbidden
 	}

@@ -151,7 +151,6 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 
 	args = append(args, tempHashFile)
 
-	// TODO: sanity check we have all the correct parameters
 	switch params.AttackMode {
 	case AttackModeDictionary:
 		for _, rule := range rules {

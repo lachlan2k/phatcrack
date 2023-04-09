@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
@@ -21,9 +20,9 @@ type AuthHandler struct {
 }
 
 type UserClaims struct {
-	ID       uuid.UUID `json:"id"`
-	Username string    `json:"username"`
-	Role     string    `json:"role"`
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
 }
 
 type AuthClaims struct {
@@ -34,7 +33,7 @@ type AuthClaims struct {
 func UserToClaims(user *dbnew.User) *AuthClaims {
 	return &AuthClaims{
 		UserClaims: UserClaims{
-			ID:       user.ID,
+			ID:       user.ID.String(),
 			Username: user.Username,
 			Role:     user.Role,
 		},

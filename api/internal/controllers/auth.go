@@ -28,7 +28,7 @@ func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 
 		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       claims.ID.String(),
+				ID:       claims.ID,
 				Username: claims.Username,
 				Role:     claims.Role,
 			},
@@ -72,13 +72,10 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			return err
 		}
 
-		// TODO: was there a better way of doing this?
 		minTime := time.After(250 * time.Millisecond)
 		defer func() { <-minTime }()
 
-		username := dbnew.NormalizeUsername(req.Username)
-
-		user, err := dbnew.GetUserByUsername(username)
+		user, err := dbnew.GetUserByUsername(req.Username)
 		if err == dbnew.ErrNotFound {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		} else if err != nil {

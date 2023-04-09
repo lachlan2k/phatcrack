@@ -151,7 +151,6 @@ func ScheduleJob(jobId string) (string, error) {
 
 		if aJobs == lJobs {
 			// Biased semi-random assignment as tie-braker
-			// TODO: do some tie-breaker calculations based on time left on jobs?
 			if rand.Intn(2) == 1 {
 				leastBusyAgent = agent
 			}

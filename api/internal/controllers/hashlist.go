@@ -23,10 +23,6 @@ func handleHashlistGet(c echo.Context) error {
 
 func handleHashlistCreate(c echo.Context) error {
 	projId := c.Param("proj-id")
-	projIdUuid, err := uuid.Parse(projId)
-	if err != nil {
-		return echo.ErrBadRequest
-	}
 
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
@@ -39,7 +35,7 @@ func handleHashlistCreate(c echo.Context) error {
 	}
 
 	// Access control
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, projIdUuid)
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, projId)
 	if err != nil {
 		return err
 	}
@@ -60,7 +56,7 @@ func handleHashlistCreate(c echo.Context) error {
 	}
 
 	newHashlist, err := dbnew.CreateHashlist(&dbnew.Hashlist{
-		ProjectID: projIdUuid,
+		ProjectID: uuid.MustParse(projId),
 
 		Name:    req.Name,
 		Version: 1,

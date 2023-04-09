@@ -63,9 +63,7 @@ type JobRuntimeData struct {
 	ErrorString     string
 	AssignedAgentID uuid.UUID
 
-	// []{ stream: string, line: string }
-	OutputLines datatypes.JSONSlice[JobRuntimeOutputLine]
-	// []hashcattypes.HashcatStatus
+	OutputLines   datatypes.JSONSlice[JobRuntimeOutputLine]
 	StatusUpdates datatypes.JSONSlice[hashcattypes.HashcatStatus]
 }
 
@@ -131,16 +129,16 @@ func GetJob(jobId string) (*Job, error) {
 	return &job, nil
 }
 
-func GetJobProjID(jobId string) (*uuid.UUID, error) {
+func GetJobProjID(jobId string) (string, error) {
 	var result struct {
 		ProjectID uuid.UUID
 	}
 
 	err := GetInstance().Table("jobs").Select("name").Where("id = ?", jobId).Scan(&result).Error
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &result.ProjectID, nil
+	return result.ProjectID.String(), nil
 }
 
 func CreateJob(job *Job) (*Job, error) {
@@ -188,10 +186,21 @@ func GetJobHashtype(jobId string) (uint, error) {
 	return result.HashType, nil
 }
 
-// TODO: rejig for access control?
-func GetJobsForAttack(attackId string) ([]Job, error) {
+func GetJobsForAttack(attackId string, projectId string) ([]Job, error) {
 	jobs := []Job{}
-	err := GetInstance().Where("AttackID = ?", attackId).Find(&jobs).Error
+
+	err := GetInstance().Select(
+		"distinct on (jobs.id), jobs.*",
+	).Joins(
+		"join attacks on jobs.attack_id = attacks.id",
+	).Joins(
+		"join hashlists on attack.hashlist_id = hashlists.id",
+	).Where(
+		"hashlists.project_id = ?", projectId,
+	).Where(
+		"jobs.attack_id = ?", attackId,
+	).Find(&jobs).Error
+
 	if err != nil {
 		return nil, err
 	}

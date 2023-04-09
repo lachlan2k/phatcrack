@@ -98,10 +98,8 @@ func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
 	}
 
 	info := dbnew.AgentInfo{
-		Status: dbnew.AgentStatusAlive,
-		LastCheckIn: &dbnew.AgentLastCheckIn{
-			Time: time.Now(),
-		},
+		Status:             dbnew.AgentStatusAlive,
+		LastCheckIn:        time.Now(),
 		AvailableWordlists: availableWordlists,
 		AvailableRuleFiles: availableRuleFiles,
 		ActiveJobIDs:       payload.ActiveJobIDs,
@@ -130,8 +128,8 @@ func (a *Agent) IsHealthy() bool {
 
 	nowSubMin := time.Now().Add(-time.Minute)
 
-	// If we've not heard from it for 60 seconds, consider it unhealthy
-	return a.latestAgentInfo.LastCheckIn.Time.Before(nowSubMin)
+	// If we've heard from it in the last minute, it's healthy
+	return a.latestAgentInfo.LastCheckIn.After(nowSubMin)
 }
 
 func (a *Agent) ActiveJobCount() int {

@@ -20,21 +20,17 @@ type Agent struct {
 	AgentInfo datatypes.JSONType[AgentInfo]
 }
 
-type AgentLastCheckIn struct {
-	Time time.Time `json:"time,omitempty"`
-}
-
 type AgentFile struct {
 	Name string `json:"name"`
 	Size int64  `json:"size"`
 }
 
 type AgentInfo struct {
-	Status             string            `json:"status"`
-	LastCheckIn        *AgentLastCheckIn `json:"last_checkin,omitempty"`
-	AvailableWordlists []AgentFile       `json:"available_wordlists,omitempty"`
-	AvailableRuleFiles []AgentFile       `json:"available_rulefiles,omitempty"`
-	ActiveJobIDs       []string          `json:"active_job_ids,omitempty"`
+	Status             string      `json:"status"`
+	LastCheckIn        time.Time   `json:"last_checkin,omitempty"`
+	AvailableWordlists []AgentFile `json:"available_wordlists,omitempty"`
+	AvailableRuleFiles []AgentFile `json:"available_rulefiles,omitempty"`
+	ActiveJobIDs       []string    `json:"active_job_ids,omitempty"`
 }
 
 func CreateAgent(name string) (newAgent *Agent, plaintextKey string, err error) {

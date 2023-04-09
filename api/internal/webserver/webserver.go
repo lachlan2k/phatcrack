@@ -35,8 +35,6 @@ func Listen(port string) error {
 		WhitelistPaths: []string{
 			"/api/v1/agent/handle/ws",
 			"/api/v1/auth/login",
-			// "/api/v1/auth/refresh",
-			// "/api/v1/auth/whoami",
 		},
 	}
 
