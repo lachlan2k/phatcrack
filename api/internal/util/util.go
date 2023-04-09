@@ -10,6 +10,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -53,4 +54,22 @@ func GenAgentKeyAndHash() (keyStr string, hashStr string, err error) {
 	hashStr = HashAgentKey(keyStr)
 
 	return
+}
+
+func isValidUUID(id string) bool {
+	if id == "" {
+		return false
+	}
+	_, err := uuid.Parse(id)
+	return err == nil
+}
+
+func AreValidUUIDs(candidates ...string) bool {
+	for _, candidate := range candidates {
+		if !isValidUUID(candidate) {
+			return false
+		}
+	}
+
+	return true
 }

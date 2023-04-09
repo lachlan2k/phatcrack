@@ -61,6 +61,9 @@ func handleProjectCreate(c echo.Context) error {
 
 func handleProjectGet(c echo.Context) error {
 	projId := c.Param("id")
+	if !util.AreValidUUIDs(projId) {
+		return echo.ErrBadRequest
+	}
 
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {

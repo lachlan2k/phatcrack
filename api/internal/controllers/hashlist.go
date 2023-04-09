@@ -23,6 +23,9 @@ func handleHashlistGet(c echo.Context) error {
 
 func handleHashlistCreate(c echo.Context) error {
 	projId := c.Param("proj-id")
+	if !util.AreValidUUIDs(projId) {
+		return echo.ErrBadRequest
+	}
 
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {

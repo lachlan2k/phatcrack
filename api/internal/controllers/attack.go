@@ -14,6 +14,9 @@ import (
 func handleAttackGetAllForHashlist(c echo.Context) error {
 	projId := c.Param("proj-id")
 	hashlistId := c.Param("hashlist-id")
+	if !util.AreValidUUIDs(projId, hashlistId) {
+		return echo.ErrBadRequest
+	}
 
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
@@ -53,6 +56,9 @@ func handleAttackGet(c echo.Context) error {
 	projId := c.Param("proj-id")
 	hashlistId := c.Param("hashlist-id")
 	attackId := c.Param("attack-id")
+	if !util.AreValidUUIDs(projId, hashlistId, attackId) {
+		return echo.ErrBadRequest
+	}
 
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {

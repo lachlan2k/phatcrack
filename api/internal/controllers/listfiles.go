@@ -23,6 +23,10 @@ func HookListsEndpoints(api *echo.Group) {
 
 func handleGetWordlist(c echo.Context) error {
 	id := c.Param("id")
+	if !util.AreValidUUIDs(id) {
+		return echo.ErrBadRequest
+	}
+
 	list, err := dbnew.GetWordlist(id)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrNotFound
@@ -36,6 +40,10 @@ func handleGetWordlist(c echo.Context) error {
 
 func handlGetRuleFile(c echo.Context) error {
 	id := c.Param("id")
+	if !util.AreValidUUIDs(id) {
+		return echo.ErrBadRequest
+	}
+
 	list, err := dbnew.GetRuleFile(id)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrNotFound

@@ -18,6 +18,10 @@ func handleAttackStart(c echo.Context) error {
 	projId := c.Param("proj-id")
 	hashlistId := c.Param("hashlist-id")
 	attackId := c.Param("attack-id")
+	if !util.AreValidUUIDs(projId, hashlistId, attackId) {
+		return echo.ErrBadRequest
+	}
+
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
@@ -75,6 +79,9 @@ func handleAttackStart(c echo.Context) error {
 func handleAttackJobGetAll(c echo.Context) error {
 	projId := c.Param("proj-id")
 	attackId := c.Param("attack-id")
+	if !util.AreValidUUIDs(projId, attackId) {
+		return echo.ErrBadRequest
+	}
 
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
@@ -111,6 +118,10 @@ func handleAttackJobGetAll(c echo.Context) error {
 func handleAttackJobGet(c echo.Context) error {
 	projId := c.Param("proj-id")
 	jobId := c.Param("job-id")
+	if !util.AreValidUUIDs(projId, jobId) {
+		return echo.ErrBadRequest
+	}
+
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
@@ -157,6 +168,10 @@ func handleAttackJobWatch(c echo.Context) error {
 	}
 
 	jobId := c.Param("job-id")
+	if !util.AreValidUUIDs(jobId) {
+		return echo.ErrBadRequest
+	}
+
 	jobProjId, err := dbnew.GetJobProjID(jobId)
 	if err != nil {
 		if err == dbnew.ErrNotFound {
