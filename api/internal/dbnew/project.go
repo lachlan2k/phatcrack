@@ -69,14 +69,10 @@ type HashlistHash struct {
 
 type Attack struct {
 	UUIDBaseModel
-	HashcatParams datatypes.JSON
+	HashcatParams datatypes.JSONType[hashcattypes.HashcatParams]
 
 	Jobs       []Job
 	HashlistID uuid.UUID `gorm:"type:uuid"`
-}
-
-func hashcatJSONToDTO(_ datatypes.JSON) hashcattypes.HashcatParams {
-	return hashcattypes.HashcatParams{}
 }
 
 func (a *Attack) ToDTO() apitypes.AttackDTO {
@@ -87,7 +83,7 @@ func (a *Attack) ToDTO() apitypes.AttackDTO {
 
 	return apitypes.AttackDTO{
 		ID:            a.ID.String(),
-		HashcatParams: hashcatJSONToDTO(a.HashcatParams),
+		HashcatParams: a.HashcatParams.Data,
 		// ID:            a.ID.Hex(),
 		// HashType:      a.HashType,
 		// Hashes:        hashes,
@@ -136,4 +132,13 @@ func GetAllProjectsForUser(userId string) ([]Project, error) {
 	}
 
 	return projs, err
+}
+
+func GetAttack(attackId string) (*Attack, error) {
+	var attack Attack
+	err := GetInstance().First(&attack, "id = ?", attackId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &attack, nil
 }

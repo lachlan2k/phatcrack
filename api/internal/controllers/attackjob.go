@@ -46,8 +46,22 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
+	attack, err := dbnew.GetAttack(attackId)
+	if err != nil {
+		return util.ServerError("Something went wrong getting attack to start", err)
+	}
+
+	targetHashes := make([]string, len(hashlist.Hashes))
+	for i, hash := range hashlist.Hashes {
+		targetHashes[i] = hash.NormalizedHash
+	}
+
 	newJob, err := dbnew.CreateJob(&dbnew.Job{
-		// TODO
+		HashlistVersion: hashlist.Version,
+		AttackID:        &attack.ID,
+		HashcatParams:   attack.HashcatParams,
+		TargetHashes:    targetHashes,
+		HashType:        hashlist.HashType,
 	})
 
 	if err != nil {
