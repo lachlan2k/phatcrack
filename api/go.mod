@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/lachlan2k/phatcrack/common v0.0.0
-	go.mongodb.org/mongo-driver v1.11.2
+	github.com/lib/pq v1.10.7
 	golang.org/x/crypto v0.7.0
 	gorm.io/datatypes v1.1.2-0.20230323024724-8e2e3c689dc8
 	gorm.io/driver/postgres v1.5.0

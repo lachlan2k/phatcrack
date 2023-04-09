@@ -6,7 +6,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
+	"github.com/lib/pq"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 const (
@@ -35,34 +37,35 @@ type Job struct {
 	HashlistVersion uint
 
 	Attack   Attack
-	AttackID uuid.UUID `gorm:"type:uuid"`
+	AttackID *uuid.UUID `gorm:"type:uuid"`
 
 	HashcatParams datatypes.JSONType[hashcattypes.HashcatParams]
 
-	TargetHashes []string `gorm:"type:text[]"`
+	TargetHashes pq.StringArray `gorm:"type:text[]"`
 	HashType     uint
 
 	RuntimeData JobRuntimeData
 
 	AssignedAgent   Agent
-	AssignedAgentID uuid.UUID `gorm:"type:uuid"`
+	AssignedAgentID *uuid.UUID `gorm:"type:uuid"`
 
-	CrackedHashes []JobCrackedHash
+	CrackedHashes datatypes.JSONSlice[JobCrackedHash]
 }
 
 type JobRuntimeData struct {
+	SimpleBaseModel
 	JobID uuid.UUID `gorm:"type:uuid"`
 
 	// when we ask the job to start
 	StartRequestTime time.Time
 	// when it actually starts on the agent
-	StartedTime     time.Time
-	StoppedTime     time.Time
-	Status          string
-	StopReason      string
-	ErrorString     string
-	AssignedAgentID uuid.UUID
+	StartedTime time.Time
+	StoppedTime time.Time
+	Status      string
+	StopReason  string
+	ErrorString string
 
+	// TODO: evaluate JSONB([]line) vs JOSNB(line)[]
 	OutputLines   datatypes.JSONSlice[JobRuntimeOutputLine]
 	StatusUpdates datatypes.JSONSlice[hashcattypes.HashcatStatus]
 }
@@ -107,10 +110,8 @@ func (j *Job) ToSimpleDTO() apitypes.JobSimpleDTO {
 }
 
 type JobCrackedHash struct {
-	SimpleBaseModel
 	Hash         string
 	PlaintextHex string
-	JobID        string
 }
 
 func (h *JobCrackedHash) ToDTO() apitypes.JobCrackedHashDTO {
@@ -146,33 +147,99 @@ func CreateJob(job *Job) (*Job, error) {
 }
 
 func SetJobStarted(jobId string, startTime time.Time) error {
-	// TODO
-	return nil
+	jobUuid, err := uuid.Parse(jobId)
+	if err != nil {
+		return err
+	}
+
+	return GetInstance().Where("job_id = ?", jobUuid).Updates(&JobRuntimeData{
+		JobID:       jobUuid,
+		Status:      JobStatusStarted,
+		StartedTime: startTime,
+	}).Error
 }
 
-func SetJobExited(jobId string, reason string, startTime time.Time) error {
-	// TODO
-	return nil
+func SetJobExited(jobId string, reason string, exitTime time.Time) error {
+	jobUuid, err := uuid.Parse(jobId)
+	if err != nil {
+		return err
+	}
+
+	return GetInstance().Where("job_id = ?", jobUuid).Updates(&JobRuntimeData{
+		JobID:       jobUuid,
+		Status:      JobStatusExited,
+		StopReason:  reason,
+		StoppedTime: exitTime,
+	}).Error
 }
 
 func SetJobScheduled(jobId string, agentId string) error {
-	// TODO
-	return nil
+	jobUuid, err := uuid.Parse(jobId)
+	if err != nil {
+		return err
+	}
+
+	agentUuid, err := uuid.Parse(agentId)
+	if err != nil {
+		return err
+	}
+
+	return GetInstance().Transaction(func(tx *gorm.DB) error {
+		err := tx.Where("job_id = ?", jobUuid).Updates(&JobRuntimeData{
+			JobID:            jobUuid,
+			Status:           JobStatusAwaitingStart,
+			StartRequestTime: time.Now(),
+		}).Error
+		if err != nil {
+			return err
+		}
+
+		err = tx.Where("id = ?", jobUuid).Updates(&Job{
+			AssignedAgentID: &agentUuid,
+		}).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
 
 func AddJobCrackedHash(jobId string, hash string, plaintextHex string) error {
-	// TODO
-	return nil
+	dbLine := datatypes.NewJSONType(JobCrackedHash{
+		Hash:         hash,
+		PlaintextHex: plaintextHex,
+	})
+
+	err := GetInstance().Exec(
+		"update jobs set cracked_hashes = cracked_hashes || ? where id = ?",
+		dbLine, jobId,
+	).Error
+
+	return err
 }
 
 func AddJobStdline(jobId string, line string, stream string) error {
-	// TODO
-	return nil
+	dbLine := datatypes.NewJSONType(JobRuntimeOutputLine{
+		Stream: stream,
+		Line:   line,
+	})
+
+	err := GetInstance().Exec(
+		"update job_runtime_data set output_lines = output_lines || ? where job_id = ?",
+		dbLine, jobId,
+	).Error
+
+	return err
 }
 
 func AddJobStatusUpdate(jobId string, status hashcattypes.HashcatStatus) error {
-	// TODO
-	return nil
+	err := GetInstance().Exec(
+		"update job_runtime_data set status_updates = status_updates || ? where job_id = ?",
+		datatypes.NewJSONType(status), jobId,
+	).Error
+
+	return err
 }
 
 func GetJobHashtype(jobId string) (uint, error) {

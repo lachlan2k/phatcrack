@@ -21,6 +21,33 @@ func main() {
 	// dbnew.RegisterUser("admin", "changeme", "admin")
 	// dbnew.RegisterUser("bobby", "changeme", "admin")
 	// dbnew.RegisterUser("lachlan", "changeme", "admin")
+	// db := dbnew.GetInstance()
+	// for i := 0; i < 10000; i++ {
+	// dbnew.AddJobStdline("c66e79b7-cee8-4dad-aeb3-8fea50a4b5ac", dbnew.JobStdLineStreamStdout, "foo")
+	// }
+
+	// // Push to target_hashes
+	// //  update jobs set target_hashes = array_append(target_hashes, 'foo')  where id = 'dfe6c30e-703d-47eb-9f75-ee50b9744cc7';
+
+	// // db.Model
+	// j := &dbnew.Job{
+	// 	RuntimeData: dbnew.JobRuntimeData{
+	// 		Status:        "foo",
+	// 		OutputLines:   datatypes.NewJSONSlice([]dbnew.JobRuntimeOutputLine{}),
+	// 		StatusUpdates: datatypes.NewJSONSlice([]hashcattypes.HashcatStatus{}),
+	// 	},
+	// 	HashlistVersion: 2,
+	// 	HashcatParams: datatypes.JSONType[hashcattypes.HashcatParams]{
+	// 		Data: hashcattypes.HashcatParams{
+	// 			AttackMode: 123,
+	// 		},
+	// 	},
+	// 	TargetHashes:    []string{"abc", "def", "ghi"},
+	// 	AssignedAgentID: nil,
+	// }
+
+	// db.Create(j)
+	// db.Save(j)
 
 	port := "3000"
 	if os.Getenv("PORT") != "" {
