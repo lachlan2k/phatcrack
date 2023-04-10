@@ -134,6 +134,15 @@ func GetAllProjectsForUser(userId string) ([]Project, error) {
 	return projs, err
 }
 
+func GetHashlist(hashlistId string) (*Hashlist, error) {
+	var hashlist Hashlist
+	err := GetInstance().First(&hashlist, "id = ?", hashlistId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &hashlist, nil
+}
+
 func GetAttack(attackId string) (*Attack, error) {
 	var attack Attack
 	err := GetInstance().First(&attack, "id = ?", attackId).Error

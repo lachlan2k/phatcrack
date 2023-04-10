@@ -1,14 +1,11 @@
 package controllers
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
-	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
 func handleAttackGetAllForHashlist(c echo.Context) error {
@@ -35,21 +32,8 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	res := apitypes.AttackMultipleDTO{}
-
-	// TODO: stop being lazy and write a db query for this
-	for _, hashlist := range proj.Hashlists {
-		if hashlist.ID.String() == hashlistId {
-			res.Attacks = make([]apitypes.AttackDTO, len(hashlist.Attacks))
-			for i, attack := range hashlist.Attacks {
-				res.Attacks[i] = attack.ToDTO()
-			}
-
-			return c.JSON(http.StatusOK, res)
-		}
-	}
-
-	return echo.ErrNotFound
+	// res := apitypes.AttackMultipleDTO{}
+	return echo.ErrNotImplemented
 }
 
 func handleAttackGet(c echo.Context) error {
@@ -77,18 +61,7 @@ func handleAttackGet(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	// TODO
-	for _, hashlist := range proj.Hashlists {
-		if hashlist.ID.String() == hashlistId {
-			for _, attack := range hashlist.Attacks {
-				if attack.ID.String() == attackId {
-					return c.JSON(http.StatusOK, attack.ToDTO())
-				}
-			}
-		}
-	}
-
-	return echo.ErrForbidden
+	return echo.ErrNotImplemented
 }
 
 func handleAttackCreate(c echo.Context) error {

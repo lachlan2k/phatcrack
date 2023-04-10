@@ -39,16 +39,28 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	// TODO: tidy up when I understand gorm better
-	var hashlist dbnew.Hashlist
-	err = dbnew.GetInstance().Joins("HashlistAttack").Joins("HashlistHash").Where("ID = ?", hashlistId).Where("ProjectID = ?", projId).Where("HashlistAttack.ID = ?", attackId).First(&hashlist).Error
+	hashlist, err := dbnew.GetHashlist(hashlistId)
 	if err == dbnew.ErrNotFound {
 		return echo.ErrNotFound
 	}
+	if err != nil {
+		return util.ServerError("Something went wrong getting hashlist to start attack on", err)
+	}
+
+	if hashlist.ProjectID != proj.ID {
+		return echo.ErrForbidden
+	}
 
 	attack, err := dbnew.GetAttack(attackId)
+	if err == dbnew.ErrNotFound {
+		return echo.ErrNotFound
+	}
 	if err != nil {
 		return util.ServerError("Something went wrong getting attack to start", err)
+	}
+
+	if attack.HashlistID != hashlist.ID {
+		return echo.ErrForbidden
 	}
 
 	targetHashes := make([]string, len(hashlist.Hashes))
