@@ -64,6 +64,8 @@ func runMigrations() {
 	instance.AutoMigrate(&Attack{})
 
 	instance.AutoMigrate(&User{})
+
+	instance.AutoMigrate(&ConfigItem{})
 }
 
 type pgJSONBArray[T interface{}] struct {

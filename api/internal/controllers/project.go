@@ -17,7 +17,7 @@ func HookProjectEndpoints(api *echo.Group) {
 		return c.String(http.StatusOK, "pong lists")
 	})
 
-	api.GET("", handleProjectGetAll)
+	api.GET("/all", handleProjectGetAll)
 	api.POST("/create", handleProjectCreate)
 	api.GET("/:id", handleProjectGet)
 
@@ -32,7 +32,7 @@ func HookProjectEndpoints(api *echo.Group) {
 
 	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job", handleAttackJobGetAll)
 	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job/:job-id", handleAttackJobGet)
-	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job/:job-id", handleAttackJobWatch)
+	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job/:job-id/watch", handleAttackJobWatch)
 
 }
 

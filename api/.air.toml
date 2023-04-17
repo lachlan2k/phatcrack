@@ -1,0 +1,7 @@
+root = "."
+tmp_dir = "/tmp/air/"
+
+[build]
+  bin = "/tmp/air/main"
+  cmd = "go build -o /tmp/air/main ."
+  include_ext = ["go"]

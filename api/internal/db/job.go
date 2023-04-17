@@ -46,7 +46,7 @@ type Job struct {
 
 	RuntimeData JobRuntimeData
 
-	AssignedAgent   Agent
+	AssignedAgent   Agent      `gorm:"constraint:OnDelete:SET NULL;"`
 	AssignedAgentID *uuid.UUID `gorm:"type:uuid"`
 }
 

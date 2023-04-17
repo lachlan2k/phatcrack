@@ -12,9 +12,9 @@ type Project struct {
 	UUIDBaseModel
 	Name        string
 	Description string
-	Hashlists   []Hashlist
+	Hashlists   []Hashlist `gorm:"constraint:OnDelete:CASCADE;"`
 
-	OwnerUser   User
+	OwnerUser   User      `gorm:"constraint:OnDelete:SET NULL;"`
 	OwnerUserID uuid.UUID `gorm:"type:uuid"`
 
 	ProjectShare []ProjectShare
@@ -37,10 +37,10 @@ type ProjectShare struct {
 	SimpleBaseModel
 
 	ProjectID uuid.UUID `gorm:"type:uuid"`
-	Project   *Project
+	Project   *Project  `gorm:"constraint:OnDelete:CASCADE;"`
 
 	UserID uuid.UUID `gorm:"type:uuid"`
-	User   *User
+	User   *User     `gorm:"constraint:OnDelete:CASCADE;"`
 }
 
 type Hashlist struct {
@@ -51,9 +51,9 @@ type Hashlist struct {
 	Version uint
 
 	HashType uint
-	Hashes   []HashlistHash
+	Hashes   []HashlistHash `gorm:"constraint:OnDelete:CASCADE;"`
 
-	Attacks []Attack
+	Attacks []Attack `gorm:"constraint:OnDelete:CASCADE;"`
 }
 
 func CreateHashlist(hashlist *Hashlist) (*Hashlist, error) {
@@ -71,7 +71,7 @@ type Attack struct {
 	UUIDBaseModel
 	HashcatParams datatypes.JSONType[hashcattypes.HashcatParams]
 
-	Jobs       []Job
+	Jobs       []Job     `gorm:"constraint:OnDelete:CASCADE;"`
 	HashlistID uuid.UUID `gorm:"type:uuid"`
 }
 
