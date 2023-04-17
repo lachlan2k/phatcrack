@@ -1,4 +1,4 @@
-package dbnew
+package db
 
 type PotfileEntry struct {
 	UUIDBaseModel

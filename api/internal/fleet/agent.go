@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
@@ -17,12 +17,12 @@ type Agent struct {
 	conn            *websocket.Conn
 	agentId         string
 	ready           bool
-	latestAgentInfo *dbnew.AgentInfo
+	latestAgentInfo *db.AgentInfo
 }
 
 func (a *Agent) Kill() {
 	a.conn.Close()
-	dbnew.UpdateAgentStatus(a.agentId, dbnew.AgentStatusDisconnected)
+	db.UpdateAgentStatus(a.agentId, db.AgentStatusDisconnected)
 	RemoveAgentByID(a.agentId)
 }
 
@@ -80,32 +80,32 @@ func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to hearbeat dto: %v", msg.Payload, err)
 	}
 
-	availableWordlists := make([]dbnew.AgentFile, len(payload.Wordlists))
-	availableRuleFiles := make([]dbnew.AgentFile, len(payload.RuleFiles))
+	availableWordlists := make([]db.AgentFile, len(payload.Wordlists))
+	availableRuleFiles := make([]db.AgentFile, len(payload.RuleFiles))
 
 	for i, list := range payload.Wordlists {
-		availableWordlists[i] = dbnew.AgentFile{
+		availableWordlists[i] = db.AgentFile{
 			Name: list.Name,
 			Size: list.Size,
 		}
 	}
 
 	for i, file := range payload.RuleFiles {
-		availableRuleFiles[i] = dbnew.AgentFile{
+		availableRuleFiles[i] = db.AgentFile{
 			Name: file.Name,
 			Size: file.Size,
 		}
 	}
 
-	info := dbnew.AgentInfo{
-		Status:             dbnew.AgentStatusAlive,
+	info := db.AgentInfo{
+		Status:             db.AgentStatusAlive,
 		LastCheckIn:        time.Now(),
 		AvailableWordlists: availableWordlists,
 		AvailableRuleFiles: availableRuleFiles,
 		ActiveJobIDs:       payload.ActiveJobIDs,
 	}
 
-	err = dbnew.UpdateAgentInfo(a.agentId, info)
+	err = db.UpdateAgentInfo(a.agentId, info)
 
 	if err != nil {
 		return err
@@ -142,7 +142,7 @@ func (a *Agent) ActiveJobCount() int {
 func (a *Agent) Handle() error {
 	log.Printf("handling agent")
 	defer a.Kill()
-	err := dbnew.UpdateAgentStatus(a.agentId, dbnew.AgentStatusAlive)
+	err := db.UpdateAgentStatus(a.agentId, db.AgentStatusAlive)
 	if err != nil {
 		return err
 	}

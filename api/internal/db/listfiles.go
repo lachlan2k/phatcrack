@@ -1,4 +1,4 @@
-package dbnew
+package db
 
 import "github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 

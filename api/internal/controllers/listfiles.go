@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
@@ -27,8 +27,8 @@ func handleGetWordlist(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	list, err := dbnew.GetWordlist(id)
-	if err == dbnew.ErrNotFound {
+	list, err := db.GetWordlist(id)
+	if err == db.ErrNotFound {
 		return echo.ErrNotFound
 	}
 	if err != nil {
@@ -44,8 +44,8 @@ func handlGetRuleFile(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	list, err := dbnew.GetRuleFile(id)
-	if err == dbnew.ErrNotFound {
+	list, err := db.GetRuleFile(id)
+	if err == db.ErrNotFound {
 		return echo.ErrNotFound
 	}
 	if err != nil {
@@ -56,7 +56,7 @@ func handlGetRuleFile(c echo.Context) error {
 }
 
 func handleGetAllWordlists(c echo.Context) error {
-	lists, err := dbnew.GetAllWordlists()
+	lists, err := db.GetAllWordlists()
 	if err != nil {
 		return util.ServerError("Failed to fetch wordlists", err)
 	}
@@ -71,7 +71,7 @@ func handleGetAllWordlists(c echo.Context) error {
 }
 
 func handleGetAllRuleFiles(c echo.Context) error {
-	lists, err := dbnew.GetAllRuleFiles()
+	lists, err := db.GetAllRuleFiles()
 	if err != nil {
 		return util.ServerError("Failed to fetch rulefiles", err)
 	}

@@ -1,4 +1,4 @@
-package dbnew
+package db
 
 import (
 	"github.com/google/uuid"

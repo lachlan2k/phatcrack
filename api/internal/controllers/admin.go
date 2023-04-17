@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
@@ -31,7 +31,7 @@ func handleCreateUser(c echo.Context) error {
 
 	// TODO: pro-active handling of duplicate username
 	// could also check to see what happens when the constraint fails
-	newUser, err := dbnew.RegisterUser(req.Username, req.Password, req.Role)
+	newUser, err := db.RegisterUser(req.Username, req.Password, req.Role)
 	if err != nil {
 		return util.ServerError("Failed to create user", err)
 	}
@@ -49,7 +49,7 @@ func handleAgentCreate(c echo.Context) error {
 		return err
 	}
 
-	newAgent, key, err := dbnew.CreateAgent(req.Name)
+	newAgent, key, err := db.CreateAgent(req.Name)
 	if err != nil {
 		return util.ServerError("Failed to create agent", err)
 	}

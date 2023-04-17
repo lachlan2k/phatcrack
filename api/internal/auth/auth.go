@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 )
 
 const TokenCookieName = "auth"
@@ -30,7 +30,7 @@ type AuthClaims struct {
 	jwt.StandardClaims
 }
 
-func UserToClaims(user *dbnew.User) *AuthClaims {
+func UserToClaims(user *db.User) *AuthClaims {
 	return &AuthClaims{
 		UserClaims: UserClaims{
 			ID:       user.ID.String(),

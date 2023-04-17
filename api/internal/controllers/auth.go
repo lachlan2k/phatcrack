@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"golang.org/x/crypto/bcrypt"
@@ -43,7 +43,7 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			return err
 		}
 
-		user, err := dbnew.GetUserByID(claims.ID)
+		user, err := db.GetUserByID(claims.ID)
 		if err != nil {
 			return util.ServerError("Failed to refresh user data", err)
 		}
@@ -75,8 +75,8 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 		minTime := time.After(250 * time.Millisecond)
 		defer func() { <-minTime }()
 
-		user, err := dbnew.GetUserByUsername(req.Username)
-		if err == dbnew.ErrNotFound {
+		user, err := db.GetUserByUsername(req.Username)
+		if err == db.ErrNotFound {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		} else if err != nil {
 			return util.ServerError("Database error", err)

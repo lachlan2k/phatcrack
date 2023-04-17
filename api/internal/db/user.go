@@ -1,4 +1,4 @@
-package dbnew
+package db
 
 import (
 	"strings"

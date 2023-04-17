@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 )
 
-func HasRightsToProject(user *auth.UserClaims, project *dbnew.Project) bool {
+func HasRightsToProject(user *auth.UserClaims, project *db.Project) bool {
 	if project.OwnerUserID.String() == user.ID {
 		return true
 	}
@@ -22,8 +22,8 @@ func HasRightsToProject(user *auth.UserClaims, project *dbnew.Project) bool {
 }
 
 func HasRightsToProjectID(user *auth.UserClaims, projId string) (bool, error) {
-	proj, err := dbnew.GetProjectForUser(projId, user.ID)
-	if proj == nil || err == dbnew.ErrNotFound {
+	proj, err := db.GetProjectForUser(projId, user.ID)
+	if proj == nil || err == db.ErrNotFound {
 		return false, nil
 	}
 	if err != nil {
@@ -33,8 +33,8 @@ func HasRightsToProjectID(user *auth.UserClaims, projId string) (bool, error) {
 }
 
 func HasRightsToJobID(user *auth.UserClaims, jobID string) (bool, error) {
-	projId, err := dbnew.GetJobProjID(jobID)
-	if err == dbnew.ErrNotFound {
+	projId, err := db.GetJobProjID(jobID)
+	if err == db.ErrNotFound {
 		return false, nil
 	}
 	if err != nil {

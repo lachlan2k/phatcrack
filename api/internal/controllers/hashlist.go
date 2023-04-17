@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/hashcathelpers"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
@@ -52,13 +52,13 @@ func handleHashlistCreate(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate and normalize hashes. Please ensure your hashes are valid for the given hash type.").SetInternal(err)
 	}
 
-	hashes := make([]dbnew.HashlistHash, 0, len(normalizedHashes))
+	hashes := make([]db.HashlistHash, 0, len(normalizedHashes))
 	for i, inputHash := range req.InputHashes {
 		hashes[i].InputHash = inputHash
 		hashes[i].NormalizedHash = normalizedHashes[i]
 	}
 
-	newHashlist, err := dbnew.CreateHashlist(&dbnew.Hashlist{
+	newHashlist, err := db.CreateHashlist(&db.Hashlist{
 		ProjectID: uuid.MustParse(projId),
 
 		Name:    req.Name,

@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
@@ -20,8 +20,8 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projId, user.ID)
-	if err == dbnew.ErrNotFound {
+	proj, err := db.GetProjectForUser(projId, user.ID)
+	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -49,8 +49,8 @@ func handleAttackGet(c echo.Context) error {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projId, user.ID)
-	if err == dbnew.ErrNotFound {
+	proj, err := db.GetProjectForUser(projId, user.ID)
+	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {

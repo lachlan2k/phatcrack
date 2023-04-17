@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
@@ -47,7 +47,7 @@ func handleProjectCreate(c echo.Context) error {
 		return err
 	}
 
-	newProj, err := dbnew.CreateProject(&dbnew.Project{
+	newProj, err := db.CreateProject(&db.Project{
 		Name:        req.Name,
 		Description: req.Description,
 		OwnerUserID: uuid.MustParse(user.ID),
@@ -70,8 +70,8 @@ func handleProjectGet(c echo.Context) error {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projId, user.ID)
-	if err == dbnew.ErrNotFound {
+	proj, err := db.GetProjectForUser(projId, user.ID)
+	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -93,10 +93,10 @@ func handleProjectGetAll(c echo.Context) error {
 		return err
 	}
 
-	projects, err := dbnew.GetAllProjectsForUser(user.ID)
+	projects, err := db.GetAllProjectsForUser(user.ID)
 	var res apitypes.ProjectResponseMultipleDTO
 
-	if err == dbnew.ErrNotFound {
+	if err == db.ErrNotFound {
 		return c.JSON(http.StatusOK, res)
 	}
 	if err != nil {

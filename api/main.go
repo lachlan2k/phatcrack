@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/webserver"
 )
 
@@ -13,7 +13,7 @@ func main() {
 		log.Fatal("DB_DSN was not specified")
 	}
 
-	err := dbnew.Connect(os.Getenv("DB_DSN"))
+	err := db.Connect(os.Getenv("DB_DSN"))
 	if err != nil {
 		log.Fatalf("database connection failed: %v", err)
 	}

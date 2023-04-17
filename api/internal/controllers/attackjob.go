@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
@@ -27,8 +27,8 @@ func handleAttackStart(c echo.Context) error {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projId, user.ID)
-	if err == dbnew.ErrNotFound {
+	proj, err := db.GetProjectForUser(projId, user.ID)
+	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -39,8 +39,8 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	hashlist, err := dbnew.GetHashlist(hashlistId)
-	if err == dbnew.ErrNotFound {
+	hashlist, err := db.GetHashlist(hashlistId)
+	if err == db.ErrNotFound {
 		return echo.ErrNotFound
 	}
 	if err != nil {
@@ -51,8 +51,8 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	attack, err := dbnew.GetAttack(attackId)
-	if err == dbnew.ErrNotFound {
+	attack, err := db.GetAttack(attackId)
+	if err == db.ErrNotFound {
 		return echo.ErrNotFound
 	}
 	if err != nil {
@@ -68,7 +68,7 @@ func handleAttackStart(c echo.Context) error {
 		targetHashes[i] = hash.NormalizedHash
 	}
 
-	newJob, err := dbnew.CreateJob(&dbnew.Job{
+	newJob, err := db.CreateJob(&db.Job{
 		HashlistVersion: hashlist.Version,
 		AttackID:        &attack.ID,
 		HashcatParams:   attack.HashcatParams,
@@ -114,8 +114,8 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projId, user.ID)
-	if err == dbnew.ErrNotFound {
+	proj, err := db.GetProjectForUser(projId, user.ID)
+	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -126,7 +126,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	jobs, err := dbnew.GetJobsForAttack(attackId, projId)
+	jobs, err := db.GetJobsForAttack(attackId, projId)
 	if err != nil {
 		return util.ServerError("Failed to get jobs for attack", err)
 	}
@@ -153,8 +153,8 @@ func handleAttackJobGet(c echo.Context) error {
 		return err
 	}
 
-	proj, err := dbnew.GetProjectForUser(projId, user.ID)
-	if err == dbnew.ErrNotFound {
+	proj, err := db.GetProjectForUser(projId, user.ID)
+	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
 	if err != nil {
@@ -165,8 +165,8 @@ func handleAttackJobGet(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	job, err := dbnew.GetJob(jobId)
-	if err == dbnew.ErrNotFound {
+	job, err := db.GetJob(jobId)
+	if err == db.ErrNotFound {
 		return echo.ErrNotFound
 	}
 
@@ -198,9 +198,9 @@ func handleAttackJobWatch(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	jobProjId, err := dbnew.GetJobProjID(jobId)
+	jobProjId, err := db.GetJobProjID(jobId)
 	if err != nil {
-		if err == dbnew.ErrNotFound {
+		if err == db.ErrNotFound {
 			return echo.NewHTTPError(http.StatusNotFound, "Job couldn't be found")
 		} else {
 			return util.ServerError("Error fetching job", err)

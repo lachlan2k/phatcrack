@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/lachlan2k/phatcrack/api/internal/dbnew"
+	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
@@ -124,14 +124,14 @@ func ScheduleJob(jobId string) (string, error) {
 		return "", ErrNoAgentsOnline
 	}
 
-	jobDb, err := dbnew.GetJob(jobId)
-	if err == dbnew.ErrNotFound {
+	jobDb, err := db.GetJob(jobId)
+	if err == db.ErrNotFound {
 		return "", ErrJobDoesntExist
 	}
 	job := jobDb.ToDTO()
 
 	// TOOD
-	// if job.RuntimeData.Status != dbnew.JobStatusCreated {
+	// if job.RuntimeData.Status != db.JobStatusCreated {
 	// return "", ErrJobAlreadyScheduled
 	// }
 
@@ -165,7 +165,7 @@ func ScheduleJob(jobId string) (string, error) {
 		return "", ErrNoAgentsOnline
 	}
 
-	err = dbnew.SetJobScheduled(job.ID, leastBusyAgent.agentId)
+	err = db.SetJobScheduled(job.ID, leastBusyAgent.agentId)
 	if err != nil {
 		return "", fmt.Errorf("failed to set job as scheduled in db: %v", err)
 	}
