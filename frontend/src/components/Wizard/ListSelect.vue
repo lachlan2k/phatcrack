@@ -5,8 +5,8 @@ interface ListItem {
   id: string
   name: string
   description: string
-  filename: string
-  size: number
+  filename_on_disk: string
+  size_in_bytes: number
   lines: number
 }
 

@@ -1,9 +1,9 @@
 import { getAllProjects } from '@/api/project'
-import type { ProjectSimpleDetailsDTO } from '@/api/types'
+import type { ProjectDTO } from '@/api/types'
 import { defineStore } from 'pinia'
 
 export type ProjectsState = {
-  projects: ProjectSimpleDetailsDTO[]
+  projects: ProjectDTO[]
 }
 
 export const useProjectsStore = defineStore({

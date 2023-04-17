@@ -1,7 +1,7 @@
 import { client } from '.'
-import type { ProjectCreateDTO, ProjectSimpleDetailsDTO, ProjectResponseMultipleDTO } from './types'
+import type { ProjectCreateDTO, ProjectDTO, ProjectResponseMultipleDTO } from './types'
 
-export function createProject(name: string, description: string): Promise<ProjectSimpleDetailsDTO> {
+export function createProject(name: string, description: string): Promise<ProjectDTO> {
   return client
     .post('/api/v1/project/create', {
       name,

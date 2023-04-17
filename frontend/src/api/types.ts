@@ -18,30 +18,31 @@ export interface AdminUserCreateResponseDTO {
   id: string
   role: string
 }
+export interface AdminIsSetupCompleteResponseDTO {
+  is_complete: boolean
+}
 export interface HashcatParams {
   attack_mode: number
   hash_type: number
   mask: string
+  mask_increment: boolean
+  mask_increment_min: number
+  mask_increment_max: number
+  mask_custom_charsets: string[]
   wordlist_filenames: string[]
   rules_filenames: string[]
   additional_args: string[]
   optimized_kernels: boolean
   slow_candidates: boolean
 }
-export interface HashlistHashDTO {
-  input_hash: string
-  normalized_hash: string
-}
 export interface AttackDTO {
   id: string
-  hash_type: number
-  hashes: HashlistHashDTO[]
   hashcat_params: HashcatParams
 }
 export interface AttackMultipleDTO {
   attacks: AttackDTO[]
 }
-export interface AttackCreateDTO {
+export interface AttackCreateRequestDTO {
   hashcat_params: HashcatParams
   hashes: string[]
   start_immediately: boolean
@@ -49,17 +50,7 @@ export interface AttackCreateDTO {
   description: string
 }
 export interface AttackStartResponseDTO {
-  new_job_id: string
-  agent_id: string
-}
-export interface AttackJobSimpleDTO {
-  id: string
-  project_id: string
-  hashlist_id: string
-  attack_id: string
-}
-export interface AttackJobMultipleDTO {
-  jobs: AttackJobSimpleDTO[]
+  new_job_id: string[]
 }
 export interface AuthLoginRequestDTO {
   username: string
@@ -131,7 +122,10 @@ export interface HashlistCreateRequestDTO {
 export interface HashlistCreateResponseDTO {
   id: string
 }
-
+export interface HashlistHashDTO {
+  input_hash: string
+  normalized_hash: string
+}
 export interface HashlistDTO {
   id: string
   name: string
@@ -153,58 +147,78 @@ export interface JobCreateResponseDTO {
 export interface JobStartResponseDTO {
   agent_id: string
 }
-export interface ListsWordlistCreateDTO {
+export interface JobRuntimeDataDTO {}
+export interface JobCrackedHashDTO {
+  Hash: string
+  PlaintextHex: string
+}
+export interface JobDTO {
+  id: string
+  hashlist_version: number
+  attack_id: string
+  hashcat_params: HashcatParams
+  target_hashes: string[]
+  hash_type: number
+  runtime_data: JobRuntimeDataDTO
+  assigned_agent_id: string
+  cracked_hashes: JobCrackedHashDTO[]
+}
+export interface JobSimpleDTO {
+  id: string
+  hashlist_version: number
+  attack_id: string
+  hash_type: number
+  assigned_agent_id: string
+}
+export interface JobMultipleDTO {
+  jobs: JobSimpleDTO[]
+}
+export interface WordlistCreateDTO {
   name: string
   description: string
   filename: string
   size: number
   lines: number
 }
-export interface ListsRuleFileCreateDTO {
+export interface RuleFileCreateDTO {
   name: string
   description: string
   filename: string
   size: number
   lines: number
 }
-export interface ListsWordlistResponseDTO {
+export interface WordlistDTO {
   id: string
   name: string
   description: string
-  filename: string
-  size: number
+  filename_on_disk: string
+  size_in_bytes: number
   lines: number
 }
-export interface ListsRuleFileResponseDTO {
+export interface RuleFileDTO {
   id: string
   name: string
   description: string
-  filename: string
-  size: number
+  filename_on_disk: string
+  size_in_bytes: number
   lines: number
 }
-export interface ListsGetAllWordlistsDTO {
-  wordlists: ListsWordlistResponseDTO[]
+export interface GetAllWordlistsDTO {
+  wordlists: WordlistDTO[]
 }
-export interface ListsGetAllRuleFilesDTO {
-  rulefiles: ListsRuleFileResponseDTO[]
+export interface GetAllRuleFilesDTO {
+  rulefiles: RuleFileDTO[]
 }
 export interface ProjectCreateDTO {
   name: string
   description: string
 }
-export interface ProjectSimpleDetailsDTO {
-  id: string
-  time_created: number
-  name: string
-  description: string
-}
-export interface ProjectsFullDetailsDTO {
+export interface ProjectDTO {
   id: string
   time_created: number
   name: string
   description: string
 }
 export interface ProjectResponseMultipleDTO {
-  projects: ProjectSimpleDetailsDTO[]
+  projects: ProjectDTO[]
 }
