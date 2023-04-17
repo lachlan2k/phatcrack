@@ -36,7 +36,7 @@ func Connect(dsn string) error {
 	}
 
 	runMigrations()
-	return nil
+	return upsertConfig()
 }
 
 func GetInstance() *gorm.DB {

@@ -21,3 +21,7 @@ type AdminUserCreateResponseDTO struct {
 	ID       string `json:"id"`
 	Role     string `json:"role"`
 }
+
+type AdminIsSetupCompleteResponseDTO struct {
+	IsComplete bool `json:"is_complete"`
+}

@@ -19,6 +19,17 @@ func HookAdminEndpoints(api *echo.Group) {
 		return c.JSON(http.StatusOK, user)
 	})
 
+	api.GET("/is_setup_complete", func(c echo.Context) error {
+		conf, err := db.GetConfigItem(db.ConfigKeyIsSetupComplete)
+		if err != nil {
+			return util.ServerError("Internal server error", err)
+		}
+
+		return c.JSON(http.StatusOK, apitypes.AdminIsSetupCompleteResponseDTO{
+			IsComplete: conf.Value == db.ConfigValueTrue,
+		})
+	})
+
 	api.POST("/user/create", handleCreateUser)
 	api.POST("/agent/create", handleAgentCreate)
 }
