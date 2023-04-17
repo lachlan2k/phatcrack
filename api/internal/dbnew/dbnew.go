@@ -5,7 +5,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
+	"gorm.io/datatypes"
 	"gorm.io/driver/postgres"
+
 	"gorm.io/gorm"
 )
 
@@ -61,4 +64,19 @@ func runMigrations() {
 	instance.AutoMigrate(&Attack{})
 
 	instance.AutoMigrate(&User{})
+}
+
+type pgJSONBArray[T interface{}] struct {
+	arr  pq.GenericArray
+	Data []datatypes.JSONType[T]
+}
+
+func (a *pgJSONBArray[T]) Scan(src interface{}) error {
+	a.Data = make([]datatypes.JSONType[T], 0)
+	a.arr.A = &a.Data
+	return a.arr.Scan(src)
+}
+
+func (a *pgJSONBArray[T]) GormDataType() string {
+	return "jsonb[]"
 }

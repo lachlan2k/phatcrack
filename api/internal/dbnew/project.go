@@ -76,18 +76,9 @@ type Attack struct {
 }
 
 func (a *Attack) ToDTO() apitypes.AttackDTO {
-	// hashes := make([]apitypes.HashlistHashDTO, len(a.Hashes))
-	// for i, hash := range a.Hashes {
-	// hashes[i] = hash.ToDTO()
-	// }
-
 	return apitypes.AttackDTO{
 		ID:            a.ID.String(),
 		HashcatParams: a.HashcatParams.Data,
-		// ID:            a.ID.Hex(),
-		// HashType:      a.HashType,
-		// Hashes:        hashes,
-		// HashcatParams: a.HashcatParams.ToDTO(),
 	}
 }
 
