@@ -143,7 +143,16 @@ func GetJobProjID(jobId string) (string, error) {
 		ProjectID uuid.UUID
 	}
 
-	err := GetInstance().Table("jobs").Select("name").Where("id = ?", jobId).Scan(&result).Error
+	err := GetInstance().Table("jobs").Select(
+		"hashlists.project_id as project_id",
+	).Joins(
+		"join attacks on attacks.id = jobs.job_id",
+	).Joins(
+		"join hashlists on hashlists.id = attacks.hashlist_id",
+	).Where(
+		"jobs.id = ?", jobId,
+	).Scan(&result).Error
+
 	if err != nil {
 		return "", err
 	}

@@ -61,6 +61,9 @@ func Listen(port string) error {
 	controllers.HookAgentEndpoints(api.Group("/agent"))
 	controllers.HookProjectEndpoints(api.Group("/project"))
 	controllers.HookListsEndpoints(api.Group("/list"))
+	controllers.HookHashcatEndpoints(api.Group("/hashlist"))
+	controllers.HookAttackEndpoints(api.Group(("/attack")))
+	controllers.HookJobEndpoints(api.Group("/job"))
 
 	adminAPI := api.Group("/admin")
 	adminAPI.Use(authHandler.AdminOnlyMiddleware())

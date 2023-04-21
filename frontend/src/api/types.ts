@@ -44,7 +44,6 @@ export interface AttackMultipleDTO {
 }
 export interface AttackCreateRequestDTO {
   hashcat_params: HashcatParams
-  hashes: string[]
   start_immediately: boolean
   name: string
   description: string

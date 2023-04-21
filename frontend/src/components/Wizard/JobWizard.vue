@@ -4,13 +4,21 @@ import MaskInput from './MaskInput.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import HrOr from '@/components/HrOr.vue'
 import { computed, watch, reactive } from 'vue'
-import { createProject } from '@/api/project'
+import { createHashlist, createProject, createAttack, startAttack } from '@/api/project'
 import { useResourcesStore } from '@/stores/resources'
 import { storeToRefs } from 'pinia'
 import { useWizardHashDetect } from '@/composables/useWizardHashDetect'
 import { useProjectsStore } from '@/stores/projects'
 import { useApi } from '@/composables/useApi'
 import { getAllRulefiles, getAllWordlists } from '@/api/lists'
+import type {
+  AttackCreateRequestDTO,
+  AttackDTO,
+  HashcatParams,
+  HashlistCreateRequestDTO,
+  HashlistCreateResponseDTO,
+  ProjectDTO
+} from '@/api/types'
 
 /*
  * Props
@@ -188,17 +196,64 @@ const hashlistStepValidationError = computed(() => {
 /*
  * API Helpers
  */
-async function saveUptoProject() {
-  await createProject(inputs.projectName, inputs.projectDesc)
-  alert('Created project!')
+async function saveUptoProject(): Promise<ProjectDTO> {
+  const proj = await createProject(inputs.projectName, inputs.projectDesc)
+  console.log('Created project', proj)
+  return proj
 }
 
-async function saveUptoHashlist() {
-  await saveUptoProject()
+async function saveUptoHashlist(): Promise<[HashlistCreateResponseDTO, ProjectDTO]> {
+  const proj = await saveUptoProject()
+  const hashlist = await createHashlist({
+    project_id: proj.id,
+    name: inputs.hashlistName,
+    hash_type: Number(inputs.hashType),
+    input_hashes: hashesArr.value,
+    has_usernames: false
+  })
+
+  console.log('Created hashlist', hashlist)
+  return [hashlist, proj]
 }
 
-async function saveUptoAttack() {
-  await saveUptoHashlist()
+function makeHashcatParams(): HashcatParams {
+  return {
+    attack_mode: inputs.attackMode,
+    hash_type: Number(inputs.hashType),
+
+    // TODO mask inputs
+    // Also TODO: how does combinator work?
+    mask: inputs.mask,
+    mask_increment: true,
+    mask_increment_min: 0,
+    mask_increment_max: 1,
+    mask_custom_charsets: [],
+
+    wordlist_filenames: inputs.selectedWordlists,
+    rules_filenames: inputs.selectedRulefiles,
+
+    optimized_kernels: inputs.optimizedKernels,
+    slow_candidates: inputs.slowCandidates,
+
+    additional_args: []
+  }
+}
+
+async function saveUptoAttack(): Promise<[AttackDTO, HashlistCreateResponseDTO, ProjectDTO]> {
+  const [hashlist, proj] = await saveUptoHashlist()
+  const attack = await createAttack(proj.id, hashlist.id, {
+    hashcat_params: makeHashcatParams(),
+    start_immediately: false,
+    // todo separate attack name?
+    name: '1 - ' + inputs.hashlistName,
+    description: ''
+  })
+  return [attack, hashlist, proj]
+}
+
+async function saveAndStartAttack() {
+  const [attack, hashlist, proj] = await saveUptoAttack()
+  startAttack(attack.id)
 }
 </script>
 
@@ -502,7 +557,7 @@ async function saveUptoAttack() {
 
             <div class="card-actions justify-end">
               <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
-              <button class="btn btn-success" @click="inputs.activeStep++">Start Attack</button>
+              <button class="btn btn-success" @click="saveAndStartAttack">Start Attack</button>
             </div>
           </div>
         </template>

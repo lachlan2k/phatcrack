@@ -13,6 +13,16 @@ import (
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
+func HookHashlistEndpoints(api *echo.Group) {
+	api.GET("/ping", func(c echo.Context) error {
+		return c.String(http.StatusOK, "pong hashlist")
+	})
+
+	api.POST("/create", handleHashlistCreate)
+	api.GET("/:hashlist-id", handleHashlistGet)
+	api.GET("/:hashlist-id/attacks", handleAttackGetAllForHashlist)
+}
+
 func handleHashlistGetAllForProj(c echo.Context) error {
 	return echo.ErrNotImplemented
 }
@@ -22,11 +32,6 @@ func handleHashlistGet(c echo.Context) error {
 }
 
 func handleHashlistCreate(c echo.Context) error {
-	projId := c.Param("proj-id")
-	if !util.AreValidUUIDs(projId) {
-		return echo.ErrBadRequest
-	}
-
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
@@ -38,7 +43,7 @@ func handleHashlistCreate(c echo.Context) error {
 	}
 
 	// Access control
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, projId)
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, req.ProjectID)
 	if err != nil {
 		return err
 	}
@@ -59,7 +64,7 @@ func handleHashlistCreate(c echo.Context) error {
 	}
 
 	newHashlist, err := db.CreateHashlist(&db.Hashlist{
-		ProjectID: uuid.MustParse(projId),
+		ProjectID: uuid.MustParse(req.ProjectID),
 
 		Name:    req.Name,
 		Version: 1,

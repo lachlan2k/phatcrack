@@ -134,6 +134,19 @@ func GetHashlist(hashlistId string) (*Hashlist, error) {
 	return &hashlist, nil
 }
 
+func GetHashlistProjID(hashlistId string) (string, error) {
+	var result struct {
+		ProjectID uuid.UUID
+	}
+
+	err := GetInstance().Model(&Hashlist{}).First(&result, "id = ?", hashlistId).Error
+
+	if err != nil {
+		return "", err
+	}
+	return result.ProjectID.String(), nil
+}
+
 func GetAttack(attackId string) (*Attack, error) {
 	var attack Attack
 	err := GetInstance().First(&attack, "id = ?", attackId).Error
@@ -141,4 +154,23 @@ func GetAttack(attackId string) (*Attack, error) {
 		return nil, err
 	}
 	return &attack, nil
+}
+
+func GetAttackProjID(attackId string) (string, error) {
+	var result struct {
+		ProjectID uuid.UUID
+	}
+
+	err := GetInstance().Table("attacks").Select(
+		"hashlists.project_id as project_id",
+	).Joins(
+		"join hashlists on hashlists.id = attacks.hashlist_id",
+	).Where(
+		"attacks.id = ?", attackId,
+	).Scan(&result).Error
+
+	if err != nil {
+		return "", err
+	}
+	return result.ProjectID.String(), nil
 }

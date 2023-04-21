@@ -14,25 +14,14 @@ import (
 
 func HookProjectEndpoints(api *echo.Group) {
 	api.GET("/ping", func(c echo.Context) error {
-		return c.String(http.StatusOK, "pong lists")
+		return c.String(http.StatusOK, "pong project")
 	})
 
 	api.GET("/all", handleProjectGetAll)
 	api.POST("/create", handleProjectCreate)
 	api.GET("/:id", handleProjectGet)
 
-	api.GET("/:proj-id/hashlist", handleHashlistGetAllForProj)
-	api.GET("/:proj-id/hashlist/:hashlist-id", handleHashlistGet)
-	api.POST("/:proj-id/hashlist/create", handleHashlistCreate)
-
-	api.GET("/:proj-id/hashlist/:hashlist-id/attack", handleAttackGetAllForHashlist)
-	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id", handleAttackGet)
-	api.PUT("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/start", handleAttackStart)
-	api.POST("/:proj-id/hashlist/:hashlist-id/attack/create", handleAttackCreate)
-
-	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job", handleAttackJobGetAll)
-	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job/:job-id", handleAttackJobGet)
-	api.GET("/:proj-id/hashlist/:hashlist-id/attack/:attack-id/job/:job-id/watch", handleAttackJobWatch)
+	api.GET("/:proj-id/hashlists", handleHashlistGetAllForProj)
 
 }
 
