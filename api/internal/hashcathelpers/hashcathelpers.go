@@ -127,17 +127,17 @@ func NormalizeHashes(hashes []string, hashType uint, hasUsernames bool) ([]strin
 		}
 	}
 
-	cmd, err := hashcatCommandWithRandSession("-m", strconv.FormatUint(uint64(hashType), 10), tmpFile.Name(), "--left", "--potfile-path", "--username", "/dev/null")
+	cmd, err := hashcatCommandWithRandSession("-m", strconv.FormatUint(uint64(hashType), 10), tmpFile.Name(), "--left", "--username", "--potfile-path", "/dev/null")
 	if err != nil {
 		return nil, err
 	}
 
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("couldn't normalize hashes: %v", err)
+		return nil, fmt.Errorf("couldn't normalize hashes: %v, out: %v", err, out)
 	}
 
-	normalizedHashes := make([]string, 0, len(hashes))
+	normalizedHashes := make([]string, len(hashes))
 
 	reader := bytes.NewReader(out)
 	scanner := bufio.NewScanner(reader)

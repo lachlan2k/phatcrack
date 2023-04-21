@@ -19,12 +19,16 @@ export function createProject(name: string, description: string): Promise<Projec
 }
 
 export function getAllProjects(): Promise<ProjectResponseMultipleDTO> {
-  return client.get('/api/v1/project').then((res) => res.data)
+  return client.get('/api/v1/project/all').then((res) => res.data)
+}
+
+export function getProject(projId: string): Promise<ProjectDTO> {
+  return client.get(`/api/v1/project/${projId}`).then(res => res.data)
 }
 
 export function createHashlist(body: HashlistCreateRequestDTO): Promise<HashlistCreateResponseDTO> {
   return client
-    .post(`/api/v1/project/${body.project_id}/hashlist/create`, body)
+    .post(`/api/v1/hashlist/create`, body)
     .then((res) => res.data)
 }
 

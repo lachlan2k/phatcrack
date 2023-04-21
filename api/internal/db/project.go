@@ -92,9 +92,9 @@ func GetProjectForUser(projId, userId string) (*Project, error) {
 	)
 
 	err := GetInstance().Preload("ProjectShare").Select(
-		"distinct on (projects.id) projects.*, project_shares.*",
+		"distinct on (projects.id) projects.*",
 	).Joins(
-		"join project_shares on project_shares.project_id = projects.id",
+		"left join project_shares on project_shares.project_id = projects.id",
 	).Where(
 		"projects.id = ?", projId,
 	).Where(accessControlQuery).First(proj).Error
@@ -111,7 +111,7 @@ func GetAllProjectsForUser(userId string) ([]Project, error) {
 	err := GetInstance().Preload("ProjectShare").Select(
 		"distinct on (projects.id) projects.*",
 	).Joins(
-		"join project_shares on project_shares.project_id = projects.id",
+		"left join project_shares on project_shares.project_id = projects.id",
 	).Where(
 		"owner_user_id = ?", userId,
 	).Or(

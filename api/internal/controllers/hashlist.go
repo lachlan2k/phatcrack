@@ -54,10 +54,11 @@ func handleHashlistCreate(c echo.Context) error {
 	// Ensure provided algorithm type is valid and normalize
 	normalizedHashes, err := hashcathelpers.NormalizeHashes(req.InputHashes, req.HashType, req.HasUsernames)
 	if err != nil {
+		c.Logger().Printf("Failed to validated hashes for project %s because %v", req.ProjectID, err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate and normalize hashes. Please ensure your hashes are valid for the given hash type.").SetInternal(err)
 	}
 
-	hashes := make([]db.HashlistHash, 0, len(normalizedHashes))
+	hashes := make([]db.HashlistHash, len(normalizedHashes))
 	for i, inputHash := range req.InputHashes {
 		hashes[i].InputHash = inputHash
 		hashes[i].NormalizedHash = normalizedHashes[i]

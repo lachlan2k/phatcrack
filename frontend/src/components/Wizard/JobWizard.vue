@@ -4,7 +4,7 @@ import MaskInput from './MaskInput.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import HrOr from '@/components/HrOr.vue'
 import { computed, watch, reactive } from 'vue'
-import { createHashlist, createProject, createAttack, startAttack } from '@/api/project'
+import { createHashlist, createProject, createAttack, startAttack, getProject } from '@/api/project'
 import { useResourcesStore } from '@/stores/resources'
 import { storeToRefs } from 'pinia'
 import { useWizardHashDetect } from '@/composables/useWizardHashDetect'
@@ -12,10 +12,8 @@ import { useProjectsStore } from '@/stores/projects'
 import { useApi } from '@/composables/useApi'
 import { getAllRulefiles, getAllWordlists } from '@/api/lists'
 import type {
-  AttackCreateRequestDTO,
   AttackDTO,
   HashcatParams,
-  HashlistCreateRequestDTO,
   HashlistCreateResponseDTO,
   ProjectDTO
 } from '@/api/types'
@@ -196,14 +194,20 @@ const hashlistStepValidationError = computed(() => {
 /*
  * API Helpers
  */
-async function saveUptoProject(): Promise<ProjectDTO> {
+async function saveOrGetProject(): Promise<ProjectDTO> {
+  if (inputs.selectedProjectId) {
+    const proj = await getProject(inputs.selectedProjectId)
+    console.log('got existing project', proj)
+    return proj
+  }
+
   const proj = await createProject(inputs.projectName, inputs.projectDesc)
   console.log('Created project', proj)
   return proj
 }
 
 async function saveUptoHashlist(): Promise<[HashlistCreateResponseDTO, ProjectDTO]> {
-  const proj = await saveUptoProject()
+  const proj = await saveOrGetProject()
   const hashlist = await createHashlist({
     project_id: proj.id,
     name: inputs.hashlistName,
