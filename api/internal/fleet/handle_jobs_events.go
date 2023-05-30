@@ -68,14 +68,14 @@ func (a *Agent) handleJobExited(msg *wstypes.Message) error {
 	}
 
 	reason := db.JobStopReasonFinished
-	if payload.Error != nil {
+	if payload.Error != "" {
 		reason = db.JobStopReasonFailed
 	}
 
 	notifyObservers(payload.JobID, *msg)
 	closeObservers(payload.JobID)
 
-	return db.SetJobExited(payload.JobID, reason, payload.Time)
+	return db.SetJobExited(payload.JobID, reason, payload.Error, payload.Time)
 }
 
 func (a *Agent) handleJobFailedToStart(msg *wstypes.Message) error {
@@ -87,5 +87,5 @@ func (a *Agent) handleJobFailedToStart(msg *wstypes.Message) error {
 	notifyObservers(payload.JobID, *msg)
 	closeObservers(payload.JobID)
 
-	return db.SetJobExited(payload.JobID, db.JobStopReasonFailedToStart, payload.Time)
+	return db.SetJobExited(payload.JobID, db.JobStopReasonFailedToStart, "", payload.Time)
 }

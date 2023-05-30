@@ -84,7 +84,7 @@ func (j *Job) ToDTO() apitypes.JobDTO {
 		cracked[i] = h.Data.ToDTO()
 	}
 
-	return apitypes.JobDTO{
+	dto := apitypes.JobDTO{
 		ID:              j.ID.String(),
 		HashlistVersion: j.HashlistVersion,
 		AttackID:        j.AttackID.String(),
@@ -92,9 +92,16 @@ func (j *Job) ToDTO() apitypes.JobDTO {
 		TargetHashes:    j.TargetHashes,
 		HashType:        j.HashType,
 		RuntimeData:     j.RuntimeData.ToDTO(),
-		AssignedAgentID: j.AssignedAgentID.String(),
 		CrackedHashes:   cracked,
 	}
+
+	if j.AssignedAgentID == nil {
+		dto.AssignedAgentID = ""
+	} else {
+		dto.AssignedAgentID = j.AssignedAgentID.String()
+	}
+
+	return dto
 }
 
 func (r *JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
@@ -160,6 +167,13 @@ func GetJobProjID(jobId string) (string, error) {
 }
 
 func CreateJob(job *Job) (*Job, error) {
+	if job.RuntimeData.Status == "" {
+		job.RuntimeData.Status = JobStatusCreated
+		job.RuntimeData.OutputLines.Init()
+		job.RuntimeData.StatusUpdates.Init()
+		job.RuntimeData.CrackedHashes.Init()
+	}
+
 	return job, GetInstance().Create(job).Error
 }
 
@@ -176,7 +190,7 @@ func SetJobStarted(jobId string, startTime time.Time) error {
 	}).Error
 }
 
-func SetJobExited(jobId string, reason string, exitTime time.Time) error {
+func SetJobExited(jobId string, reason string, errStr string, exitTime time.Time) error {
 	jobUuid, err := uuid.Parse(jobId)
 	if err != nil {
 		return err
@@ -187,6 +201,7 @@ func SetJobExited(jobId string, reason string, exitTime time.Time) error {
 		Status:      JobStatusExited,
 		StopReason:  reason,
 		StoppedTime: exitTime,
+		ErrorString: errStr,
 	}).Error
 }
 
@@ -229,6 +244,7 @@ func AddJobCrackedHash(jobId string, hash string, plaintextHex string) error {
 	).Error
 }
 
+// TODO: actually, on second thought, I want to keep all stderr lines, and only roll-over stdout lines
 const MaxJobOutputs = 10
 
 func AddJobStdline(jobId string, stream string, line string) error {
@@ -254,7 +270,15 @@ func GetJobHashtype(jobId string) (uint, error) {
 	var result struct {
 		HashType uint
 	}
-	err := GetInstance().Model(&Job{}).Select("Hashlist.HashType").Joins("Hashlist").Scan(&result).Error
+	err := GetInstance().Table("jobs").Select(
+		"hashlists.hash_type as hash_type",
+	).Joins(
+		"join attacks on attacks.id = jobs.attack_id",
+	).Joins(
+		"join hashlists on attacks.hashlist_id = hashlists.id",
+	).Where(
+		"jobs.id = ?", jobId,
+	).Scan(&result).Error
 	if err != nil {
 		return 0, err
 	}

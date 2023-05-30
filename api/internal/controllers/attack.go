@@ -235,7 +235,7 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Something went wrong getting attack to start", err)
 	}
 
-	hashlist, err := db.GetHashlist(attack.HashlistID.String())
+	hashlist, err := db.GetHashlistWithHashes(attack.HashlistID.String())
 	if err == db.ErrNotFound {
 		return echo.ErrNotFound
 	}

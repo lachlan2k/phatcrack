@@ -139,6 +139,15 @@ func GetHashlist(hashlistId string) (*Hashlist, error) {
 	return &hashlist, nil
 }
 
+func GetHashlistWithHashes(hashlistId string) (*Hashlist, error) {
+	var hashlist Hashlist
+	err := GetInstance().Preload("Hashes").First(&hashlist, "id = ?", hashlistId).Error
+	if err != nil {
+		return nil, err
+	}
+	return &hashlist, nil
+}
+
 func GetHashlistProjID(hashlistId string) (string, error) {
 	var result struct {
 		ProjectID uuid.UUID

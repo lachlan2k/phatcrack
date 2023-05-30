@@ -228,6 +228,8 @@ func (sess *HashcatSession) Start() error {
 		return fmt.Errorf("couldn't attach stderr to hashcat: %v", err)
 	}
 
+	log.Printf("Running hashcat command: %s", sess.proc.String())
+
 	err = sess.proc.Start()
 	if err != nil {
 		return fmt.Errorf("couldn't start hashcat: %v", err)

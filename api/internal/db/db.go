@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"time"
 
@@ -71,6 +72,16 @@ func runMigrations() {
 type pgJSONBArray[T interface{}] struct {
 	arr  pq.GenericArray
 	Data []datatypes.JSONType[T]
+}
+
+func (a *pgJSONBArray[T]) Init() {
+	a.Data = make([]datatypes.JSONType[T], 0)
+}
+
+// Value implements the driver.Valuer interface.
+func (a pgJSONBArray[T]) Value() (driver.Value, error) {
+	a.arr.A = a.Data
+	return a.arr.Value()
 }
 
 func (a *pgJSONBArray[T]) Scan(src interface{}) error {

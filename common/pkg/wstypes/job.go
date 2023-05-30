@@ -61,7 +61,7 @@ type JobStdLineDTO struct {
 type JobExitedDTO struct {
 	JobID string    `json:"job_id"`
 	Time  time.Time `json:"time"`
-	Error error     `json:"error"`
+	Error string    `json:"error"`
 }
 
 // JobStatusUpdate

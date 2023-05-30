@@ -17,7 +17,8 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: process.env.DEV_API_URL,
-        changeOrigin: true
+        changeOrigin: true,
+        ws: true
       }
     }
   }

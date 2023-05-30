@@ -44,9 +44,15 @@ func (h *Handler) sendJobStderrLine(jobId, line string) {
 }
 
 func (h *Handler) sendJobExited(jobId string, err error) {
+	errStr := ""
+	if err != nil {
+		errStr = err.Error()
+	}
+
 	h.sendMessage(wstypes.JobExitedType, wstypes.JobExitedDTO{
 		JobID: jobId,
-		Error: err,
+		Error: errStr,
+		Time:  time.Now(),
 	})
 }
 
