@@ -11,12 +11,7 @@ import { useWizardHashDetect } from '@/composables/useWizardHashDetect'
 import { useProjectsStore } from '@/stores/projects'
 import { useApi } from '@/composables/useApi'
 import { getAllRulefiles, getAllWordlists } from '@/api/lists'
-import type {
-  AttackDTO,
-  HashcatParams,
-  HashlistCreateResponseDTO,
-  ProjectDTO
-} from '@/api/types'
+import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
 
 /*
  * Props
@@ -245,7 +240,8 @@ function makeHashcatParams(): HashcatParams {
 
 async function saveUptoAttack(): Promise<[AttackDTO, HashlistCreateResponseDTO, ProjectDTO]> {
   const [hashlist, proj] = await saveUptoHashlist()
-  const attack = await createAttack(proj.id, hashlist.id, {
+  const attack = await createAttack({
+    hashlist_id: hashlist.id,
     hashcat_params: makeHashcatParams(),
     start_immediately: false,
     // todo separate attack name?

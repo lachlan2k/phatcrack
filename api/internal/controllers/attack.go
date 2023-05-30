@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
@@ -10,6 +11,8 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
+	"gorm.io/datatypes"
 )
 
 func HookAttackEndpoints(api *echo.Group) {
@@ -35,6 +38,7 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return err
 	}
 
+	// TODO: This is all a bit gross and could ideally be collapsed into a shorter number of queries?
 	projId, err := db.GetHashlistProjID(hashlistId)
 	if err != nil {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
@@ -52,8 +56,19 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	// res := apitypes.AttackMultipleDTO{}
-	return echo.ErrNotImplemented
+	attacks, err := db.GetAllAttacksForHashlist(hashlistId)
+	if err != nil {
+		return util.ServerError("Failed to get attacks for hashlist", err)
+	}
+
+	attackDTOs := make([]apitypes.AttackDTO, len(attacks))
+	for i, attack := range attacks {
+		attackDTOs[i] = attack.ToDTO()
+	}
+
+	return c.JSON(http.StatusOK, apitypes.AttackMultipleDTO{
+		Attacks: attackDTOs,
+	})
 }
 
 func handleAttackJobGetAll(c echo.Context) error {
@@ -110,7 +125,48 @@ func handleAttackGet(c echo.Context) error {
 		return err
 	}
 
+	// TOOD: this could be collapsed into less queries too
 	projId, err := db.GetAttackProjID(attackId)
+	if err != nil {
+		return util.ServerError("Failed to fetch project id for attack", err)
+	}
+
+	proj, err := db.GetProjectForUser(projId, user.ID)
+	if err == db.ErrNotFound {
+		return echo.ErrForbidden
+	}
+	if err != nil {
+		return util.ServerError("Failed to fetch project", err)
+	}
+
+	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
+		return echo.ErrForbidden
+	}
+
+	attack, err := db.GetAttack(attackId)
+	if err != nil {
+		return util.ServerError("Failed to get attack", err)
+	}
+
+	return c.JSON(http.StatusOK, attack.ToDTO())
+}
+
+func handleAttackCreate(c echo.Context) error {
+	req, err := util.BindAndValidate[apitypes.AttackCreateRequestDTO](c)
+	if err != nil {
+		return err
+	}
+
+	if !util.AreValidUUIDs(req.HashlistID) {
+		return echo.ErrBadRequest
+	}
+
+	user, err := auth.ClaimsFromReq(c)
+	if err != nil {
+		return err
+	}
+
+	projId, err := db.GetHashlistProjID(req.HashlistID)
 	if err != nil {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
@@ -127,29 +183,36 @@ func handleAttackGet(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	return echo.ErrNotImplemented
-}
+	// TODO: somewhere I'd prefer to do some better, more explicit consumption of this
+	// Basically, it needs to be extremely clear which hashcat params are coming in
+	hashcatParams := datatypes.JSONType[hashcattypes.HashcatParams]{}
+	hashcatParams.Data = req.HashcatParams
 
-func handleAttackCreate(c echo.Context) error {
-	_, err := auth.ClaimsFromReq(c)
+	attack, err := db.CreateAttack(&db.Attack{
+		HashcatParams: hashcatParams,
+		HashlistID:    uuid.MustParse(req.HashlistID),
+	})
 	if err != nil {
-		return err
+		return util.ServerError("Failed to create new attack", err)
 	}
 
-	return echo.ErrNotImplemented
+	return c.JSON(http.StatusCreated, attack.ToDTO())
 }
 
 func handleAttackStart(c echo.Context) error {
-	projId := c.Param("proj-id")
-	hashlistId := c.Param("hashlist-id")
 	attackId := c.Param("attack-id")
-	if !util.AreValidUUIDs(projId, hashlistId, attackId) {
+	if !util.AreValidUUIDs(attackId) {
 		return echo.ErrBadRequest
 	}
 
 	user, err := auth.ClaimsFromReq(c)
 	if err != nil {
 		return err
+	}
+
+	projId, err := db.GetAttackProjID(attackId)
+	if err != nil {
+		return util.ServerError("Failed to fetch project id for attack", err)
 	}
 
 	proj, err := db.GetProjectForUser(projId, user.ID)
@@ -164,18 +227,6 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	hashlist, err := db.GetHashlist(hashlistId)
-	if err == db.ErrNotFound {
-		return echo.ErrNotFound
-	}
-	if err != nil {
-		return util.ServerError("Something went wrong getting hashlist to start attack on", err)
-	}
-
-	if hashlist.ProjectID != proj.ID {
-		return echo.ErrForbidden
-	}
-
 	attack, err := db.GetAttack(attackId)
 	if err == db.ErrNotFound {
 		return echo.ErrNotFound
@@ -184,14 +235,21 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Something went wrong getting attack to start", err)
 	}
 
-	if attack.HashlistID != hashlist.ID {
-		return echo.ErrForbidden
+	hashlist, err := db.GetHashlist(attack.HashlistID.String())
+	if err == db.ErrNotFound {
+		return echo.ErrNotFound
+	}
+	if err != nil {
+		return util.ServerError("Something went wrong getting hashlist to start attack on", err)
 	}
 
 	targetHashes := make([]string, len(hashlist.Hashes))
 	for i, hash := range hashlist.Hashes {
 		targetHashes[i] = hash.NormalizedHash
 	}
+
+	// TODO: this will eventually be replaced by some special sauce responsible for sharding and creating jobs
+	// Could possibly go into the fleet package, or another package called "sharding", idk
 
 	newJob, err := db.CreateJob(&db.Job{
 		HashlistVersion: hashlist.Version,
@@ -207,6 +265,8 @@ func handleAttackStart(c echo.Context) error {
 
 	_, err = fleet.ScheduleJob(newJob.ID.String())
 
+	// TODO: now that we've refactored the relationship between attacks and jobs...
+	// ...we should probably just delete the job if it fails, right?
 	switch err {
 	case nil:
 		return c.JSON(http.StatusOK, apitypes.AttackStartResponseDTO{

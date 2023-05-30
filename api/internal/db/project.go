@@ -75,9 +75,14 @@ type Attack struct {
 	HashlistID uuid.UUID `gorm:"type:uuid"`
 }
 
+func CreateAttack(attack *Attack) (*Attack, error) {
+	return attack, GetInstance().Create(attack).Error
+}
+
 func (a *Attack) ToDTO() apitypes.AttackDTO {
 	return apitypes.AttackDTO{
 		ID:            a.ID.String(),
+		HashlistID:    a.HashlistID.String(),
 		HashcatParams: a.HashcatParams.Data,
 	}
 }
@@ -154,6 +159,15 @@ func GetAttack(attackId string) (*Attack, error) {
 		return nil, err
 	}
 	return &attack, nil
+}
+
+func GetAllAttacksForHashlist(hashlistId string) ([]Attack, error) {
+	attacks := []Attack{}
+	err := GetInstance().Find(&attacks, "hashlist_id = ?", hashlistId).Error
+	if err != nil {
+		return nil, err
+	}
+	return attacks, nil
 }
 
 func GetAttackProjID(attackId string) (string, error) {

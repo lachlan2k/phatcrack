@@ -43,6 +43,7 @@ export interface AttackMultipleDTO {
   attacks: AttackDTO[]
 }
 export interface AttackCreateRequestDTO {
+  hashlist_id: string
   hashcat_params: HashcatParams
   start_immediately: boolean
   name: string

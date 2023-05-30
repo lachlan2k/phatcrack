@@ -23,23 +23,15 @@ export function getAllProjects(): Promise<ProjectResponseMultipleDTO> {
 }
 
 export function getProject(projId: string): Promise<ProjectDTO> {
-  return client.get(`/api/v1/project/${projId}`).then(res => res.data)
+  return client.get(`/api/v1/project/${projId}`).then((res) => res.data)
 }
 
 export function createHashlist(body: HashlistCreateRequestDTO): Promise<HashlistCreateResponseDTO> {
-  return client
-    .post(`/api/v1/hashlist/create`, body)
-    .then((res) => res.data)
+  return client.post(`/api/v1/hashlist/create`, body).then((res) => res.data)
 }
 
-export function createAttack(
-  projectId: string,
-  hashlistId: string,
-  body: AttackCreateRequestDTO
-): Promise<AttackDTO> {
-  return client
-    .post(`/api/v1/hashlist/${hashlistId}/attack/create`)
-    .then((res) => res.data)
+export function createAttack(body: AttackCreateRequestDTO): Promise<AttackDTO> {
+  return client.post(`/api/v1/attack/create`, body).then((res) => res.data)
 }
 
 export function startAttack(attackId: string): Promise<AttackStartResponseDTO> {

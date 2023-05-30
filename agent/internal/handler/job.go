@@ -122,7 +122,11 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 
 	log.Printf("Starting job %s", job.ID)
 
-	sess.Start()
+	err = sess.Start()
+	if err != nil {
+		h.sendJobFailedToStart(job.ID, err)
+		return err
+	}
 
 	go func() {
 
