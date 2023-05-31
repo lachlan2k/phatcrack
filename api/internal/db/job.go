@@ -246,7 +246,7 @@ func AddJobCrackedHash(jobId string, hash string, plaintextHex string) error {
 		return err
 	}
 
-	return GetInstance().Debug().Table(
+	return GetInstance().Table(
 		"hashlist_hashes",
 	).Where(
 		"normalized_hash = ?", hash,
