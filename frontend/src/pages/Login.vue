@@ -3,11 +3,12 @@ import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
-const { isLoggedIn, loginError } = storeToRefs(authStore)
+const { isLoggedIn, loginError, isLoginLoading, loggedInUser } = storeToRefs(authStore)
 
 watch(isLoggedIn, (newIsLoggedIn) => {
   if (newIsLoggedIn) {
@@ -15,17 +16,22 @@ watch(isLoggedIn, (newIsLoggedIn) => {
   }
 })
 
-const isLoading = ref(false)
 const username = ref('')
 const password = ref('')
+
+const toast = useToast()
 
 async function doLogin(event: Event) {
   if (event) {
     event.preventDefault()
   }
-  isLoading.value = true
-  await authStore.login(username.value, password.value)
-  isLoading.value = false
+
+  const loginSuccess = await authStore.login(username.value, password.value)
+  if (loginSuccess) {
+    toast.success('Welcome, ' + loggedInUser.value?.username, {
+      timeout: 1500
+    })
+  }
 }
 </script>
 
@@ -64,7 +70,7 @@ async function doLogin(event: Event) {
             <p>{{ loginError }}</p>
           </div>
           <div class="form-control mt-6">
-            <button type="submit" class="btn-primary btn" :disabled="isLoading">Login</button>
+            <button type="submit" class="btn-primary btn" :disabled="isLoginLoading">Login</button>
           </div>
         </form>
       </div>

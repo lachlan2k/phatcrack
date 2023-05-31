@@ -24,11 +24,67 @@ func HookHashlistEndpoints(api *echo.Group) {
 }
 
 func handleHashlistGetAllForProj(c echo.Context) error {
-	return echo.ErrNotImplemented
+	projId := c.Param("proj-id")
+	if !util.AreValidUUIDs(projId) {
+		return echo.ErrBadRequest
+	}
+
+	user, err := auth.ClaimsFromReq(c)
+	if err != nil {
+		return err
+	}
+
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, projId)
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return echo.ErrForbidden
+	}
+
+	hashlists, err := db.GetAllHashlistsForProject(projId)
+	if err != nil {
+		return util.ServerError("Failed to get hashlists", err)
+	}
+
+	res := apitypes.HashlistResponseMultipleDTO{}
+	res.Hashlists = make([]apitypes.HashlistDTO, len(hashlists))
+
+	for i, hashlist := range hashlists {
+		res.Hashlists[i] = hashlist.ToDTO(false)
+	}
+
+	return c.JSON(http.StatusOK, res)
 }
 
 func handleHashlistGet(c echo.Context) error {
-	return echo.ErrNotImplemented
+	hashlistId := c.Param("hashlist-id")
+	if !util.AreValidUUIDs(hashlistId) {
+		return echo.ErrBadRequest
+	}
+
+	user, err := auth.ClaimsFromReq(c)
+	if err != nil {
+		return err
+	}
+
+	hashlist, err := db.GetHashlistWithHashes(hashlistId)
+	if err == db.ErrNotFound {
+		return echo.ErrNotFound
+	}
+	if err != nil {
+		return util.ServerError("Failed to load hashlist", err)
+	}
+
+	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, hashlist.ProjectID.String())
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return echo.ErrForbidden
+	}
+
+	return c.JSON(http.StatusOK, hashlist.ToDTO(true))
 }
 
 func handleHashlistCreate(c echo.Context) error {

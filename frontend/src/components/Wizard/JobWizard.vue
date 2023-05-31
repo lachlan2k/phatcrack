@@ -12,6 +12,7 @@ import { useProjectsStore } from '@/stores/projects'
 import { useApi } from '@/composables/useApi'
 import { getAllRulefiles, getAllWordlists } from '@/api/lists'
 import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
+import { useToast } from 'vue-toastification'
 
 /*
  * Props
@@ -186,33 +187,50 @@ const hashlistStepValidationError = computed(() => {
   return null
 })
 
+const toast = useToast()
+
 /*
  * API Helpers
  */
 async function saveOrGetProject(): Promise<ProjectDTO> {
-  if (inputs.selectedProjectId) {
-    const proj = await getProject(inputs.selectedProjectId)
-    console.log('got existing project', proj)
-    return proj
-  }
+  try {
+    if (inputs.selectedProjectId) {
+      const proj = await getProject(inputs.selectedProjectId)
+      console.log('got existing project', proj)
+      return proj
+    }
 
-  const proj = await createProject(inputs.projectName, inputs.projectDesc)
-  console.log('Created project', proj)
-  return proj
+    const proj = await createProject(inputs.projectName, inputs.projectDesc)
+    console.log('Created project', proj)
+    toast.success(`Created project "${inputs.projectName}"!`)
+    return proj
+  } catch (err: any) {
+    toast.warning('Failed to create project' + err.message)
+    // Throw up so our caller knows an error happened
+    throw err
+  }
 }
 
-async function saveUptoHashlist(): Promise<[HashlistCreateResponseDTO, ProjectDTO]> {
+async function saveUptoHashlist(): Promise<HashlistCreateResponseDTO> {
   const proj = await saveOrGetProject()
-  const hashlist = await createHashlist({
-    project_id: proj.id,
-    name: inputs.hashlistName,
-    hash_type: Number(inputs.hashType),
-    input_hashes: hashesArr.value,
-    has_usernames: false
-  })
 
-  console.log('Created hashlist', hashlist)
-  return [hashlist, proj]
+  try {
+    const hashlist = await createHashlist({
+      project_id: proj.id,
+      name: inputs.hashlistName,
+      hash_type: Number(inputs.hashType),
+      input_hashes: hashesArr.value,
+      has_usernames: false
+    })
+
+    console.log('Created hashlist', hashlist)
+    toast.success(`Created hashlist "${inputs.hashlistName}"!`)
+
+    return hashlist
+  } catch (err: any) {
+    toast.warning('Failed to create hashlist' + err.message)
+    throw err
+  }
 }
 
 function makeHashcatParams(): HashcatParams {
@@ -238,22 +256,34 @@ function makeHashcatParams(): HashcatParams {
   }
 }
 
-async function saveUptoAttack(): Promise<[AttackDTO, HashlistCreateResponseDTO, ProjectDTO]> {
-  const [hashlist, proj] = await saveUptoHashlist()
-  const attack = await createAttack({
-    hashlist_id: hashlist.id,
-    hashcat_params: makeHashcatParams(),
-    start_immediately: false,
-    // todo separate attack name?
-    name: '1 - ' + inputs.hashlistName,
-    description: ''
-  })
-  return [attack, hashlist, proj]
+async function saveUptoAttack(): Promise<AttackDTO> {
+  const hashlist = await saveUptoHashlist()
+
+  try {
+    const attack = await createAttack({
+      hashlist_id: hashlist.id,
+      hashcat_params: makeHashcatParams(),
+      start_immediately: false,
+      // todo separate attack name?
+      name: '1 - ' + inputs.hashlistName,
+      description: ''
+    })
+    toast.success('Created attack!')
+    return attack
+  } catch (err: any) {
+    toast.warning('Failed to create attack' + err.message)
+    throw err
+  }
 }
 
 async function saveAndStartAttack() {
-  const [attack, hashlist, proj] = await saveUptoAttack()
-  startAttack(attack.id)
+  const attack = await saveUptoAttack()
+  try {
+    startAttack(attack.id)
+    toast.success('Started attack!')
+  } catch (err: any) {
+    toast.warning('Failed to start attack: ' + err.message)
+  }
 }
 </script>
 

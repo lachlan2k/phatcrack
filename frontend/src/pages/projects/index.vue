@@ -29,38 +29,20 @@ const projects = computed(() => data.value?.projects)
               </tr>
             </thead>
             <tbody class="first-col-bold">
-              <!-- row 1 -->
-              <tr class="hover">
-                <td>41234 - Customer A</td>
-                <td>2 hours ago</td>
-                <td>8</td>
-                <td><div class="badge-info badge">4 attacks running</div></td>
-              </tr>
-              <tr class="hover" v-for="project in projects" :key="project.id">
-                <td>{{ project.name }}</td>
-                <td>{{ timeSince(project.time_created) }}</td>
-                <td>8</td>
-                <td><div class="badge-info badge">4 attacks running</div></td>
-              </tr>
-              <!-- row 2 -->
-              <tr class="hover">
-                <td>
-                  41235 - Customer B
-                  <span class="ml-2 text-slate-500">
-                    <font-awesome-icon icon="fa-solid fa-link" />
-                  </span>
-                </td>
-                <td>10 days ago</td>
-                <td>3</td>
-                <td><div class="badge-ghost badge">Idle</div></td>
-              </tr>
-              <!-- row 3 -->
-              <tr class="hover">
-                <td>41236 - Customer C</td>
-                <td>2 months ago</td>
-                <td>2</td>
-                <td><div class="badge-ghost badge">Idle</div></td>
-              </tr>
+              <RouterLink
+                custom
+                v-slot="{ navigate }"
+                v-for="project in projects"
+                :key="project.id"
+                :to="`/project/${project.id}`"
+              >
+                <tr class="hover cursor-pointer" @click="navigate">
+                  <td>{{ project.name }}</td>
+                  <td>{{ timeSince(project.time_created) }}</td>
+                  <td>8</td>
+                  <td><div class="badge-info badge">4 attacks running</div></td>
+                </tr>
+              </RouterLink>
             </tbody>
           </table>
           <p class="mt-2">

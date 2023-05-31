@@ -51,7 +51,6 @@ func runMigrations() {
 
 	instance.AutoMigrate(&Job{})
 	instance.AutoMigrate(&JobRuntimeData{})
-	instance.AutoMigrate(&JobCrackedHash{})
 
 	instance.AutoMigrate(&Wordlist{})
 	instance.AutoMigrate(&RuleFile{})

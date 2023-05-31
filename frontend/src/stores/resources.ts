@@ -27,5 +27,11 @@ export const useResourcesStore = defineStore({
     loadAll() {
       this.loadHashTypes()
     }
+  },
+
+  getters: {
+    isHashTypesLoaded: (state) => state.hashTypes.length > 0,
+    getHashTypeName: (state) => (hashId: number) =>
+      state.hashTypes.find((x) => x.id == hashId)?.name ?? ''
   }
 })

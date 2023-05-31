@@ -15,6 +15,8 @@ type HashlistCreateResponseDTO struct {
 type HashlistHashDTO struct {
 	InputHash      string `json:"input_hash"`
 	NormalizedHash string `json:"normalized_hash"`
+	IsCracked      bool   `json:"is_cracked"`
+	PlaintextHex   string `json:"plaintext_hex"`
 }
 
 type HashlistDTO struct {
@@ -24,4 +26,8 @@ type HashlistDTO struct {
 	HashType    uint              `json:"hash_type"`
 	Hashes      []HashlistHashDTO `json:"hashes"`
 	Version     uint              `json:"version"`
+}
+
+type HashlistResponseMultipleDTO struct {
+	Hashlists []HashlistDTO `json:"hashlists"`
 }

@@ -26,6 +26,7 @@ func (p *Project) ToDTO() apitypes.ProjectDTO {
 		TimeCreated: p.CreatedAt.UnixMilli(),
 		Name:        p.Name,
 		Description: p.Description,
+		OwnerUserID: p.OwnerUserID.String(),
 	}
 }
 
@@ -56,6 +57,25 @@ type Hashlist struct {
 	Attacks []Attack `gorm:"constraint:OnDelete:CASCADE;"`
 }
 
+func (h *Hashlist) ToDTO(withHashes bool) apitypes.HashlistDTO {
+	var hashes []apitypes.HashlistHashDTO = nil
+	if withHashes {
+		hashes = make([]apitypes.HashlistHashDTO, len(h.Hashes))
+		for i, hash := range h.Hashes {
+			hashes[i] = hash.ToDTO()
+		}
+	}
+
+	return apitypes.HashlistDTO{
+		ID:          h.ID.String(),
+		Name:        h.Name,
+		TimeCreated: h.CreatedAt.Unix(),
+		HashType:    h.HashType,
+		Hashes:      hashes,
+		Version:     h.Version,
+	}
+}
+
 func CreateHashlist(hashlist *Hashlist) (*Hashlist, error) {
 	return hashlist, GetInstance().Create(hashlist).Error
 }
@@ -65,6 +85,17 @@ type HashlistHash struct {
 	HashlistID     uuid.UUID `gorm:"type:uuid"`
 	NormalizedHash string
 	InputHash      string
+	PlaintextHex   string
+	IsCracked      bool
+}
+
+func (h *HashlistHash) ToDTO() apitypes.HashlistHashDTO {
+	return apitypes.HashlistHashDTO{
+		InputHash:      h.InputHash,
+		NormalizedHash: h.InputHash,
+		PlaintextHex:   h.PlaintextHex,
+		IsCracked:      h.IsCracked,
+	}
 }
 
 type Attack struct {
@@ -159,6 +190,15 @@ func GetHashlistProjID(hashlistId string) (string, error) {
 		return "", err
 	}
 	return result.ProjectID.String(), nil
+}
+
+func GetAllHashlistsForProject(projId string) ([]Hashlist, error) {
+	hashlists := []Hashlist{}
+	err := GetInstance().Find(&hashlists, "project_id = ?", projId).Error
+	if err != nil {
+		return nil, err
+	}
+	return hashlists, err
 }
 
 func GetAttack(attackId string) (*Attack, error) {

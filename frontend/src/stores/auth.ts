@@ -4,6 +4,7 @@ import type { AuthCurrentUserDTO } from '@/api/types'
 
 export type AuthState = {
   loggedInUser: AuthCurrentUserDTO | null
+  isLoginLoading: boolean
   loginError: string | null
   hasTriedAuth: boolean
 }
@@ -15,11 +16,13 @@ export const useAuthStore = defineStore({
     ({
       loggedInUser: null,
       loginError: null,
+      isLoginLoading: false,
       hasTriedAuth: false // When the app first loads, we don't want to assume a session timeout, so we want to check auth at least once
     } as AuthState),
 
   actions: {
-    async login(username: string, password: string) {
+    async login(username: string, password: string): Promise<boolean> {
+      this.isLoginLoading = true
       try {
         const details = await apiLogin(username, password)
         this.loggedInUser = details?.user ?? null
@@ -29,7 +32,10 @@ export const useAuthStore = defineStore({
         this.loginError = err.response.data.message
       } finally {
         this.hasTriedAuth = true
+        this.isLoginLoading = false
       }
+
+      return this.loggedInUser != null
     },
 
     async logout() {

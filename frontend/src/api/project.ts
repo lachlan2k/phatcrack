@@ -1,5 +1,10 @@
 import { client } from '.'
-import type { AttackDTO, AttackStartResponseDTO } from './types'
+import type {
+  AttackDTO,
+  AttackStartResponseDTO,
+  HashlistDTO,
+  HashlistResponseMultipleDTO
+} from './types'
 import type { AttackCreateRequestDTO } from './types'
 import type {
   HashlistCreateRequestDTO,
@@ -36,4 +41,12 @@ export function createAttack(body: AttackCreateRequestDTO): Promise<AttackDTO> {
 
 export function startAttack(attackId: string): Promise<AttackStartResponseDTO> {
   return client.put(`/api/v1/attack/${attackId}/start`).then((res) => res.data)
+}
+
+export function getHashlistsForProject(projId: string): Promise<HashlistResponseMultipleDTO> {
+  return client.get(`/api/v1/project/${projId}/hashlists`).then((res) => res.data)
+}
+
+export function getHashlist(hashlistId: string): Promise<HashlistDTO> {
+  return client.get(`/api/v1/hashlist/${hashlistId}`).then((res) => res.data)
 }

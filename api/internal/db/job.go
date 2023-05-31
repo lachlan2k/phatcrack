@@ -238,10 +238,22 @@ func AddJobCrackedHash(jobId string, hash string, plaintextHex string) error {
 		PlaintextHex: plaintextHex,
 	})
 
-	return GetInstance().Exec(
+	err := GetInstance().Exec(
 		"update job_runtime_data set cracked_hashes = array_append(cracked_hashes, ?) where job_id = ?",
 		dbLine, jobId,
 	).Error
+	if err != nil {
+		return err
+	}
+
+	return GetInstance().Debug().Table(
+		"hashlist_hashes",
+	).Where(
+		"normalized_hash = ?", hash,
+	).Updates(&HashlistHash{
+		PlaintextHex: plaintextHex,
+		IsCracked:    true,
+	}).Error
 }
 
 // TODO: actually, on second thought, I want to keep all stderr lines, and only roll-over stdout lines

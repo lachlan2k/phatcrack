@@ -37,6 +37,7 @@ export interface HashcatParams {
 }
 export interface AttackDTO {
   id: string
+  hashlist_id: string
   hashcat_params: HashcatParams
 }
 export interface AttackMultipleDTO {
@@ -134,6 +135,9 @@ export interface HashlistDTO {
   hashes: HashlistHashDTO[]
   version: number
 }
+export interface HashlistResponseMultipleDTO {
+  hashlists: HashlistDTO[]
+}
 export interface JobCreateRequestDTO {
   hashcat_params: HashcatParams
   hashes: string[]
@@ -218,6 +222,7 @@ export interface ProjectDTO {
   time_created: number
   name: string
   description: string
+  owner_user_id: string
 }
 export interface ProjectResponseMultipleDTO {
   projects: ProjectDTO[]

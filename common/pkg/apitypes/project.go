@@ -10,6 +10,7 @@ type ProjectDTO struct {
 	TimeCreated int64  `json:"time_created"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	OwnerUserID string `json:"owner_user_id"`
 }
 
 type ProjectResponseMultipleDTO struct {
