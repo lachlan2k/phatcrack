@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getProject, getHashlistsForProject, getHashlist } from '@/api/project'
+import { getHashlist } from '@/api/project'
 import { useApi } from '@/composables/useApi'
 import { useResourcesStore } from '@/stores/resources'
 import { computed } from 'vue'
@@ -20,10 +20,10 @@ const isLoading = computed(() => {
 })
 
 const hashTypeStr = computed(() => {
-    if (isLoading) {
-        return ''
-    }
-    return getHashTypeName.value(hashlistData.value!.hash_type)
+  if (isLoading.value) {
+    return ''
+  }
+  return getHashTypeName.value(hashlistData.value!.hash_type)
 })
 </script>
 
@@ -50,9 +50,9 @@ const hashTypeStr = computed(() => {
 
               <tbody>
                 <tr v-for="hash in hashlistData?.hashes" :key="hash.normalized_hash">
-                    <td>{{ hash.input_hash }}</td>
-                    <td>{{ hash.normalized_hash }}</td>
-                    <td>{{ decodeHex(hash.plaintext_hex) || '-' }}</td>
+                  <td>{{ hash.input_hash }}</td>
+                  <td>{{ hash.normalized_hash }}</td>
+                  <td>{{ decodeHex(hash.plaintext_hex) || '-' }}</td>
                 </tr>
 
                 <tr v-for="hashlist in hashlistData?.hashlists" :key="hashlist.id">
