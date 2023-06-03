@@ -13,7 +13,7 @@ export async function detectHashType(exampleHash: string): Promise<DetectHashTyp
   }
 
   const results = await client
-    .post('/api/v1/hashcat/detect_hashtype', {
+    .post('/api/v1/hashcat/detect-hashtype', {
       test_hash: exampleHash
     } as DetectHashTypeRequestDTO)
     .then((res) => res.data as DetectHashTypeResponseDTO)

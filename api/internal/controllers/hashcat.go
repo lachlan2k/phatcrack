@@ -21,7 +21,7 @@ func HookHashcatEndpoints(api *echo.Group) {
 		})
 	})
 
-	api.POST("/detect_hashtype", func(c echo.Context) error {
+	api.POST("/detect-hashtype", func(c echo.Context) error {
 		req, err := util.BindAndValidate[apitypes.DetectHashTypeRequestDTO](c)
 		if err != nil {
 			return err
@@ -37,7 +37,7 @@ func HookHashcatEndpoints(api *echo.Group) {
 		})
 	})
 
-	api.POST("/verify_hashes", func(c echo.Context) error {
+	api.POST("/verify-hashes", func(c echo.Context) error {
 		req, err := util.BindAndValidate[apitypes.VerifyHashesRequestDTO](c)
 		if err != nil {
 			return err
@@ -52,7 +52,7 @@ func HookHashcatEndpoints(api *echo.Group) {
 		})
 	})
 
-	api.POST("/normalize_hashes", func(c echo.Context) error {
+	api.POST("/normalize-hashes", func(c echo.Context) error {
 		req, err := util.BindAndValidate[apitypes.NormalizeHashesRequestDTO](c)
 		if err != nil {
 			return err

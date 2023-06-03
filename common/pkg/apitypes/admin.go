@@ -25,3 +25,14 @@ type AdminUserCreateResponseDTO struct {
 type AdminIsSetupCompleteResponseDTO struct {
 	IsComplete bool `json:"is_complete"`
 }
+
+type AdminConfigResponseDTO struct {
+	IsSetupComplete                   bool `json:"is_setup_complete"`
+	IsMFARequired                     bool `json:"is_mfa_required"`
+	RequirePasswordChangeOnFirstLogin bool `json:"require_password_change_on_first_login"`
+}
+
+type AdminConfigRequestDTO struct {
+	IsMFARequired                     bool `json:"is_mfa_required"`
+	RequirePasswordChangeOnFirstLogin bool `json:"require_password_change_on_first_login"`
+}

@@ -21,15 +21,37 @@ func HookAdminEndpoints(api *echo.Group) {
 		return c.JSON(http.StatusOK, user)
 	})
 
-	api.GET("/is-setup-complete", func(c echo.Context) error {
+	api.PUT("/config", func(c echo.Context) error {
+		req, err := util.BindAndValidate[apitypes.AdminConfigRequestDTO](c)
+		if err != nil {
+			return err
+		}
+
+		err = config.Update(func(newConf *config.RuntimeConfig) error {
+			newConf.IsMFARequired = req.IsMFARequired
+			newConf.RequirePasswordChangeOnFirstLogin = req.RequirePasswordChangeOnFirstLogin
+			return nil
+		})
+
+		if err != nil {
+			return util.ServerError("Failed to update config", err)
+		}
+
 		conf := config.Get()
-		return c.JSON(http.StatusOK, apitypes.AdminIsSetupCompleteResponseDTO{
-			IsComplete: conf.IsSetupComplete,
+		return c.JSON(http.StatusOK, apitypes.AdminConfigResponseDTO{
+			IsSetupComplete:                   conf.IsSetupComplete,
+			IsMFARequired:                     conf.IsMFARequired,
+			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
 		})
 	})
 
 	api.GET("/config", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, config.Get())
+		conf := config.Get()
+		return c.JSON(http.StatusOK, apitypes.AdminConfigResponseDTO{
+			IsSetupComplete:                   conf.IsSetupComplete,
+			IsMFARequired:                     conf.IsMFARequired,
+			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
+		})
 	})
 
 	api.POST("/user/create", handleCreateUser)
