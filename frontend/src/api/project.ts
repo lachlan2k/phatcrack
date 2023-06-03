@@ -3,6 +3,7 @@ import type {
   AttackDTO,
   AttackMultipleDTO,
   AttackStartResponseDTO,
+  AttackWithJobsMultipleDTO,
   HashlistDTO,
   HashlistResponseMultipleDTO
 } from './types'
@@ -55,3 +56,31 @@ export function getHashlist(hashlistId: string): Promise<HashlistDTO> {
 export function getAttacksForHashlist(hashlistId: string): Promise<AttackMultipleDTO> {
   return client.get(`/api/v1/hashlist/${hashlistId}/attacks`).then((res) => res.data)
 }
+
+export function getAttacksWithJobsForHashlist(
+  hashlistId: string,
+  includeRuntimeData: boolean = true
+): Promise<AttackWithJobsMultipleDTO> {
+  return client
+    .get(
+      `/api/v1/hashlist/${hashlistId}/attacks-with-jobs` +
+        (includeRuntimeData ? '?includeRuntimeData' : '')
+    )
+    .then((res) => res.data)
+}
+
+export const JobStatusCreated = 'JobStatus-Created'
+export const JobStatusAwaitingStart = 'JobStatus-AwaitingStart'
+export const JobStatusStarted = 'JobStatus-Started'
+export const JobStatusExited = 'JobStatus-Exited'
+
+// Clean exit
+export const JobStopReasonFinished = 'JobStopReason-Finished'
+// User stopped it
+export const JobStopReasonUserStopped = 'JobStopReason-UserStopped'
+// Never started in the first place
+export const JobStopReasonFailedToStart = 'JobStopReason-FailedToStart'
+// General failure
+export const JobStopReasonFailed = 'JobStopReason-Failed'
+// Agent timed out and we lost contact
+export const JobStopReasonTimeout = 'JobStopReason-Timeout'

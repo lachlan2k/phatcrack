@@ -99,7 +99,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	jobs, err := db.GetJobsForAttack(attackId)
+	jobs, err := db.GetJobsForAttack(attackId, c.QueryParams().Has("includeRuntimeData"))
 	if err != nil {
 		return util.ServerError("Failed to get jobs for attack", err)
 	}
@@ -125,7 +125,7 @@ func handleAttackGet(c echo.Context) error {
 		return err
 	}
 
-	// TOOD: this could be collapsed into less queries too
+	// TODO: this could be collapsed into less queries too
 	projId, err := db.GetAttackProjID(attackId)
 	if err != nil {
 		return util.ServerError("Failed to fetch project id for attack", err)

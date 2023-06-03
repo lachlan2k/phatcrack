@@ -79,11 +79,6 @@ type JobRuntimeOutputLine struct {
 }
 
 func (j *Job) ToDTO() apitypes.JobDTO {
-	cracked := make([]apitypes.JobCrackedHashDTO, len(j.RuntimeData.CrackedHashes.Data))
-	for i, h := range j.RuntimeData.CrackedHashes.Data {
-		cracked[i] = h.Data.ToDTO()
-	}
-
 	dto := apitypes.JobDTO{
 		ID:              j.ID.String(),
 		HashlistVersion: j.HashlistVersion,
@@ -92,7 +87,6 @@ func (j *Job) ToDTO() apitypes.JobDTO {
 		TargetHashes:    j.TargetHashes,
 		HashType:        j.HashType,
 		RuntimeData:     j.RuntimeData.ToDTO(),
-		CrackedHashes:   cracked,
 	}
 
 	if j.AssignedAgentID == nil {
@@ -106,7 +100,33 @@ func (j *Job) ToDTO() apitypes.JobDTO {
 
 func (r *JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
 	// TODO
-	return apitypes.JobRuntimeDataDTO{}
+	outlines := make([]apitypes.JobRuntimeOutputLineDTO, len(r.OutputLines.Data))
+	cracked := make([]apitypes.JobCrackedHashDTO, len(r.CrackedHashes.Data))
+
+	for i, line := range r.OutputLines.Data {
+		outlines[i] = apitypes.JobRuntimeOutputLineDTO{
+			Stream: line.Data.Stream,
+			Line:   line.Data.Line,
+		}
+	}
+
+	for i, hash := range r.CrackedHashes.Data {
+		cracked[i] = hash.Data.ToDTO()
+	}
+
+	return apitypes.JobRuntimeDataDTO{
+		StartRequestTime: r.StartRequestTime,
+
+		StartedTime: r.StartedTime,
+		StoppedTime: r.StoppedTime,
+		Status:      r.Status,
+		StopReason:  r.StopReason,
+		ErrorString: r.ErrorString,
+
+		OutputLines:   outlines,
+		StatusUpdates: r.StatusUpdates.Unwrap(),
+		CrackedHashes: cracked,
+	}
 }
 
 func (j *Job) ToSimpleDTO() apitypes.JobSimpleDTO {
@@ -131,18 +151,19 @@ func (h *JobCrackedHash) ToDTO() apitypes.JobCrackedHashDTO {
 	}
 }
 
-func GetJob(jobId string) (*Job, error) {
+func GetJob(jobId string, includeRuntimeData bool) (*Job, error) {
 	var job Job
-	err := GetInstance().First(&job, "id = ?", jobId).Error
+	inst := GetInstance()
+	if includeRuntimeData {
+		inst = inst.Preload("RuntimeData")
+	}
+
+	err := inst.First(&job, "id = ?", jobId).Error
 	if err != nil {
 		return nil, err
 	}
-	return &job, nil
-}
 
-func GetJobWithRuntimeData(jobId string) (j Job, err error) {
-	err = GetInstance().Preload("RuntimeData").First(&j, "id = ?", jobId).Error
-	return
+	return &job, nil
 }
 
 func GetJobProjID(jobId string) (string, error) {
@@ -301,11 +322,15 @@ func GetJobHashtype(jobId string) (uint, error) {
 	return result.HashType, nil
 }
 
-func GetJobsForAttack(attackId string) ([]Job, error) {
+func GetJobsForAttack(attackId string, includeRuntimeData bool) ([]Job, error) {
 	jobs := []Job{}
 
-	err := GetInstance().
-		Debug().
+	inst := GetInstance()
+	if includeRuntimeData {
+		inst = inst.Preload("RuntimeData")
+	}
+
+	err := inst.
 		Select("distinct on (jobs.id) jobs.*").
 		Where("jobs.attack_id = ?", attackId).
 		Find(&jobs).Error

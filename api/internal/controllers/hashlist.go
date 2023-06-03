@@ -21,6 +21,7 @@ func HookHashlistEndpoints(api *echo.Group) {
 	api.POST("/create", handleHashlistCreate)
 	api.GET("/:hashlist-id", handleHashlistGet)
 	api.GET("/:hashlist-id/attacks", handleAttackGetAllForHashlist)
+	api.GET("/:hashlist-id/attacks-with-jobs", handleAttacksAndJobsForHashlist)
 }
 
 func handleHashlistGetAllForProj(c echo.Context) error {

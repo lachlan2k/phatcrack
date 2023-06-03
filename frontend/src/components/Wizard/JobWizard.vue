@@ -329,7 +329,7 @@ async function saveAndStartAttack() {
             />
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
-                <button class="link" @click="saveUptoProject" v-if="inputs.projectName != ''">
+                <button class="link" @click="saveOrGetProject" v-if="inputs.projectName != ''">
                   Create empty project and finish
                 </button>
               </div>

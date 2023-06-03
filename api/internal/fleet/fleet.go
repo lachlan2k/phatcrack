@@ -124,13 +124,13 @@ func ScheduleJob(jobId string) (string, error) {
 		return "", ErrNoAgentsOnline
 	}
 
-	jobDb, err := db.GetJob(jobId)
+	jobDb, err := db.GetJob(jobId, false)
 	if err == db.ErrNotFound {
 		return "", ErrJobDoesntExist
 	}
 	job := jobDb.ToDTO()
 
-	// TOOD
+	// TODO
 	// if job.RuntimeData.Status != db.JobStatusCreated {
 	// return "", ErrJobAlreadyScheduled
 	// }

@@ -28,21 +28,21 @@ import RecentAttacks from '@/components/RecentAttacks.vue'
                 <td>41234 - Customer A</td>
                 <td>2 hours ago</td>
                 <td>8</td>
-                <td><div class="badge-info badge">4 attacks running</div></td>
+                <td><div class="badge badge-info">4 attacks running</div></td>
               </tr>
               <!-- row 2 -->
               <tr class="hover">
                 <td>41235 - Customer B</td>
                 <td>10 days ago</td>
                 <td>3</td>
-                <td><div class="badge-ghost badge">Idle</div></td>
+                <td><div class="badge badge-ghost">Idle</div></td>
               </tr>
               <!-- row 3 -->
               <tr class="hover">
                 <td>41236 - Customer C</td>
                 <td>2 months ago</td>
                 <td>2</td>
-                <td><div class="badge-ghost badge">Idle</div></td>
+                <td><div class="badge badge-ghost">Idle</div></td>
               </tr>
             </tbody>
           </table>

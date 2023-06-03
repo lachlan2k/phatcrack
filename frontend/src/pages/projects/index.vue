@@ -40,7 +40,7 @@ const projects = computed(() => data.value?.projects)
                   <td>{{ project.name }}</td>
                   <td>{{ timeSince(project.time_created) }}</td>
                   <td>8</td>
-                  <td><div class="badge-info badge">4 attacks running</div></td>
+                  <td><div class="badge badge-info">4 attacks running</div></td>
                 </tr>
               </RouterLink>
             </tbody>

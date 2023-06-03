@@ -8,6 +8,15 @@ type AttackDTO struct {
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_params"`
 }
 
+type AttackWithJobsDTO struct {
+	AttackDTO
+	Jobs []JobDTO `json:"jobs"`
+}
+
+type AttackWithJobsMultipleDTO struct {
+	Attacks []AttackWithJobsDTO `json:"attacks"`
+}
+
 type AttackMultipleDTO struct {
 	Attacks []AttackDTO `json:"attacks"`
 }

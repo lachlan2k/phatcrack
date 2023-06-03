@@ -21,6 +21,15 @@ export interface AdminUserCreateResponseDTO {
 export interface AdminIsSetupCompleteResponseDTO {
   is_complete: boolean
 }
+export interface AdminConfigResponseDTO {
+  is_setup_complete: boolean
+  is_mfa_required: boolean
+  require_password_change_on_first_login: boolean
+}
+export interface AdminConfigRequestDTO {
+  is_mfa_required: boolean
+  require_password_change_on_first_login: boolean
+}
 export interface HashcatParams {
   attack_mode: number
   hash_type: number
@@ -39,6 +48,78 @@ export interface AttackDTO {
   id: string
   hashlist_id: string
   hashcat_params: HashcatParams
+}
+export interface JobCrackedHashDTO {
+  hash: string
+  plaintext_hex: string
+}
+export interface HashcatStatusDevice {
+  device_id: number
+  device_name: string
+  device_type: string
+  speed: number
+  util: number
+  temp: number
+}
+export interface HashcatStatusGuess {
+  guess_base: string
+  guess_base_count: number
+  guess_base_offset: number
+  guess_base_percent: number
+  guess_mod: string
+  guess_mod_count: number
+  guess_mod_offset: number
+  guess_mod_percent: number
+  guess_mode: number
+}
+export interface HashcatStatus {
+  original_line: string
+  time: Time
+  session: string
+  guess: HashcatStatusGuess
+  status: number
+  target: string
+  progress: number[]
+  restore_point: number
+  recovered_hashes: number[]
+  recovered_salts: number[]
+  rejected: number
+  devices: HashcatStatusDevice[]
+}
+export interface JobRuntimeOutputLineDTO {
+  stream: string
+  line: string
+}
+export interface Time {}
+export interface JobRuntimeDataDTO {
+  start_request_time: Time
+  started_time: Time
+  stopped_time: Time
+  status: string
+  stop_reason: string
+  error_string: string
+  output_lines: JobRuntimeOutputLineDTO[]
+  status_updates: HashcatStatus[]
+  cracked_hashes: JobCrackedHashDTO[]
+}
+export interface JobDTO {
+  id: string
+  hashlist_version: number
+  attack_id: string
+  hashcat_params: HashcatParams
+  target_hashes: string[]
+  hash_type: number
+  runtime_data: JobRuntimeDataDTO
+  assigned_agent_id: string
+}
+export interface AttackWithJobsDTO {
+  id: string
+  hashlist_id: string
+  hashcat_params: HashcatParams
+  jobs: JobDTO[]
+}
+export interface AttackWithJobsMultipleDTO {
+  attacks: AttackWithJobsDTO[]
 }
 export interface AttackMultipleDTO {
   attacks: AttackDTO[]
@@ -153,22 +234,7 @@ export interface JobCreateResponseDTO {
 export interface JobStartResponseDTO {
   agent_id: string
 }
-export interface JobRuntimeDataDTO {}
-export interface JobCrackedHashDTO {
-  Hash: string
-  PlaintextHex: string
-}
-export interface JobDTO {
-  id: string
-  hashlist_version: number
-  attack_id: string
-  hashcat_params: HashcatParams
-  target_hashes: string[]
-  hash_type: number
-  runtime_data: JobRuntimeDataDTO
-  assigned_agent_id: string
-  cracked_hashes: JobCrackedHashDTO[]
-}
+
 export interface JobSimpleDTO {
   id: string
   hashlist_version: number

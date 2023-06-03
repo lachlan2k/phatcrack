@@ -72,7 +72,7 @@
                 </td>
                 <td>1,928w</td>
                 <td class="text-center">
-                  <div class="badge-accent badge badge-sm"></div>
+                  <div class="badge badge-accent badge-sm"></div>
                 </td>
               </tr>
 
@@ -84,7 +84,7 @@
                 <td><font-awesome-icon icon="fa-solid fa-memory" /> RTX 3070 Ti (74°c)</td>
                 <td>704w</td>
                 <td class="text-center">
-                  <div class="badge-accent badge badge-sm"></div>
+                  <div class="badge badge-accent badge-sm"></div>
                 </td>
               </tr>
 
@@ -99,7 +99,7 @@
                 <td>-</td>
 
                 <td class="text-center">
-                  <div class="badge-ghost badge badge-sm"></div>
+                  <div class="badge badge-ghost badge-sm"></div>
                 </td>
               </tr>
             </tbody>

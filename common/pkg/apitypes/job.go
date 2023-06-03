@@ -1,6 +1,8 @@
 package apitypes
 
 import (
+	"time"
+
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 )
 
@@ -20,11 +22,29 @@ type JobStartResponseDTO struct {
 	AgentID string `json:"agent_id"`
 }
 
-type JobRuntimeDataDTO struct{}
+type JobRuntimeOutputLineDTO struct {
+	Stream string `json:"stream"`
+	Line   string `json:"line"`
+}
+
+type JobRuntimeDataDTO struct {
+	// when we ask the job to start
+	StartRequestTime time.Time `json:"start_request_time"`
+	// when it actually starts on the agent
+	StartedTime time.Time `json:"started_time"`
+	StoppedTime time.Time `json:"stopped_time"`
+	Status      string    `json:"status"`
+	StopReason  string    `json:"stop_reason"`
+	ErrorString string    `json:"error_string"`
+
+	OutputLines   []JobRuntimeOutputLineDTO    `json:"output_lines"`
+	StatusUpdates []hashcattypes.HashcatStatus `json:"status_updates"`
+	CrackedHashes []JobCrackedHashDTO          `json:"cracked_hashes"`
+}
 
 type JobCrackedHashDTO struct {
-	Hash         string
-	PlaintextHex string
+	Hash         string `json:"hash"`
+	PlaintextHex string `json:"plaintext_hex"`
 }
 
 type JobDTO struct {
@@ -36,7 +56,6 @@ type JobDTO struct {
 	HashType        uint                       `json:"hash_type"`
 	RuntimeData     JobRuntimeDataDTO          `json:"runtime_data"`
 	AssignedAgentID string                     `json:"assigned_agent_id"`
-	CrackedHashes   []JobCrackedHashDTO        `json:"cracked_hashes"`
 }
 
 type JobSimpleDTO struct {

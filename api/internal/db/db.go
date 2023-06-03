@@ -115,6 +115,15 @@ func (a pgJSONBArray[T]) Value() (driver.Value, error) {
 	return a.arr.Value()
 }
 
+func (a *pgJSONBArray[T]) Unwrap() []T {
+	arr := make([]T, len(a.Data))
+	for i, el := range a.Data {
+		arr[i] = el.Data
+	}
+
+	return arr
+}
+
 func (a *pgJSONBArray[T]) Scan(src interface{}) error {
 	a.Data = make([]datatypes.JSONType[T], 0)
 	a.arr.A = &a.Data
