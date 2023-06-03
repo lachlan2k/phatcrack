@@ -13,6 +13,7 @@ import { useApi } from '@/composables/useApi'
 import { getAllRulefiles, getAllWordlists } from '@/api/lists'
 import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
 import { useToast } from 'vue-toastification'
+import { attackModes } from '@/util/hashcat'
 
 /*
  * Props
@@ -49,20 +50,6 @@ const steps = [
   { name: 'Configure Attack Settings' },
   { name: 'Review & Start Attack' }
 ].slice(props.firstStep ?? 0)
-
-const attackModes = [
-  { name: 'Wordlist', value: 0 },
-  { name: 'Combinator', value: 1 },
-  { name: 'Brute-force/Mask', value: 3 },
-  {
-    name: 'Wordlist + Mask',
-    value: 6
-  },
-  {
-    name: 'Mask + Wordlist',
-    value: 7
-  }
-]
 
 /*
  * User Inputs

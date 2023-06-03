@@ -152,7 +152,7 @@ func GetJobProjID(jobId string) (string, error) {
 
 	err := GetInstance().Table("jobs").
 		Select("hashlists.project_id as project_id").
-		Joins("join attacks on attacks.id = jobs.job_id").
+		Joins("join attacks on attacks.id = jobs.attack_id").
 		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
 		Where("jobs.id = ?", jobId).
 		Scan(&result).Error
@@ -301,14 +301,12 @@ func GetJobHashtype(jobId string) (uint, error) {
 	return result.HashType, nil
 }
 
-func GetJobsForAttack(attackId string, projectId string) ([]Job, error) {
+func GetJobsForAttack(attackId string) ([]Job, error) {
 	jobs := []Job{}
 
 	err := GetInstance().
-		Select("distinct on (jobs.id), jobs.*").
-		Joins("join attacks on jobs.attack_id = attacks.id").
-		Joins("join hashlists on attack.hashlist_id = hashlists.id").
-		Where("hashlists.project_id = ?", projectId).
+		Debug().
+		Select("distinct on (jobs.id) jobs.*").
 		Where("jobs.attack_id = ?", attackId).
 		Find(&jobs).Error
 

@@ -18,5 +18,9 @@ export const useProjectsStore = defineStore({
     async load() {
       this.projects = (await getAllProjects()).projects
     }
+  },
+
+  getters: {
+    byId: (state) => (projId: string) => state.projects.find(x => x.id === projId) ?? null
   }
 })

@@ -6,6 +6,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import decodeHex from '@/util/decodeHex'
 import { storeToRefs } from 'pinia'
+import { getAttackModeName } from '@/util/hashcat'
 
 const hashlistId = useRoute().params.id as string
 const { data: hashlistData, isLoading: isLoadingHashlist } = useApi(() => getHashlist(hashlistId))
@@ -70,7 +71,7 @@ const hashTypeStr = computed(() => {
               <!-- head -->
               <thead>
                 <tr>
-                  <th>Original Hash</th>
+                  <th>Attack Mode</th>
                   <th>Normalized Hash</th>
                   <th>Cracked Plaintext</th>
                 </tr>
@@ -79,7 +80,7 @@ const hashTypeStr = computed(() => {
               <tbody>
                 <tr v-for="attack in attacksData?.attacks" :key="attack.id">
                   <td>
-                    {{ attack.id }}
+                    {{ getAttackModeName(attack.hashcat_params.attack_mode) }}
                   </td>
                 </tr>
               </tbody>

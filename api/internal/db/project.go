@@ -150,7 +150,6 @@ func GetAllProjectsForUser(userId string) ([]Project, error) {
 		Or("project_shares.user_id = ?", userId)
 
 	err := GetInstance().
-		Debug().
 		Table("(?) as p", subquery).
 		Order("p.created_at DESC").
 		Find(&projs).Error

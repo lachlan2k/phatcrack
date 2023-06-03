@@ -99,7 +99,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	jobs, err := db.GetJobsForAttack(attackId, projId)
+	jobs, err := db.GetJobsForAttack(attackId)
 	if err != nil {
 		return util.ServerError("Failed to get jobs for attack", err)
 	}
