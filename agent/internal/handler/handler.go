@@ -45,10 +45,11 @@ func (h *Handler) sendMessageUnbuffered(msgType string, payload interface{}) err
 		return err
 	}
 
-	return h.conn.WriteJSONUnbuffered(wstypes.Message{
+	h.conn.WriteJSONUnbuffered(wstypes.Message{
 		Type:    msgType,
 		Payload: string(payloadBytes),
 	})
+	return nil
 }
 
 func (h *Handler) handleMessage(msg *wstypes.Message) error {

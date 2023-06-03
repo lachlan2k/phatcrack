@@ -100,10 +100,12 @@ func (w *WSWrapper) Run() error {
 			log.Printf("failed to dial ws endpoint: %v, %v", conn, err)
 
 			if time.Since(lastValidConnectonTime) > w.MaximumDropoutTime {
+				w.lock.Unlock()
 				return fmt.Errorf("couldn't re-establish connection after %v seconds", w.MaximumDropoutTime.Seconds())
 			}
 
 			time.Sleep(time.Second)
+			w.lock.Unlock()
 			continue
 		}
 
@@ -113,6 +115,7 @@ func (w *WSWrapper) Run() error {
 			if err != nil {
 				log.Printf("Failed to write previous message: %v", err)
 				time.Sleep(time.Second)
+				w.lock.Unlock()
 				continue
 			}
 		}
@@ -132,6 +135,6 @@ func (w *WSWrapper) Run() error {
 		w.lock.Unlock()
 
 		lastValidConnectonTime = time.Now()
-		time.Sleep(time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }

@@ -18,6 +18,6 @@ func main() {
 	err := handler.Run(&conf)
 
 	if err != nil {
-		panic(err)
+		log.Fatalf("%v", err)
 	}
 }
