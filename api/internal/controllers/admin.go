@@ -42,7 +42,7 @@ func handleCreateUser(c echo.Context) error {
 		return err
 	}
 
-	rolesOk := auth.AreRoleAllowedOnRegistration(req.Roles)
+	rolesOk := auth.AreRolesAllowedOnRegistration(req.Roles)
 	if !rolesOk {
 		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
 	}
