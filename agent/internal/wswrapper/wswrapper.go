@@ -55,7 +55,7 @@ func (w *WSWrapper) ReadJSON(v interface{}) error {
 		w.errs <- err
 	}
 
-	return nil
+	return errors.New("failed to read json")
 }
 
 func (w *WSWrapper) handle() error {
