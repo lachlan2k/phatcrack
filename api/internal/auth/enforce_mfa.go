@@ -14,22 +14,42 @@ func (a *AuthHandler) EnforceMFA() echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			if !config.Get().IsMFARequired {
-				return next(c)
-			}
-
 			u, err := ClaimsFromReq(c)
 			if err != nil {
 				return echo.ErrUnauthorized
 			}
 
+			userIsEnrolled := false
+			userHasCompleted := false
 			for _, userRole := range u.Roles {
-				if userRole == RoleMFAEnrolled || userRole == RoleMFAExempt {
+				if userRole == RoleMFAEnrolled {
+					userIsEnrolled = true
+				}
+
+				if userRole == RoleMFACompleted {
+					userHasCompleted = true
+				}
+
+				// Early exit if they're exempt
+				if userRole == RoleMFAExempt {
 					return next(c)
 				}
 			}
 
-			return echo.NewHTTPError(http.StatusForbidden, "MFA not yet configured")
+			if config.Get().IsMFARequired {
+				if !userIsEnrolled {
+					return echo.NewHTTPError(http.StatusForbidden, "MFA not yet enrolled")
+				}
+			}
+
+			// Even if we don't globally enforce MFA, we need to enforce it if the user has chosen to configure it themselves
+			if userIsEnrolled {
+				if !userHasCompleted {
+					return echo.NewHTTPError(http.StatusForbidden, "MFA not yet completed")
+				}
+			}
+
+			return next(c)
 		}
 	}
 }
