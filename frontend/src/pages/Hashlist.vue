@@ -13,7 +13,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import decodeHex from '@/util/decodeHex'
 import { storeToRefs } from 'pinia'
-import { getAttackModeName } from '@/util/hashcat'
+import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import type { AttackWithJobsDTO } from '@/api/types'
 import { getAttacksWithJobsForHashlist } from '@/api/project'
 
@@ -33,6 +33,8 @@ const isLoading = computed(() => {
   return isLoadingHashlist.value || !isHashTypesLoaded.value || isLoadingAttacksData.value
 })
 
+// TODO: this will almost certainl perform terribly, and the code isn't super tidy?
+// When maturing this page, it might be worthwhile pulling this out to a weakmap or something computed
 const numJobs = (attack: AttackWithJobsDTO) => attack.jobs.length
 const numJobsRunning = (attack: AttackWithJobsDTO) =>
   attack.jobs.filter((x) => x.runtime_data.status == JobStatusStarted).length
@@ -53,6 +55,8 @@ const numJobsQueued = (attack: AttackWithJobsDTO) =>
     (x) =>
       x.runtime_data.status == JobStatusAwaitingStart || x.runtime_data.status == JobStatusCreated
   ).length
+const hashrateSum = (attack: AttackWithJobsDTO) =>
+  attack.jobs.map((x) => x.runtime_summary.hashrate).reduce((a, b) => a + b)
 
 const hashTypeStr = computed(() => {
   if (isLoading.value) {
@@ -63,80 +67,85 @@ const hashTypeStr = computed(() => {
 </script>
 
 <template>
-  <main class="w-full p-6">
+  <main class="w-full p-5">
     <p v-if="isLoading">Loading</p>
     <div v-else>
       <div class="prose">
         <h1>{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
       </div>
-      <div class="mt-6 flex flex-col flex-wrap gap-6">
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title">Hashes</h2>
-            <table class="table w-full">
-              <!-- head -->
-              <thead>
-                <tr>
-                  <th>Original Hash</th>
-                  <th>Normalized Hash</th>
-                  <th>Cracked Plaintext</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr v-for="hash in hashlistData?.hashes" :key="hash.normalized_hash">
-                  <td>{{ hash.input_hash }}</td>
-                  <td>{{ hash.normalized_hash }}</td>
-                  <td>{{ decodeHex(hash.plaintext_hex) || '-' }}</td>
-                </tr>
-              </tbody>
-            </table>
+      <div class="flex justify-between">
+        <div class="mt-6 flex flex-wrap gap-6">
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <div class="flex flex-row justify-between">
+                <h2 class="card-title">Attacks</h2>
+                <button class="btn-primary btn-sm btn">New Attack</button>
+              </div>
+              <table class="compact-table table w-full">
+                <!-- head -->
+                <thead>
+                  <tr>
+                    <th>Attack Mode</th>
+                    <th>Status</th>
+                    <th>Total Hashrate</th>
+                    <th>Controls</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="attack in attacksData?.attacks" :key="attack.id">
+                    <td>
+                      {{ getAttackModeName(attack.hashcat_params.attack_mode) }}
+                    </td>
+                    <td v-if="numJobs(attack)">
+                      <div class="badge badge-success mr-1" v-if="numJobsFinished(attack) > 0">
+                        {{ numJobsFinished(attack) }} jobs finished
+                      </div>
+                      <div class="badge badge-info mr-1" v-if="numJobsRunning(attack) > 0">
+                        {{ numJobsRunning(attack) }} jobs running
+                      </div>
+                      <div class="badge badge-secondary mr-1" v-if="numJobsQueued(attack) > 0">
+                        {{ numJobsQueued(attack) }} jobs pending
+                      </div>
+                      <div class="badge badge-error" v-if="numJobsFailed(attack)">
+                        {{ numJobsFailed(attack) }} jobs failed
+                      </div>
+                    </td>
+                    <td v-else>
+                      <div class="badge badge-info">No jobs for attack</div>
+                    </td>
+                    <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
+                    <td>stop/start/delete</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="mt-6 flex flex-col flex-wrap gap-6">
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title">Attacks</h2>
-            <table class="table w-full">
-              <!-- head -->
-              <thead>
-                <tr>
-                  <th>Attack Mode</th>
-                  <th>Status of Jobs</th>
-                  <th>Controls</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr v-for="attack in attacksData?.attacks" :key="attack.id">
-                  <td>
-                    {{ getAttackModeName(attack.hashcat_params.attack_mode) }}
-                  </td>
-
-                  <td v-if="numJobs(attack)">
-                    <div class="badge badge-success mr-1" v-if="numJobsFinished(attack) > 0">
-                      {{ numJobsFinished(attack) }} jobs finished
-                    </div>
-                    <div class="badge badge-info mr-1" v-if="numJobsRunning(attack) > 0">
-                      {{ numJobsRunning(attack) }} jobs running
-                    </div>
-                    <div class="badge badge-secondary mr-1" v-if="numJobsQueued(attack) > 0">
-                      {{ numJobsQueued(attack) }} jobs pending
-                    </div>
-                    <div class="badge badge-error" v-if="numJobsFailed(attack)">
-                      {{ numJobsFailed(attack) }} jobs failed
-                    </div>
-                  </td>
-                  <td v-else>
-                    <div class="badge badge-info">No jobs for attack</div>
-                  </td>
-
-                  <td>Stop button/restart/start button? delete button?</td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="mt-6 flex flex-wrap gap-6">
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <div class="flex flex-row justify-between">
+                <h2 class="card-title">Hashlist</h2>
+                <button class="btn-sm btn">Edit</button>
+              </div>
+              <table class="compact-table compact-table table w-full">
+                <!-- head -->
+                <thead>
+                  <tr>
+                    <th>Original Hash</th>
+                    <!-- <th>Normalized Hash</th> -->
+                    <th>Cracked Plaintext</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="hash in hashlistData?.hashes" :key="hash.normalized_hash">
+                    <td>{{ hash.input_hash }}</td>
+                    <!-- <td>{{ hash.normalized_hash }}</td> -->
+                    <td>{{ decodeHex(hash.plaintext_hex) || '-' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

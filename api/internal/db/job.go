@@ -87,6 +87,7 @@ func (j *Job) ToDTO() apitypes.JobDTO {
 		TargetHashes:    j.TargetHashes,
 		HashType:        j.HashType,
 		RuntimeData:     j.RuntimeData.ToDTO(),
+		RuntimeSummary:  j.RuntimeData.ToSummaryDTO(),
 	}
 
 	if j.AssignedAgentID == nil {
@@ -127,6 +128,43 @@ func (r *JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
 		StatusUpdates: r.StatusUpdates.Unwrap(),
 		CrackedHashes: cracked,
 	}
+}
+
+func (r *JobRuntimeData) ToSummaryDTO() apitypes.JobRuntimeSummaryDTO {
+	dto := apitypes.JobRuntimeSummaryDTO{
+		StartedTime:            r.StartedTime.Unix(),
+		StoppedTime:            r.StoppedTime.Unix(),
+		Hashrate:               0,
+		PercentComplete:        -1,
+		EstimatedTimeRemaining: -1,
+	}
+
+	statusUpdates := r.StatusUpdates.Unwrap()
+	if len(statusUpdates) > 0 {
+		status := statusUpdates[len(statusUpdates)-1]
+
+		for _, dev := range status.Devices {
+			dto.Hashrate += dev.Speed
+		}
+
+		if r.Status == JobStatusStarted {
+			if status.EstimatedStop > time.Now().Unix() {
+				dto.EstimatedTimeRemaining = status.EstimatedStop - time.Now().Unix()
+			}
+
+			// This is a tuple with (keyspace covered, total keyspace)
+			if len(status.Progress) == 2 {
+				dto.PercentComplete = float32(status.Progress[0]) / float32(status.Progress[1])
+			}
+		}
+
+		if r.Status == JobStatusExited && r.StopReason == JobStopReasonFinished {
+			dto.PercentComplete = 100.0
+			dto.EstimatedTimeRemaining = 0
+		}
+	}
+
+	return dto
 }
 
 func (j *Job) ToSimpleDTO() apitypes.JobSimpleDTO {

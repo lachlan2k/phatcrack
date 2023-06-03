@@ -28,18 +28,24 @@ type JobRuntimeOutputLineDTO struct {
 }
 
 type JobRuntimeDataDTO struct {
-	// when we ask the job to start
 	StartRequestTime time.Time `json:"start_request_time"`
-	// when it actually starts on the agent
-	StartedTime time.Time `json:"started_time"`
-	StoppedTime time.Time `json:"stopped_time"`
-	Status      string    `json:"status"`
-	StopReason  string    `json:"stop_reason"`
-	ErrorString string    `json:"error_string"`
+	StartedTime      time.Time `json:"started_time"`
+	StoppedTime      time.Time `json:"stopped_time"`
+	Status           string    `json:"status"`
+	StopReason       string    `json:"stop_reason"`
+	ErrorString      string    `json:"error_string"`
 
 	OutputLines   []JobRuntimeOutputLineDTO    `json:"output_lines"`
 	StatusUpdates []hashcattypes.HashcatStatus `json:"status_updates"`
 	CrackedHashes []JobCrackedHashDTO          `json:"cracked_hashes"`
+}
+
+type JobRuntimeSummaryDTO struct {
+	Hashrate               int     `json:"hashrate"`
+	EstimatedTimeRemaining int64   `json:"estimated_time_remaining"`
+	PercentComplete        float32 `json:"percent_complete"`
+	StartedTime            int64   `json:"started_time"`
+	StoppedTime            int64   `json:"stopped_time"`
 }
 
 type JobCrackedHashDTO struct {
@@ -55,6 +61,7 @@ type JobDTO struct {
 	TargetHashes    []string                   `json:"target_hashes"`
 	HashType        uint                       `json:"hash_type"`
 	RuntimeData     JobRuntimeDataDTO          `json:"runtime_data"`
+	RuntimeSummary  JobRuntimeSummaryDTO       `json:"runtime_summary"`
 	AssignedAgentID string                     `json:"assigned_agent_id"`
 }
 

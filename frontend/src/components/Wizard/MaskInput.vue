@@ -31,7 +31,7 @@ function update(val: string) {
       <button
         text="foo"
         @click="update(props.modelValue + maskCharset.mask)"
-        class="btn-outline btn btn-xs mr-1 normal-case"
+        class="btn-outline btn-xs btn mr-1 normal-case"
       >
         {{ maskCharset.mask }}
       </button>

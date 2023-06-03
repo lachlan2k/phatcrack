@@ -534,8 +534,8 @@ async function saveAndStartAttack() {
             </div>
 
             <div class="card-actions justify-end">
-              <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
-              <button class="btn btn-primary" @click="inputs.activeStep++">Next</button>
+              <button class="btn-ghost btn" @click="inputs.activeStep--">Previous</button>
+              <button class="btn-primary btn" @click="inputs.activeStep++">Next</button>
             </div>
           </div>
         </template>
@@ -573,8 +573,8 @@ async function saveAndStartAttack() {
             </div>
 
             <div class="card-actions justify-end">
-              <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
-              <button class="btn btn-success" @click="saveAndStartAttack">Start Attack</button>
+              <button class="btn-ghost btn" @click="inputs.activeStep--">Previous</button>
+              <button class="btn-success btn" @click="saveAndStartAttack">Start Attack</button>
             </div>
           </div>
         </template>

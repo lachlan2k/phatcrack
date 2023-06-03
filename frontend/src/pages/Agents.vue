@@ -1,5 +1,5 @@
 <template>
-  <main class="w-full p-6">
+  <main class="w-full p-5">
     <div class="prose">
       <h1>Agents</h1>
     </div>
@@ -45,7 +45,7 @@
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">Agent List</h2>
-          <table class="table w-full">
+          <table class="compact-table table w-full">
             <!-- head -->
             <thead>
               <tr>

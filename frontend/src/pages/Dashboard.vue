@@ -3,7 +3,7 @@ import RecentAttacks from '@/components/RecentAttacks.vue'
 </script>
 
 <template>
-  <main class="w-full p-6">
+  <main class="w-full p-5">
     <div class="prose">
       <h1>Dashboard</h1>
     </div>
@@ -11,7 +11,7 @@ import RecentAttacks from '@/components/RecentAttacks.vue'
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">Recent Projects</h2>
-          <table class="table w-full">
+          <table class="compact-table table w-full">
             <!-- head -->
             <thead>
               <tr>

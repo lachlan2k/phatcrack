@@ -49,6 +49,13 @@ export interface AttackDTO {
   hashlist_id: string
   hashcat_params: HashcatParams
 }
+export interface JobRuntimeSummaryDTO {
+  hashrate: number
+  estimated_time_remaining: number
+  percent_complete: number
+  started_time: number
+  stopped_time: number
+}
 export interface JobCrackedHashDTO {
   hash: string
   plaintext_hex: string
@@ -85,6 +92,8 @@ export interface HashcatStatus {
   recovered_salts: number[]
   rejected: number
   devices: HashcatStatusDevice[]
+  time_start: number
+  estimated_stop: number
 }
 export interface JobRuntimeOutputLineDTO {
   stream: string
@@ -110,6 +119,7 @@ export interface JobDTO {
   target_hashes: string[]
   hash_type: number
   runtime_data: JobRuntimeDataDTO
+  runtime_summary: JobRuntimeSummaryDTO
   assigned_agent_id: string
 }
 export interface AttackWithJobsDTO {

@@ -24,7 +24,7 @@ const isLoading = computed(() => {
 </script>
 
 <template>
-  <main class="w-full p-6">
+  <main class="w-full p-5">
     <p v-if="isLoading">Loading</p>
     <div v-else>
       <div class="prose">

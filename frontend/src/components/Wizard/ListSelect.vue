@@ -60,7 +60,7 @@ function toggleSelected(id: string) {
 
 <template>
   <label class="label font-bold">{{ labelText }}</label>
-  <table class="table w-full">
+  <table class="compact-table table w-full">
     <tbody>
       <tr>
         <td>Select</td>

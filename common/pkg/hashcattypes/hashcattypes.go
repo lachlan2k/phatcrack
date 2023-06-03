@@ -56,6 +56,9 @@ type HashcatStatus struct {
 	RecoveredSalts  []int                 `json:"recovered_salts"`
 	Rejected        int                   `json:"rejected"`
 	Devices         []HashcatStatusDevice `json:"devices"`
+
+	TimeStart     int64 `json:"time_start"`
+	EstimatedStop int64 `json:"estimated_stop"`
 }
 
 type HashcatResult struct {

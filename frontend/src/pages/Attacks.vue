@@ -3,7 +3,7 @@ import RecentAttacks from '@/components/RecentAttacks.vue'
 </script>
 
 <template>
-  <main class="w-full p-6">
+  <main class="w-full p-5">
     <div class="prose">
       <h1>Attacks</h1>
     </div>

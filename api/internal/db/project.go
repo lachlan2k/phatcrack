@@ -23,7 +23,7 @@ type Project struct {
 func (p *Project) ToDTO() apitypes.ProjectDTO {
 	return apitypes.ProjectDTO{
 		ID:          p.ID.String(),
-		TimeCreated: p.CreatedAt.UnixMilli(),
+		TimeCreated: p.CreatedAt.Unix(),
 		Name:        p.Name,
 		Description: p.Description,
 		OwnerUserID: p.OwnerUserID.String(),

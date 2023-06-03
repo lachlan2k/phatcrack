@@ -9,7 +9,7 @@ const projects = computed(() => data.value?.projects)
 </script>
 
 <template>
-  <main class="w-full p-6">
+  <main class="w-full p-5">
     <div class="prose">
       <h1>Project Folders</h1>
     </div>

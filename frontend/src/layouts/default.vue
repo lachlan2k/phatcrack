@@ -16,7 +16,7 @@ const pageLinks = [
 </script>
 
 <template>
-  <div class="drawer-mobile drawer">
+  <div class="drawer lg:drawer-open">
     <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content bg-slate-100">
       <router-view />
@@ -28,15 +28,14 @@ const pageLinks = [
         <h2 class="btn-ghost btn w-full text-center text-3xl">Phatcrack</h2>
         <hr class="mt-4 mb-8 h-px border-0 bg-gray-200 dark:bg-gray-700" />
         <RouterLink to="/wizard">
-          <a class="btn w-full gap-2 bg-slate-600">
+          <a class="btn-neutral btn w-full gap-2 bg-slate-600">
             <span>
               <font-awesome-icon icon="fa-solid fa-pencil" />
             </span>
             Get Cracking
           </a>
         </RouterLink>
-        <div class="h-8"></div>
-        <ul class="menu text-lg">
+        <ul class="menu menu-lg">
           <li class="menu-title pb-2"><span>Pages</span></li>
 
           <li
@@ -52,9 +51,7 @@ const pageLinks = [
           </li>
         </ul>
 
-        <div></div>
-
-        <ul class="menu mt-auto text-lg">
+        <ul class="menu menu-lg">
           <li
             class="hover-bordered"
             v-if="authStore.isAdmin"

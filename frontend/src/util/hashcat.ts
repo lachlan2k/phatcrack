@@ -32,3 +32,17 @@ export const maskCharsets: MaskInfo[] = [
   { mask: '?a', charset: '?l?u?d?s', description: 'Lowercase, uppercase, digits and symbols' },
   { mask: '?b', charset: '0x00 - 0xFF', description: 'All possible bytes' }
 ]
+
+const hashrateUnits = ['H/s', 'KH/s', 'MH/s', 'GH/s', 'TH/s']
+
+export function hashrateStr(hashrate: number): string {
+  let n = 0,
+    x = hashrate
+
+  while (x > 1000 && n < hashrateUnits.length - 1) {
+    n++
+    x /= 1000
+  }
+
+  return `${x.toFixed(1)} ${hashrateUnits[n]}`
+}

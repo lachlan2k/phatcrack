@@ -3,7 +3,7 @@ import JobWizard from '@/components/Wizard/JobWizard.vue'
 </script>
 
 <template>
-  <main class="w-full p-6">
+  <main class="w-full p-5">
     <div class="prose">
       <h1>New Project Wizard</h1>
     </div>
