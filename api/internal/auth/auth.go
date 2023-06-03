@@ -27,6 +27,7 @@ type UserClaims struct {
 
 type AuthClaims struct {
 	UserClaims
+	HasCompletedMFA bool `json:"has_completed_mfa"`
 	jwt.StandardClaims
 }
 
@@ -37,6 +38,7 @@ func UserToClaims(user *db.User) *AuthClaims {
 			Username: user.Username,
 			Roles:    user.Roles,
 		},
+		HasCompletedMFA: false,
 	}
 }
 

@@ -3,9 +3,6 @@ package auth
 const RoleAdmin = "admin"
 const RoleStandard = "standard"
 
-// This is dynamic. We add this once the user completes MFA
-const RoleMFACompleted = "mfa_completed"
-
 const RoleMFAEnrolled = "mfa_enrolled"
 const RoleMFAExempt = "mfa_exempt"
 const RoleRequiresPasswordChange = "requires_password_change"

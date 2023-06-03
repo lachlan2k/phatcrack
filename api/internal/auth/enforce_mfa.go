@@ -20,14 +20,9 @@ func (a *AuthHandler) EnforceMFA() echo.MiddlewareFunc {
 			}
 
 			userIsEnrolled := false
-			userHasCompleted := false
 			for _, userRole := range u.Roles {
 				if userRole == RoleMFAEnrolled {
 					userIsEnrolled = true
-				}
-
-				if userRole == RoleMFACompleted {
-					userHasCompleted = true
 				}
 
 				// Early exit if they're exempt
@@ -35,6 +30,8 @@ func (a *AuthHandler) EnforceMFA() echo.MiddlewareFunc {
 					return next(c)
 				}
 			}
+
+			userHasCompleted := u.HasCompletedMFA
 
 			if config.Get().IsMFARequired {
 				if !userIsEnrolled {
