@@ -70,6 +70,7 @@ export const useAuthStore = defineStore({
     isLoggedIn: (state) => state.loggedInUser != null,
     username: (state) => state.loggedInUser?.username,
     error: (state) => state.loginError,
-    isAdmin: (state) => state.loggedInUser?.role === 'admin'
+    isAdmin: (state) => state.loggedInUser?.roles.includes('admin') ?? false,
+    hasRole: (state) => (role: string) => state.loggedInUser?.roles.includes(role) ?? false
   }
 })

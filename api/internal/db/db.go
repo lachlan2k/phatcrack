@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"time"
 
@@ -37,7 +38,38 @@ func Connect(dsn string) error {
 	}
 
 	runMigrations()
-	return upsertConfig()
+	return seed()
+}
+
+func seed() error {
+	var userCount int64
+	err := GetInstance().Model(&User{}).Count(&userCount).Error
+	if err != nil {
+		return err
+	}
+
+	if userCount == 0 {
+		_, err := RegisterUser("admin", "changeme", []string{"admin"})
+		if err != nil {
+			return err
+		}
+	}
+
+	var configRowCount int64
+	err = GetInstance().Model(&Config{}).Count(&configRowCount).Error
+	if err != nil {
+		return err
+	}
+
+	if configRowCount == 0 {
+		return GetInstance().Create(&Config{
+			Config: datatypes.JSON([]byte("{}")),
+		}).Error
+	} else if configRowCount > 1 {
+		return errors.New("more than one config row was found in the db (there should only be 1)")
+	}
+
+	return nil
 }
 
 func GetInstance() *gorm.DB {
@@ -65,7 +97,7 @@ func runMigrations() {
 
 	instance.AutoMigrate(&User{})
 
-	instance.AutoMigrate(&ConfigItem{})
+	instance.AutoMigrate(&Config{})
 }
 
 type pgJSONBArray[T interface{}] struct {

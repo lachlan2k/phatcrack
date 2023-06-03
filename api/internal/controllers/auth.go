@@ -13,6 +13,8 @@ import (
 )
 
 func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
+	// Note: these endpoints are MFA-exempt, so tread carefully before you add anything else
+	// If adding a generic endpoint to update password, etc. maybe that should go elsewhere
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong auth")
 	})
@@ -30,9 +32,17 @@ func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 			User: apitypes.AuthCurrentUserDTO{
 				ID:       claims.ID,
 				Username: claims.Username,
-				Role:     claims.Role,
+				Roles:    claims.Roles,
 			},
 		})
+	})
+
+	// Reminder, we're MFA exempt here, so don't put a general password change here
+	api.POST("/change-temporary-password", func(c echo.Context) error {
+		// TODO: when implementing this, ensure the user has the RoleRequiresPasswordChange role
+		// Because this is a setup endpoint, its MFA-exempt
+		// For implementing general password changing, we should use a different endpoint
+		return echo.ErrNotImplemented
 	})
 }
 
@@ -49,7 +59,6 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 		}
 
 		newClaims := auth.UserToClaims(user)
-
 		err = authHandler.SignAndSetJWT(c, newClaims)
 		if err != nil {
 			return err
@@ -59,7 +68,7 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			User: apitypes.AuthCurrentUserDTO{
 				ID:       user.ID.String(),
 				Username: user.Username,
-				Role:     user.Role,
+				Roles:    user.Roles,
 			},
 		})
 	}
@@ -94,7 +103,7 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			User: apitypes.AuthCurrentUserDTO{
 				ID:       user.ID.String(),
 				Username: user.Username,
-				Role:     user.Role,
+				Roles:    user.Roles,
 			},
 		})
 	}

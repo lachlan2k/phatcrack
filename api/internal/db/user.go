@@ -4,13 +4,14 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/datatypes"
 )
 
 type User struct {
 	UUIDBaseModel
 	Username     string `gorm:"uniqueIndex"`
 	PasswordHash string
-	Role         string
+	Roles        datatypes.JSONSlice[string]
 }
 
 func NormalizeUsername(username string) string {
@@ -35,7 +36,7 @@ func GetUserByUsername(username string) (*User, error) {
 	return &user, nil
 }
 
-func RegisterUser(username, password, role string) (*User, error) {
+func RegisterUser(username, password string, roles []string) (*User, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -44,7 +45,7 @@ func RegisterUser(username, password, role string) (*User, error) {
 	user := &User{
 		Username:     NormalizeUsername(username),
 		PasswordHash: string(passwordHash),
-		Role:         role,
+		Roles:        roles,
 	}
 
 	err = GetInstance().Create(user).Error

@@ -20,9 +20,9 @@ type AuthHandler struct {
 }
 
 type UserClaims struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	ID       string   `json:"id"`
+	Username string   `json:"username"`
+	Roles    []string `json:"roles"`
 }
 
 type AuthClaims struct {
@@ -35,7 +35,7 @@ func UserToClaims(user *db.User) *AuthClaims {
 		UserClaims: UserClaims{
 			ID:       user.ID.String(),
 			Username: user.Username,
-			Role:     user.Role,
+			Roles:    user.Roles,
 		},
 	}
 }
@@ -89,27 +89,33 @@ func (a *AuthHandler) SignAndSetJWT(c echo.Context, claims *AuthClaims) error {
 	return nil
 }
 
+func (a *AuthHandler) shouldSkip(c echo.Context) bool {
+	path := c.Request().URL.Path
+	for _, bypassPath := range a.WhitelistPaths {
+		if path == bypassPath {
+			return true
+		}
+	}
+	return false
+}
+
 func (a *AuthHandler) Middleware() echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningMethod: middleware.AlgorithmHS256,
 		SigningKey:    a.Secret,
 		TokenLookup:   "cookie:" + TokenCookieName,
 		Claims:        &AuthClaims{},
-		Skipper: func(c echo.Context) bool {
-			path := c.Request().URL.Path
-			for _, bypassPath := range a.WhitelistPaths {
-				if path == bypassPath {
-					return true
-				}
-			}
-			return false
-		},
+		Skipper:       a.shouldSkip,
 	})
 }
 
-func (a *AuthHandler) RoleRestrictedMiddleware(allowedRoles []string) echo.MiddlewareFunc {
+func (a *AuthHandler) RoleRestrictedMiddleware(allowedRoles []string, disallowedRoles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			if a.shouldSkip(c) {
+				return next(c)
+			}
+
 			user, ok := c.Get("user").(*jwt.Token)
 			if user == nil || !ok {
 				return echo.ErrUnauthorized
@@ -120,9 +126,19 @@ func (a *AuthHandler) RoleRestrictedMiddleware(allowedRoles []string) echo.Middl
 				return echo.ErrUnauthorized
 			}
 
-			for _, role := range allowedRoles {
-				if claims.Role == role {
-					return next(c)
+			for _, disallowedRole := range disallowedRoles {
+				for _, userRole := range claims.Roles {
+					if disallowedRole == userRole {
+						return echo.ErrUnauthorized
+					}
+				}
+			}
+
+			for _, allowedRole := range allowedRoles {
+				for _, userRole := range claims.Roles {
+					if allowedRole == userRole {
+						return next(c)
+					}
 				}
 			}
 
@@ -132,5 +148,5 @@ func (a *AuthHandler) RoleRestrictedMiddleware(allowedRoles []string) echo.Middl
 }
 
 func (a *AuthHandler) AdminOnlyMiddleware() echo.MiddlewareFunc {
-	return a.RoleRestrictedMiddleware([]string{"admin"})
+	return a.RoleRestrictedMiddleware([]string{"admin"}, nil)
 }

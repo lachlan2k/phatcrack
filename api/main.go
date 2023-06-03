@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/webserver"
 )
@@ -16,6 +17,16 @@ func main() {
 	err := db.Connect(os.Getenv("DB_DSN"))
 	if err != nil {
 		log.Fatalf("database connection failed: %v", err)
+	}
+
+	err = config.Reload()
+	if err != nil {
+		log.Fatalf("failed to load runtime config: %v", err)
+	}
+
+	err = config.Save()
+	if err != nil {
+		log.Fatalf("failed to write config to db for consistency: %v", err)
 	}
 
 	port := "3000"

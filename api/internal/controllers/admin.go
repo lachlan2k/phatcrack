@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lachlan2k/phatcrack/api/internal/auth"
+	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
@@ -19,15 +21,15 @@ func HookAdminEndpoints(api *echo.Group) {
 		return c.JSON(http.StatusOK, user)
 	})
 
-	api.GET("/is_setup_complete", func(c echo.Context) error {
-		conf, err := db.GetConfigItem(db.ConfigKeyIsSetupComplete)
-		if err != nil {
-			return util.ServerError("Internal server error", err)
-		}
-
+	api.GET("/is-setup-complete", func(c echo.Context) error {
+		conf := config.Get()
 		return c.JSON(http.StatusOK, apitypes.AdminIsSetupCompleteResponseDTO{
-			IsComplete: conf.Value == db.ConfigValueTrue,
+			IsComplete: conf.IsSetupComplete,
 		})
+	})
+
+	api.GET("/config", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, config.Get())
 	})
 
 	api.POST("/user/create", handleCreateUser)
@@ -40,9 +42,18 @@ func handleCreateUser(c echo.Context) error {
 		return err
 	}
 
+	rolesOk := auth.AreRoleAllowedOnRegistration(req.Roles)
+	if !rolesOk {
+		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
+	}
+
+	if config.Get().RequirePasswordChangeOnFirstLogin {
+		req.Roles = append(req.Roles, auth.RoleRequiresPasswordChange)
+	}
+
 	// TODO: pro-active handling of duplicate username
 	// could also check to see what happens when the constraint fails
-	newUser, err := db.RegisterUser(req.Username, req.Password, req.Role)
+	newUser, err := db.RegisterUser(req.Username, req.Password, req.Roles)
 	if err != nil {
 		return util.ServerError("Failed to create user", err)
 	}
@@ -50,7 +61,7 @@ func handleCreateUser(c echo.Context) error {
 	return c.JSON(http.StatusCreated, apitypes.AdminUserCreateResponseDTO{
 		ID:       newUser.ID.String(),
 		Username: newUser.Username,
-		Role:     newUser.Role,
+		Roles:    newUser.Roles,
 	})
 }
 

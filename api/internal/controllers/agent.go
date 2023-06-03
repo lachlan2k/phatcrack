@@ -11,6 +11,8 @@ import (
 )
 
 func HookAgentEndpoints(api *echo.Group) {
+	// NOTE: this is just for agent handling
+	// These endpoints are exempt from useful authz/n
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong agent")
 	})

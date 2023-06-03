@@ -1,76 +1,48 @@
 package db
 
 import (
-	"fmt"
+	"encoding/json"
 
-	"gorm.io/gorm/clause"
+	"github.com/lachlan2k/phatcrack/api/internal/util"
+	"gorm.io/datatypes"
 )
 
-const ConfigKeyIsSetupComplete = "IsSetupComplete"
-
-const ConfigValueTrue = "true"
-const ConfigValueFalse = "false"
-
-type ConfigItem struct {
+type Config struct {
 	SimpleBaseModel
-	Key   string `gorm:"uniqueIndex"`
-	Value string
+	Config datatypes.JSON
 }
 
-func GetConfigItem(configKey string) (*ConfigItem, error) {
-	var item ConfigItem
-	err := GetInstance().First(&item, "key = ?", configKey).Error
-	if err != nil {
-		return nil, err
-	}
-	return &item, nil
+func (c Config) TableName() string {
+	return "config"
 }
 
-func GetConfigItemWithDefault(configKey string, defaultValue string) (*ConfigItem, error) {
-	var item ConfigItem
-	err := GetInstance().First(&item, "key = ?", configKey).Error
-	if err == ErrNotFound {
-		return SetConfigItem(configKey, defaultValue)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	return &item, nil
-}
-
-func SetConfigItem(configKey string, value string) (*ConfigItem, error) {
-	item := &ConfigItem{
-		Key:   configKey,
-		Value: value,
-	}
-
-	err := GetInstance().Clauses(clause.OnConflict{
-		UpdateAll: true,
-	}).Create(&item).Error
+func GetConfig[ConfigT interface{}]() (*ConfigT, error) {
+	var configRow Config
+	err := GetInstance().First(&configRow).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return item, nil
+	conf, err := util.UnmarshalJSON[ConfigT](configRow.Config.String())
+	if err != nil {
+		return nil, err
+	}
+	return &conf, nil
 }
 
-func upsertConfig() error {
-	var userCount int64
-	err := GetInstance().Model(&User{}).Count(&userCount).Error
+func SetConfig[ConfigT interface{}](newConf ConfigT) error {
+	confBytes, err := json.Marshal(newConf)
 	if err != nil {
 		return err
 	}
 
-	if userCount == 0 {
-		_, err := RegisterUser("admin", "changeme", "admin")
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("Created default admin user with password \"changeme\"")
-		SetConfigItem(ConfigKeyIsSetupComplete, ConfigValueFalse)
+	var configRow Config
+	err = GetInstance().First(&configRow).Error
+	if err != nil {
+		return err
 	}
 
-	return nil
+	return GetInstance().Model(&configRow).Updates(&Config{
+		Config: datatypes.JSON(confBytes),
+	}).Error
 }

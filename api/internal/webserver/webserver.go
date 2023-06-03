@@ -50,15 +50,27 @@ func Listen(port string) error {
 
 	api := e.Group("/api/v1")
 
+	// Agent auth is done separately in the controller, so it can go before auth middleware
+	controllers.HookAgentEndpoints(api.Group("/agent"))
+
 	api.Use(authHandler.Middleware())
 
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
 	})
 
+	// If a user has "requires_password_change" etc they need to be able to do that
+	// Don't worry, the authHandler.Middleware() is already enforcing auth
 	controllers.HookAuthEndpoints(api.Group("/auth"), &authHandler)
+
+	api.Use(authHandler.EnforceMFA())
+
+	api.Use(authHandler.RoleRestrictedMiddleware(
+		[]string{auth.RoleAdmin, auth.RoleStandard},
+		[]string{auth.RoleRequiresPasswordChange}, // disallowed
+	))
+
 	controllers.HookHashcatEndpoints(api.Group("/hashcat"))
-	controllers.HookAgentEndpoints(api.Group("/agent"))
 	controllers.HookProjectEndpoints(api.Group("/project"))
 	controllers.HookListsEndpoints(api.Group("/list"))
 	controllers.HookHashlistEndpoints(api.Group("/hashlist"))

@@ -6,9 +6,9 @@ type AuthLoginRequestDTO struct {
 }
 
 type AuthCurrentUserDTO struct {
-	ID       string `json:"id"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	ID       string   `json:"id"`
+	Username string   `json:"username"`
+	Roles    []string `json:"roles"`
 }
 
 type AuthLoginResponseDTO struct {

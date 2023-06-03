@@ -11,12 +11,12 @@ export interface AdminAgentCreateResponseDTO {
 export interface AdminUserCreateRequestDTO {
   username: string
   password: string
-  role: string
+  roles: string[]
 }
 export interface AdminUserCreateResponseDTO {
   username: string
   id: string
-  role: string
+  roles: string[]
 }
 export interface AdminIsSetupCompleteResponseDTO {
   is_complete: boolean
@@ -60,7 +60,7 @@ export interface AuthLoginRequestDTO {
 export interface AuthCurrentUserDTO {
   id: string
   username: string
-  role: string
+  roles: string[]
 }
 export interface AuthLoginResponseDTO {
   user: AuthCurrentUserDTO
