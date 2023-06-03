@@ -150,15 +150,12 @@ func GetJobProjID(jobId string) (string, error) {
 		ProjectID uuid.UUID
 	}
 
-	err := GetInstance().Table("jobs").Select(
-		"hashlists.project_id as project_id",
-	).Joins(
-		"join attacks on attacks.id = jobs.job_id",
-	).Joins(
-		"join hashlists on hashlists.id = attacks.hashlist_id",
-	).Where(
-		"jobs.id = ?", jobId,
-	).Scan(&result).Error
+	err := GetInstance().Table("jobs").
+		Select("hashlists.project_id as project_id").
+		Joins("join attacks on attacks.id = jobs.job_id").
+		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
+		Where("jobs.id = ?", jobId).
+		Scan(&result).Error
 
 	if err != nil {
 		return "", err
@@ -183,11 +180,13 @@ func SetJobStarted(jobId string, startTime time.Time) error {
 		return err
 	}
 
-	return GetInstance().Where("job_id = ?", jobUuid).Updates(&JobRuntimeData{
-		JobID:       jobUuid,
-		Status:      JobStatusStarted,
-		StartedTime: startTime,
-	}).Error
+	return GetInstance().
+		Where("job_id = ?", jobUuid).
+		Updates(&JobRuntimeData{
+			JobID:       jobUuid,
+			Status:      JobStatusStarted,
+			StartedTime: startTime,
+		}).Error
 }
 
 func SetJobExited(jobId string, reason string, errStr string, exitTime time.Time) error {
@@ -196,13 +195,15 @@ func SetJobExited(jobId string, reason string, errStr string, exitTime time.Time
 		return err
 	}
 
-	return GetInstance().Where("job_id = ?", jobUuid).Updates(&JobRuntimeData{
-		JobID:       jobUuid,
-		Status:      JobStatusExited,
-		StopReason:  reason,
-		StoppedTime: exitTime,
-		ErrorString: errStr,
-	}).Error
+	return GetInstance().
+		Where("job_id = ?", jobUuid).
+		Updates(&JobRuntimeData{
+			JobID:       jobUuid,
+			Status:      JobStatusExited,
+			StopReason:  reason,
+			StoppedTime: exitTime,
+			ErrorString: errStr,
+		}).Error
 }
 
 func SetJobScheduled(jobId string, agentId string) error {
@@ -217,18 +218,22 @@ func SetJobScheduled(jobId string, agentId string) error {
 	}
 
 	return GetInstance().Transaction(func(tx *gorm.DB) error {
-		err := tx.Where("job_id = ?", jobUuid).Updates(&JobRuntimeData{
-			JobID:            jobUuid,
-			Status:           JobStatusAwaitingStart,
-			StartRequestTime: time.Now(),
-		}).Error
+		err := tx.
+			Where("job_id = ?", jobUuid).
+			Updates(&JobRuntimeData{
+				JobID:            jobUuid,
+				Status:           JobStatusAwaitingStart,
+				StartRequestTime: time.Now(),
+			}).Error
 		if err != nil {
 			return err
 		}
 
-		return tx.Where("id = ?", jobUuid).Updates(&Job{
-			AssignedAgentID: &agentUuid,
-		}).Error
+		return tx.
+			Where("id = ?", jobUuid).
+			Updates(&Job{
+				AssignedAgentID: &agentUuid,
+			}).Error
 	})
 }
 
@@ -246,14 +251,13 @@ func AddJobCrackedHash(jobId string, hash string, plaintextHex string) error {
 		return err
 	}
 
-	return GetInstance().Table(
-		"hashlist_hashes",
-	).Where(
-		"normalized_hash = ?", hash,
-	).Updates(&HashlistHash{
-		PlaintextHex: plaintextHex,
-		IsCracked:    true,
-	}).Error
+	return GetInstance().
+		Table("hashlist_hashes").
+		Where("normalized_hash = ?", hash).
+		Updates(&HashlistHash{
+			PlaintextHex: plaintextHex,
+			IsCracked:    true,
+		}).Error
 }
 
 // TODO: actually, on second thought, I want to keep all stderr lines, and only roll-over stdout lines
@@ -282,15 +286,15 @@ func GetJobHashtype(jobId string) (uint, error) {
 	var result struct {
 		HashType uint
 	}
-	err := GetInstance().Table("jobs").Select(
-		"hashlists.hash_type as hash_type",
-	).Joins(
-		"join attacks on attacks.id = jobs.attack_id",
-	).Joins(
-		"join hashlists on attacks.hashlist_id = hashlists.id",
-	).Where(
-		"jobs.id = ?", jobId,
-	).Scan(&result).Error
+
+	err := GetInstance().
+		Table("jobs").
+		Select("hashlists.hash_type as hash_type").
+		Joins("join attacks on attacks.id = jobs.attack_id").
+		Joins("join hashlists on attacks.hashlist_id = hashlists.id").
+		Where("jobs.id = ?", jobId).
+		Scan(&result).Error
+
 	if err != nil {
 		return 0, err
 	}
@@ -300,17 +304,13 @@ func GetJobHashtype(jobId string) (uint, error) {
 func GetJobsForAttack(attackId string, projectId string) ([]Job, error) {
 	jobs := []Job{}
 
-	err := GetInstance().Select(
-		"distinct on (jobs.id), jobs.*",
-	).Joins(
-		"join attacks on jobs.attack_id = attacks.id",
-	).Joins(
-		"join hashlists on attack.hashlist_id = hashlists.id",
-	).Where(
-		"hashlists.project_id = ?", projectId,
-	).Where(
-		"jobs.attack_id = ?", attackId,
-	).Find(&jobs).Error
+	err := GetInstance().
+		Select("distinct on (jobs.id), jobs.*").
+		Joins("join attacks on jobs.attack_id = attacks.id").
+		Joins("join hashlists on attack.hashlist_id = hashlists.id").
+		Where("hashlists.project_id = ?", projectId).
+		Where("jobs.attack_id = ?", attackId).
+		Find(&jobs).Error
 
 	if err != nil {
 		return nil, err

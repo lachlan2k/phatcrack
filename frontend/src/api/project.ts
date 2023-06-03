@@ -1,6 +1,7 @@
 import { client } from '.'
 import type {
   AttackDTO,
+  AttackMultipleDTO,
   AttackStartResponseDTO,
   HashlistDTO,
   HashlistResponseMultipleDTO
@@ -49,4 +50,8 @@ export function getHashlistsForProject(projId: string): Promise<HashlistResponse
 
 export function getHashlist(hashlistId: string): Promise<HashlistDTO> {
   return client.get(`/api/v1/hashlist/${hashlistId}`).then((res) => res.data)
+}
+
+export function getAttacksForHashlist(hashlistId: string): Promise<AttackMultipleDTO> {
+  return client.get(`/api/v1/hashlist/${hashlistId}/attacks`).then((res) => res.data)
 }

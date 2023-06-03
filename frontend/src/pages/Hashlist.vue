@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getHashlist } from '@/api/project'
+import { getAttacksForHashlist, getHashlist } from '@/api/project'
 import { useApi } from '@/composables/useApi'
 import { useResourcesStore } from '@/stores/resources'
 import { computed } from 'vue'
@@ -10,13 +10,15 @@ import { storeToRefs } from 'pinia'
 const hashlistId = useRoute().params.id as string
 const { data: hashlistData, isLoading: isLoadingHashlist } = useApi(() => getHashlist(hashlistId))
 
+const { data: attacksData, isLoading: isLoadingAttacksData } = useApi(() => getAttacksForHashlist(hashlistId))
+
 const resources = useResourcesStore()
 
 const { getHashTypeName, isHashTypesLoaded } = storeToRefs(resources)
 resources.loadHashTypes()
 
 const isLoading = computed(() => {
-  return isLoadingHashlist.value || !isHashTypesLoaded.value
+  return isLoadingHashlist.value || !isHashTypesLoaded.value || isLoadingAttacksData.value
 })
 
 const hashTypeStr = computed(() => {
@@ -54,10 +56,31 @@ const hashTypeStr = computed(() => {
                   <td>{{ hash.normalized_hash }}</td>
                   <td>{{ decodeHex(hash.plaintext_hex) || '-' }}</td>
                 </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-                <tr v-for="hashlist in hashlistData?.hashlists" :key="hashlist.id">
-                  <td>{{ hashlist.name }}</td>
-                  <td>{{ hashlist.hash_type }} - {{ getHashTypeName(hashlist.hash_type) }}</td>
+      <div class="mt-6 flex flex-col flex-wrap gap-6">
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title">Attacks</h2>
+            <table class="table w-full">
+              <!-- head -->
+              <thead>
+                <tr>
+                  <th>Original Hash</th>
+                  <th>Normalized Hash</th>
+                  <th>Cracked Plaintext</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr v-for="attack in attacksData?.attacks" :key="attack.id">
+                  <td>
+                    {{ attack.id }}
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -121,19 +121,16 @@ func (a *Attack) ToDTO() apitypes.AttackDTO {
 func GetProjectForUser(projId, userId string) (*Project, error) {
 	proj := new(Project)
 
-	accessControlQuery := GetInstance().Where(
-		"owner_user_id = ?", userId,
-	).Or(
-		"project_shares.user_id = ?", userId,
-	)
+	accessControlQuery := GetInstance().
+		Where("owner_user_id = ?", userId).
+		Or("project_shares.user_id = ?", userId)
 
-	err := GetInstance().Preload("ProjectShare").Select(
-		"distinct on (projects.id) projects.*",
-	).Joins(
-		"left join project_shares on project_shares.project_id = projects.id",
-	).Where(
-		"projects.id = ?", projId,
-	).Where(accessControlQuery).First(proj).Error
+	err := GetInstance().
+		Preload("ProjectShare").
+		Select("distinct on (projects.id) projects.*").
+		Joins("left join project_shares on project_shares.project_id = projects.id").
+		Where("projects.id = ?", projId).
+		Where(accessControlQuery).First(proj).Error
 
 	if err != nil {
 		return nil, err
@@ -144,15 +141,19 @@ func GetProjectForUser(projId, userId string) (*Project, error) {
 func GetAllProjectsForUser(userId string) ([]Project, error) {
 	projs := []Project{}
 
-	err := GetInstance().Preload("ProjectShare").Select(
-		"distinct on (projects.id) projects.*",
-	).Joins(
-		"left join project_shares on project_shares.project_id = projects.id",
-	).Where(
-		"owner_user_id = ?", userId,
-	).Or(
-		"project_shares.user_id = ?", userId,
-	).Find(&projs).Error
+	subquery := GetInstance().
+		Table("projects").
+		Preload("ProjectShare").
+		Select("distinct on (projects.id) projects.*").
+		Joins("left join project_shares on project_shares.project_id = projects.id").
+		Where("owner_user_id = ?", userId).
+		Or("project_shares.user_id = ?", userId)
+
+	err := GetInstance().
+		Debug().
+		Table("(?) as p", subquery).
+		Order("p.created_at DESC").
+		Find(&projs).Error
 
 	if err != nil {
 		return nil, err
@@ -224,13 +225,12 @@ func GetAttackProjID(attackId string) (string, error) {
 		ProjectID uuid.UUID
 	}
 
-	err := GetInstance().Table("attacks").Select(
-		"hashlists.project_id as project_id",
-	).Joins(
-		"join hashlists on hashlists.id = attacks.hashlist_id",
-	).Where(
-		"attacks.id = ?", attackId,
-	).Scan(&result).Error
+	err := GetInstance().
+		Table("attacks").
+		Select("hashlists.project_id as project_id").
+		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
+		Where("attacks.id = ?", attackId).
+		Scan(&result).Error
 
 	if err != nil {
 		return "", err
