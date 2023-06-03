@@ -60,5 +60,5 @@ func (h *Handler) sendHeartbeat() error {
 	}
 	payload.RuleFiles = rulefiles
 
-	return h.sendMessage(wstypes.HeartbeatType, payload)
+	return h.sendMessageUnbuffered(wstypes.HeartbeatType, payload)
 }

@@ -3,16 +3,15 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
+	"github.com/lachlan2k/phatcrack/agent/internal/wswrapper"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
@@ -22,23 +21,31 @@ type ActiveJob struct {
 }
 
 type Handler struct {
-	conn       *websocket.Conn
+	conn       *wswrapper.WSWrapper
 	conf       *config.Config
 	jobsLock   sync.Mutex
 	activeJobs map[string]ActiveJob
 }
 
 func (h *Handler) sendMessage(msgType string, payload interface{}) error {
-	if h.conn == nil {
-		return errors.New("connection closed")
-	}
-
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
 
 	return h.conn.WriteJSON(wstypes.Message{
+		Type:    msgType,
+		Payload: string(payloadBytes),
+	})
+}
+
+func (h *Handler) sendMessageUnbuffered(msgType string, payload interface{}) error {
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	return h.conn.WriteJSONUnbuffered(wstypes.Message{
 		Type:    msgType,
 		Payload: string(payloadBytes),
 	})
@@ -59,9 +66,12 @@ func (h *Handler) readLoop(ctx context.Context) error {
 		var msg wstypes.Message
 		err := h.conn.ReadJSON(&msg)
 		if err != nil {
-			return fmt.Errorf("error when trying to read websocket JSON: %v", err)
+			time.Sleep(time.Second)
+			continue
 		}
 
+		// TODO: should we be error handling here? I don't think so
+		// Because if hashcat dies, for example, that shouldn't be reason to kill the agent
 		err = h.handleMessage(&msg)
 		if err != nil {
 			return fmt.Errorf("error when handling message: %v", err)
@@ -92,8 +102,6 @@ func (h *Handler) writeLoop(ctx context.Context) error {
 }
 
 func (h *Handler) Handle() error {
-	log.Printf("Agent connected")
-
 	errs := make(chan error, 2)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -110,33 +118,42 @@ func (h *Handler) Handle() error {
 	return err
 }
 
-func Run(conf *config.Config) {
+func Run(conf *config.Config) error {
 	headers := http.Header{
 		"X-Agent-Key": []string{conf.AuthKey},
 	}
 
+	conn := &wswrapper.WSWrapper{
+		Endpoint:           conf.WSEndpoint,
+		Headers:            headers,
+		MaximumDropoutTime: time.Minute * 5,
+	}
+
 	h := &Handler{
-		conn:       nil,
+		conn:       conn,
 		conf:       conf,
 		activeJobs: make(map[string]ActiveJob),
 	}
 
-	for {
-		log.Printf("Dialing %s...", conf.WSEndpoint)
+	conn.Setup()
 
-		conn, _, err := websocket.DefaultDialer.Dial(conf.WSEndpoint, headers)
-		if err != nil {
-			log.Printf("failed to dial ws endpoint: %v, %v", conn, err)
-			time.Sleep(time.Second)
-			continue
-		}
+	errs := make(chan error)
 
-		h.conn = conn
-		err = h.Handle()
+	go func() {
+		err := conn.Run()
+
 		if err != nil {
-			log.Printf("Error when running agent, reconnecting: %v", err)
+			errs <- fmt.Errorf("unrecoverable connection error: %v", err)
 		}
-		h.conn.Close()
-		time.Sleep(time.Second)
-	}
+	}()
+
+	go func() {
+		err := h.Handle()
+
+		if err != nil {
+			errs <- fmt.Errorf("unrecoverable handler error: %v", err)
+		}
+	}()
+
+	return <-errs
 }

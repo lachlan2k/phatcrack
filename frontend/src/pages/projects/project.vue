@@ -44,10 +44,17 @@ const isLoading = computed(() => {
               </thead>
 
               <tbody class="first-col-bold">
-                <tr v-for="hashlist in hashlistData?.hashlists" :key="hashlist.id">
+                <RouterLink
+                  custom
+                  v-slot="{ navigate }"
+                  v-for="hashlist in hashlistData?.hashlists" :key="hashlist.id"
+                  :to="`/hashlist/${hashlist.id}`"
+                >
+                <tr class="hover cursor-pointer" @click="navigate">
                   <td>{{ hashlist.name }}</td>
                   <td>{{ hashlist.hash_type }} - {{ getHashTypeName(hashlist.hash_type) }}</td>
                 </tr>
+                </RouterLink>
               </tbody>
             </table>
           </div>

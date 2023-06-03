@@ -15,5 +15,9 @@ func main() {
 	conf := config.LoadConfig(*configPath)
 
 	log.Printf("Starting agent")
-	handler.Run(&conf)
+	err := handler.Run(&conf)
+
+	if err != nil {
+		panic(err)
+	}
 }
