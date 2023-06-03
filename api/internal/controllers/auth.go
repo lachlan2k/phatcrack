@@ -88,12 +88,15 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 		if err == db.ErrNotFound {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		} else if err != nil {
-			return util.ServerError("Database error", err)
+			return util.ServerError("Internal error", err)
 		}
 
 		hashingTest := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
-		if hashingTest != nil {
+		if hashingTest == bcrypt.ErrMismatchedHashAndPassword {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
+		}
+		if hashingTest != nil {
+			return util.ServerError("Internal error", hashingTest)
 		}
 
 		claims := auth.UserToClaims(user)
