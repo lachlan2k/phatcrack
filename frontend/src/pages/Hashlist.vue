@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import Modal from '@/components/Modal.vue'
+import HashlistEditor from '@/components/HashlistEditor.vue'
+
 import {
   JobStatusAwaitingStart,
   JobStatusCreated,
@@ -9,20 +12,40 @@ import {
 } from '@/api/project'
 import { useApi } from '@/composables/useApi'
 import { useResourcesStore } from '@/stores/resources'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import decodeHex from '@/util/decodeHex'
 import { storeToRefs } from 'pinia'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import type { AttackWithJobsDTO } from '@/api/types'
 import { getAttacksWithJobsForHashlist } from '@/api/project'
+import JobWizard from '@/components/Wizard/JobWizard.vue'
 
 const hashlistId = useRoute().params.id as string
-const { data: hashlistData, isLoading: isLoadingHashlist } = useApi(() => getHashlist(hashlistId))
+const {
+  data: hashlistData,
+  isLoading: isLoadingHashlist,
+  silentlyRefresh: refreshHashlist
+} = useApi(() => getHashlist(hashlistId))
 
-const { data: attacksData, isLoading: isLoadingAttacksData } = useApi(() =>
-  getAttacksWithJobsForHashlist(hashlistId)
-)
+const {
+  data: attacksData,
+  isLoading: isLoadingAttacksData,
+  silentlyRefresh: refreshAttack
+} = useApi(() => getAttacksWithJobsForHashlist(hashlistId))
+
+const intervalId = ref(0)
+
+onMounted(() => {
+  intervalId.value = setInterval(() => {
+    refreshAttack()
+    refreshHashlist()
+  }, 10 * 1000)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(intervalId.value)
+})
 
 const resources = useResourcesStore()
 
@@ -32,6 +55,9 @@ resources.loadHashTypes()
 const isLoading = computed(() => {
   return isLoadingHashlist.value || !isHashTypesLoaded.value || isLoadingAttacksData.value
 })
+
+const isAttackWizardOpen = ref(false)
+const isHashlistEditorOpen = ref(false)
 
 // TODO: this will almost certainl perform terribly, and the code isn't super tidy?
 // When maturing this page, it might be worthwhile pulling this out to a weakmap or something computed
@@ -67,19 +93,28 @@ const hashTypeStr = computed(() => {
 </script>
 
 <template>
-  <main class="w-full p-5">
+  <main class="w-full p-4">
     <p v-if="isLoading">Loading</p>
     <div v-else>
       <div class="prose">
         <h1>{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
       </div>
-      <div class="flex justify-between">
+      <div class="flex gap-4">
         <div class="mt-6 flex flex-wrap gap-6">
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
               <div class="flex flex-row justify-between">
+                <Modal v-model:isOpen="isAttackWizardOpen">
+                  <JobWizard
+                    :firstStep="2"
+                    :existingHashlistId="hashlistId"
+                    :existingProjectId="hashlistData?.project_id"
+                  />
+                </Modal>
                 <h2 class="card-title">Attacks</h2>
-                <button class="btn-primary btn-sm btn">New Attack</button>
+                <button class="btn-primary btn-sm btn" @click="() => (isAttackWizardOpen = true)">
+                  New Attack
+                </button>
               </div>
               <table class="compact-table table w-full">
                 <!-- head -->
@@ -123,10 +158,15 @@ const hashTypeStr = computed(() => {
         </div>
         <div class="mt-6 flex flex-wrap gap-6">
           <div class="card bg-base-100 shadow-xl">
+            <Modal v-model:isOpen="isHashlistEditorOpen">
+              <HashlistEditor v-if="isHashlistEditorOpen" :hashlistId="hashlistData!.id" />
+            </Modal>
             <div class="card-body">
               <div class="flex flex-row justify-between">
                 <h2 class="card-title">Hashlist</h2>
-                <button class="btn-sm btn">Edit</button>
+                <button class="btn-sm btn" @click="() => (isHashlistEditorOpen = true)">
+                  Edit
+                </button>
               </div>
               <table class="compact-table compact-table table w-full">
                 <!-- head -->
@@ -141,7 +181,9 @@ const hashTypeStr = computed(() => {
                   <tr v-for="hash in hashlistData?.hashes" :key="hash.normalized_hash">
                     <td>{{ hash.input_hash }}</td>
                     <!-- <td>{{ hash.normalized_hash }}</td> -->
-                    <td>{{ decodeHex(hash.plaintext_hex) || '-' }}</td>
+                    <td>
+                      <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
+                    </td>
                   </tr>
                 </tbody>
               </table>

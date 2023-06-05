@@ -33,14 +33,14 @@ export function useWizardHashDetect(hashesArr: Ref<string[]>) {
 
   const detectButtonClass = computed(() => {
     if (isLoadingSuggestions.value) {
-      return 'btn-secondary'
+      return 'btn-ghost'
     }
 
     if (suggestedHashTypes.value != null) {
       return ''
     }
 
-    return 'btn-primary'
+    return 'btn-neutral'
   })
 
   const detectButtonText = computed(() => {
@@ -52,7 +52,7 @@ export function useWizardHashDetect(hashesArr: Ref<string[]>) {
       return 'Reset Filter'
     }
 
-    return 'Detect hash type'
+    return 'Detect'
   })
 
   return {

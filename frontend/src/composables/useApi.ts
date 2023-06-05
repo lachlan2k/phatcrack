@@ -53,12 +53,37 @@ export function useApi<DTOType>(
     }
   }
 
+  const silentlyRefresh = async () => {
+    try {
+      const response = await apiFunc()
+      state.data = response as UnwrapRef<DTOType>
+    } catch (err: any) {
+      if (axios.isAxiosError(err)) {
+        switch (err.response?.status) {
+          case 401:
+            // We have possibly been logged out, inform our auth store
+            authStore.refreshAuth()
+            state.errorMessage = 'Unauthorized'
+            break
+          default:
+            state.errorMessage =
+              'Something went wrong, status ' + err.status + ' ' + err.response?.data?.message
+            break
+        }
+      } else {
+        console.warn(err)
+        state.errorMessage = 'Unknown error occured when loading data: ' + err?.message
+      }
+    }
+  }
+
   if (options.immediate) {
     setTimeout(fetchData, 0)
   }
 
   return {
     ...toRefs(state),
-    fetchData
+    fetchData,
+    silentlyRefresh
   }
 }

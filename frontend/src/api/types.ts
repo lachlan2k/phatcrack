@@ -222,6 +222,7 @@ export interface HashlistHashDTO {
 }
 export interface HashlistDTO {
   id: string
+  project_id: string
   name: string
   time_created: number
   hash_type: number

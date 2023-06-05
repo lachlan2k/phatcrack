@@ -140,13 +140,18 @@ func Run(conf *config.Config) error {
 
 	errs := make(chan error)
 
+	signalFirstConn := sync.NewCond(&sync.Mutex{})
+
 	go func() {
-		err := conn.Run()
+		err := conn.Run(signalFirstConn)
 
 		if err != nil {
 			errs <- fmt.Errorf("unrecoverable connection error: %v", err)
 		}
 	}()
+
+	signalFirstConn.L.Lock()
+	signalFirstConn.Wait()
 
 	go func() {
 		err := h.Handle()

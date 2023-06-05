@@ -21,6 +21,7 @@ type HashlistHashDTO struct {
 
 type HashlistDTO struct {
 	ID          string            `json:"id"`
+	ProjectID   string            `json:"project_id"`
 	Name        string            `json:"name"`
 	TimeCreated int64             `json:"time_created"`
 	HashType    uint              `json:"hash_type"`

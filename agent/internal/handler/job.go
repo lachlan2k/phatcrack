@@ -110,17 +110,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 		return fmt.Errorf("job %s already exists", job.ID)
 	}
 
-	params := hashcat.HashcatParams{
-		AttackMode:        job.HashcatParams.AttackMode,
-		HashType:          job.HashcatParams.HashType,
-		Mask:              job.HashcatParams.Mask,
-		WordlistFilenames: job.HashcatParams.WordlistFilenames,
-		RulesFilenames:    job.HashcatParams.RulesFilenames,
-		AdditionalArgs:    job.HashcatParams.AdditionalArgs,
-		OptimizedKernels:  job.HashcatParams.OptimizedKernels,
-	}
-
-	sess, err := hashcat.NewHashcatSession(job.ID, job.TargetHashes, params, h.conf)
+	sess, err := hashcat.NewHashcatSession(job.ID, job.TargetHashes, hashcat.HashcatParams(job.HashcatParams), h.conf)
 	if err != nil {
 		h.sendJobFailedToStart(job.ID, err)
 		return err

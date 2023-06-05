@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 
 export type ResourceStore = {
   hashTypes: HashType[]
+  loading: boolean
 }
 
 export const useResourcesStore = defineStore({
@@ -11,16 +12,22 @@ export const useResourcesStore = defineStore({
 
   state: () =>
     ({
-      hashTypes: []
+      hashTypes: [],
+      loading: false
     } as ResourceStore),
 
   actions: {
     async loadHashTypes() {
-      if (this.hashTypes.length === 0) {
-        const hashTypes = await loadHashTypes()
-        this.hashTypes = Object.values(hashTypes.hashtypes).sort(
-          (a: HashType, b: HashType) => a.id - b.id
-        )
+      if (this.hashTypes.length === 0 && !this.loading) {
+        this.loading = true
+        try {
+          const hashTypes = await loadHashTypes()
+          this.hashTypes = Object.values(hashTypes.hashtypes).sort(
+            (a: HashType, b: HashType) => a.id - b.id
+          )
+        } finally {
+          this.loading = false
+        }
       }
     },
 

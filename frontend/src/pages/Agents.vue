@@ -1,5 +1,5 @@
 <template>
-  <main class="w-full p-5">
+  <main class="w-full p-4">
     <div class="prose">
       <h1>Agents</h1>
     </div>

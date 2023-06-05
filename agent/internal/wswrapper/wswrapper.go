@@ -2,6 +2,7 @@ package wswrapper
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -18,6 +19,7 @@ type WSWrapper struct {
 	MaximumDropoutTime time.Duration
 
 	writeChan chan interface{}
+	readChan  chan []byte
 
 	conn       *websocket.Conn
 	errs       chan error
@@ -43,20 +45,8 @@ func (w *WSWrapper) WriteJSONUnbuffered(v interface{}) error {
 }
 
 func (w *WSWrapper) ReadJSON(v interface{}) error {
-	w.lock.Lock()
-	defer w.lock.Unlock()
-
-	if w.conn == nil {
-		return errors.New("couldn't read json, connection was nil")
-	}
-
-	err := w.conn.ReadJSON(v)
-	if err != nil {
-		w.errs <- err
-		return errors.New("failed to read json")
-	}
-
-	return nil
+	bytes := <-w.readChan
+	return json.Unmarshal(bytes, v)
 }
 
 func (w *WSWrapper) handle() error {
@@ -73,10 +63,26 @@ func (w *WSWrapper) handle() error {
 			case w.msgToWrite = <-w.writeChan:
 				err := w.conn.WriteJSON(w.msgToWrite)
 				if err != nil {
-					break
+					w.errs <- err
 				}
 
 				w.msgToWrite = nil
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			_, b, err := w.conn.ReadMessage()
+			if err != nil {
+				w.errs <- err
+				return
+			}
+
+			w.readChan <- b
+
+			if ctx.Err() != nil {
+				return
 			}
 		}
 	}()
@@ -87,10 +93,12 @@ func (w *WSWrapper) handle() error {
 
 func (w *WSWrapper) Setup() {
 	w.writeChan = make(chan interface{}, 1000)
+	w.readChan = make(chan []byte, 10)
 }
 
-func (w *WSWrapper) Run() error {
+func (w *WSWrapper) Run(notifyFirstConn *sync.Cond) error {
 	lastValidConnectonTime := time.Now()
+	first := true
 
 	for {
 		log.Printf("Dialing %s...", w.Endpoint)
@@ -124,6 +132,11 @@ func (w *WSWrapper) Run() error {
 		w.conn = conn
 		w.lock.Unlock()
 
+		if first {
+			notifyFirstConn.Signal()
+			first = false
+		}
+
 		log.Printf("Agent connected")
 
 		err = w.handle()
@@ -131,6 +144,7 @@ func (w *WSWrapper) Run() error {
 			log.Printf("Error when running ws wrapper, reconnecting: %v", err)
 		}
 
+		log.Printf("LOCK")
 		w.lock.Lock()
 		w.conn = nil
 		w.lock.Unlock()

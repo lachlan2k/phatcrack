@@ -68,6 +68,7 @@ func (h *Hashlist) ToDTO(withHashes bool) apitypes.HashlistDTO {
 
 	return apitypes.HashlistDTO{
 		ID:          h.ID.String(),
+		ProjectID:   h.ProjectID.String(),
 		Name:        h.Name,
 		TimeCreated: h.CreatedAt.Unix(),
 		HashType:    h.HashType,

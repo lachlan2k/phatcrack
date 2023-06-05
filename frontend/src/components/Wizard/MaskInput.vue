@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { maskCharsets } from '@/util/hashcat'
 
 const props = defineProps<{
@@ -7,9 +8,10 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue'])
 
-function update(val: string) {
-  return emit('update:modelValue', val)
-}
+const value = computed({
+  get: () => props.modelValue,
+  set: (value: string) => emit('update:modelValue', value)
+})
 </script>
 
 <template>
@@ -17,8 +19,7 @@ function update(val: string) {
   <input
     type="text"
     placeholder="Mask"
-    :value="props.modelValue"
-    @input="update($event.target.value)"
+    v-model="value"
     class="input-bordered input w-full max-w-xs"
   />
   <div class="mt-4">
@@ -30,7 +31,7 @@ function update(val: string) {
     >
       <button
         text="foo"
-        @click="update(props.modelValue + maskCharset.mask)"
+        @click="value += maskCharset.mask"
         class="btn-outline btn-xs btn mr-1 normal-case"
       >
         {{ maskCharset.mask }}
