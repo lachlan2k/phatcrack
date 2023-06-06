@@ -6,8 +6,9 @@ type Message struct {
 }
 
 const (
-	HeartbeatType  = "Heartbeat"
-	AgentErrorType = "AgentError"
+	HeartbeatType           = "Heartbeat"
+	AgentErrorType          = "AgentError"
+	DownloadFileRequestType = "DownloadFileRequest"
 )
 
 type FileDTO struct {
@@ -16,10 +17,14 @@ type FileDTO struct {
 }
 
 type HeartbeatDTO struct {
-	Time         int64     `json:"time"`
-	ActiveJobIDs []string  `json:"active_job_ids"`
-	Wordlists    []FileDTO `json:"wordlists"`
-	RuleFiles    []FileDTO `json:"rulefiles"`
+	Time              int64     `json:"time"`
+	ActiveJobIDs      []string  `json:"active_job_ids"`
+	Listfiles         []FileDTO `json:"listifles"`
+	IsDownloadingFile bool      `json:"is_downloading_file"`
+}
+
+type DownloadFileRequestDTO struct {
+	FileID string `json:"file_id"`
 }
 
 type AgentErrorDTO struct {

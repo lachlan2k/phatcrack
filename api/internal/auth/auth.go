@@ -2,7 +2,9 @@ package auth
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -93,7 +95,8 @@ func (a *AuthHandler) SignAndSetJWT(c echo.Context, claims *AuthClaims) error {
 func (a *AuthHandler) shouldSkip(c echo.Context) bool {
 	path := c.Request().URL.Path
 	for _, bypassPath := range a.WhitelistPaths {
-		if path == bypassPath {
+		log.Printf("\nComparing %s and %s\n", path, bypassPath)
+		if strings.HasPrefix(path, bypassPath) {
 			return true
 		}
 	}

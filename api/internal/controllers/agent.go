@@ -3,9 +3,11 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
@@ -18,6 +20,32 @@ func HookAgentEndpoints(api *echo.Group) {
 	})
 
 	api.GET("/handle/ws", handleAgentWs)
+	api.GET("/handle/download-file/:id", handleAgentDownloadFile)
+}
+
+func handleAgentDownloadFile(c echo.Context) error {
+	fileId := c.Param("id")
+	if !util.AreValidUUIDs(fileId) {
+		return echo.ErrBadRequest
+	}
+
+	authKey := c.Request().Header.Get("X-Agent-Key")
+	if len(authKey) == 0 {
+		return echo.ErrBadRequest
+	}
+
+	agentId, err := db.FindAgentIDByAuthKey(authKey)
+
+	if err != nil || agentId == "" {
+		return echo.ErrUnauthorized
+	}
+
+	filename, err := filerepo.GetPathToFile(uuid.MustParse(fileId))
+	if err != nil {
+		return util.ServerError("Failed to get file", err)
+	}
+
+	return c.File(filename)
 }
 
 func handleAgentWs(c echo.Context) error {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
 	"github.com/lachlan2k/phatcrack/api/internal/webserver"
 )
 
@@ -36,6 +37,15 @@ func main() {
 
 	if os.Getenv("HC_PATH") == "" {
 		log.Printf("HC_PATH was not specified, some API endpoints may not work if hashcat is not in PATH\n")
+	}
+
+	if os.Getenv("FILEREPO_PATH") == "" {
+		log.Fatalf("FILEREPO_PATH was not specified")
+	}
+
+	err = filerepo.SetPath(os.Getenv("FILEREPO_PATH"))
+	if err != nil {
+		log.Fatalf("failed to use specified FILEREPO_PATH: %v", err)
 	}
 
 	err = webserver.Listen(port)

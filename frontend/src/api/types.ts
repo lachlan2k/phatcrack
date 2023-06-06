@@ -137,9 +137,6 @@ export interface AttackMultipleDTO {
 export interface AttackCreateRequestDTO {
   hashlist_id: string
   hashcat_params: HashcatParams
-  start_immediately: boolean
-  name: string
-  description: string
 }
 export interface AttackStartResponseDTO {
   new_job_id: string[]

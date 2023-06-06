@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 
@@ -21,10 +22,12 @@ type ActiveJob struct {
 }
 
 type Handler struct {
-	conn       *wswrapper.WSWrapper
-	conf       *config.Config
-	jobsLock   sync.Mutex
-	activeJobs map[string]ActiveJob
+	conn              *wswrapper.WSWrapper
+	conf              *config.Config
+	jobsLock          sync.Mutex
+	fileDownloadLock  sync.Mutex
+	isDownloadingFile bool
+	activeJobs        map[string]ActiveJob
 }
 
 func (h *Handler) sendMessage(msgType string, payload interface{}) error {
@@ -56,6 +59,9 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 	switch msg.Type {
 	case wstypes.JobStartType:
 		return h.handleJobStart(msg)
+
+	case wstypes.DownloadFileRequestType:
+		return h.handleDownloadFileRequest(msg)
 
 	default:
 		return fmt.Errorf("unreconized message type: %s", msg.Type)
@@ -119,13 +125,35 @@ func (h *Handler) Handle() error {
 	return err
 }
 
+func apiEndpointToWSEndpoint(apiEndpoint string) (string, error) {
+	wsUrl, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return "", err
+	}
+
+	switch wsUrl.Scheme {
+	case "http":
+		wsUrl.Scheme = "ws"
+	case "https":
+		wsUrl.Scheme = "wss"
+	}
+
+	wsUrl.Path += "/agent/handle/ws"
+	return wsUrl.String(), nil
+}
+
 func Run(conf *config.Config) error {
 	headers := http.Header{
 		"X-Agent-Key": []string{conf.AuthKey},
 	}
 
+	wsEndpoint, err := apiEndpointToWSEndpoint(conf.APIEndpoint)
+	if err != nil {
+		return fmt.Errorf("invalid API endpoint (%s): %v", conf.APIEndpoint, err)
+	}
+
 	conn := &wswrapper.WSWrapper{
-		Endpoint:           conf.WSEndpoint,
+		Endpoint:           wsEndpoint,
 		Headers:            headers,
 		MaximumDropoutTime: time.Minute * 5,
 	}

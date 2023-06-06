@@ -84,8 +84,7 @@ func runMigrations() {
 	instance.AutoMigrate(&Job{})
 	instance.AutoMigrate(&JobRuntimeData{})
 
-	instance.AutoMigrate(&Wordlist{})
-	instance.AutoMigrate(&RuleFile{})
+	instance.AutoMigrate(&Listfile{})
 
 	instance.AutoMigrate(&PotfileEntry{})
 

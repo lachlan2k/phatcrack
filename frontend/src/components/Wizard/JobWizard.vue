@@ -5,7 +5,14 @@ import MaskInput from './MaskInput.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import HrOr from '@/components/HrOr.vue'
 import { computed, watch, reactive } from 'vue'
-import { createHashlist, createProject, createAttack, startAttack, getProject, getHashlist } from '@/api/project'
+import {
+  createHashlist,
+  createProject,
+  createAttack,
+  startAttack,
+  getProject,
+  getHashlist
+} from '@/api/project'
 import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
 import { useApi } from '@/composables/useApi'
@@ -26,9 +33,19 @@ const props = withDefaults(
     existingHashlistId?: string
   }>(),
   {
-    firstStep: 0
+    firstStep: 0,
   }
 )
+
+interface StartEmitDetails {
+  projectId: string
+  hashlistId: string
+  attackId: string
+}
+
+const emit = defineEmits<{
+  (e: 'successfulStart', details: StartEmitDetails): void
+}>()
 
 const projectsStore = useProjectsStore()
 const { projects } = storeToRefs(projectsStore)
@@ -170,6 +187,8 @@ async function saveOrGetProject(): Promise<ProjectDTO> {
 
     const proj = await createProject(inputs.projectName, inputs.projectDesc)
 
+    inputs.selectedProjectId = proj.id
+
     toast.success(`Created project "${inputs.projectName}"!`)
     return proj
   } catch (err: any) {
@@ -179,7 +198,7 @@ async function saveOrGetProject(): Promise<ProjectDTO> {
   }
 }
 
-async function saveUptoHashlist(): Promise<HashlistCreateResponseDTO> {
+async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
   const proj = await saveOrGetProject()
 
   try {
@@ -198,6 +217,8 @@ async function saveUptoHashlist(): Promise<HashlistCreateResponseDTO> {
 
     console.log('Created hashlist', hashlist)
     toast.success(`Created hashlist "${inputs.hashlistName}"!`)
+
+    inputs.selectedHashlistId = hashlist.id
 
     return hashlist
   } catch (err: any) {
@@ -230,16 +251,12 @@ function makeHashcatParams(): HashcatParams {
 }
 
 async function saveUptoAttack(): Promise<AttackDTO> {
-  const hashlist = await saveUptoHashlist()
+  const hashlist = await saveOrGetHashlist()
 
   try {
     const attack = await createAttack({
       hashlist_id: hashlist.id,
-      hashcat_params: makeHashcatParams(),
-      start_immediately: false,
-      // todo separate attack name?
-      name: 'Attack Temp - ' + inputs.hashlistName,
-      description: ''
+      hashcat_params: makeHashcatParams()
     })
     toast.success('Created attack!')
     return attack
@@ -253,6 +270,11 @@ async function saveAndStartAttack() {
   const attack = await saveUptoAttack()
   try {
     startAttack(attack.id)
+    emit('successfulStart', {
+      projectId: inputs.selectedProjectId,
+      hashlistId: inputs.selectedHashlistId,
+      attackId: attack.id
+    })
     toast.success('Started attack!')
   } catch (err: any) {
     toast.warning('Failed to start attack: ' + err.message)
@@ -347,7 +369,7 @@ async function saveAndStartAttack() {
               <div class="flex justify-start">
                 <button
                   class="link"
-                  @click="saveUptoHashlist"
+                  @click="saveOrGetHashlist"
                   v-if="hashlistStepValidationError == null"
                 >
                   Save hashlist and finish

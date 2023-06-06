@@ -48,17 +48,11 @@ func (h *Handler) sendHeartbeat() error {
 		payload.ActiveJobIDs = append(payload.ActiveJobIDs, id)
 	}
 
-	wordlistFiles, err := getFileDTOs(h.conf.WordlistsDirectory)
+	listFiles, err := getFileDTOs(h.conf.ListfileDirectory)
 	if err != nil {
 		return err
 	}
-	payload.Wordlists = wordlistFiles
-
-	rulefiles, err := getFileDTOs(h.conf.RulesDirectory)
-	if err != nil {
-		return err
-	}
-	payload.RuleFiles = rulefiles
+	payload.Listfiles = listFiles
 
 	return h.sendMessageUnbuffered(wstypes.HeartbeatType, payload)
 }

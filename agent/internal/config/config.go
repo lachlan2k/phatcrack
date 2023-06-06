@@ -8,12 +8,11 @@ import (
 )
 
 type Config struct {
-	AuthKeyFile        string `json:"auth_key_file"`
-	AuthKey            string `json:"auth_key"`
-	HashcatBinary      string `json:"hashcat_binary"`
-	RulesDirectory     string `json:"rules_directory"`
-	WordlistsDirectory string `json:"wordlists_directory"`
-	WSEndpoint         string `json:"ws_endpoint"`
+	AuthKeyFile       string `json:"auth_key_file"`
+	AuthKey           string `json:"auth_key"`
+	HashcatBinary     string `json:"hashcat_binary"`
+	ListfileDirectory string `json:"listfile_directory"`
+	APIEndpoint       string `json:"api_endpoint"`
 }
 
 func LoadConfig(configPath string) (config Config) {

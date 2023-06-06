@@ -51,8 +51,13 @@ import RecentAttacks from '@/components/RecentAttacks.vue'
 
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-          <h2 class="card-title">Recent Attacks</h2>
-          <RecentAttacks />
+          <h2 class="card-title">Upload Boi</h2>
+          <form action="/api/v1/list/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" />
+            <input type="text" name="file-line-count" value="100" placeholder="Line count" />
+            <input type="text" name="file-type" placeholder="Wordlist"  value="Wordlist"/>
+            <input type="submit" />
+          </form>
         </div>
       </div>
     </div>

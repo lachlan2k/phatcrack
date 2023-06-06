@@ -80,28 +80,19 @@ func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to hearbeat dto: %v", msg.Payload, err)
 	}
 
-	availableWordlists := make([]db.AgentFile, len(payload.Wordlists))
-	availableRuleFiles := make([]db.AgentFile, len(payload.RuleFiles))
+	availableListfiles := make([]db.AgentFile, len(payload.Listfiles))
 
-	for i, list := range payload.Wordlists {
-		availableWordlists[i] = db.AgentFile{
+	for i, list := range payload.Listfiles {
+		availableListfiles[i] = db.AgentFile{
 			Name: list.Name,
 			Size: list.Size,
-		}
-	}
-
-	for i, file := range payload.RuleFiles {
-		availableRuleFiles[i] = db.AgentFile{
-			Name: file.Name,
-			Size: file.Size,
 		}
 	}
 
 	info := db.AgentInfo{
 		Status:             db.AgentStatusAlive,
 		LastCheckIn:        time.Now(),
-		AvailableWordlists: availableWordlists,
-		AvailableRuleFiles: availableRuleFiles,
+		AvailableListfiles: availableListfiles,
 		ActiveJobIDs:       payload.ActiveJobIDs,
 	}
 
@@ -109,6 +100,37 @@ func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
 
 	if err != nil {
 		return err
+	}
+
+	// TODO: cache this database query (seems a bit unecessary if we have lots of agents, etc)
+	if !payload.IsDownloadingFile {
+		expectedListfiles, err := db.GetAllListfiles()
+		if err != nil {
+			return err
+		}
+
+		for _, expectedFile := range expectedListfiles {
+			if !expectedFile.AvailableForDownload {
+				continue
+			}
+
+			found := false
+			for _, file := range availableListfiles {
+				if file.Name == expectedFile.ID.String() && file.Size == int64(expectedFile.SizeInBytes) {
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				a.sendMessage(wstypes.DownloadFileRequestType, wstypes.DownloadFileRequestDTO{
+					FileID: expectedFile.ID.String(),
+				})
+
+				// Only do one at a time :)
+				break
+			}
+		}
 	}
 
 	a.latestAgentInfo = &info

@@ -2,78 +2,70 @@ package db
 
 import "github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 
-type Wordlist struct {
+const (
+	ListfileTypeWordlist = "Wordlist"
+	ListfileTypeRulefile = "Rulefile"
+)
+
+type Listfile struct {
 	UUIDBaseModel
-	Name           string
-	Description    string
-	FilenameOnDisk string
-	SizeInBytes    uint64
-	Lines          uint64
+	Name                 string
+	AvailableForDownload bool
+	FileType             string
+	SizeInBytes          uint64
+	Lines                uint64
 }
 
-func (w *Wordlist) ToDTO() apitypes.WordlistDTO {
-	return apitypes.WordlistDTO{
-		ID:             w.ID.String(),
-		Name:           w.Name,
-		Description:    w.Description,
-		FilenameOnDisk: w.FilenameOnDisk,
-		SizeInBytes:    w.SizeInBytes,
-		Lines:          w.Lines,
+func (w *Listfile) ToDTO() apitypes.ListfileDTO {
+	return apitypes.ListfileDTO{
+		ID:          w.ID.String(),
+		Name:        w.Name,
+		FileType:    w.FileType,
+		SizeInBytes: w.SizeInBytes,
+		Lines:       w.Lines,
 	}
 }
 
-type RuleFile struct {
-	UUIDBaseModel
-	Name           string
-	Description    string
-	FilenameOnDisk string
-	SizeInBytes    uint64
-	Lines          uint64
-}
-
-func (r *RuleFile) ToDTO() apitypes.RuleFileDTO {
-	return apitypes.RuleFileDTO{
-		ID:             r.ID.String(),
-		Name:           r.Name,
-		Description:    r.Description,
-		FilenameOnDisk: r.FilenameOnDisk,
-		SizeInBytes:    r.SizeInBytes,
-		Lines:          r.Lines,
-	}
-}
-
-func GetWordlist(id string) (*Wordlist, error) {
-	var wordlist Wordlist
-	err := GetInstance().First(&wordlist, "id = ?", id).Error
+func GetListfile(id string) (*Listfile, error) {
+	var listfile Listfile
+	err := GetInstance().First(&listfile, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
-	return &wordlist, nil
+	return &listfile, nil
 }
 
-func GetAllWordlists() ([]Wordlist, error) {
-	wordlists := []Wordlist{}
-	err := GetInstance().Find(&wordlists).Error
+func CreateListfile(listfile *Listfile) (*Listfile, error) {
+	return listfile, GetInstance().Create(listfile).Error
+}
+
+func MarkListfileAsAvailable(id string) error {
+	return GetInstance().Model(&Listfile{}).Where("id = ?", id).Updates(&Listfile{AvailableForDownload: true}).Error
+}
+
+func GetAllRulefiles() ([]Listfile, error) {
+	rulefiles := []Listfile{}
+	err := GetInstance().Where("file_type = ?", ListfileTypeRulefile).Find(&rulefiles).Error
+	if err != nil {
+		return nil, err
+	}
+	return rulefiles, nil
+}
+
+func GetAllWordlists() ([]Listfile, error) {
+	wordlists := []Listfile{}
+	err := GetInstance().Where("file_type = ?", ListfileTypeWordlist).Find(&wordlists).Error
 	if err != nil {
 		return nil, err
 	}
 	return wordlists, nil
 }
 
-func GetRuleFile(id string) (*RuleFile, error) {
-	var rulefile RuleFile
-	err := GetInstance().First(&rulefile, "id = ?", id).Error
+func GetAllListfiles() ([]Listfile, error) {
+	listfiles := []Listfile{}
+	err := GetInstance().Find(&listfiles).Error
 	if err != nil {
 		return nil, err
 	}
-	return &rulefile, nil
-}
-
-func GetAllRuleFiles() ([]RuleFile, error) {
-	rulefiles := []RuleFile{}
-	err := GetInstance().Find(&rulefiles).Error
-	if err != nil {
-		return nil, err
-	}
-	return rulefiles, nil
+	return listfiles, nil
 }

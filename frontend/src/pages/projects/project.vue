@@ -36,23 +36,20 @@ const isLoading = computed(() => {
       <div class="prose">
         <h1>{{ projectData?.name }}</h1>
       </div>
-      <div class="mt-6 flex flex-col flex-wrap gap-6">
+      <div class="mt-6 flex flex-wrap gap-6">
         <div class="card bg-base-100 shadow-xl">
           <div class="card-body">
             <div class="flex flex-row justify-between">
-                <h2 class="card-title">Hashlists</h2>
+              <h2 class="card-title">Hashlists</h2>
 
-                <button class="btn-primary btn-sm btn" @click="() => (isWizardOpen = true)">
-                  New Hashlist
-                </button>
+              <button class="btn-primary btn-sm btn" @click="() => (isWizardOpen = true)">
+                New Hashlist
+              </button>
 
-                <Modal v-model:isOpen="isWizardOpen">
-                  <JobWizard
-                    :firstStep="1"
-                    :existingProjectId="projId"
-                  />
-                </Modal>
-              </div>
+              <Modal v-model:isOpen="isWizardOpen">
+                <JobWizard :firstStep="1" :existingProjectId="projId" />
+              </Modal>
+            </div>
             <table class="table w-full">
               <!-- head -->
               <thead>

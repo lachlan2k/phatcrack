@@ -61,7 +61,9 @@ func (w *WSWrapper) handle() error {
 			case <-ctx.Done():
 				return
 			case w.msgToWrite = <-w.writeChan:
+				w.lock.Lock()
 				err := w.conn.WriteJSON(w.msgToWrite)
+				w.lock.Unlock()
 				if err != nil {
 					w.errs <- err
 				}
@@ -144,7 +146,6 @@ func (w *WSWrapper) Run(notifyFirstConn *sync.Cond) error {
 			log.Printf("Error when running ws wrapper, reconnecting: %v", err)
 		}
 
-		log.Printf("LOCK")
 		w.lock.Lock()
 		w.conn = nil
 		w.lock.Unlock()

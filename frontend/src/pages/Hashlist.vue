@@ -40,7 +40,7 @@ onMounted(() => {
   intervalId.value = setInterval(() => {
     refreshAttack()
     refreshHashlist()
-  }, 10 * 1000)
+  }, 3 * 1000)
 })
 
 onBeforeUnmount(() => {
@@ -58,6 +58,16 @@ const isLoading = computed(() => {
 
 const isAttackWizardOpen = ref(false)
 const isHashlistEditorOpen = ref(false)
+
+const onlyShowCracked = ref(false)
+
+const filteredHashes = computed(() => {
+  if (onlyShowCracked.value) {
+    return hashlistData.value?.hashes.filter(x => x.is_cracked)
+  }
+
+  return hashlistData.value?.hashes
+})
 
 // TODO: this will almost certainl perform terribly, and the code isn't super tidy?
 // When maturing this page, it might be worthwhile pulling this out to a weakmap or something computed
@@ -168,6 +178,12 @@ const hashTypeStr = computed(() => {
                   Edit
                 </button>
               </div>
+              <div class="form-control">
+  <label class="label cursor-pointer">
+    <span class="label-text">Only show cracked</span> 
+    <input type="checkbox" class="toggle" v-model="onlyShowCracked" />
+  </label>
+</div>
               <table class="compact-table compact-table table w-full">
                 <!-- head -->
                 <thead>
@@ -178,7 +194,7 @@ const hashTypeStr = computed(() => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="hash in hashlistData?.hashes" :key="hash.normalized_hash">
+                  <tr v-for="hash in filteredHashes" :key="hash.normalized_hash">
                     <td>{{ hash.input_hash }}</td>
                     <!-- <td>{{ hash.normalized_hash }}</td> -->
                     <td>

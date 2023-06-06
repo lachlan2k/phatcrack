@@ -14,7 +14,7 @@ const projects = computed(() => data.value?.projects)
       <h1>Project Folders</h1>
     </div>
     <p v-if="isLoading">Loading</p>
-    <div class="mt-6 flex flex-col flex-wrap gap-6" v-else>
+    <div class="mt-6 flex flex-wrap gap-6" v-else>
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">My Projects & Projects Shared with Me</h2>
@@ -38,7 +38,7 @@ const projects = computed(() => data.value?.projects)
               >
                 <tr class="hover cursor-pointer" @click="navigate">
                   <td>{{ project.name }}</td>
-                  <td>{{ timeSince(project.time_created) }}</td>
+                  <td>{{ timeSince(project.time_created * 1000) }}</td>
                   <td>8</td>
                   <td><div class="badge badge-info">4 attacks running</div></td>
                 </tr>

@@ -22,8 +22,10 @@ services:
       - JWT_KEY=hunter2
       - PORT=3000
       - DB_DSN=host=db user=phatcrack password=${DB_PASS:-phatcrack} dbname=phatcrack
+      - FILEREPO_PATH=/srv/filerepo
     volumes:
       - ./:/app/phatcrack:z
+      - ./filerepo:/srv/filerepo:z
 
   db:
     image: postgres:15

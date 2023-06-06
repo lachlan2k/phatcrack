@@ -3,6 +3,7 @@ package db
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"gorm.io/datatypes"
 )
@@ -28,8 +29,7 @@ type AgentFile struct {
 type AgentInfo struct {
 	Status             string      `json:"status"`
 	LastCheckIn        time.Time   `json:"last_checkin,omitempty"`
-	AvailableWordlists []AgentFile `json:"available_wordlists,omitempty"`
-	AvailableRuleFiles []AgentFile `json:"available_rulefiles,omitempty"`
+	AvailableListfiles []AgentFile `json:"available_listfiles,omitempty"`
 	ActiveJobIDs       []string    `json:"active_job_ids,omitempty"`
 }
 
@@ -61,6 +61,21 @@ func FindAgentByAuthKey(authKey string) (*Agent, error) {
 		return nil, err
 	}
 	return agent, nil
+}
+
+func FindAgentIDByAuthKey(authKey string) (string, error) {
+	var result struct {
+		ID uuid.UUID
+	}
+
+	keyHash := util.HashAgentKey(authKey)
+	err := GetInstance().Model(&Agent{}).Where(&Agent{KeyHash: keyHash}).First(&result).Error
+
+	if err != nil {
+		return "", err
+	}
+
+	return result.ID.String(), nil
 }
 
 func UpdateAgentStatus(agentID string, status string) error {

@@ -34,6 +34,7 @@ func Listen(port string) error {
 		Secret: jwtKey,
 		WhitelistPaths: []string{
 			"/api/v1/agent/handle/ws",
+			"/api/v1/agent/handle/download-file",
 			"/api/v1/auth/login",
 		},
 	}
