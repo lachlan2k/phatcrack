@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
@@ -102,6 +103,8 @@ func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
 		return err
 	}
 
+	filesToRequestDownload := []uuid.UUID{}
+
 	// TODO: cache this database query (seems a bit unecessary if we have lots of agents, etc)
 	if !payload.IsDownloadingFile {
 		expectedListfiles, err := db.GetAllListfiles()
@@ -123,14 +126,13 @@ func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
 			}
 
 			if !found {
-				a.sendMessage(wstypes.DownloadFileRequestType, wstypes.DownloadFileRequestDTO{
-					FileID: expectedFile.ID.String(),
-				})
-
-				// Only do one at a time :)
-				break
+				filesToRequestDownload = append(filesToRequestDownload, expectedFile.ID)
 			}
 		}
+	}
+
+	if len(filesToRequestDownload) > 0 {
+		a.RequestFileDownload(filesToRequestDownload...)
 	}
 
 	a.latestAgentInfo = &info
@@ -159,6 +161,21 @@ func (a *Agent) ActiveJobCount() int {
 		return -1
 	}
 	return len(a.latestAgentInfo.ActiveJobIDs)
+}
+
+func (a *Agent) RequestFileDownload(fileIDs ...uuid.UUID) error {
+	fileIDStrs := make([]string, len(fileIDs))
+	for i, id := range fileIDs {
+		idStr := id.String()
+		if idStr == "" {
+			return fmt.Errorf("couldn't parse ID for file download %v", id)
+		}
+		fileIDStrs[i] = idStr
+	}
+
+	return a.sendMessage(wstypes.DownloadFileRequestType, wstypes.DownloadFileRequestDTO{
+		FileIDs: fileIDStrs,
+	})
 }
 
 func (a *Agent) Handle() error {

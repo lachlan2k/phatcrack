@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
+	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
@@ -59,6 +60,10 @@ func handleListfileUpload(c echo.Context) error {
 	}
 
 	outfile, err := filerepo.Create(listfile.ID)
+	if err != nil {
+		return util.ServerError("Failed to create new file on disk", err)
+	}
+
 	_, err = io.Copy(outfile, uploadedFileHandle)
 	if err != nil {
 		return util.ServerError("Failed to write to new file on disk", err)
@@ -68,6 +73,8 @@ func handleListfileUpload(c echo.Context) error {
 	if err != nil {
 		return util.ServerError("Failed to prepare new listfile", err)
 	}
+
+	fleet.RequestFileDownload(listfile.ID)
 
 	return c.JSON(http.StatusCreated, listfile.ToDTO())
 }

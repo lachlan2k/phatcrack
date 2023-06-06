@@ -67,12 +67,6 @@ func (params HashcatParams) Validate() error {
 		return fmt.Errorf("unsupported attack mode %d", params.AttackMode)
 	}
 
-	if params.MaskIncrement {
-		if params.AttackMode != AttackModeMask && params.AttackMode != AttackModeHybridMD && params.AttackMode != AttackModeHybridDM {
-			return fmt.Errorf("mask increment was enabled, but not supported in attack mode %d", params.AttackMode)
-		}
-	}
-
 	return nil
 }
 

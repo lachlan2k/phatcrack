@@ -12,33 +12,15 @@ import (
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
-func (h *Handler) handleDownloadFileRequest(msg *wstypes.Message) error {
-	if h.isDownloadingFile {
-		// Silently fail if we're already doing a download (caused by race condition/de-sync from network latency on client/server comms)
-		return nil
-	}
-
-	h.fileDownloadLock.Lock()
-	h.isDownloadingFile = true
-
-	defer func() {
-		h.isDownloadingFile = false
-		h.fileDownloadLock.Unlock()
-	}()
-
-	payload, err := util.UnmarshalJSON[wstypes.DownloadFileRequestDTO](msg.Payload)
-	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to job start dto: %v", msg.Payload, err)
-	}
-
-	writePath := filepath.Join(h.conf.ListfileDirectory, filepath.Join("/", payload.FileID))
+func (h *Handler) downloadFile(fileID string) error {
+	writePath := filepath.Join(h.conf.ListfileDirectory, filepath.Join("/", fileID))
 
 	outFile, err := os.OpenFile(writePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return err
 	}
 
-	request, err := http.NewRequest("GET", fmt.Sprintf("%s/agent/handle/download-file/%s", h.conf.APIEndpoint, payload.FileID), nil)
+	request, err := http.NewRequest("GET", fmt.Sprintf("%s/agent/handle/download-file/%s", h.conf.APIEndpoint, fileID), nil)
 	if err != nil {
 		return err
 	}
@@ -57,4 +39,34 @@ func (h *Handler) handleDownloadFileRequest(msg *wstypes.Message) error {
 
 	_, err = io.Copy(outFile, response.Body)
 	return err
+}
+
+func (h *Handler) handleDownloadFileRequest(msg *wstypes.Message) error {
+	if h.isDownloadingFile {
+		// Silently fail if we're already doing a download
+		// We'll be instructed to complete the download at a later time, so this is all good
+		return nil
+	}
+
+	h.fileDownloadLock.Lock()
+	h.isDownloadingFile = true
+
+	defer func() {
+		h.isDownloadingFile = false
+		h.fileDownloadLock.Unlock()
+	}()
+
+	payload, err := util.UnmarshalJSON[wstypes.DownloadFileRequestDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to job start dto: %v", msg.Payload, err)
+	}
+
+	for _, file := range payload.FileIDs {
+		err := h.downloadFile(file)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

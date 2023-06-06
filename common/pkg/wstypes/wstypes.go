@@ -24,7 +24,7 @@ type HeartbeatDTO struct {
 }
 
 type DownloadFileRequestDTO struct {
-	FileID string `json:"file_id"`
+	FileIDs []string `json:"file_id"`
 }
 
 type AgentErrorDTO struct {

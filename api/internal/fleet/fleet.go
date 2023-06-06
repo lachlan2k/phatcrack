@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
@@ -177,4 +178,13 @@ func ScheduleJob(jobId string) (string, error) {
 	})
 
 	return leastBusyAgent.agentId, nil
+}
+
+func RequestFileDownload(fileIDs ...uuid.UUID) {
+	fleetLock.Lock()
+	defer fleetLock.Unlock()
+
+	for _, agent := range fleet {
+		agent.RequestFileDownload(fileIDs...)
+	}
 }

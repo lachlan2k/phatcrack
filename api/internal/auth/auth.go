@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -95,7 +94,6 @@ func (a *AuthHandler) SignAndSetJWT(c echo.Context, claims *AuthClaims) error {
 func (a *AuthHandler) shouldSkip(c echo.Context) bool {
 	path := c.Request().URL.Path
 	for _, bypassPath := range a.WhitelistPaths {
-		log.Printf("\nComparing %s and %s\n", path, bypassPath)
 		if strings.HasPrefix(path, bypassPath) {
 			return true
 		}

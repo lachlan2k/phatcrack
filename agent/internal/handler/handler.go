@@ -61,7 +61,8 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 		return h.handleJobStart(msg)
 
 	case wstypes.DownloadFileRequestType:
-		return h.handleDownloadFileRequest(msg)
+		go h.handleDownloadFileRequest(msg)
+		return nil
 
 	default:
 		return fmt.Errorf("unreconized message type: %s", msg.Type)
@@ -84,7 +85,7 @@ func (h *Handler) readLoop(ctx context.Context) error {
 			return fmt.Errorf("error when handling message: %v", err)
 		}
 
-		log.Printf("Received: %v", msg)
+		log.Printf("Received: %v", msg.Type)
 
 		select {
 		case <-ctx.Done():
