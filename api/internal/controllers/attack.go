@@ -186,6 +186,9 @@ func handleAttackCreate(c echo.Context) error {
 	// TODO: somewhere I'd prefer to do some better, more explicit consumption of this
 	// Basically, it needs to be extremely clear which hashcat params are coming in
 	hashcatParams := datatypes.JSONType[hashcattypes.HashcatParams]{}
+
+	// TODO (security): validate hashlists and rulefiles are known filenames from the filestore
+	// also probably remove the "AdditionalArgs" for now
 	hashcatParams.Data = req.HashcatParams
 
 	attack, err := db.CreateAttack(&db.Attack{
