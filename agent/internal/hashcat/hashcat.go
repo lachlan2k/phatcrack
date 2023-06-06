@@ -289,7 +289,11 @@ func (sess *HashcatSession) Start() error {
 			}
 		}
 
-		sess.DoneChan <- sess.proc.Wait()
+		done := sess.proc.Wait()
+		// Give us a hot moment to read any cracked hashes that are still being written to disk
+		time.Sleep(time.Second)
+		sess.DoneChan <- done
+
 		tailer.Kill(nil)
 	}()
 

@@ -78,14 +78,14 @@ func (h *Handler) readLoop(ctx context.Context) error {
 			continue
 		}
 
+		log.Printf("Received: %v", msg.Type)
+
 		// TODO: should we be error handling here? I don't think so
 		// Because if hashcat dies, for example, that shouldn't be reason to kill the agent
 		err = h.handleMessage(&msg)
 		if err != nil {
 			return fmt.Errorf("error when handling message: %v", err)
 		}
-
-		log.Printf("Received: %v", msg.Type)
 
 		select {
 		case <-ctx.Done():

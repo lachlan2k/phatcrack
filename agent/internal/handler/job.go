@@ -49,6 +49,14 @@ func (h *Handler) sendJobExited(jobId string, err error) {
 		errStr = err.Error()
 	}
 
+	// Hashcat gives exit code of 1 when a wordlist is exhausted
+	// But not when a mask doesn't crack everything
+	// So, we're just gonna silently ignore this?
+	// I hate it
+	if errStr == "exit status 1" {
+		errStr = ""
+	}
+
 	h.sendMessage(wstypes.JobExitedType, wstypes.JobExitedDTO{
 		JobID: jobId,
 		Error: errStr,
