@@ -244,8 +244,10 @@ func handleAttackStart(c echo.Context) error {
 	}
 
 	targetHashes := make([]string, len(hashlist.Hashes))
-	for i, hash := range hashlist.Hashes {
-		targetHashes[i] = hash.NormalizedHash
+	for _, hash := range hashlist.Hashes {
+		if !hash.IsCracked {
+			targetHashes = append(targetHashes, hash.NormalizedHash)
+		}
 	}
 
 	// TODO: this will eventually be replaced by some special sauce responsible for sharding and creating jobs
