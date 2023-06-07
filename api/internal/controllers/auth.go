@@ -12,27 +12,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
+func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 	// Note: these endpoints are MFA-exempt, so tread carefully before you add anything else
 	// If adding a generic endpoint to update password, etc. maybe that should go elsewhere
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong auth")
 	})
 
-	api.PUT("/refresh", handleRefresh(authHandler))
-	api.POST("/login", handleLogin(authHandler))
+	api.PUT("/refresh", handleRefresh(sessHandler))
+	api.POST("/login", handleLogin(sessHandler))
 
 	api.GET("/whoami", func(c echo.Context) error {
-		claims, err := auth.ClaimsFromReq(c)
-		if err != nil {
-			return err
+		user, _ := auth.UserFromReq(c)
+		if user == nil {
+			return echo.ErrForbidden
 		}
 
 		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       claims.ID,
-				Username: claims.Username,
-				Roles:    claims.Roles,
+				ID:       user.ID.String(),
+				Username: user.Username,
+				Roles:    user.Roles,
 			},
 		})
 	})
@@ -46,22 +46,16 @@ func HookAuthEndpoints(api *echo.Group, authHandler *auth.AuthHandler) {
 	})
 }
 
-func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
+func handleRefresh(sessHandler auth.SessionHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		claims, err := auth.ClaimsFromReq(c)
+		err := sessHandler.Refresh(c)
 		if err != nil {
 			return err
 		}
 
-		user, err := db.GetUserByID(claims.ID)
-		if err != nil {
-			return util.ServerError("Failed to refresh user data", err)
-		}
-
-		newClaims := auth.UserToClaims(user)
-		err = authHandler.SignAndSetJWT(c, newClaims)
-		if err != nil {
-			return err
+		user, _ := auth.UserFromReq(c)
+		if user == nil {
+			return echo.ErrForbidden
 		}
 
 		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
@@ -74,7 +68,7 @@ func handleRefresh(authHandler *auth.AuthHandler) echo.HandlerFunc {
 	}
 }
 
-func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
+func handleLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		req, err := util.BindAndValidate[apitypes.AuthLoginRequestDTO](c)
 		if err != nil {
@@ -99,8 +93,10 @@ func handleLogin(authHandler *auth.AuthHandler) echo.HandlerFunc {
 			return util.ServerError("Internal error", hashingTest)
 		}
 
-		claims := auth.UserToClaims(user)
-		authHandler.SignAndSetJWT(c, claims)
+		sessHandler.Start(c, auth.SessionData{
+			UserID:          user.ID.String(),
+			HasCompletedMFA: false,
+		})
 
 		return c.JSON(http.StatusOK, apitypes.AuthLoginResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{

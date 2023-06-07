@@ -1,9 +1,9 @@
 package webserver
 
 import (
-	"crypto/rand"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
@@ -13,31 +13,37 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
+func makeSessionHandler() auth.SessionHandler {
+	jwtKey := []byte(os.Getenv("JWT_KEY"))
+
+	if len(jwtKey) > 0 && 1 == 0 {
+		return &auth.JWTSessionHandler{
+			Secret: jwtKey,
+			WhitelistPaths: []string{
+				"/api/v1/agent/handle/ws",
+				"/api/v1/agent/handle/download-file",
+				"/api/v1/auth/login",
+			},
+			SessionLifetime: 10 * time.Minute,
+		}
+	}
+
+	return &auth.InMemorySessionHandler{
+		WhitelistPaths: []string{
+			"/api/v1/agent/handle/ws",
+			"/api/v1/agent/handle/download-file",
+			"/api/v1/auth/login",
+		},
+		SessionLifetime: 10 * time.Minute,
+	}
+}
+
 func Listen(port string) error {
 	e := echo.New()
 
 	e.Validator = &util.RequestValidator{Validator: validator.New()}
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-
-	jwtKey := []byte(os.Getenv("JWT_KEY"))
-	if len(jwtKey) == 0 {
-		keyBuf := make([]byte, 32)
-		rand.Reader.Read(keyBuf)
-		jwtKey = keyBuf[:]
-		e.Logger.Printf("Generating jwtKey")
-	} else {
-		e.Logger.Printf("Using JWT_KEY from environment")
-	}
-
-	authHandler := auth.AuthHandler{
-		Secret: jwtKey,
-		WhitelistPaths: []string{
-			"/api/v1/agent/handle/ws",
-			"/api/v1/agent/handle/download-file",
-			"/api/v1/auth/login",
-		},
-	}
 
 	// Slightly annoying, the auth middleware, by default, uses a 400 error when the auth is missing
 	// We want a 401
@@ -49,12 +55,14 @@ func Listen(port string) error {
 		c.Echo().DefaultHTTPErrorHandler(err, c)
 	}
 
+	sessionHandler := makeSessionHandler()
+
 	api := e.Group("/api/v1")
 
 	// Agent auth is done separately in the controller, so it can go before auth middleware
 	controllers.HookAgentEndpoints(api.Group("/agent"))
 
-	api.Use(authHandler.Middleware())
+	api.Use(sessionHandler.CreateMiddleware())
 
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
@@ -62,11 +70,12 @@ func Listen(port string) error {
 
 	// If a user has "requires_password_change" etc they need to be able to do that
 	// Don't worry, the authHandler.Middleware() is already enforcing auth
-	controllers.HookAuthEndpoints(api.Group("/auth"), &authHandler)
+	controllers.HookAuthEndpoints(api.Group("/auth"), sessionHandler)
 
-	api.Use(authHandler.EnforceMFA())
+	api.Use(auth.EnforceMFAMiddleware(sessionHandler))
 
-	api.Use(authHandler.RoleRestrictedMiddleware(
+	api.Use(auth.RoleRestrictedMiddleware(
+		sessionHandler,
 		[]string{auth.RoleAdmin, auth.RoleStandard},
 		[]string{auth.RoleRequiresPasswordChange}, // disallowed
 	))
@@ -79,7 +88,7 @@ func Listen(port string) error {
 	controllers.HookJobEndpoints(api.Group("/job"))
 
 	adminAPI := api.Group("/admin")
-	adminAPI.Use(authHandler.AdminOnlyMiddleware())
+	adminAPI.Use(auth.AdminOnlyMiddleware(sessionHandler))
 
 	controllers.HookAdminEndpoints(adminAPI)
 

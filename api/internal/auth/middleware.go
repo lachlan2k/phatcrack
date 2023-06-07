@@ -3,26 +3,24 @@ package auth
 import (
 	"net/http"
 
-	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 )
 
-func (a *AuthHandler) EnforceMFA() echo.MiddlewareFunc {
+func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if a.shouldSkip(c) {
+			if s.shouldSkip(c) {
 				return next(c)
 			}
 
-			u, err := ClaimsFromReq(c)
-			if err != nil {
+			user, sess := UserFromReq(c)
+			if user == nil {
 				return echo.ErrUnauthorized
 			}
 
 			userIsEnrolled := false
-			for _, userRole := range u.Roles {
+			for _, userRole := range user.Roles {
 				if userRole == RoleMFAEnrolled {
 					userIsEnrolled = true
 				}
@@ -33,7 +31,7 @@ func (a *AuthHandler) EnforceMFA() echo.MiddlewareFunc {
 				}
 			}
 
-			userHasCompleted := u.HasCompletedMFA
+			userHasCompleted := sess.HasCompletedMFA
 
 			if config.Get().IsMFARequired {
 				if !userIsEnrolled {
@@ -53,35 +51,21 @@ func (a *AuthHandler) EnforceMFA() echo.MiddlewareFunc {
 	}
 }
 
-func (a *AuthHandler) Middleware() echo.MiddlewareFunc {
-	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningMethod: middleware.AlgorithmHS256,
-		SigningKey:    a.Secret,
-		TokenLookup:   "cookie:" + TokenCookieName,
-		Claims:        &AuthClaims{},
-		Skipper:       a.shouldSkip,
-	})
-}
-
-func (a *AuthHandler) RoleRestrictedMiddleware(allowedRoles []string, disallowedRoles []string) echo.MiddlewareFunc {
+func RoleRestrictedMiddleware(h SessionHandler, allowedRoles []string, disallowedRoles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if a.shouldSkip(c) {
+			if h.shouldSkip(c) {
 				return next(c)
 			}
 
-			user, ok := c.Get("user").(*jwt.Token)
-			if user == nil || !ok {
-				return echo.ErrUnauthorized
-			}
+			user, _ := UserFromReq(c)
 
-			claims, ok := user.Claims.(*AuthClaims)
-			if claims == nil || !ok {
+			if user == nil {
 				return echo.ErrUnauthorized
 			}
 
 			for _, disallowedRole := range disallowedRoles {
-				for _, userRole := range claims.Roles {
+				for _, userRole := range user.Roles {
 					if disallowedRole == userRole {
 						return echo.ErrUnauthorized
 					}
@@ -89,7 +73,7 @@ func (a *AuthHandler) RoleRestrictedMiddleware(allowedRoles []string, disallowed
 			}
 
 			for _, allowedRole := range allowedRoles {
-				for _, userRole := range claims.Roles {
+				for _, userRole := range user.Roles {
 					if allowedRole == userRole {
 						return next(c)
 					}
@@ -101,6 +85,6 @@ func (a *AuthHandler) RoleRestrictedMiddleware(allowedRoles []string, disallowed
 	}
 }
 
-func (a *AuthHandler) AdminOnlyMiddleware() echo.MiddlewareFunc {
-	return a.RoleRestrictedMiddleware([]string{"admin"}, nil)
+func AdminOnlyMiddleware(h SessionHandler) echo.MiddlewareFunc {
+	return RoleRestrictedMiddleware(h, []string{"admin"}, nil)
 }

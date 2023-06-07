@@ -30,12 +30,12 @@ func handleHashlistGetAllForProj(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, projId)
+	allowed, err := accesscontrol.HasRightsToProjectID(user, projId)
 	if err != nil {
 		return err
 	}
@@ -64,9 +64,9 @@ func handleHashlistGet(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
 	hashlist, err := db.GetHashlistWithHashes(hashlistId)
@@ -77,7 +77,7 @@ func handleHashlistGet(c echo.Context) error {
 		return util.ServerError("Failed to load hashlist", err)
 	}
 
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, hashlist.ProjectID.String())
+	allowed, err := accesscontrol.HasRightsToProjectID(user, hashlist.ProjectID.String())
 	if err != nil {
 		return err
 	}
@@ -89,9 +89,9 @@ func handleHashlistGet(c echo.Context) error {
 }
 
 func handleHashlistCreate(c echo.Context) error {
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
 	req, err := util.BindAndValidate[apitypes.HashlistCreateRequestDTO](c)
@@ -100,7 +100,7 @@ func handleHashlistCreate(c echo.Context) error {
 	}
 
 	// Access control
-	allowed, err := accesscontrol.HasRightsToProjectID(&user.UserClaims, req.ProjectID)
+	allowed, err := accesscontrol.HasRightsToProjectID(user, req.ProjectID)
 	if err != nil {
 		return err
 	}

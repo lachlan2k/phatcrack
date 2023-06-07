@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
@@ -22,13 +21,12 @@ func HookProjectEndpoints(api *echo.Group) {
 	api.GET("/:id", handleProjectGet)
 
 	api.GET("/:proj-id/hashlists", handleHashlistGetAllForProj)
-
 }
 
 func handleProjectCreate(c echo.Context) error {
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
 	req, err := util.BindAndValidate[apitypes.ProjectCreateDTO](c)
@@ -39,7 +37,7 @@ func handleProjectCreate(c echo.Context) error {
 	newProj, err := db.CreateProject(&db.Project{
 		Name:        req.Name,
 		Description: req.Description,
-		OwnerUserID: uuid.MustParse(user.ID),
+		OwnerUserID: user.ID,
 	})
 	if err != nil {
 		return util.ServerError("Failed to create project", err)
@@ -54,12 +52,12 @@ func handleProjectGet(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -68,7 +66,7 @@ func handleProjectGet(c echo.Context) error {
 	}
 
 	// Even though our DB query should've constrained it, sanity check with access control regardless
-	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(user, proj) {
 		c.Logger().Printf("Something went wrong with getting project %s for user %s, the query returned it, but the user should not have access", proj.ID.String(), user.ID)
 		return echo.ErrForbidden
 	}
@@ -77,12 +75,12 @@ func handleProjectGet(c echo.Context) error {
 }
 
 func handleProjectGetAll(c echo.Context) error {
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
-	projects, err := db.GetAllProjectsForUser(user.ID)
+	projects, err := db.GetAllProjectsForUser(user.ID.String())
 	var res apitypes.ProjectResponseMultipleDTO
 
 	if err == db.ErrNotFound {
@@ -96,7 +94,7 @@ func handleProjectGetAll(c echo.Context) error {
 
 	for _, project := range projects {
 		// Sanity check access control
-		if !accesscontrol.HasRightsToProject(&user.UserClaims, &project) {
+		if !accesscontrol.HasRightsToProject(user, &project) {
 			c.Logger().Printf("Something went wrong with getting all projects for user %s, the database query returned project %s, which the user should NOT have access to", user.ID, project.ID.String())
 			continue
 		}

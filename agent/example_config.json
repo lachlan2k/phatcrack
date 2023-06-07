@@ -1,8 +1,7 @@
 {
     "auth_key_file": "/etc/phatcrack-agent/auth-key",
     "hashcat_binary": "/opt/hashcat/hashcat.bin",
-    "rules_directory": "/opt/hashcat/rules",
-    "wordlists_directory": "/opt/wordlists",
-    "ws_endpoint": "wss://192.168.120.11:8118/api/v1/agent/handle/ws",
+    "listfile_directory": "/opt/listfiles",
+    "api_endpoint": "http://127.0.0.1:3000/api/v1",
     "additional_hashcat_args": ["-w3", "--loopback"]
 }

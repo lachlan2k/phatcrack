@@ -33,9 +33,9 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
 	// TODO: This is all a bit gross and could ideally be collapsed into a shorter number of queries?
@@ -44,7 +44,7 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -52,7 +52,7 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(user, proj) {
 		return echo.ErrForbidden
 	}
 
@@ -77,9 +77,9 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
 	projId, err := db.GetAttackProjID(attackId)
@@ -87,7 +87,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -95,7 +95,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(user, proj) {
 		return echo.ErrForbidden
 	}
 
@@ -120,9 +120,9 @@ func handleAttackGet(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
 	// TODO: this could be collapsed into less queries too
@@ -131,7 +131,7 @@ func handleAttackGet(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for attack", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -139,7 +139,7 @@ func handleAttackGet(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(user, proj) {
 		return echo.ErrForbidden
 	}
 
@@ -161,9 +161,9 @@ func handleAttackCreate(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
 	projId, err := db.GetHashlistProjID(req.HashlistID)
@@ -171,7 +171,7 @@ func handleAttackCreate(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -179,7 +179,7 @@ func handleAttackCreate(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(user, proj) {
 		return echo.ErrForbidden
 	}
 
@@ -208,9 +208,9 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, err := auth.ClaimsFromReq(c)
-	if err != nil {
-		return err
+	user, _ := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
 	}
 
 	projId, err := db.GetAttackProjID(attackId)
@@ -218,7 +218,7 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for attack", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID)
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -226,7 +226,7 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Failed to fetch project", err)
 	}
 
-	if !accesscontrol.HasRightsToProject(&user.UserClaims, proj) {
+	if !accesscontrol.HasRightsToProject(user, proj) {
 		return echo.ErrForbidden
 	}
 
