@@ -12,6 +12,19 @@ type User struct {
 	Username     string `gorm:"uniqueIndex"`
 	PasswordHash string
 	Roles        datatypes.JSONSlice[string]
+
+	MFAType string
+	MFAData datatypes.JSON
+}
+
+func (u *User) HasRole(roleToCheck string) bool {
+	for _, r := range u.Roles {
+		if r == roleToCheck {
+			return true
+		}
+	}
+
+	return false
 }
 
 func NormalizeUsername(username string) string {

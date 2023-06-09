@@ -55,7 +55,7 @@ import RecentAttacks from '@/components/RecentAttacks.vue'
           <form action="/api/v1/list/upload" method="POST" enctype="multipart/form-data">
             <input type="file" name="file" />
             <input type="text" name="file-line-count" value="100" placeholder="Line count" />
-            <input type="text" name="file-type" placeholder="Wordlist"  value="Wordlist"/>
+            <input type="text" name="file-type" placeholder="Wordlist" value="Wordlist" />
             <input type="submit" />
           </form>
         </div>

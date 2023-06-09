@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import JobWizard from '@/components/Wizard/JobWizard.vue'
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
@@ -14,6 +14,6 @@ function navToHashlist(hashlistId: string) {
     <div class="prose">
       <h1>Cracking Wizard</h1>
     </div>
-    <JobWizard :first-step="0" @successful-start="details => navToHashlist(details.hashlistId)" />
+    <JobWizard :first-step="0" @successful-start="(details) => navToHashlist(details.hashlistId)" />
   </main>
 </template>

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/NHAS/webauthn/webauthn"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 )
@@ -22,6 +23,9 @@ type SessionHandler interface {
 type SessionData struct {
 	UserID          string
 	HasCompletedMFA bool
+
+	WebAuthnSession     *webauthn.SessionData
+	PendingWebAuthnUser *webauthnUser
 }
 
 const sessionContextKey = "sess-data"
@@ -36,7 +40,7 @@ func SessionDataFromReq(c echo.Context) *SessionData {
 	return &data
 }
 
-func UserFromReq(c echo.Context) (*db.User, *SessionData) {
+func UserAndSessFromReq(c echo.Context) (*db.User, *SessionData) {
 	sess := SessionDataFromReq(c)
 	if sess == nil {
 		return nil, nil
@@ -56,4 +60,9 @@ func UserFromReq(c echo.Context) (*db.User, *SessionData) {
 
 	c.Set(sessionUserContextKey, user)
 	return user, sess
+}
+
+func UserFromReq(c echo.Context) *db.User {
+	u, _ := UserAndSessFromReq(c)
+	return u
 }

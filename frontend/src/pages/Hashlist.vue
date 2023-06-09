@@ -63,7 +63,7 @@ const onlyShowCracked = ref(false)
 
 const filteredHashes = computed(() => {
   if (onlyShowCracked.value) {
-    return hashlistData.value?.hashes.filter(x => x.is_cracked)
+    return hashlistData.value?.hashes.filter((x) => x.is_cracked)
   }
 
   return hashlistData.value?.hashes
@@ -179,11 +179,11 @@ const hashTypeStr = computed(() => {
                 </button>
               </div>
               <div class="form-control">
-  <label class="label cursor-pointer">
-    <span class="label-text">Only show cracked</span> 
-    <input type="checkbox" class="toggle" v-model="onlyShowCracked" />
-  </label>
-</div>
+                <label class="label cursor-pointer">
+                  <span class="label-text">Only show cracked</span>
+                  <input type="checkbox" class="toggle" v-model="onlyShowCracked" />
+                </label>
+              </div>
               <table class="compact-table compact-table table w-full">
                 <!-- head -->
                 <thead>

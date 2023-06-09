@@ -33,7 +33,7 @@ const props = withDefaults(
     existingHashlistId?: string
   }>(),
   {
-    firstStep: 0,
+    firstStep: 0
   }
 )
 

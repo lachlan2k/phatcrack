@@ -1,9 +1,15 @@
 import { defineStore } from 'pinia'
 import { login as apiLogin, refreshAuth as apiRefreshAuth, logout as apiLogout } from '@/api/auth'
-import type { AuthCurrentUserDTO } from '@/api/types'
+import type {
+  AuthCurrentUserDTO,
+  AuthLoginResponseDTO,
+  AuthRefreshResponseDTO,
+  AuthWhoamiResponseDTO
+} from '@/api/types'
 
 export type AuthState = {
-  loggedInUser: AuthCurrentUserDTO | null
+  whoamiDetails: AuthLoginResponseDTO | AuthWhoamiResponseDTO | AuthRefreshResponseDTO | null
+
   isLoginLoading: boolean
   loginError: string | null
   hasTriedAuth: boolean
@@ -14,10 +20,13 @@ export const useAuthStore = defineStore({
 
   state: () =>
     ({
-      loggedInUser: null,
+      whoamiDetails: null,
+
       loginError: null,
       isLoginLoading: false,
-      hasTriedAuth: false // When the app first loads, we don't want to assume a session timeout, so we want to check auth at least once
+
+      // When the app first loads, we don't want to assume a session timeout, so we want to check auth at least once
+      hasTriedAuth: false
     } as AuthState),
 
   actions: {
@@ -25,10 +34,10 @@ export const useAuthStore = defineStore({
       this.isLoginLoading = true
       try {
         const details = await apiLogin(username, password)
-        this.loggedInUser = details?.user ?? null
+        this.whoamiDetails = details
         this.loginError = null
       } catch (err: any) {
-        this.loggedInUser = null
+        this.whoamiDetails = null
         this.loginError = err.response.data.message
       } finally {
         this.hasTriedAuth = true
@@ -42,14 +51,14 @@ export const useAuthStore = defineStore({
       try {
         apiLogout()
       } finally {
-        this.loggedInUser = null
+        this.whoamiDetails = null
       }
     },
 
     async refreshAuth() {
       try {
         const details = await apiRefreshAuth()
-        this.loggedInUser = details.user
+        this.whoamiDetails = details
         this.loginError = null
       } catch (err: any) {
         // We were logged in before, and now we're not
@@ -59,7 +68,7 @@ export const useAuthStore = defineStore({
           this.loginError = err.response.data.message
         }
 
-        this.loggedInUser = null
+        this.whoamiDetails = null
       } finally {
         this.hasTriedAuth = true
       }
@@ -67,10 +76,24 @@ export const useAuthStore = defineStore({
   },
 
   getters: {
-    isLoggedIn: (state) => state.loggedInUser != null,
-    username: (state) => state.loggedInUser?.username,
+    isLoggedIn: (state) => state.whoamiDetails?.user != null,
+    loggedInUser: (state) => state.whoamiDetails?.user,
+
+    hasCompletedAuth: (state) =>
+      state.whoamiDetails?.user != null &&
+      !state.whoamiDetails?.is_awaiting_mfa &&
+      !state.whoamiDetails?.requires_password_change &&
+      !state.whoamiDetails?.requires_mfa_enrollment,
+
+    isAwaitingMFA: state => state?.whoamiDetails?.is_awaiting_mfa ?? false,
+    requiresPasswordChange: state => state?.whoamiDetails?.requires_password_change ?? false,
+    requiresMFAEnrollment: state => state?.whoamiDetails?.requires_mfa_enrollment,
+
+    username: (state) => state.whoamiDetails?.user.username,
+
     error: (state) => state.loginError,
-    isAdmin: (state) => state.loggedInUser?.roles.includes('admin') ?? false,
-    hasRole: (state) => (role: string) => state.loggedInUser?.roles.includes(role) ?? false
+    
+    isAdmin: (state) => state.whoamiDetails?.user.roles.includes('admin') ?? false,
+    hasRole: (state) => (role: string) => state.whoamiDetails?.user.roles.includes(role) ?? false
   }
 })

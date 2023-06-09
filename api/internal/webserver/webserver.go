@@ -69,7 +69,7 @@ func Listen(port string) error {
 	})
 
 	// If a user has "requires_password_change" etc they need to be able to do that
-	// Don't worry, the authHandler.Middleware() is already enforcing auth
+	// Don't worry, the sessionhandler middleware is already enforcing auth
 	controllers.HookAuthEndpoints(api.Group("/auth"), sessionHandler)
 
 	api.Use(auth.EnforceMFAMiddleware(sessionHandler))

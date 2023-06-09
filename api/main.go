@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"net/url"
 	"os"
 
+	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
@@ -42,6 +44,17 @@ func main() {
 	if os.Getenv("FILEREPO_PATH") == "" {
 		log.Fatalf("FILEREPO_PATH was not specified")
 	}
+
+	if os.Getenv("BASE_URL") == "" {
+		log.Fatalf("BASE_URL was not specified")
+	}
+
+	parsedBaseURL, err := url.Parse(os.Getenv("BASE_URL"))
+	if err != nil {
+		log.Fatalf("Provided BASE_URL could not be parsed: %v", err)
+	}
+
+	auth.InitWebAuthn(*parsedBaseURL)
 
 	err = filerepo.SetPath(os.Getenv("FILEREPO_PATH"))
 	if err != nil {

@@ -29,7 +29,7 @@ func handleAttackJobGet(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserFromReq(c)
+	user, _ := auth.UserAndSessFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -71,7 +71,7 @@ func handleAttackJobWatch(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid origin header").SetInternal(err)
 	}
 
-	user, _ := auth.UserFromReq(c)
+	user, _ := auth.UserAndSessFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -127,7 +127,7 @@ func handleAttacksAndJobsForHashlist(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserFromReq(c)
+	user, _ := auth.UserAndSessFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}

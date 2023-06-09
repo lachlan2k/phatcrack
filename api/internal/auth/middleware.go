@@ -14,7 +14,7 @@ func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			user, sess := UserFromReq(c)
+			user, sess := UserAndSessFromReq(c)
 			if user == nil {
 				return echo.ErrUnauthorized
 			}
@@ -58,7 +58,7 @@ func RoleRestrictedMiddleware(h SessionHandler, allowedRoles []string, disallowe
 				return next(c)
 			}
 
-			user, _ := UserFromReq(c)
+			user, _ := UserAndSessFromReq(c)
 
 			if user == nil {
 				return echo.ErrUnauthorized
