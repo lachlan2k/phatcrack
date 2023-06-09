@@ -272,6 +272,12 @@ func handleAttackStart(c echo.Context) error {
 
 	// TODO: now that we've refactored the relationship between attacks and jobs...
 	// ...we should probably just delete the job if it fails, right?
+	// TODO: ...done?
+	if err != nil {
+		// If the deletion fails, there's not much for us to do really
+		db.GetInstance().Delete(newJob)
+	}
+
 	switch err {
 	case nil:
 		return c.JSON(http.StatusOK, apitypes.AttackStartResponseDTO{
