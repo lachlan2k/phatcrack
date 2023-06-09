@@ -33,7 +33,7 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -77,7 +77,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -120,7 +120,7 @@ func handleAttackGet(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -161,7 +161,7 @@ func handleAttackCreate(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -208,7 +208,7 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}

@@ -30,7 +30,7 @@ func handleHashlistGetAllForProj(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -64,7 +64,7 @@ func handleHashlistGet(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -89,7 +89,7 @@ func handleHashlistGet(c echo.Context) error {
 }
 
 func handleHashlistCreate(c echo.Context) error {
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}

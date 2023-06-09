@@ -24,7 +24,7 @@ func HookProjectEndpoints(api *echo.Group) {
 }
 
 func handleProjectCreate(c echo.Context) error {
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -52,7 +52,7 @@ func handleProjectGet(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
@@ -75,7 +75,7 @@ func handleProjectGet(c echo.Context) error {
 }
 
 func handleProjectGetAll(c echo.Context) error {
-	user, _ := auth.UserAndSessFromReq(c)
+	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
