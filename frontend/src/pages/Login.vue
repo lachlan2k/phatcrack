@@ -2,7 +2,13 @@
 import { AxiosError } from 'axios'
 import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { finishMFAChallenge, startMFAEnrollment, startMFAChallenge, finishMFAEnrollment, changeTemporaryPassword } from '@/api/auth'
+import {
+  finishMFAChallenge,
+  startMFAEnrollment,
+  startMFAChallenge,
+  finishMFAEnrollment,
+  changeTemporaryPassword
+} from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
@@ -77,7 +83,7 @@ async function doPasswordChange(event: Event) {
       old_password: password.value,
       new_password: newPassword.value
     })
-    if (res === "Ok") {
+    if (res === 'Ok') {
       toast.success('Password changed successfully')
     } else {
       toast.warning('Unexpected API response: ' + res)
@@ -266,7 +272,9 @@ const cardTitle = computed(() => {
               <p>{{ loginError }}</p>
             </div>
             <div class="form-control mt-6">
-              <button type="submit" class="btn-primary btn" :disabled="isPasswordChangeLoading">Change Password</button>
+              <button type="submit" class="btn-primary btn" :disabled="isPasswordChangeLoading">
+                Change Password
+              </button>
             </div>
           </form>
         </div>

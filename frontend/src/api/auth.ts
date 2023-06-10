@@ -70,9 +70,7 @@ export function finishMFAChallenge(cred: PublicKeyCredential): Promise<string> {
 }
 
 export function changeTemporaryPassword(body: AuthChangePasswordRequestDTO): Promise<string> {
-  return client
-    .post('/api/v1/auth/change-temporary-password', body)
-    .then(res => res.data)
+  return client.post('/api/v1/auth/change-temporary-password', body).then((res) => res.data)
 }
 
 export function refreshAuth(): Promise<AuthWhoamiResponseDTO> {

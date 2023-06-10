@@ -66,16 +66,15 @@ loadListfiles()
 
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-          
-        <div class="flex flex-row justify-between">
-              <Modal v-model:isOpen="isRulefileUploadOpen">
-                <FileUpload fileType="Rulefile" />
-              </Modal>
-              <h2 class="card-title">Rulefiles</h2>
-              <button class="btn-primary btn-sm btn" @click="() => (isRulefileUploadOpen = true)">
-                Upload Rulefile
-              </button>
-            </div>
+          <div class="flex flex-row justify-between">
+            <Modal v-model:isOpen="isRulefileUploadOpen">
+              <FileUpload fileType="Rulefile" />
+            </Modal>
+            <h2 class="card-title">Rulefiles</h2>
+            <button class="btn-primary btn-sm btn" @click="() => (isRulefileUploadOpen = true)">
+              Upload Rulefile
+            </button>
+          </div>
 
           <table class="table w-full">
             <thead>

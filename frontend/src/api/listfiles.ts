@@ -10,7 +10,10 @@ export function getAllRulefiles(): Promise<GetAllRuleFilesDTO> {
   return client.get('/api/v1/list/rulefile/all').then((res) => res.data)
 }
 
-export function uploadListfile(body: FormData, onUploadProgress: (progress: AxiosProgressEvent) => void): Promise<ListfileDTO> {
+export function uploadListfile(
+  body: FormData,
+  onUploadProgress: (progress: AxiosProgressEvent) => void
+): Promise<ListfileDTO> {
   return client
     .post('/api/v1/list/upload', body, {
       headers: {

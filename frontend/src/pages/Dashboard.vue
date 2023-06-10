@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import Modal from '@/components/Modal.vue'
-import FileUpload from '@/components/FileUpload.vue'
-</script>
-
 <template>
   <main class="w-full p-4">
     <div class="prose">

@@ -24,7 +24,7 @@ export const useListfilesStore = defineStore({
         return
       }
 
-      if (forceRefetch || this.wordlists.length === 0 && this.rulefiles.length == 0) {
+      if (forceRefetch || (this.wordlists.length === 0 && this.rulefiles.length == 0)) {
         this.loading = true
         try {
           const wordlistsReq = getAllWordlists()

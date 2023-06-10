@@ -12,11 +12,11 @@ enum FileType {
   Rulefile = 'Rulefile'
 }
 
-const MaxSizeInBytes = 10 * (1000**3) // 10GB
-const MaxSizeForAutoLineCount = 500 * 1000**2 // 500MB
+const MaxSizeInBytes = 10 * 1000 ** 3 // 10GB
+const MaxSizeForAutoLineCount = 500 * 1000 ** 2 // 500MB
 
 const props = defineProps<{
-  fileType: FileType | null 
+  fileType: FileType | null
 }>()
 
 const fileInputEl = ref<HTMLInputElement | null>(null)
@@ -49,7 +49,7 @@ const requiresLineCountSpecified = computed(() => {
   return fileToUpload.value.size > MaxSizeForAutoLineCount
 })
 
-watch(requiresLineCountSpecified, doesRequire => {
+watch(requiresLineCountSpecified, (doesRequire) => {
   if (doesRequire) {
     // Set it back to 0 to ask the server to calculate it
     lineCount.value = 0
@@ -95,7 +95,10 @@ async function onSubmit(event: Event) {
 
   try {
     isLoading.value = true
-    const uploadedFile = await uploadListfile(formData, (newProgress: AxiosProgressEvent) => progress.value = newProgress)
+    const uploadedFile = await uploadListfile(
+      formData,
+      (newProgress: AxiosProgressEvent) => (progress.value = newProgress)
+    )
     toast.success('Successfully uploaded file: ' + uploadedFile.name)
     listfilesStore.load(true)
 
@@ -121,65 +124,70 @@ async function onSubmit(event: Event) {
 
 <template>
   <h3 class="text-lg font-bold">Upload a {{ props.fileType == null ? 'File' : props.fileType }}</h3>
-    <div class="form-control mt-1">
-        <label class="label">
-          <span class="label-text">Name</span>
-        </label>
-        <input
-          type="text"
-          class="input-bordered input"
-          v-model="fileName"
-          :placeholder="fileType == FileType.Rulefile ? 'best64.rule' : 'rockyou.txt'"
-        />
-      </div>
-    
-    <div class="form-control mt-1" v-if="requiresLineCountSpecified">
-      <label class="label">
-        <span class="label-text">Number of lines</span>
-      </label>
-      <input
-        type="number"
-        class="input-bordered input"
-        v-model="lineCount"
-      />
-      <label class="label" v-if="lineCount == 0">
-          <span class="label-text text-error">Files larger {{ bytesToReadable(MaxSizeForAutoLineCount) }} require a line count</span>
-        </label>
-    </div>
+  <div class="form-control mt-1">
+    <label class="label">
+      <span class="label-text">Name</span>
+    </label>
+    <input
+      type="text"
+      class="input-bordered input"
+      v-model="fileName"
+      :placeholder="fileType == FileType.Rulefile ? 'best64.rule' : 'rockyou.txt'"
+    />
+  </div>
 
-    <div class="form-control mt-1" v-if="props.fileType == null">
-      <label class="label">
-        <span class="label-text">File type</span>
-      </label>
-      <select class="select-bordered select" v-model="fileType">
-        <option value="Wordlist">Wordlist</option>
-        <option value="Rulefile">Rulefile</option>
-      </select>
-    </div>
+  <div class="form-control mt-1" v-if="requiresLineCountSpecified">
+    <label class="label">
+      <span class="label-text">Number of lines</span>
+    </label>
+    <input type="number" class="input-bordered input" v-model="lineCount" />
+    <label class="label" v-if="lineCount == 0">
+      <span class="label-text text-error"
+        >Files larger {{ bytesToReadable(MaxSizeForAutoLineCount) }} require a line count</span
+      >
+    </label>
+  </div>
 
-    <div class="form-control mt-1">
-      <label class="label">
-        <span class="label-text">Pick a file (max {{ bytesToReadable(MaxSizeInBytes) }})</span>
-      </label>
-      <input
-        type="file"
-        ref="fileInputEl"
-        @change="onFileSelect"
-        class="file-input-bordered file-input-ghost file-input"
-        name="file"
-      />
-    </div>
-    <div v-if="isLoading && progress != null && progress.total != null">
-      <progress class="progress progress-primary w-full" :value="progress.loaded / progress.total * 100" max="100"></progress>
-    </div>
+  <div class="form-control mt-1" v-if="props.fileType == null">
+    <label class="label">
+      <span class="label-text">File type</span>
+    </label>
+    <select class="select-bordered select" v-model="fileType">
+      <option value="Wordlist">Wordlist</option>
+      <option value="Rulefile">Rulefile</option>
+    </select>
+  </div>
 
-    <div class="form-control mt-3">
-      <span class="tooltip" :data-tip="validationError">
-        <button @click="onSubmit" :disabled="validationError != null || isLoading" 
-            class="btn-primary btn w-full">
-          <span class="loading loading-spinner loading-md" v-if="isLoading"></span>
-          {{ buttonText }}
-        </button>
-      </span>
-    </div>
+  <div class="form-control mt-1">
+    <label class="label">
+      <span class="label-text">Pick a file (max {{ bytesToReadable(MaxSizeInBytes) }})</span>
+    </label>
+    <input
+      type="file"
+      ref="fileInputEl"
+      @change="onFileSelect"
+      class="file-input-bordered file-input-ghost file-input"
+      name="file"
+    />
+  </div>
+  <div v-if="isLoading && progress != null && progress.total != null">
+    <progress
+      class="progress-primary progress w-full"
+      :value="(progress.loaded / progress.total) * 100"
+      max="100"
+    ></progress>
+  </div>
+
+  <div class="form-control mt-3">
+    <span class="tooltip" :data-tip="validationError">
+      <button
+        @click="onSubmit"
+        :disabled="validationError != null || isLoading"
+        class="btn-primary btn w-full"
+      >
+        <span class="loading loading-spinner loading-md" v-if="isLoading"></span>
+        {{ buttonText }}
+      </button>
+    </span>
+  </div>
 </template>
