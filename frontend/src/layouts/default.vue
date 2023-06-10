@@ -26,7 +26,7 @@ const pageLinks = [
 
       <aside class="flex w-80 flex-col p-4">
         <h2 class="btn-ghost btn w-full text-center text-3xl">Phatcrack</h2>
-        <hr class="mt-4 mb-8 h-px border-0 bg-gray-200 dark:bg-gray-700" />
+        <hr class="mb-8 mt-4 h-px border-0 bg-gray-200 dark:bg-gray-700" />
         <RouterLink to="/wizard">
           <a class="btn-neutral btn w-full gap-2 bg-slate-600">
             <span>

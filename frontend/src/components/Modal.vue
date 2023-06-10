@@ -14,7 +14,7 @@ const isOpen = computed({
 </script>
 
 <template>
-  <dialog :class="isOpen ? 'modal modal-open' : 'custom-modal modal'">
+  <div :class="isOpen ? 'modal modal-open' : 'modal'">
     <form method="dialog" class="remove-card-backgrounds modal-box">
       <button
         @click="() => (isOpen = false)"
@@ -27,7 +27,7 @@ const isOpen = computed({
     <form method="dialog" class="modal-backdrop">
       <button @click="() => (isOpen = false)">close</button>
     </form>
-  </dialog>
+  </div>
 </template>
 
 <style scoped>
@@ -35,6 +35,10 @@ const isOpen = computed({
   max-width: 90vw;
   width: auto;
 }
+/* .modal::backdrop { */
+/* background-color: rgba(0, 0, 0, 0.3); */
+/* animation: modal-pop 0.2s ease-out; */
+/* } */
 </style>
 
 <style>

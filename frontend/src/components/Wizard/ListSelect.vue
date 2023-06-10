@@ -1,18 +1,10 @@
 <script setup lang="ts">
+import type { ListfileDTO } from '@/api/types'
 import { watch } from 'vue'
-
-interface ListItem {
-  id: string
-  name: string
-  description: string
-  filename_on_disk: string
-  size_in_bytes: number
-  lines: number
-}
 
 const props = defineProps<{
   labelText: string
-  list: ListItem[]
+  list: ListfileDTO[]
   modelValue: string[] // list of selected IDs
   limit: number
 }>()

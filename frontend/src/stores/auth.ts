@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { login as apiLogin, refreshAuth as apiRefreshAuth, logout as apiLogout } from '@/api/auth'
 import type {
-  AuthCurrentUserDTO,
   AuthLoginResponseDTO,
   AuthRefreshResponseDTO,
   AuthWhoamiResponseDTO
@@ -85,14 +84,14 @@ export const useAuthStore = defineStore({
       !state.whoamiDetails?.requires_password_change &&
       !state.whoamiDetails?.requires_mfa_enrollment,
 
-    isAwaitingMFA: state => state?.whoamiDetails?.is_awaiting_mfa ?? false,
-    requiresPasswordChange: state => state?.whoamiDetails?.requires_password_change ?? false,
-    requiresMFAEnrollment: state => state?.whoamiDetails?.requires_mfa_enrollment,
+    isAwaitingMFA: (state) => state?.whoamiDetails?.is_awaiting_mfa ?? false,
+    requiresPasswordChange: (state) => state?.whoamiDetails?.requires_password_change ?? false,
+    requiresMFAEnrollment: (state) => state?.whoamiDetails?.requires_mfa_enrollment,
 
     username: (state) => state.whoamiDetails?.user.username,
 
     error: (state) => state.loginError,
-    
+
     isAdmin: (state) => state.whoamiDetails?.user.roles.includes('admin') ?? false,
     hasRole: (state) => (role: string) => state.whoamiDetails?.user.roles.includes(role) ?? false
   }

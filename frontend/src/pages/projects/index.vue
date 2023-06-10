@@ -2,7 +2,7 @@
 import { getAllProjects } from '@/api/project'
 import { useApi } from '@/composables/useApi'
 import { computed } from 'vue'
-import { timeSince } from '@/util/timeSince'
+import { timeSince } from '@/util/units'
 
 const { data, isLoading } = useApi(getAllProjects)
 const projects = computed(() => data.value?.projects)

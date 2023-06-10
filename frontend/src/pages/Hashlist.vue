@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
+import IconButton from '@/components/IconButton.vue'
 import HashlistEditor from '@/components/HashlistEditor.vue'
 
 import {
@@ -159,7 +160,19 @@ const hashTypeStr = computed(() => {
                       <div class="badge badge-info">No jobs for attack</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
-                    <td>stop/start/delete</td>
+                    <td>
+                      <IconButton tooltip="Start" icon="fa-solid fa-play" color="success" />
+                      <div class="tooltip" data-tip="Stop">
+                        <button class="btn-ghost btn-xs btn hover:btn-warning">
+                          <font-awesome-icon icon="fa-solid fa-stop" />
+                        </button>
+                      </div>
+                      <div class="tooltip" data-tip="Delete">
+                        <button class="btn-ghost btn-xs btn hover:btn-error">
+                          <font-awesome-icon icon="fa-solid fa-trash" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>

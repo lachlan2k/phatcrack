@@ -16,7 +16,7 @@ import {
 import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
 import { useApi } from '@/composables/useApi'
-import { getAllRulefiles, getAllWordlists } from '@/api/lists'
+import { getAllRulefiles, getAllWordlists } from '@/api/listfiles'
 import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
 import { useToast } from 'vue-toastification'
 import { attackModes } from '@/util/hashcat'
@@ -73,11 +73,11 @@ const steps = [
   { name: 'Review & Start Attack' }
 ]
 
-enum STEP_INDEXES {
-  STEP_PROJ = 0,
-  STEP_HASHLIST = 1,
-  STEP_ATTACK = 2,
-  STEP_REVIEW = 3
+enum StepIndex {
+  Project = 0,
+  Hashlist = 1,
+  Attack = 2,
+  Review = 3
 }
 
 const stepsToDisplay = steps.slice(props.firstStep)
@@ -146,10 +146,6 @@ const hashesArr = computed(() => {
 
 const selectedHashType = computed(() =>
   allHashTypes.value.find((x) => x.id.toString() === inputs.hashType)
-)
-
-const selectedAttackMode = computed(
-  () => attackModes.find((x) => x.value === inputs.attackMode) ?? attackModes[0]
 )
 
 /*
@@ -303,7 +299,7 @@ async function saveAndStartAttack() {
         </h2>
 
         <!-- Create/Select Project -->
-        <template v-if="inputs.activeStep == 0">
+        <template v-if="inputs.activeStep == StepIndex.Project">
           <div class="form-control">
             <label class="label font-bold">
               <span class="label-text">Choose Project</span>
@@ -357,7 +353,7 @@ async function saveAndStartAttack() {
         </template>
 
         <!-- Create Hashlist -->
-        <template v-if="inputs.activeStep == 1">
+        <template v-if="inputs.activeStep == StepIndex.Hashlist">
           <div class="form-control">
             <HashlistInputs
               v-model:hashes="inputs.hashes"
@@ -392,7 +388,7 @@ async function saveAndStartAttack() {
         </template>
 
         <!-- Attack settings -->
-        <template v-if="inputs.activeStep == 2">
+        <template v-if="inputs.activeStep == StepIndex.Attack">
           <div class="join self-center">
             <input
               type="radio"
@@ -515,7 +511,7 @@ async function saveAndStartAttack() {
         </template>
 
         <!-- Review/start -->
-        <template v-if="inputs.activeStep == 3">
+        <template v-if="inputs.activeStep == StepIndex.Review">
           <table class="first-col-bold table w-full">
             <tbody>
               <div v-if="props.firstStep == 0">

@@ -39,6 +39,8 @@ const router = createRouter({
 
     route('/hashlist/:id', 'Hashlist', () => import('@/pages/Hashlist.vue')),
 
+    route('/listfiles', 'Listfiles', () => import('@/pages/Listfiles.vue')),
+
     route('/wizard', 'Wizard', () => import('@/pages/Wizard.vue'))
   ]
 })

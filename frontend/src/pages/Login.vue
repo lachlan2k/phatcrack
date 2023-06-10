@@ -4,14 +4,21 @@ import { storeToRefs } from 'pinia'
 import { finishMFAChallenge, startMFAEnrollment } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
-import { useToast } from 'vue-toastification'
 import { finishMFAEnrollment } from '@/api/auth'
 import { startMFAChallenge } from '@/api/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
-const { hasCompletedAuth, isAwaitingMFA, requiresPasswordChange, requiresMFAEnrollment, loginError, isLoginLoading, loggedInUser } = storeToRefs(authStore)
+const {
+  hasCompletedAuth,
+  isAwaitingMFA,
+  requiresPasswordChange,
+  requiresMFAEnrollment,
+  loginError,
+  isLoginLoading,
+  loggedInUser
+} = storeToRefs(authStore)
 
 enum ActiveScreens {
   Credentials,
@@ -50,18 +57,16 @@ watch(hasCompletedAuth, (hasCompletedAuth) => {
 const username = ref('')
 const password = ref('')
 
-const toast = useToast()
-
 async function doLogin(event: Event) {
   if (event) {
     event.preventDefault()
   }
 
-  const loginSuccess = await authStore.login(username.value, password.value)
+  authStore.login(username.value, password.value)
 }
 
 function urlSafeB64Decode(value: string) {
-    return Uint8Array.from(atob(value.replace(/_/g, '/').replace(/-/g, '+')), c => c.charCodeAt(0));
+  return Uint8Array.from(atob(value.replace(/_/g, '/').replace(/-/g, '+')), (c) => c.charCodeAt(0))
 }
 
 async function enrollKey() {
@@ -70,16 +75,16 @@ async function enrollKey() {
     ...response,
     publicKey: {
       ...response.publicKey,
-      challenge: urlSafeB64Decode((response.publicKey.challenge as unknown) as string), // type codegen is wrong, its a base64 encoded string once marshalled, not a []byte
+      challenge: urlSafeB64Decode(response.publicKey.challenge as unknown as string), // type codegen is wrong, its a base64 encoded string once marshalled, not a []byte
       user: {
         ...response.publicKey.user,
         id: urlSafeB64Decode(response.publicKey.user.id as string)
       },
-      excludeCredentials: response.publicKey.excludeCredentials?.map(cred => ({
+      excludeCredentials: response.publicKey.excludeCredentials?.map((cred) => ({
         ...cred,
-        id: urlSafeB64Decode((cred.id as unknown) as string)
+        id: urlSafeB64Decode(cred.id as unknown as string)
       })),
-      attestation: "none"
+      attestation: 'none'
     } as PublicKeyCredentialCreationOptions
   }
 
@@ -97,11 +102,11 @@ async function verifyKey() {
     ...response,
     publicKey: {
       ...response.publicKey,
-      challenge: urlSafeB64Decode((response.publicKey.challenge as unknown) as string), // type codegen is wrong, its a base64 encoded string once marshalled, not a []byte
-      allowCredentials: response.publicKey.allowCredentials?.map(cred => ({
+      challenge: urlSafeB64Decode(response.publicKey.challenge as unknown as string), // type codegen is wrong, its a base64 encoded string once marshalled, not a []byte
+      allowCredentials: response.publicKey.allowCredentials?.map((cred) => ({
         ...cred,
-        id: urlSafeB64Decode((cred.id as unknown) as string)
-      })),
+        id: urlSafeB64Decode(cred.id as unknown as string)
+      }))
     } as PublicKeyCredentialRequestOptions
   }
 
@@ -113,7 +118,7 @@ async function verifyKey() {
   await authStore.refreshAuth()
 }
 
-watch(activeScreen, newActiveScreen => {
+watch(activeScreen, (newActiveScreen) => {
   if (newActiveScreen == ActiveScreens.MFAVerification) {
     verifyKey()
   }
@@ -123,7 +128,7 @@ const cardTitle = computed(() => {
   switch (activeScreen.value) {
     case ActiveScreens.Credentials:
       return 'Login to Phatcrack'
-    
+
     case ActiveScreens.PasswordChange:
       return 'Set a new password'
 
@@ -135,6 +140,9 @@ const cardTitle = computed(() => {
 
     case ActiveScreens.Done:
       return 'You have successfully logged in!'
+
+    default:
+      return ''
   }
 })
 </script>
@@ -179,28 +187,24 @@ const cardTitle = computed(() => {
         </form>
 
         <div v-if="activeScreen == ActiveScreens.MFAVerification" class="text-center">
-          <p>
-            We need to verify your identity
-          </p>
+          <p>We need to verify your identity</p>
           <div class="cursor-pointer" @click="verifyKey">
-            <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem;" />
+            <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem" />
           </div>
           <div>
-            <button class="btn btn-ghost" @click="verifyKey">Verify</button>
+            <button class="btn-ghost btn" @click="verifyKey">Verify</button>
           </div>
         </div>
 
         <div v-if="activeScreen == ActiveScreens.MFAEnrollment">
-          <p>
-            You are required to enroll a security key
-          </p>
+          <p>You are required to enroll a security key</p>
           <div class="cursor-pointer" @click="enrollKey">
-            <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem;" />
+            <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem" />
           </div>
           <div>
-            <button class="btn btn-primary" @click="enrollKey">Enroll Key</button>
+            <button class="btn-primary btn" @click="enrollKey">Enroll Key</button>
           </div>
-        </div> 
+        </div>
       </div>
     </div>
   </main>

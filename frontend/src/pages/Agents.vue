@@ -21,7 +21,7 @@
             <div class="stat-title">Total Power Draw</div>
             <div class="stat-value flex justify-between">
               <span>3,801w</span>
-              <span class="mt-1 ml-4 text-2xl text-yellow-400">
+              <span class="ml-4 mt-1 text-2xl text-yellow-400">
                 <font-awesome-icon icon="fa-solid fa-bolt" />
               </span>
             </div>

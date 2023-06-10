@@ -41,7 +41,6 @@ const {
   detectButtonClass,
   detectButtonClick,
   detectButtonText,
-  detectStatusText,
   suggestedHashTypes,
   isLoadingSuggestions
 } = useWizardHashDetect(hashesArr)
