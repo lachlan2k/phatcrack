@@ -5,6 +5,7 @@ import { useToast } from 'vue-toastification'
 import { bytesToReadable } from '@/util/units'
 import { uploadListfile } from '@/api/listfiles'
 import { useListfilesStore } from '@/stores/listfiles'
+import type { AxiosProgressEvent } from 'axios'
 
 enum FileType {
   Wordlist = 'Wordlist',
@@ -26,6 +27,7 @@ const fileType = ref(props.fileType ?? FileType.Wordlist)
 const fileToUpload = ref<File | null>(null)
 
 const isLoading = ref(false)
+const progress = ref<AxiosProgressEvent | null>(null)
 
 const validationError = computed(() => {
   if (fileToUpload.value == null) {
@@ -93,13 +95,14 @@ async function onSubmit(event: Event) {
 
   try {
     isLoading.value = true
-    const uploadedFile = await uploadListfile(formData)
+    const uploadedFile = await uploadListfile(formData, (newProgress: AxiosProgressEvent) => progress.value = newProgress)
     toast.success('Successfully uploaded file: ' + uploadedFile.name)
     listfilesStore.load(true)
 
     fileName.value = ''
     fileToUpload.value = null
     lineCount.value = 0
+    progress.value = null
 
     if (fileInputEl.value != null) {
       fileInputEl.value.value = ''
@@ -117,7 +120,7 @@ async function onSubmit(event: Event) {
 </script>
 
 <template>
-  <h3 class="text-lg font-bold">Upload a file</h3>
+  <h3 class="text-lg font-bold">Upload a {{ props.fileType == null ? 'File' : props.fileType }}</h3>
     <div class="form-control mt-1">
         <label class="label">
           <span class="label-text">Name</span>
@@ -166,7 +169,11 @@ async function onSubmit(event: Event) {
         name="file"
       />
     </div>
-    <div class="form-control mt-6">
+    <div v-if="isLoading && progress != null && progress.total != null">
+      <progress class="progress progress-primary w-full" :value="progress.loaded / progress.total * 100" max="100"></progress>
+    </div>
+
+    <div class="form-control mt-3">
       <span class="tooltip" :data-tip="validationError">
         <button @click="onSubmit" :disabled="validationError != null || isLoading" 
             class="btn-primary btn w-full">
