@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import { AxiosError } from 'axios'
 import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { finishMFAChallenge, startMFAEnrollment } from '@/api/auth'
+import { finishMFAChallenge, startMFAEnrollment, startMFAChallenge, finishMFAEnrollment, changeTemporaryPassword } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
-import { finishMFAEnrollment } from '@/api/auth'
-import { startMFAChallenge } from '@/api/auth'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const authStore = useAuthStore()
 const router = useRouter()
 
@@ -56,6 +57,7 @@ watch(hasCompletedAuth, (hasCompletedAuth) => {
 
 const username = ref('')
 const password = ref('')
+const newPassword = ref('')
 
 async function doLogin(event: Event) {
   if (event) {
@@ -63,6 +65,35 @@ async function doLogin(event: Event) {
   }
 
   authStore.login(username.value, password.value)
+}
+
+async function doPasswordChange(event: Event) {
+  if (event) {
+    event.preventDefault()
+  }
+
+  try {
+    const res = await changeTemporaryPassword({
+      old_password: password.value,
+      new_password: newPassword.value
+    })
+    if (res === "Ok") {
+      toast.success('Password changed successfully')
+    } else {
+      toast.warning('Unexpected API response: ' + res)
+    }
+
+    authStore.refreshAuth()
+  } catch (e: any) {
+    let errorString = 'Unknown Error'
+    if (e instanceof AxiosError) {
+      errorString = e.response?.data?.message
+    } else if (e instanceof Error) {
+      errorString = e.message
+    }
+
+    toast.error('Failed to change temporary password: ' + errorString)
+  }
 }
 
 function urlSafeB64Decode(value: string) {
@@ -204,6 +235,40 @@ const cardTitle = computed(() => {
           <div>
             <button class="btn-primary btn" @click="enrollKey">Enroll Key</button>
           </div>
+        </div>
+
+        <div v-if="activeScreen == ActiveScreens.PasswordChange">
+          <p class="text-center">You are required to change your password</p>
+          <form @submit="doPasswordChange">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Old Password</span>
+              </label>
+              <input
+                type="password"
+                placeholder="hunter2"
+                class="input-bordered input"
+                v-model="password"
+              />
+            </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">New Password</span>
+              </label>
+              <input
+                type="text"
+                placeholder="hunter2"
+                class="input-bordered input"
+                v-model="newPassword"
+              />
+            </div>
+            <div v-if="loginError != null" class="mt-4 text-center text-red-500">
+              <p>{{ loginError }}</p>
+            </div>
+            <div class="form-control mt-6">
+              <button type="submit" class="btn-primary btn" :disabled="isPasswordChangeLoading">Change Password</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

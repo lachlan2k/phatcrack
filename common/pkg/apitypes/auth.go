@@ -41,3 +41,8 @@ type AuthWebAuthnStartEnrollmentResponseDTO struct {
 type AuthWebAuthnStartChallengeResponseDTO struct {
 	protocol.CredentialAssertion
 }
+
+type AuthChangePasswordRequestDTO struct {
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password" validate:"required,min=16,max=128"`
+}

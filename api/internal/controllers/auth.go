@@ -46,12 +46,53 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 		})
 	})
 
-	// Reminder, we're MFA exempt here, so don't put a general password change here
+	// Reminder, we're MFA exempt here, so this is only for users changing their first-set temporary password
 	api.POST("/change-temporary-password", func(c echo.Context) error {
-		// TODO: when implementing this, ensure the user has the RoleRequiresPasswordChange role
-		// Because this is a setup endpoint, its MFA-exempt
-		// For implementing general password changing, we should use a different endpoint
-		return echo.ErrNotImplemented
+		req, err := util.BindAndValidate[apitypes.AuthChangePasswordRequestDTO](c)
+		if err != nil {
+			return err
+		}
+
+		user := auth.UserFromReq(c)
+		if user == nil {
+			return echo.ErrForbidden
+		}
+
+		if !user.HasRole(auth.RoleRequiresPasswordChange) {
+			return echo.NewHTTPError(http.StatusBadRequest, "This endpoint is only available to users who are required to change their password")
+		}
+
+		if len(user.PasswordHash) > 0 {
+			err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword))
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, "Old password was incorrect")
+			}
+		}
+
+		if req.NewPassword == req.OldPassword {
+			return echo.NewHTTPError(http.StatusBadRequest, "New password must be different to old password")
+		}
+
+		newPasswordHash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			return util.ServerError("Failed to update password", err)
+		}
+
+		user.PasswordHash = string(newPasswordHash)
+
+		for i, role := range user.Roles {
+			if role == auth.RoleRequiresPasswordChange {
+				user.Roles = append(user.Roles[:i], user.Roles[i+1:]...)
+				break
+			}
+		}
+
+		err = user.Save()
+		if err != nil {
+			return util.ServerError("Failed to update password", err)
+		}
+
+		return c.JSON(http.StatusOK, "Ok")
 	})
 
 	api.GET("/mfa/is-awaiting-challenge", func(c echo.Context) error {

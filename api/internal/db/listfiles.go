@@ -14,6 +14,7 @@ type Listfile struct {
 	FileType             string
 	SizeInBytes          uint64
 	Lines                uint64
+	IsLocked             bool
 }
 
 func (w *Listfile) ToDTO() apitypes.ListfileDTO {

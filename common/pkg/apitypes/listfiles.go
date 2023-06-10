@@ -6,6 +6,7 @@ type ListfileDTO struct {
 	Name        string `json:"name"`
 	SizeInBytes uint64 `json:"size_in_bytes"`
 	Lines       uint64 `json:"lines"`
+	IsLocked    bool   `json:"is_locked"`
 }
 
 type GetAllWordlistsDTO struct {
