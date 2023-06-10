@@ -1,11 +1,14 @@
 package controllers
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
@@ -33,19 +36,48 @@ func handleListfileUpload(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	lineCount, err := strconv.Atoi(c.FormValue("file-line-count"))
-	if err != nil || lineCount <= 0 {
-		return echo.ErrBadRequest
-	}
-
 	uploadedFile, err := c.FormFile("file")
 	if err != nil {
 		return echo.ErrBadRequest
 	}
 
+	maxFileSize := config.Get().MaximumUploadedFileSize
+	if uploadedFile.Size > maxFileSize {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Uploaded file too large (maximum %d bytes)", maxFileSize))
+	}
+
+	maxAutodetectSize := config.Get().MaximumUploadedFileLineScanSize
+	canAutodetectLineCount := uploadedFile.Size <= maxAutodetectSize
+
+	lineCount, err := strconv.Atoi(c.FormValue("file-line-count"))
+	if err != nil || (lineCount == 0 && !canAutodetectLineCount) || lineCount < 0 {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			fmt.Sprintf("Invalid line count %d. Can only automatically detect lines for files up to %d bytes", lineCount, maxAutodetectSize),
+		)
+	}
+
 	uploadedFileHandle, err := uploadedFile.Open()
 	if err != nil {
-		return util.ServerError("failed to open hanel to file", err)
+		return util.ServerError("failed to open handle to file", err)
+	}
+
+	// Auto detect linecount
+	if lineCount == 0 {
+		lineCount = 1                // First line won't have a \n
+		buf := make([]byte, 32*1024) // 32kb buffer
+		lineSeparator := []byte{'\n'}
+
+		for i := int64(0); i < maxAutodetectSize; i++ {
+			n, err := uploadedFileHandle.Read(buf)
+			lineCount += bytes.Count(buf[:n], lineSeparator)
+			if err != nil {
+				break
+			}
+		}
+
+		// Rewind for when we need to copy it to disk
+		uploadedFileHandle.Seek(0, io.SeekStart)
 	}
 
 	// TODO rollback on later failures

@@ -19,8 +19,12 @@ export const useListfilesStore = defineStore({
     } as ListfileStore),
 
   actions: {
-    async loadListfiles() {
-      if (this.wordlists.length === 0 && this.rulefiles.length == 0 && !this.loading) {
+    async load(forceRefetch = false) {
+      if (this.loading) {
+        return
+      }
+
+      if (forceRefetch || this.wordlists.length === 0 && this.rulefiles.length == 0) {
         this.loading = true
         try {
           const wordlistsReq = getAllWordlists()

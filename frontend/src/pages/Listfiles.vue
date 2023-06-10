@@ -9,7 +9,7 @@ import { bytesToReadable } from '@/util/units'
 import { useListfilesStore } from '@/stores/listfiles'
 
 const listfilesStore = useListfilesStore()
-const { loadListfiles } = listfilesStore
+const { load: loadListfiles } = listfilesStore
 const { wordlists, rulefiles } = storeToRefs(useListfilesStore())
 
 const isWordlistUploadOpen = ref(false)

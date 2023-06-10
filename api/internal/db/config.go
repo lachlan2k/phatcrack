@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"gorm.io/datatypes"
@@ -28,6 +29,31 @@ func GetConfig[ConfigT interface{}]() (*ConfigT, error) {
 		return nil, err
 	}
 	return &conf, nil
+}
+
+func SeedConfig[ConfigT interface{}](defaultConfig ConfigT) error {
+	confBytes, err := json.Marshal(defaultConfig)
+	if err != nil {
+		return err
+	}
+
+	var configRowCount int64
+	err = GetInstance().Model(&Config{}).Count(&configRowCount).Error
+	if err != nil {
+		return err
+	}
+
+	if configRowCount == 0 {
+		return GetInstance().Create(&Config{
+			Config: datatypes.JSON(confBytes),
+		}).Error
+	}
+
+	if configRowCount > 1 {
+		return fmt.Errorf("found %d config entries in database, there should only be 1", configRowCount)
+	}
+
+	return nil
 }
 
 func SetConfig[ConfigT interface{}](newConf ConfigT) error {

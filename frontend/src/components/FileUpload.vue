@@ -4,6 +4,7 @@ import { useToast } from 'vue-toastification'
 
 import { bytesToReadable } from '@/util/units'
 import { uploadListfile } from '@/api/listfiles'
+import { useListfilesStore } from '@/stores/listfiles'
 
 enum FileType {
   Wordlist = 'Wordlist',
@@ -11,16 +12,20 @@ enum FileType {
 }
 
 const MaxSizeInBytes = 10 * (1000**3) // 10GB
-const MaxSizeForAutoLineCount = 100 * 1000**2 // 100MB
+const MaxSizeForAutoLineCount = 500 * 1000**2 // 500MB
 
 const props = defineProps<{
   fileType: FileType | null 
 }>()
 
+const fileInputEl = ref<HTMLInputElement | null>(null)
+
 const fileName = ref('')
 const lineCount = ref(0)
 const fileType = ref(props.fileType ?? FileType.Wordlist)
 const fileToUpload = ref<File | null>(null)
+
+const isLoading = ref(false)
 
 const validationError = computed(() => {
   if (fileToUpload.value == null) {
@@ -54,7 +59,9 @@ const buttonText = computed(() => {
     return 'Upload'
   }
 
-  return `Upload ${fileName.value} (${bytesToReadable(fileToUpload.value!.size)})`
+  const verb = isLoading.value ? 'Uploading' : 'Upload'
+
+  return `${verb} ${fileName.value} (${bytesToReadable(fileToUpload.value!.size)})`
 })
 
 async function onFileSelect(event: Event) {
@@ -70,6 +77,8 @@ async function onFileSelect(event: Event) {
 
 const toast = useToast()
 
+const listfilesStore = useListfilesStore()
+
 async function onSubmit(event: Event) {
   event.preventDefault()
   if (fileToUpload.value == null) {
@@ -83,21 +92,32 @@ async function onSubmit(event: Event) {
   formData.append('file', fileToUpload.value)
 
   try {
+    isLoading.value = true
     const uploadedFile = await uploadListfile(formData)
     toast.success('Successfully uploaded file: ' + uploadedFile.name)
+    listfilesStore.load(true)
+
+    fileName.value = ''
+    fileToUpload.value = null
+    lineCount.value = 0
+
+    if (fileInputEl.value != null) {
+      fileInputEl.value.value = ''
+    }
   } catch (e) {
     if (e instanceof Error) {
       toast.error('Failed to upload file: ' + e.message)
     } else {
       toast.error('Failed to upload file')
     }
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
 
 <template>
   <h3 class="text-lg font-bold">Upload a file</h3>
-  <form @submit="onSubmit" action="/api/v1/list/upload" method="POST" enctype="multipart/form-data">
     <div class="form-control mt-1">
         <label class="label">
           <span class="label-text">Name</span>
@@ -140,21 +160,19 @@ async function onSubmit(event: Event) {
       </label>
       <input
         type="file"
+        ref="fileInputEl"
         @change="onFileSelect"
         class="file-input-bordered file-input-ghost file-input"
         name="file"
       />
     </div>
-
     <div class="form-control mt-6">
       <span class="tooltip" :data-tip="validationError">
-        <input
-          type="submit"
-          class="btn-primary btn w-full"
-          :value="buttonText"
-          :disabled="validationError != null"
-        />
+        <button @click="onSubmit" :disabled="validationError != null || isLoading" 
+            class="btn-primary btn w-full">
+          <span class="loading loading-spinner loading-md" v-if="isLoading"></span>
+          {{ buttonText }}
+        </button>
       </span>
     </div>
-  </form>
 </template>

@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"time"
 
@@ -53,20 +52,6 @@ func seed() error {
 		if err != nil {
 			return err
 		}
-	}
-
-	var configRowCount int64
-	err = GetInstance().Model(&Config{}).Count(&configRowCount).Error
-	if err != nil {
-		return err
-	}
-
-	if configRowCount == 0 {
-		return GetInstance().Create(&Config{
-			Config: datatypes.JSON([]byte("{}")),
-		}).Error
-	} else if configRowCount > 1 {
-		return errors.New("more than one config row was found in the db (there should only be 1)")
 	}
 
 	return nil

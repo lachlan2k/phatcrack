@@ -55,10 +55,6 @@ import FileUpload from '@/components/FileUpload.vue'
           </table>
         </div>
       </div>
-
-      <Modal :isOpen="true">
-        <FileUpload />
-      </Modal>
     </div>
   </main>
 </template>
