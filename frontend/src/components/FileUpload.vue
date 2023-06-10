@@ -7,10 +7,7 @@ import { uploadListfile } from '@/api/listfiles'
 import { useListfilesStore } from '@/stores/listfiles'
 import type { AxiosProgressEvent } from 'axios'
 
-enum FileType {
-  Wordlist = 'Wordlist',
-  Rulefile = 'Rulefile'
-}
+type FileType = 'Wordlist' | 'Rulefile'
 
 const MaxSizeInBytes = 10 * 1000 ** 3 // 10GB
 const MaxSizeForAutoLineCount = 500 * 1000 ** 2 // 500MB
@@ -23,7 +20,7 @@ const fileInputEl = ref<HTMLInputElement | null>(null)
 
 const fileName = ref('')
 const lineCount = ref(0)
-const fileType = ref(props.fileType ?? FileType.Wordlist)
+const fileType = ref(props.fileType ?? 'Wordlist')
 const fileToUpload = ref<File | null>(null)
 
 const isLoading = ref(false)
@@ -132,7 +129,7 @@ async function onSubmit(event: Event) {
       type="text"
       class="input-bordered input"
       v-model="fileName"
-      :placeholder="fileType == FileType.Rulefile ? 'best64.rule' : 'rockyou.txt'"
+      :placeholder="fileType == 'Rulefile' ? 'best64.rule' : 'rockyou.txt'"
     />
   </div>
 

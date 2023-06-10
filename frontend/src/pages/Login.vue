@@ -73,12 +73,15 @@ async function doLogin(event: Event) {
   authStore.login(username.value, password.value)
 }
 
+const isPasswordChangeLoading = ref(false)
+
 async function doPasswordChange(event: Event) {
   if (event) {
     event.preventDefault()
   }
 
   try {
+    isPasswordChangeLoading.value = true
     const res = await changeTemporaryPassword({
       old_password: password.value,
       new_password: newPassword.value
@@ -99,6 +102,8 @@ async function doPasswordChange(event: Event) {
     }
 
     toast.error('Failed to change temporary password: ' + errorString)
+  } finally {
+    isPasswordChangeLoading.value = false
   }
 }
 

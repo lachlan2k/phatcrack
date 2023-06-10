@@ -183,13 +183,51 @@ func handleAttackCreate(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	// TODO: somewhere I'd prefer to do some better, more explicit consumption of this
-	// Basically, it needs to be extremely clear which hashcat params are coming in
-	hashcatParams := datatypes.JSONType[hashcattypes.HashcatParams]{}
+	rulefiles, err := db.GetAllRulefiles()
+	if err != nil {
+		return util.ServerError("Failed to get information to validate hashcat params", err)
+	}
+	wordlists, err := db.GetAllWordlists()
+	if err != nil {
+		return util.ServerError("Failed to get information to validate hashcat params", err)
+	}
 
-	// TODO (security): validate hashlists and rulefiles are known filenames from the filestore
-	// also probably remove the "AdditionalArgs" for now
-	hashcatParams.Data = req.HashcatParams
+	// Check all specified wordlists exactly match the ID of a known wordlist
+	for _, suppliedWordlist := range req.HashcatParams.WordlistFilenames {
+		found := false
+		for _, dbWordlist := range wordlists {
+			if dbWordlist.ID.String() == suppliedWordlist {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid wordlist supplied: %v", suppliedWordlist)
+		}
+	}
+
+	// Same for rulefiles
+	for _, suppliedRulefile := range req.HashcatParams.RulesFilenames {
+		found := false
+		for _, dbRulefile := range rulefiles {
+			if dbRulefile.ID.String() == suppliedRulefile {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid rulefile supplied: %v", suppliedRulefile)
+		}
+	}
+
+	// Don't allow any additional args
+	req.HashcatParams.AdditionalArgs = []string{}
+
+	hashcatParams := datatypes.JSONType[hashcattypes.HashcatParams]{
+		Data: req.HashcatParams,
+	}
 
 	attack, err := db.CreateAttack(&db.Attack{
 		HashcatParams: hashcatParams,

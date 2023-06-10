@@ -2,6 +2,7 @@
 import Modal from '@/components/Modal.vue'
 import IconButton from '@/components/IconButton.vue'
 import HashlistEditor from '@/components/HashlistEditor.vue'
+import PaginationControls from '@/components/PaginationControls.vue'
 
 import {
   JobStatusAwaitingStart,
@@ -16,6 +17,7 @@ import { useResourcesStore } from '@/stores/resources'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import decodeHex from '@/util/decodeHex'
+import { usePagination } from '@/composables/usePagination'
 import { storeToRefs } from 'pinia'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import type { AttackWithJobsDTO } from '@/api/types'
@@ -62,12 +64,28 @@ const isHashlistEditorOpen = ref(false)
 
 const onlyShowCracked = ref(false)
 
+const crackedHashes = computed(() => {
+  return hashlistData.value?.hashes.filter((x) => x.is_cracked) ?? []
+})
+
 const filteredHashes = computed(() => {
   if (onlyShowCracked.value) {
-    return hashlistData.value?.hashes.filter((x) => x.is_cracked)
+    return crackedHashes.value
   }
 
-  return hashlistData.value?.hashes
+  return hashlistData.value?.hashes ?? []
+})
+
+const {
+  next: nextPage,
+  prev: prevPage,
+  totalPages,
+  currentItems: currentHashes,
+  activePage
+} = usePagination(filteredHashes, 10)
+
+const numberOfHashesCracked = computed(() => {
+  return crackedHashes.value?.length ?? 0
 })
 
 // TODO: this will almost certainl perform terribly, and the code isn't super tidy?
@@ -186,8 +204,11 @@ const hashTypeStr = computed(() => {
             </Modal>
             <div class="card-body">
               <div class="flex flex-row justify-between">
-                <h2 class="card-title">Hashlist</h2>
-                <button class="btn-sm btn" @click="() => (isHashlistEditorOpen = true)">
+                <h2 class="card-title">
+                  Hashlist ({{ numberOfHashesCracked }}/{{ hashlistData?.hashes.length ?? 0 }}
+                  cracked)
+                </h2>
+                <button class="btn-neutral btn-sm btn" @click="() => (isHashlistEditorOpen = true)">
                   Edit
                 </button>
               </div>
@@ -197,25 +218,32 @@ const hashTypeStr = computed(() => {
                   <input type="checkbox" class="toggle" v-model="onlyShowCracked" />
                 </label>
               </div>
+
               <table class="compact-table compact-table table w-full">
-                <!-- head -->
                 <thead>
                   <tr>
                     <th>Original Hash</th>
-                    <!-- <th>Normalized Hash</th> -->
                     <th>Cracked Plaintext</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="hash in filteredHashes" :key="hash.normalized_hash">
-                    <td>{{ hash.input_hash }}</td>
-                    <!-- <td>{{ hash.normalized_hash }}</td> -->
-                    <td>
+                  <tr v-for="hash in currentHashes" :key="hash.normalized_hash">
+                    <td class="font-mono">{{ hash.input_hash }}</td>
+                    <td class="font-mono">
                       <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
                     </td>
                   </tr>
                 </tbody>
               </table>
+
+              <div class="mt-2 w-full text-center">
+                <PaginationControls
+                  @next="() => nextPage()"
+                  @prev="() => prevPage()"
+                  :current-page="activePage"
+                  :total-pages="totalPages"
+                />
+              </div>
             </div>
           </div>
         </div>

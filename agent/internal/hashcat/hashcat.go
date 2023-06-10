@@ -266,8 +266,6 @@ func (sess *HashcatSession) Start() error {
 		scanner := bufio.NewScanner(pStdout)
 		for scanner.Scan() {
 			line := scanner.Text()
-
-			log.Printf("read line %v", line)
 			sess.StdoutLines <- line
 
 			if len(line) == 0 {
