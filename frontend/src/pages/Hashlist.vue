@@ -82,7 +82,7 @@ const {
   totalPages,
   currentItems: currentHashes,
   activePage
-} = usePagination(filteredHashes, 10)
+} = usePagination(filteredHashes, 20)
 
 const numberOfHashesCracked = computed(() => {
   return crackedHashes.value?.length ?? 0
@@ -129,7 +129,59 @@ const hashTypeStr = computed(() => {
         <h1>{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
       </div>
       <div class="flex gap-4">
+      <div class="mt-6 flex flex-wrap gap-6">
+              <div class="card bg-base-100 shadow-xl">
+                <Modal v-model:isOpen="isHashlistEditorOpen">
+                  <HashlistEditor v-if="isHashlistEditorOpen" :hashlistId="hashlistData!.id" />
+                </Modal>
+                <div class="card-body" style="min-width: 500px;">
+                  <div class="flex flex-row justify-between">
+                    <h2 class="card-title">
+                      Hashlist ({{ numberOfHashesCracked }}/{{ hashlistData?.hashes.length ?? 0 }}
+                      cracked)
+                    </h2>
+                    <button class="btn-ghost btn-sm btn" @click="() => (isHashlistEditorOpen = true)">
+                      Edit
+                    </button>
+                  </div>
+                  <div class="form-control">
+                    <label class="label cursor-pointer">
+                      <span class="label-text">Only show cracked</span>
+                      <input type="checkbox" class="toggle" v-model="onlyShowCracked" />
+                    </label>
+                  </div>
+
+                  <table class="compact-table compact-table table table-sm hashlist-table w-full">
+                    <thead>
+                      <tr>
+                        <th>Original Hash</th>
+                        <th>Cracked Plaintext</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="hash in currentHashes" :key="hash.normalized_hash">
+                        <td class="font-mono">{{ hash.input_hash }}</td>
+                        <td class="font-mono">
+                          <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div class="mt-2 w-full text-center">
+                    <PaginationControls
+                      @next="() => nextPage()"
+                      @prev="() => prevPage()"
+                      :current-page="activePage"
+                      :total-pages="totalPages"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
         <div class="mt-6 flex flex-wrap gap-6">
+          
+
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
               <div class="flex flex-row justify-between">
@@ -197,56 +249,7 @@ const hashTypeStr = computed(() => {
             </div>
           </div>
         </div>
-        <div class="mt-6 flex flex-wrap gap-6">
-          <div class="card bg-base-100 shadow-xl">
-            <Modal v-model:isOpen="isHashlistEditorOpen">
-              <HashlistEditor v-if="isHashlistEditorOpen" :hashlistId="hashlistData!.id" />
-            </Modal>
-            <div class="card-body">
-              <div class="flex flex-row justify-between">
-                <h2 class="card-title">
-                  Hashlist ({{ numberOfHashesCracked }}/{{ hashlistData?.hashes.length ?? 0 }}
-                  cracked)
-                </h2>
-                <button class="btn-neutral btn-sm btn" @click="() => (isHashlistEditorOpen = true)">
-                  Edit
-                </button>
-              </div>
-              <div class="form-control">
-                <label class="label cursor-pointer">
-                  <span class="label-text">Only show cracked</span>
-                  <input type="checkbox" class="toggle" v-model="onlyShowCracked" />
-                </label>
-              </div>
-
-              <table class="compact-table compact-table table w-full">
-                <thead>
-                  <tr>
-                    <th>Original Hash</th>
-                    <th>Cracked Plaintext</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="hash in currentHashes" :key="hash.normalized_hash">
-                    <td class="font-mono">{{ hash.input_hash }}</td>
-                    <td class="font-mono">
-                      <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div class="mt-2 w-full text-center">
-                <PaginationControls
-                  @next="() => nextPage()"
-                  @prev="() => prevPage()"
-                  :current-page="activePage"
-                  :total-pages="totalPages"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </div>
   </main>
@@ -255,5 +258,10 @@ const hashTypeStr = computed(() => {
 <style scoped>
 thead > tr > th {
   background: none !important;
+}
+
+.hashlist-table.table-sm :where(th, td) {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
 }
 </style>

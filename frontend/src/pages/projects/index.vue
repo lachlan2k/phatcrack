@@ -39,8 +39,10 @@ const projects = computed(() => data.value?.projects)
                 <tr class="hover cursor-pointer" @click="navigate">
                   <td>{{ project.name }}</td>
                   <td>{{ timeSince(project.time_created * 1000) }}</td>
-                  <td>8</td>
-                  <td><div class="badge badge-info">4 attacks running</div></td>
+                  <td>foo</td>
+                  <td>bar</td>
+                  <!-- <td>8</td> -->
+                  <!-- <td><div class="badge badge-info">4 attacks running</div></td> -->
                 </tr>
               </RouterLink>
             </tbody>

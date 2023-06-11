@@ -9,6 +9,7 @@ const route = useRoute()
 const pageLinks = [
   { name: 'Dashboard', icon: 'fa-gauge', to: '/dashboard' },
   { name: 'Project Folders', icon: 'fa-folder', to: '/projects' },
+  { name: 'Wordlists & Rules', icon: 'fa-file', to: '/listfiles' },
   { name: 'All Running Jobs', icon: 'fa-bars-progress', to: '/jobs' },
   { name: 'Potfile', icon: 'fa-trophy', to: '/potfile' },
   { name: 'Agents', icon: 'fa-robot', to: '/agents' }
@@ -22,9 +23,7 @@ const pageLinks = [
       <router-view />
     </div>
     <div class="drawer-side bg-neutral text-neutral-content">
-      <label for="my-drawer-2" class="drawer-overlay"></label>
-
-      <aside class="flex w-80 flex-col p-4">
+      <aside class="flex w-80 flex-col p-4 h-full">
         <h2 class="btn-ghost btn w-full text-center text-3xl">Phatcrack</h2>
         <hr class="mb-8 mt-4 h-px border-0 bg-gray-200 dark:bg-gray-700" />
         <RouterLink to="/wizard">
@@ -35,23 +34,25 @@ const pageLinks = [
             Get Cracking
           </a>
         </RouterLink>
-        <ul class="menu menu-lg">
-          <li class="menu-title pb-2"><span>Pages</span></li>
 
+        <ul class="menu menu-lg mt-4">
           <li
             v-for="link in pageLinks"
             :key="link.name"
             :class="route.path == link.to ? 'bordered' : 'hover-bordered'"
+            class="mt-2"
           >
-            <RouterLink :to="link.to">
-              <span><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
+            <RouterLink :to="link.to" :class="route.path == link.to ? 'active' : ''">
+              <span class="active"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
 
               {{ link.name }}
             </RouterLink>
           </li>
         </ul>
 
-        <ul class="menu menu-lg">
+        <div class="flex flex-grow"></div>
+
+        <ul class="menu menu-lg justify-self-end">
           <li
             class="hover-bordered"
             v-if="authStore.isAdmin"
@@ -75,3 +76,26 @@ const pageLinks = [
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Backported from Daisy UI v2 */
+.menu li {
+  margin-top: 0.75rem;
+  transition: border 0.15s ease;
+}
+
+.menu li a {
+  padding: 0.5rem 1.25rem;
+}
+.menu li.hover-bordered {
+  @apply border-l-4 border-transparent hover:border-primary;
+}
+
+.menu li.bordered {
+  @apply border-l-4 border-primary;
+}
+
+.menu li:hover a, .menu li a:active {
+  color: inherit;
+}
+</style>
