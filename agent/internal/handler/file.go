@@ -20,7 +20,7 @@ func (h *Handler) downloadFile(fileID string) error {
 		return err
 	}
 
-	request, err := http.NewRequest("GET", fmt.Sprintf("%s/agent/handle/download-file/%s", h.conf.APIEndpoint, fileID), nil)
+	request, err := http.NewRequest("GET", fmt.Sprintf("%s/agent-handler/download-file/%s", h.conf.APIEndpoint, fileID), nil)
 	if err != nil {
 		return err
 	}

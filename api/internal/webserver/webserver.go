@@ -60,7 +60,7 @@ func Listen(port string) error {
 	api := e.Group("/api/v1")
 
 	// Agent auth is done separately in the controller, so it can go before auth middleware
-	controllers.HookAgentEndpoints(api.Group("/agent"))
+	controllers.HookAgentHandlerEndpoints(api.Group("/agent-handler"))
 
 	api.Use(sessionHandler.CreateMiddleware())
 

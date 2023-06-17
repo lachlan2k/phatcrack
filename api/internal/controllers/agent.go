@@ -12,15 +12,15 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
-func HookAgentEndpoints(api *echo.Group) {
+func HookAgentHandlerEndpoints(api *echo.Group) {
 	// NOTE: this is just for agent handling
 	// These endpoints are exempt from useful authz/n
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong agent")
 	})
 
-	api.GET("/handle/ws", handleAgentWs)
-	api.GET("/handle/download-file/:id", handleAgentDownloadFile)
+	api.GET("/ws", handleAgentWs)
+	api.GET("/download-file/:id", handleAgentDownloadFile)
 }
 
 func handleAgentDownloadFile(c echo.Context) error {

@@ -139,7 +139,7 @@ func apiEndpointToWSEndpoint(apiEndpoint string) (string, error) {
 		wsUrl.Scheme = "wss"
 	}
 
-	wsUrl.Path += "/agent/handle/ws"
+	wsUrl.Path += "/agent-handler/ws"
 	return wsUrl.String(), nil
 }
 
