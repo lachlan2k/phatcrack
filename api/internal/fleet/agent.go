@@ -21,10 +21,11 @@ type Agent struct {
 	latestAgentInfo *db.AgentInfo
 }
 
-func (a *Agent) Kill() {
-	a.conn.Close()
-	db.UpdateAgentStatus(a.agentId, db.AgentStatusDisconnected)
-	RemoveAgentByID(a.agentId)
+func (a *Agent) MarkDisconnected() {
+	fleetLock.Lock()
+	defer fleetLock.Unlock()
+	a.ready = false
+	a.conn = nil
 }
 
 func (a *Agent) handleMessage(msg *wstypes.Message) error {
@@ -156,6 +157,10 @@ func (a *Agent) IsHealthy() bool {
 	return a.latestAgentInfo.LastCheckIn.After(nowSubMin)
 }
 
+func (a *Agent) TimeSinceHeartbeat() time.Duration {
+	return time.Since(a.latestAgentInfo.LastCheckIn)
+}
+
 func (a *Agent) ActiveJobCount() int {
 	if !a.ready || a.latestAgentInfo == nil || a.latestAgentInfo.ActiveJobIDs == nil {
 		return -1
@@ -180,7 +185,7 @@ func (a *Agent) RequestFileDownload(fileIDs ...uuid.UUID) error {
 
 func (a *Agent) Handle() error {
 	log.Printf("handling agent")
-	defer a.Kill()
+	defer a.MarkDisconnected()
 	err := db.UpdateAgentStatus(a.agentId, db.AgentStatusAlive)
 	if err != nil {
 		return err

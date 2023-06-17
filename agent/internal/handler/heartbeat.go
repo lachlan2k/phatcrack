@@ -35,13 +35,16 @@ func getFileDTOs(dir string) ([]wstypes.FileDTO, error) {
 	return dtos, nil
 }
 
+var startTime = time.Now()
+
 func (h *Handler) sendHeartbeat() error {
 	h.jobsLock.Lock()
 	defer h.jobsLock.Unlock()
 
 	payload := wstypes.HeartbeatDTO{
-		Time:         time.Now().Unix(),
-		ActiveJobIDs: make([]string, len(h.activeJobs)),
+		Time:           time.Now().Unix(),
+		AgentStartTime: startTime.Unix(),
+		ActiveJobIDs:   make([]string, len(h.activeJobs)),
 	}
 
 	for id := range h.activeJobs {

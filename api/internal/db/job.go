@@ -204,6 +204,19 @@ func GetJob(jobId string, includeRuntimeData bool) (*Job, error) {
 	return &job, nil
 }
 
+func GetAllIncompleteJobs() ([]Job, error) {
+	jobs := []Job{}
+	err := GetInstance().
+		Joins("JobRuntimeData").
+		Where("job_runtime_data.status != ?", JobStatusExited).
+		Find(&jobs).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return jobs, err
+}
+
 func GetJobProjID(jobId string) (string, error) {
 	var result struct {
 		ProjectID uuid.UUID

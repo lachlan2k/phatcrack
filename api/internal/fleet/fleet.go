@@ -91,23 +91,24 @@ func closeObservers(jobId string) {
 	delete(observerMap, jobId)
 }
 
-func RegisterAgentFromWebsocket(conn *websocket.Conn, agentId string) (*Agent, error) {
-	agent := &Agent{
+func RegisterAgentFromWebsocket(conn *websocket.Conn, agentId string) *Agent {
+	fleetLock.Lock()
+	defer fleetLock.Unlock()
+
+	existingAgent, ok := fleet[agentId]
+	if ok {
+		return existingAgent
+	}
+
+	newAgent := &Agent{
 		conn:            conn,
 		agentId:         agentId,
 		ready:           false,
 		latestAgentInfo: nil,
 	}
 
-	fleetLock.Lock()
-	defer fleetLock.Unlock()
-
-	if _, agentExists := fleet[agent.agentId]; agentExists {
-		return nil, fmt.Errorf("Agent %s was already active", agent.agentId)
-	}
-
-	fleet[agent.agentId] = agent
-	return agent, nil
+	fleet[agentId] = newAgent
+	return newAgent
 }
 
 func RemoveAgentByID(projectId string) {
@@ -121,6 +122,10 @@ func ScheduleJob(jobId string) (string, error) {
 	fleetLock.Lock()
 	defer fleetLock.Unlock()
 
+	return scheduleJobUnsafe(jobId)
+}
+
+func scheduleJobUnsafe(jobId string) (string, error) {
 	if len(fleet) == 0 {
 		return "", ErrNoAgentsOnline
 	}

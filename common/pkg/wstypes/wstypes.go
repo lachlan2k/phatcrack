@@ -18,6 +18,7 @@ type FileDTO struct {
 
 type HeartbeatDTO struct {
 	Time              int64     `json:"time"`
+	AgentStartTime    int64     `json:"agent_start_time"`
 	ActiveJobIDs      []string  `json:"active_job_ids"`
 	Listfiles         []FileDTO `json:"listifles"`
 	IsDownloadingFile bool      `json:"is_downloading_file"`

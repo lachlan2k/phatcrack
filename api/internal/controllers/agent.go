@@ -66,12 +66,7 @@ func handleAgentWs(c echo.Context) error {
 
 	defer ws.Close()
 
-	agent, err := fleet.RegisterAgentFromWebsocket(ws, agentData.ID.String())
-	if err != nil {
-		c.Logger().Printf("Failed to register agent: %v", err)
-		return nil
-	}
-
+	agent := fleet.RegisterAgentFromWebsocket(ws, agentData.ID.String())
 	err = agent.Handle()
 	if err != nil {
 		c.Logger().Printf("Error from agent: %v", err)
