@@ -23,7 +23,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 	api.PUT("/refresh", handleRefresh(sessHandler))
 	api.POST("/login", handleLogin(sessHandler))
 
-	api.GET("/logout", func(c echo.Context) error {
+	api.POST("/logout", func(c echo.Context) error {
 		sessHandler.Destroy(c)
 		return c.JSON(http.StatusOK, "Goodbye")
 	})

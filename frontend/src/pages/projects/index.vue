@@ -15,7 +15,7 @@ const projects = computed(() => data.value?.projects)
     </div>
     <p v-if="isLoading">Loading</p>
     <div class="mt-6 flex flex-wrap gap-6" v-else>
-      <div class="card bg-base-100 shadow-xl">
+      <div class="card bg-base-100 shadow-xl min-w-56">
         <div class="card-body">
           <h2 class="card-title">My Projects & Projects Shared with Me</h2>
           <table class="table w-full">

@@ -10,7 +10,9 @@ export function usePagination<ItemT>(items: Ref<ItemT[]>, itemsPerPage: number) 
   )
 
   watch(totalPages, (newTotalPages) => {
-    if (activePage.value >= newTotalPages) {
+    if (newTotalPages == 0) {
+      activePage.value = 0
+    } else if (activePage.value >= newTotalPages) {
       activePage.value = newTotalPages - 1
     }
   })

@@ -12,7 +12,7 @@ const emit = defineEmits(['next', 'prev'])
     <button class="btn-sm join-item btn cursor-pointer" @click="() => emit('prev')">«</button>
     <button class="btn-sm join-item btn">
       Page {{ props.currentPage + 1
-      }}{{ props.totalPages != null ? ` of ${props.totalPages}` : '' }}
+      }}{{ props.totalPages != null && props.totalPages > 1 ? ` of ${props.totalPages}` : '' }}
     </button>
     <button class="btn-sm join-item btn cursor-pointer" @click="() => emit('next')">»</button>
   </div>

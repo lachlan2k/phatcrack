@@ -220,11 +220,11 @@ const cardTitle = computed(() => {
               v-model="password"
             />
           </div>
-          <div v-if="loginError != null" class="mt-4 text-center text-red-500">
-            <p>{{ loginError }}</p>
-          </div>
           <div class="form-control mt-6">
-            <button type="submit" class="btn-primary btn" :disabled="isLoginLoading">Login</button>
+            <button type="submit" class="btn-primary btn" :disabled="isLoginLoading">
+              <span class="loading loading-spinner loading-md" v-if="isLoginLoading"></span>
+              Login
+            </button>
           </div>
         </form>
 
@@ -238,7 +238,7 @@ const cardTitle = computed(() => {
           </div>
         </div>
 
-        <div v-if="activeScreen == ActiveScreens.MFAEnrollment">
+        <div v-if="activeScreen == ActiveScreens.MFAEnrollment" class="text-center">
           <p>You are required to enroll a security key</p>
           <div class="cursor-pointer" @click="enrollKey">
             <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem" />
@@ -278,10 +278,20 @@ const cardTitle = computed(() => {
             </div>
             <div class="form-control mt-6">
               <button type="submit" class="btn-primary btn" :disabled="isPasswordChangeLoading">
+                <span class="loading loading-spinner loading-md" v-if="isLoginLoading"></span>
                 Change Password
               </button>
             </div>
           </form>
+        </div>
+
+        <div v-if="activeScreen == ActiveScreens.Done" class="text-center">
+          <p>Welcome</p>
+          <font-awesome-icon
+            icon="fa-solid fa-check"
+            class="my-8 text-success"
+            style="font-size: 5rem"
+          />
         </div>
       </div>
     </div>

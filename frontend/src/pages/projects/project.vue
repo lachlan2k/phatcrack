@@ -9,6 +9,7 @@ import { useResourcesStore } from '@/stores/resources'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { timeSince } from '@/util/units'
 
 const projId = useRoute().params.id as string
 
@@ -37,7 +38,7 @@ const isLoading = computed(() => {
         <h1>{{ projectData?.name }}</h1>
       </div>
       <div class="mt-6 flex flex-wrap gap-6">
-        <div class="card bg-base-100 shadow-xl">
+        <div class="card bg-base-100 shadow-xl min-w-[400px]">
           <div class="card-body">
             <div class="flex flex-row justify-between">
               <h2 class="card-title">Hashlists</h2>
@@ -56,6 +57,7 @@ const isLoading = computed(() => {
                 <tr>
                   <th>Name</th>
                   <th>Hash Type</th>
+                  <th>Created</th>
                 </tr>
               </thead>
 
@@ -70,6 +72,7 @@ const isLoading = computed(() => {
                   <tr class="hover cursor-pointer" @click="navigate">
                     <td>{{ hashlist.name }}</td>
                     <td>{{ hashlist.hash_type }} - {{ getHashTypeName(hashlist.hash_type) }}</td>
+                    <td>{{ timeSince(hashlist.time_created * 1000) }}</td>
                   </tr>
                 </RouterLink>
               </tbody>

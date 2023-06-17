@@ -39,11 +39,13 @@ const {
 
 const intervalId = ref(0)
 
+async function intervalLoop() {
+  await Promise.all([refreshAttack(), refreshHashlist])
+  intervalId.value = setInterval(intervalLoop, 3 * 1000)
+}
+
 onMounted(() => {
-  intervalId.value = setInterval(() => {
-    refreshAttack()
-    refreshHashlist()
-  }, 3 * 1000)
+  intervalLoop()
 })
 
 onBeforeUnmount(() => {
@@ -62,6 +64,7 @@ const isLoading = computed(() => {
 const isAttackWizardOpen = ref(false)
 const isHashlistEditorOpen = ref(false)
 
+const filterText = ref('')
 const onlyShowCracked = ref(false)
 
 const crackedHashes = computed(() => {
@@ -73,7 +76,13 @@ const filteredHashes = computed(() => {
     return crackedHashes.value
   }
 
-  return hashlistData.value?.hashes ?? []
+  const arr = hashlistData.value?.hashes ?? []
+
+  if (filterText.value == '') {
+    return arr
+  }
+
+  return arr.filter(x => decodeHex(x.plaintext_hex).toLowerCase().includes(filterText.value) || x.input_hash.toLowerCase().includes(filterText.value) || x.normalized_hash.toLowerCase().includes(filterText.value))
 })
 
 const {
@@ -129,59 +138,63 @@ const hashTypeStr = computed(() => {
         <h1>{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
       </div>
       <div class="flex gap-4">
-      <div class="mt-6 flex flex-wrap gap-6">
-              <div class="card bg-base-100 shadow-xl">
-                <Modal v-model:isOpen="isHashlistEditorOpen">
-                  <HashlistEditor v-if="isHashlistEditorOpen" :hashlistId="hashlistData!.id" />
-                </Modal>
-                <div class="card-body" style="min-width: 500px;">
-                  <div class="flex flex-row justify-between">
-                    <h2 class="card-title">
-                      Hashlist ({{ numberOfHashesCracked }}/{{ hashlistData?.hashes.length ?? 0 }}
-                      cracked)
-                    </h2>
-                    <button class="btn-ghost btn-sm btn" @click="() => (isHashlistEditorOpen = true)">
-                      Edit
-                    </button>
-                  </div>
-                  <div class="form-control">
-                    <label class="label cursor-pointer">
-                      <span class="label-text">Only show cracked</span>
-                      <input type="checkbox" class="toggle" v-model="onlyShowCracked" />
-                    </label>
-                  </div>
+        <div class="mt-6 flex flex-wrap gap-6">
+          <div class="card bg-base-100 shadow-xl">
+            <Modal v-model:isOpen="isHashlistEditorOpen">
+              <HashlistEditor v-if="isHashlistEditorOpen" :hashlistId="hashlistData!.id" />
+            </Modal>
+            <div class="card-body" style="min-width: 500px">
+              <div class="flex flex-row justify-between">
+                <h2 class="card-title">
+                  Hashlist ({{ numberOfHashesCracked }}/{{ hashlistData?.hashes.length ?? 0 }}
+                  cracked)
+                </h2>
+                <button class="btn-ghost btn-sm btn" @click="() => (isHashlistEditorOpen = true)">
+                  Edit
+                </button>
+              </div>
+              <div class="form-control">
+                <label class="label cursor-pointer">
+                  <span class="label-text">Only show cracked</span>
+                  <input type="checkbox" class="toggle" v-model="onlyShowCracked" />
+                </label>
+              </div>
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">Filter</span>
+                  <input type="text" class="input input-bordered input-sm" placeholder="Hash or plaintext..." v-model="filterText">
+                </label>
+              </div>
 
-                  <table class="compact-table compact-table table table-sm hashlist-table w-full">
-                    <thead>
-                      <tr>
-                        <th>Original Hash</th>
-                        <th>Cracked Plaintext</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="hash in currentHashes" :key="hash.normalized_hash">
-                        <td class="font-mono">{{ hash.input_hash }}</td>
-                        <td class="font-mono">
-                          <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <table class="compact-table compact-table hashlist-table table-sm table w-full">
+                <thead>
+                  <tr>
+                    <th>Original Hash</th>
+                    <th>Cracked Plaintext</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="hash in currentHashes" :key="hash.normalized_hash">
+                    <td class="font-mono">{{ hash.input_hash }}</td>
+                    <td class="font-mono">
+                      <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-                  <div class="mt-2 w-full text-center">
-                    <PaginationControls
-                      @next="() => nextPage()"
-                      @prev="() => prevPage()"
-                      :current-page="activePage"
-                      :total-pages="totalPages"
-                    />
-                  </div>
-                </div>
+              <div class="mt-2 w-full text-center">
+                <PaginationControls
+                  @next="() => nextPage()"
+                  @prev="() => prevPage()"
+                  :current-page="activePage"
+                  :total-pages="totalPages"
+                />
               </div>
             </div>
+          </div>
+        </div>
         <div class="mt-6 flex flex-wrap gap-6">
-          
-
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
               <div class="flex flex-row justify-between">
@@ -230,18 +243,10 @@ const hashTypeStr = computed(() => {
                       <div class="badge badge-info">No jobs for attack</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
-                    <td>
+                    <td class="text-center">
                       <IconButton tooltip="Start" icon="fa-solid fa-play" color="success" />
-                      <div class="tooltip" data-tip="Stop">
-                        <button class="btn-ghost btn-xs btn hover:btn-warning">
-                          <font-awesome-icon icon="fa-solid fa-stop" />
-                        </button>
-                      </div>
-                      <div class="tooltip" data-tip="Delete">
-                        <button class="btn-ghost btn-xs btn hover:btn-error">
-                          <font-awesome-icon icon="fa-solid fa-trash" />
-                        </button>
-                      </div>
+                      <IconButton tooltip="Stop" icon="fa-solid fa-stop" color="warning" />
+                      <IconButton tooltip="Delete" icon="fa-solid fa-trash" color="error" />
                     </td>
                   </tr>
                 </tbody>
@@ -249,7 +254,6 @@ const hashTypeStr = computed(() => {
             </div>
           </div>
         </div>
-        
       </div>
     </div>
   </main>

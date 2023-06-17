@@ -55,7 +55,7 @@ loadListfiles()
                 </td>
                 <td>{{ bytesToReadable(wordlist.size_in_bytes) }}</td>
                 <td>{{ wordlist.lines }}</td>
-                <td>
+                <td class="text-center">
                   <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                 </td>
               </tr>
@@ -92,7 +92,7 @@ loadListfiles()
                 </td>
                 <td>{{ bytesToReadable(rulefile.size_in_bytes) }}</td>
                 <td>{{ rulefile.lines }}</td>
-                <td>
+                <td class="text-center">
                   <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                 </td>
               </tr>
