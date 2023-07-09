@@ -57,6 +57,10 @@ func (a *Agent) handleJobStatusUpdate(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to job status update dto: %v", msg.Payload, err)
 	}
 
+	if len(payload.Status.Devices) > 0 {
+		db.UpdateAgentDevices(a.agentId, payload.Status.Devices)
+	}
+
 	notifyObservers(payload.JobID, *msg)
 	return db.AddJobStatusUpdate(payload.JobID, payload.Status)
 }

@@ -38,6 +38,14 @@ export interface UserDTO {
 export interface AdminGetAllUsersResponseDTO {
   users: UserDTO[]
 }
+export interface HashcatStatusDevice {
+  device_id: number
+  device_name: string
+  device_type: string
+  speed: number
+  util: number
+  temp: number
+}
 export interface AgentFileDTO {
   name: string
   size: number
@@ -52,6 +60,7 @@ export interface AgentDTO {
   id: string
   name: string
   agent_info: AgentInfoDTO
+  agent_devices: HashcatStatusDevice[]
 }
 
 export interface AgentGetAllResponseDTO {
@@ -86,14 +95,6 @@ export interface JobRuntimeSummaryDTO {
 export interface JobCrackedHashDTO {
   hash: string
   plaintext_hex: string
-}
-export interface HashcatStatusDevice {
-  device_id: number
-  device_name: string
-  device_type: string
-  speed: number
-  util: number
-  temp: number
 }
 export interface HashcatStatusGuess {
   guess_base: string

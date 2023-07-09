@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getAllAgents } from '@/api/agent'
 import { useApi } from '@/composables/useApi'
+import { formatDeviceName } from '@/util/formatDeviceName'
 
 const AgentStatusAlive = 'AgentStatusAlive'
 
@@ -19,7 +20,12 @@ const { data: allAgents } = useApi(getAllAgents)
           <div class="stat">
             <div class="stat-title">Agents Online</div>
             <div class="stat-value flex justify-between">
-              <span>2/3</span>
+              <span
+                >{{
+                  allAgents?.agents.filter((x) => x.agent_info.status == AgentStatusAlive).length ??
+                  '?'
+                }}/{{ allAgents?.agents.length ?? '?' }}</span
+              >
               <span class="mt-1 text-2xl text-primary">
                 <font-awesome-icon icon="fa-solid fa-robot" />
               </span>
@@ -55,72 +61,30 @@ const { data: allAgents } = useApi(getAllAgents)
         <div class="card-body">
           <h2 class="card-title">Agent List</h2>
           <table class="compact-table table w-full">
-            <!-- head -->
             <thead>
               <tr>
                 <th>Hostname</th>
-                <th>CPU</th>
-                <th>GPU</th>
-                <th>Power Usage</th>
+                <th>Devices</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody class="first-col-bold">
-              <tr class="hover">
-                <td>jimbob.lan</td>
-                <td>
-                  <font-awesome-icon icon="fa-solid fa-microchip" /> Intel Core i7 7700k (93°c)
-                </td>
-                <td>
-                  <font-awesome-icon icon="fa-solid fa-memory" /> RTX 3080 Ti (78°c)
-                  <br />
-                  <font-awesome-icon icon="fa-solid fa-memory" /> RTX 3080 Ti (81°c)
-                  <br />
-                  <font-awesome-icon icon="fa-solid fa-memory" /> RTX 3080 Ti (76°c)
-                  <br />
-                </td>
-                <td>1,928w</td>
-                <td class="text-center">
-                  <div class="badge badge-accent badge-sm"></div>
-                </td>
-              </tr>
-
-              <tr class="hover">
-                <td>workhorse.lan</td>
-                <td>
-                  <font-awesome-icon icon="fa-solid fa-microchip" /> AMD Radeon Ryzen 7 5800X (83°c)
-                </td>
-                <td><font-awesome-icon icon="fa-solid fa-memory" /> RTX 3070 Ti (74°c)</td>
-                <td>704w</td>
-                <td class="text-center">
-                  <div class="badge badge-accent badge-sm"></div>
-                </td>
-              </tr>
-
-              <tr class="hover">
-                <td>pizzabox.lan</td>
-                <td>
-                  <font-awesome-icon icon="fa-solid fa-microchip" /> Intel Xeon 2660 v4
-                  <br />
-                  <font-awesome-icon icon="fa-solid fa-microchip" /> Intel Xeon 2660 v4
-                </td>
-                <td><font-awesome-icon icon="fa-solid fa-memory" /> Quadro A5000</td>
-                <td>-</td>
-
-                <td class="text-center">
-                  <div class="badge badge-ghost badge-sm"></div>
-                </td>
-              </tr>
-
               <tr class="hover" v-for="agent in allAgents?.agents" :key="agent.id">
                 <td>{{ agent.name }}</td>
                 <td>
-                  <font-awesome-icon icon="fa-solid fa-microchip" /> Intel Xeon 2660 v4
-                  <br />
-                  <font-awesome-icon icon="fa-solid fa-microchip" /> Intel Xeon 2660 v4
+                  <span
+                    v-for="device in agent.agent_devices"
+                    :key="device.device_id + device.device_name"
+                  >
+                    <font-awesome-icon
+                      icon="fa-solid fa-memory"
+                      v-if="device.device_type == 'GPU'"
+                    />
+                    <font-awesome-icon icon="fa-solid fa-microchip" v-else />
+                    {{ formatDeviceName(device.device_name) }} ({{ device.temp }} °c)
+                    <br />
+                  </span>
                 </td>
-                <td><font-awesome-icon icon="fa-solid fa-memory" /> Quadro A5000</td>
-                <td>-</td>
 
                 <td class="text-center">
                   <div

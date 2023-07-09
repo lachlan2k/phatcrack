@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"gorm.io/datatypes"
 )
 
@@ -17,14 +18,19 @@ const (
 
 type Agent struct {
 	UUIDBaseModel
-	Name      string
-	KeyHash   string
-	AgentInfo datatypes.JSONType[AgentInfo]
+	Name         string
+	KeyHash      string
+	AgentInfo    datatypes.JSONType[AgentInfo]
+	AgentDevices datatypes.JSONType[AgentDeviceInfo]
 }
 
 type AgentFile struct {
 	Name string `json:"name"`
 	Size int64  `json:"size"`
+}
+
+type AgentDeviceInfo struct {
+	Devices []hashcattypes.HashcatStatusDevice
 }
 
 type AgentInfo struct {
@@ -57,9 +63,10 @@ func (a *AgentInfo) ToDTO() apitypes.AgentInfoDTO {
 
 func (a *Agent) ToDTO() apitypes.AgentDTO {
 	return apitypes.AgentDTO{
-		ID:        a.ID.String(),
-		Name:      a.Name,
-		AgentInfo: a.AgentInfo.Data.ToDTO(),
+		ID:           a.ID.String(),
+		Name:         a.Name,
+		AgentInfo:    a.AgentInfo.Data.ToDTO(),
+		AgentDevices: a.AgentDevices.Data.Devices,
 	}
 }
 
@@ -117,13 +124,19 @@ func FindAgentIDByAuthKey(authKey string) (string, error) {
 	return result.ID.String(), nil
 }
 
-func UpdateAgentStatus(agentID string, status string) error {
-	// return GetInstance().Exec(
-	// "UPDATE agents SET \"agent_info\" = jsonb_set(\"agent_info\"::jsonb, '{status}', ?) WHERE id = ?", status, agentID,
-	// ).Error
+func UpdateAgentDevices(agentId string, devices []hashcattypes.HashcatStatusDevice) error {
 	return GetInstance().
 		Table("agents").
-		Where("id", agentID).
+		Where("id", agentId).
+		Update("agent_devices", AgentDeviceInfo{
+			Devices: devices,
+		}).Error
+}
+
+func UpdateAgentStatus(agentId string, status string) error {
+	return GetInstance().
+		Table("agents").
+		Where("id", agentId).
 		UpdateColumn("agent_info",
 			datatypes.JSONSet("agent_info").Set("{status}", status),
 		).

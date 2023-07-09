@@ -14,7 +14,7 @@ export const useResourcesStore = defineStore({
     ({
       hashTypes: [],
       loading: false
-    } as ResourceStore),
+    }) as ResourceStore,
 
   actions: {
     async loadHashTypes() {

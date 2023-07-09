@@ -1,9 +1,12 @@
 package apitypes
 
+import "github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
+
 type AgentDTO struct {
-	ID        string       `json:"id"`
-	Name      string       `json:"name"`
-	AgentInfo AgentInfoDTO `json:"agent_info"`
+	ID           string                             `json:"id"`
+	Name         string                             `json:"name"`
+	AgentInfo    AgentInfoDTO                       `json:"agent_info"`
+	AgentDevices []hashcattypes.HashcatStatusDevice `json:"agent_devices"`
 }
 
 type AgentFileDTO struct {

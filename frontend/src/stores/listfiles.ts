@@ -16,7 +16,7 @@ export const useListfilesStore = defineStore({
       wordlists: [],
       rulefiles: [],
       loading: false
-    } as ListfileStore),
+    }) as ListfileStore,
 
   actions: {
     async load(forceRefetch = false) {
