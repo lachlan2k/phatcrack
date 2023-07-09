@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import { getAllAgents } from '@/api/agent'
+import { useApi } from '@/composables/useApi'
+
+const AgentStatusAlive = 'AgentStatusAlive'
+
+const { data: allAgents } = useApi(getAllAgents)
+</script>
+
 <template>
   <main class="w-full p-4">
     <div class="prose">
@@ -100,6 +109,25 @@
 
                 <td class="text-center">
                   <div class="badge badge-ghost badge-sm"></div>
+                </td>
+              </tr>
+
+              <tr class="hover" v-for="agent in allAgents?.agents" :key="agent.id">
+                <td>{{ agent.name }}</td>
+                <td>
+                  <font-awesome-icon icon="fa-solid fa-microchip" /> Intel Xeon 2660 v4
+                  <br />
+                  <font-awesome-icon icon="fa-solid fa-microchip" /> Intel Xeon 2660 v4
+                </td>
+                <td><font-awesome-icon icon="fa-solid fa-memory" /> Quadro A5000</td>
+                <td>-</td>
+
+                <td class="text-center">
+                  <div
+                    class="badge badge-accent badge-sm"
+                    v-if="agent.agent_info.status == AgentStatusAlive"
+                  ></div>
+                  <div class="badge badge-ghost badge-sm" v-else></div>
                 </td>
               </tr>
             </tbody>

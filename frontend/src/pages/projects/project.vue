@@ -38,7 +38,7 @@ const isLoading = computed(() => {
         <h1>{{ projectData?.name }}</h1>
       </div>
       <div class="mt-6 flex flex-wrap gap-6">
-        <div class="card bg-base-100 shadow-xl min-w-[400px]">
+        <div class="card min-w-[400px] bg-base-100 shadow-xl">
           <div class="card-body">
             <div class="flex flex-row justify-between">
               <h2 class="card-title">Hashlists</h2>

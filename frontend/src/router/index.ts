@@ -31,17 +31,18 @@ const router = createRouter({
     },
     route('/agents', 'Agents', () => import('@/pages/Agents.vue')),
     route('/jobs', 'All Running Jobs', () => import('@/pages/Attacks.vue')),
-    route('/dashboard', 'Dashboard', () => import('@/pages/Dashboard.vue')),
+    route('/dashboard', 'Dashboard', () => import('@/pages/projects/index.vue')),
     route('/potfile', 'Potfile', () => import('@/pages/Potfile.vue')),
 
-    route('/projects', 'All Projects', () => import('@/pages/projects/index.vue')),
     route('/project/:id', 'Project', () => import('@/pages/projects/project.vue')),
 
     route('/hashlist/:id', 'Hashlist', () => import('@/pages/Hashlist.vue')),
 
     route('/listfiles', 'Listfiles', () => import('@/pages/Listfiles.vue')),
 
-    route('/wizard', 'Wizard', () => import('@/pages/Wizard.vue'))
+    route('/wizard', 'Wizard', () => import('@/pages/Wizard.vue')),
+
+    route('/admin', 'Admin', () => import('@/pages/Admin.vue'))
   ]
 })
 

@@ -20,8 +20,6 @@ func makeSessionHandler() auth.SessionHandler {
 		return &auth.JWTSessionHandler{
 			Secret: jwtKey,
 			WhitelistPaths: []string{
-				"/api/v1/agent/handle/ws",
-				"/api/v1/agent/handle/download-file",
 				"/api/v1/auth/login",
 			},
 			SessionLifetime: 10 * time.Minute,
@@ -30,8 +28,6 @@ func makeSessionHandler() auth.SessionHandler {
 
 	return &auth.InMemorySessionHandler{
 		WhitelistPaths: []string{
-			"/api/v1/agent/handle/ws",
-			"/api/v1/agent/handle/download-file",
 			"/api/v1/auth/login",
 		},
 		SessionLifetime: 10 * time.Minute,
@@ -41,7 +37,9 @@ func makeSessionHandler() auth.SessionHandler {
 func Listen(port string) error {
 	e := echo.New()
 
-	e.Validator = &util.RequestValidator{Validator: validator.New()}
+	validator := &util.RequestValidator{Validator: validator.New()}
+	validator.Init()
+	e.Validator = validator
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
@@ -85,6 +83,7 @@ func Listen(port string) error {
 	controllers.HookListsEndpoints(api.Group("/list"))
 	controllers.HookHashlistEndpoints(api.Group("/hashlist"))
 	controllers.HookAttackEndpoints(api.Group(("/attack")))
+	controllers.HookAgentEndpoints(api.Group("/agent"))
 	controllers.HookJobEndpoints(api.Group("/job"))
 
 	adminAPI := api.Group("/admin")

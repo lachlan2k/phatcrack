@@ -12,7 +12,7 @@ var RolesAllowedOnRegistration = []string{RoleAdmin, RoleStandard}
 func AreRolesAllowedOnRegistration(roles []string) bool {
 	for _, role := range roles {
 		found := false
-		for _, allowedRole := range roles {
+		for _, allowedRole := range RolesAllowedOnRegistration {
 			if role == allowedRole {
 				found = true
 				break

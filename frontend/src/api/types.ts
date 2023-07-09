@@ -30,6 +30,33 @@ export interface AdminConfigRequestDTO {
   is_mfa_required: boolean
   require_password_change_on_first_login: boolean
 }
+export interface UserDTO {
+  id: string
+  username: string
+  roles: string[]
+}
+export interface AdminGetAllUsersResponseDTO {
+  users: UserDTO[]
+}
+export interface AgentFileDTO {
+  name: string
+  size: number
+}
+export interface AgentInfoDTO {
+  status: string
+  last_checkin?: number
+  available_listfiles?: AgentFileDTO[]
+  active_job_ids?: string[]
+}
+export interface AgentDTO {
+  id: string
+  name: string
+  agent_info: AgentInfoDTO
+}
+
+export interface AgentGetAllResponseDTO {
+  agents: AgentDTO[]
+}
 export interface HashcatParams {
   attack_mode: number
   hash_type: number

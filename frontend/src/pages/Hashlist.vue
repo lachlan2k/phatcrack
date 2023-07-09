@@ -82,7 +82,12 @@ const filteredHashes = computed(() => {
     return arr
   }
 
-  return arr.filter(x => decodeHex(x.plaintext_hex).toLowerCase().includes(filterText.value) || x.input_hash.toLowerCase().includes(filterText.value) || x.normalized_hash.toLowerCase().includes(filterText.value))
+  return arr.filter(
+    (x) =>
+      decodeHex(x.plaintext_hex).toLowerCase().includes(filterText.value) ||
+      x.input_hash.toLowerCase().includes(filterText.value) ||
+      x.normalized_hash.toLowerCase().includes(filterText.value)
+  )
 })
 
 const {
@@ -162,7 +167,12 @@ const hashTypeStr = computed(() => {
               <div class="form-control">
                 <label class="label">
                   <span class="label-text">Filter</span>
-                  <input type="text" class="input input-bordered input-sm" placeholder="Hash or plaintext..." v-model="filterText">
+                  <input
+                    type="text"
+                    class="input-bordered input input-sm"
+                    placeholder="Hash or plaintext..."
+                    v-model="filterText"
+                  />
                 </label>
               </div>
 

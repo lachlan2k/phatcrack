@@ -3,6 +3,7 @@ package db
 import (
 	"strings"
 
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/datatypes"
 )
@@ -15,6 +16,14 @@ type User struct {
 
 	MFAType string
 	MFAData datatypes.JSON
+}
+
+func (u *User) ToDTO() apitypes.UserDTO {
+	return apitypes.UserDTO{
+		ID:       u.ID.String(),
+		Username: u.Username,
+		Roles:    u.Roles,
+	}
 }
 
 func (u *User) HasRole(roleToCheck string) bool {
@@ -33,6 +42,15 @@ func (u *User) Save() error {
 
 func NormalizeUsername(username string) string {
 	return strings.ToLower(strings.TrimSpace(username))
+}
+
+func GetAllUsers() ([]User, error) {
+	users := []User{}
+	err := GetInstance().Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func GetUserByID(id string) (*User, error) {

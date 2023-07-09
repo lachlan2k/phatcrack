@@ -3,74 +3,30 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
-	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
-	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
-func HookAgentHandlerEndpoints(api *echo.Group) {
-	// NOTE: this is just for agent handling
-	// These endpoints are exempt from useful authz/n
+func HookAgentEndpoints(api *echo.Group) {
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong agent")
 	})
 
-	api.GET("/ws", handleAgentWs)
-	api.GET("/download-file/:id", handleAgentDownloadFile)
-}
+	api.GET("/all", func(c echo.Context) error {
+		agents, err := db.GetAllAgents()
+		if err != nil {
+			return util.ServerError("Couldn't fetch agents", err)
+		}
 
-func handleAgentDownloadFile(c echo.Context) error {
-	fileId := c.Param("id")
-	if !util.AreValidUUIDs(fileId) {
-		return echo.ErrBadRequest
-	}
+		agentDTOs := make([]apitypes.AgentDTO, len(agents))
+		for i, a := range agents {
+			agentDTOs[i] = a.ToDTO()
+		}
 
-	authKey := c.Request().Header.Get("X-Agent-Key")
-	if len(authKey) == 0 {
-		return echo.ErrBadRequest
-	}
-
-	agentId, err := db.FindAgentIDByAuthKey(authKey)
-
-	if err != nil || agentId == "" {
-		return echo.ErrUnauthorized
-	}
-
-	filename, err := filerepo.GetPathToFile(uuid.MustParse(fileId))
-	if err != nil {
-		return util.ServerError("Failed to get file", err)
-	}
-
-	return c.File(filename)
-}
-
-func handleAgentWs(c echo.Context) error {
-	authKey := c.Request().Header.Get("X-Agent-Key")
-	if len(authKey) == 0 {
-		return echo.ErrBadRequest
-	}
-
-	agentData, err := db.FindAgentByAuthKey(authKey)
-	if err != nil {
-		return echo.ErrUnauthorized
-	}
-
-	ws, err := (&websocket.Upgrader{}).Upgrade(c.Response(), c.Request(), nil)
-	if err != nil {
-		return util.ServerError("Couldn't upgrade websocket", err)
-	}
-
-	defer ws.Close()
-
-	agent := fleet.RegisterAgentFromWebsocket(ws, agentData.ID.String())
-	err = agent.Handle()
-	if err != nil {
-		c.Logger().Printf("Error from agent: %v", err)
-	}
-
-	return nil
+		return c.JSON(http.StatusOK, apitypes.AgentGetAllResponseDTO{
+			Agents: agentDTOs,
+		})
+	})
 }

@@ -13,7 +13,7 @@ type AdminAgentCreateResponseDTO struct {
 type AdminUserCreateRequestDTO struct {
 	Username string   `json:"username" validate:"required,min=4,max=64"`
 	Password string   `json:"password" validate:"required,min=8,max=128"`
-	Roles    []string `json:"roles" validate:"required,userrole"`
+	Roles    []string `json:"roles" validate:"required,userroles"`
 }
 
 type AdminUserCreateResponseDTO struct {
@@ -35,4 +35,8 @@ type AdminConfigResponseDTO struct {
 type AdminConfigRequestDTO struct {
 	IsMFARequired                     bool `json:"is_mfa_required"`
 	RequirePasswordChangeOnFirstLogin bool `json:"require_password_change_on_first_login"`
+}
+
+type AdminGetAllUsersResponseDTO struct {
+	Users []UserDTO `json:"users"`
 }

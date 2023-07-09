@@ -220,6 +220,9 @@ const cardTitle = computed(() => {
               v-model="password"
             />
           </div>
+          <div v-if="loginError != null" class="mt-4 text-center text-red-500">
+            <p>{{ loginError }}</p>
+          </div>
           <div class="form-control mt-6">
             <button type="submit" class="btn-primary btn" :disabled="isLoginLoading">
               <span class="loading loading-spinner loading-md" v-if="isLoginLoading"></span>
@@ -267,7 +270,7 @@ const cardTitle = computed(() => {
                 <span class="label-text">New Password</span>
               </label>
               <input
-                type="text"
+                type="password"
                 placeholder="hunter2"
                 class="input-bordered input"
                 v-model="newPassword"

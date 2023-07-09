@@ -9,15 +9,13 @@ const router = useRouter()
 const route = useRoute()
 
 const pageLinks = [
-  { name: 'Dashboard', icon: 'fa-gauge', to: '/dashboard' },
-  { name: 'Project Folders', icon: 'fa-folder', to: '/projects' },
+  { name: 'Project Dashboard', icon: 'fa-gauge', to: '/dashboard' },
   { name: 'Wordlists & Rules', icon: 'fa-file', to: '/listfiles' },
-  { name: 'All Running Jobs', icon: 'fa-bars-progress', to: '/jobs' },
   { name: 'Potfile', icon: 'fa-trophy', to: '/potfile' },
   { name: 'Agents', icon: 'fa-robot', to: '/agents' }
 ]
 
-async function logout () {
+async function logout() {
   await apiLogout()
   router.push('/login')
   authStore.refreshAuth()
@@ -66,10 +64,10 @@ async function logout () {
             v-if="authStore.isAdmin"
             :class="route.path == 'admin' ? 'bordered' : 'hover-bordered'"
           >
-            <a>
+            <RouterLink to="/admin" :class="route.path == '/admin' ? 'active' : ''">
               <span><font-awesome-icon icon="fa-solid fa-lock" /></span>
               Admin
-            </a>
+            </RouterLink>
           </li>
           <li class="hover-bordered">
             <div class="text-content-neutral dropdown-top dropdown">

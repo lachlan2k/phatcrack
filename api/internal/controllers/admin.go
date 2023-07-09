@@ -54,6 +54,22 @@ func HookAdminEndpoints(api *echo.Group) {
 		})
 	})
 
+	api.GET("/user/all", func(c echo.Context) error {
+		users, err := db.GetAllUsers()
+		if err != nil {
+			return util.ServerError("Failed to get users", err)
+		}
+
+		userDTOs := make([]apitypes.UserDTO, len(users))
+		for i := range users {
+			userDTOs[i] = users[i].ToDTO()
+		}
+
+		return c.JSON(http.StatusOK, apitypes.AdminGetAllUsersResponseDTO{
+			Users: userDTOs,
+		})
+	})
+
 	api.POST("/user/create", handleCreateUser)
 	api.POST("/agent/create", handleAgentCreate)
 }
@@ -77,7 +93,7 @@ func handleCreateUser(c echo.Context) error {
 	// could also check to see what happens when the constraint fails
 	newUser, err := db.RegisterUser(req.Username, req.Password, req.Roles)
 	if err != nil {
-		return util.ServerError("Failed to create user", err)
+		return util.ServerError("Couldn't create user", err)
 	}
 
 	return c.JSON(http.StatusCreated, apitypes.AdminUserCreateResponseDTO{

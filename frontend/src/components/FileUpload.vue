@@ -122,7 +122,7 @@ async function onSubmit(event: Event) {
 <template>
   <h3 class="text-lg font-bold">Upload a {{ props.fileType == null ? 'File' : props.fileType }}</h3>
   <div class="form-control mt-1">
-    <label class="label">
+    <label class="label font-bold">
       <span class="label-text">Name</span>
     </label>
     <input
@@ -134,7 +134,7 @@ async function onSubmit(event: Event) {
   </div>
 
   <div class="form-control mt-1" v-if="requiresLineCountSpecified">
-    <label class="label">
+    <label class="label font-bold">
       <span class="label-text">Number of lines</span>
     </label>
     <input type="number" class="input-bordered input" v-model="lineCount" />
@@ -146,7 +146,7 @@ async function onSubmit(event: Event) {
   </div>
 
   <div class="form-control mt-1" v-if="props.fileType == null">
-    <label class="label">
+    <label class="label font-bold">
       <span class="label-text">File type</span>
     </label>
     <select class="select-bordered select" v-model="fileType">
@@ -156,7 +156,7 @@ async function onSubmit(event: Event) {
   </div>
 
   <div class="form-control mt-1">
-    <label class="label">
+    <label class="label font-bold">
       <span class="label-text">Pick a file (max {{ bytesToReadable(MaxSizeInBytes) }})</span>
     </label>
     <input
