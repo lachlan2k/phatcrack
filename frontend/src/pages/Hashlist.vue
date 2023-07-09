@@ -41,7 +41,7 @@ const intervalId = ref(0)
 
 async function intervalLoop() {
   await Promise.all([refreshAttack(), refreshHashlist])
-  intervalId.value = setInterval(intervalLoop, 3 * 1000)
+  intervalId.value = setTimeout(intervalLoop, 3 * 1000)
 }
 
 onMounted(() => {
