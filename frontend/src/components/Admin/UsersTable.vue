@@ -6,9 +6,20 @@ import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
 import { ref, computed } from 'vue'
 import { AxiosError } from 'axios'
+import { usePagination } from '@/composables/usePagination'
 
 const isUserCreateOpen = ref(false)
 const { data: allUsers, fetchData: fetchUsers } = useApi(adminGetAllUsers)
+
+const usersToPaginate = computed(() => allUsers.value?.users ?? [])
+
+const {
+  next: nextPage,
+  prev: prevPage,
+  totalPages: totalPages,
+  currentItems: paginatedUsers,
+  activePage
+} = usePagination(usersToPaginate, 20)
 
 const toast = useToast()
 
@@ -121,7 +132,7 @@ async function onCreateUser() {
       </tr>
     </thead>
     <tbody>
-      <tr class="hover" v-for="user in allUsers?.users" :key="user.id">
+      <tr class="hover" v-for="user in paginatedUsers" :key="user.id">
         <td>
           <strong>{{ user.username }}</strong>
         </td>
@@ -134,4 +145,12 @@ async function onCreateUser() {
       </tr>
     </tbody>
   </table>
+  <div class="mt-2 w-full text-center">
+    <PaginationControls
+      @next="() => nextPage()"
+      @prev="() => prevPage()"
+      :current-page="activePage"
+      :total-pages="totalPages"
+    />
+  </div>
 </template>
