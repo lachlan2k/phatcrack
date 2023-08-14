@@ -47,7 +47,6 @@ func (a *Agent) handleJobStdLine(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to job stdline dto: %v", msg.Payload, err)
 	}
 
-	notifyObservers(payload.JobID, *msg)
 	return db.AddJobStdline(payload.JobID, payload.Line, payload.Stream)
 }
 
@@ -61,7 +60,6 @@ func (a *Agent) handleJobStatusUpdate(msg *wstypes.Message) error {
 		db.UpdateAgentDevices(a.agentId, payload.Status.Devices)
 	}
 
-	notifyObservers(payload.JobID, *msg)
 	return db.AddJobStatusUpdate(payload.JobID, payload.Status)
 }
 
@@ -76,9 +74,6 @@ func (a *Agent) handleJobExited(msg *wstypes.Message) error {
 		reason = db.JobStopReasonFailed
 	}
 
-	notifyObservers(payload.JobID, *msg)
-	closeObservers(payload.JobID)
-
 	return db.SetJobExited(payload.JobID, reason, payload.Error, payload.Time)
 }
 
@@ -87,9 +82,6 @@ func (a *Agent) handleJobFailedToStart(msg *wstypes.Message) error {
 	if err != nil {
 		return fmt.Errorf("couldn't unmarshal %v to job failed to start dto: %v", msg.Payload, err)
 	}
-
-	notifyObservers(payload.JobID, *msg)
-	closeObservers(payload.JobID)
 
 	return db.SetJobExited(payload.JobID, db.JobStopReasonFailedToStart, "", payload.Time)
 }
