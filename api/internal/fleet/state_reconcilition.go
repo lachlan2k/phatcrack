@@ -82,7 +82,7 @@ func stateReconciliation() error {
 					log.Printf("Warn: Job was marked as awaiaitng-start in database, but an agent was found to be running it. This probably indicates a race condition, and we'll let it slide for now.")
 					db.SetJobStarted(job.ID.String(), time.Now())
 				} else {
-					db.SetJobExited(job.ID.String(), "The job did not start in time", "", time.Now())
+					db.SetJobExited(job.ID.String(), db.JobStopReasonTimeout, "The job did not start in time", time.Now())
 					// TODO tell agent to kill it?
 				}
 			}
@@ -90,7 +90,7 @@ func stateReconciliation() error {
 	}
 
 	for _, jobId := range jobsFailed {
-		db.SetJobExited(jobId, "The agent running this job died", "", time.Now())
+		db.SetJobExited(jobId, db.JobStopReasonFailed, "The agent running this job died", time.Now())
 	}
 
 	return nil
