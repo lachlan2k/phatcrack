@@ -9,6 +9,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
+	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/webserver"
 )
 
@@ -59,6 +60,11 @@ func main() {
 	err = filerepo.SetPath(os.Getenv("FILEREPO_PATH"))
 	if err != nil {
 		log.Fatalf("failed to use specified FILEREPO_PATH: %v", err)
+	}
+
+	err = fleet.Setup()
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	err = webserver.Listen(port)

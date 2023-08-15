@@ -306,7 +306,7 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Couldn't create attack job", err)
 	}
 
-	_, err = fleet.ScheduleJob(newJob.ID.String())
+	_, err = fleet.ScheduleJobs([]string{newJob.ID.String()})
 
 	// TODO: now that we've refactored the relationship between attacks and jobs...
 	// ...we should probably just delete the job if it fails, right?

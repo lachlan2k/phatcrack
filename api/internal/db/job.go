@@ -207,7 +207,7 @@ func GetJob(jobId string, includeRuntimeData bool) (*Job, error) {
 func GetAllIncompleteJobs() ([]Job, error) {
 	jobs := []Job{}
 	err := GetInstance().
-		Joins("JobRuntimeData").
+		Joins("join job_runtime_data on job_runtime_data.job_id = jobs.id").
 		Where("job_runtime_data.status != ?", JobStatusExited).
 		Find(&jobs).Error
 

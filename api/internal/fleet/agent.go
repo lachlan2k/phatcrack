@@ -14,22 +14,32 @@ import (
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
-type Agent struct {
-	conn            *websocket.Conn
-	agentId         string
-	ready           bool
-	latestAgentInfo *db.AgentInfo
+type AgentConnection struct {
+	conn    *websocket.Conn
+	agentId string
 }
 
-func (a *Agent) MarkDisconnected() {
+func (a *AgentConnection) MarkDisconnected() {
 	fleetLock.Lock()
 	defer fleetLock.Unlock()
-	a.ready = false
+
+	agent, err := db.GetAgent(a.agentId)
+	if err != nil {
+		db.UpdateAgentStatus(a.agentId, db.AgentStatusUnhealthyAndDisconnected)
+		return
+	}
+
+	newInfo := agent.AgentInfo.Data
+	newInfo.Status = db.AgentStatusUnhealthyAndDisconnected
+	newInfo.TimeOfLastDisconnect = time.Now()
+
+	db.UpdateAgentInfo(a.agentId, newInfo)
 	a.conn = nil
 }
 
-func (a *Agent) handleMessage(msg *wstypes.Message) error {
-	log.Printf("received: %v", msg)
+func (a *AgentConnection) handleMessage(msg *wstypes.Message) error {
+	fleetLock.Lock()
+	defer fleetLock.Unlock()
 
 	switch msg.Type {
 	case wstypes.HeartbeatType:
@@ -58,7 +68,7 @@ func (a *Agent) handleMessage(msg *wstypes.Message) error {
 	}
 }
 
-func (a *Agent) sendMessage(msgType string, payload interface{}) error {
+func (a *AgentConnection) sendMessage(msgType string, payload interface{}) error {
 	if a.conn == nil {
 		return errors.New("connection closed")
 	}
@@ -76,7 +86,7 @@ func (a *Agent) sendMessage(msgType string, payload interface{}) error {
 	})
 }
 
-func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
+func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 	payload, err := util.UnmarshalJSON[wstypes.HeartbeatDTO](msg.Payload)
 	if err != nil {
 		return fmt.Errorf("couldn't unmarshal %v to hearbeat dto: %v", msg.Payload, err)
@@ -92,10 +102,10 @@ func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
 	}
 
 	info := db.AgentInfo{
-		Status:             db.AgentStatusAlive,
-		LastCheckIn:        time.Now(),
-		AvailableListfiles: availableListfiles,
-		ActiveJobIDs:       payload.ActiveJobIDs,
+		Status:              db.AgentStatusHealthy,
+		TimeOfLastHeartbeat: time.Now(),
+		AvailableListfiles:  availableListfiles,
+		ActiveJobIDs:        payload.ActiveJobIDs,
 	}
 
 	err = db.UpdateAgentInfo(a.agentId, info)
@@ -136,39 +146,18 @@ func (a *Agent) handleHeartbeat(msg *wstypes.Message) error {
 		a.RequestFileDownload(filesToRequestDownload...)
 	}
 
-	a.latestAgentInfo = &info
-	a.ready = true
-
 	return nil
 }
 
-func (a *Agent) IsHealthy() bool {
-	if !a.ready {
+func (a *AgentConnection) IsHealthy() bool {
+	agent, err := db.GetAgent(a.agentId)
+	if err != nil {
 		return false
 	}
-
-	if a.latestAgentInfo == nil {
-		return false
-	}
-
-	nowSubMin := time.Now().Add(-time.Minute)
-
-	// If we've heard from it in the last minute, it's healthy
-	return a.latestAgentInfo.LastCheckIn.After(nowSubMin)
+	return agent.AgentInfo.Data.Status == db.AgentStatusHealthy
 }
 
-func (a *Agent) TimeSinceHeartbeat() time.Duration {
-	return time.Since(a.latestAgentInfo.LastCheckIn)
-}
-
-func (a *Agent) ActiveJobCount() int {
-	if !a.ready || a.latestAgentInfo == nil || a.latestAgentInfo.ActiveJobIDs == nil {
-		return -1
-	}
-	return len(a.latestAgentInfo.ActiveJobIDs)
-}
-
-func (a *Agent) RequestFileDownload(fileIDs ...uuid.UUID) error {
+func (a *AgentConnection) RequestFileDownload(fileIDs ...uuid.UUID) error {
 	fileIDStrs := make([]string, len(fileIDs))
 	for i, id := range fileIDs {
 		idStr := id.String()
@@ -183,10 +172,20 @@ func (a *Agent) RequestFileDownload(fileIDs ...uuid.UUID) error {
 	})
 }
 
-func (a *Agent) Handle() error {
+func (a *AgentConnection) Handle() error {
 	log.Printf("handling agent")
 	defer a.MarkDisconnected()
-	err := db.UpdateAgentStatus(a.agentId, db.AgentStatusAlive)
+
+	agentInfo, err := db.GetAgent(a.agentId)
+	if err != nil {
+		return err
+	}
+
+	newInfo := agentInfo.AgentInfo.Data
+	newInfo.Status = db.AgentStatusUnhealthyButConnected
+	newInfo.TimeOfLastConnect = time.Now()
+
+	err = db.UpdateAgentInfo(a.agentId, newInfo)
 	if err != nil {
 		return err
 	}
@@ -202,7 +201,5 @@ func (a *Agent) Handle() error {
 		if err != nil {
 			return fmt.Errorf("error when handling %s message: %v", msg.Type, err)
 		}
-
-		log.Printf("Received: %v", msg)
 	}
 }

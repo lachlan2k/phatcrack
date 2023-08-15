@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	AgentStatusAlive        = "AgentStatusAlive"
-	AgentStatusDisconnected = "AgentStatusDisconnected"
-	AgentStatusNeverSeen    = "AgentStatusNeverSeen"
+	AgentStatusHealthy                  = "AgentStatusHealthy"
+	AgentStatusUnhealthyButConnected    = "AgentStatusUnhealthyButConnected"
+	AgentStatusUnhealthyAndDisconnected = "AgentStatusUnhealthyAndDisconnected"
+	AgentStatusDead                     = "AgentStatusDead"
 )
 
 type Agent struct {
@@ -34,10 +35,12 @@ type AgentDeviceInfo struct {
 }
 
 type AgentInfo struct {
-	Status             string      `json:"status"`
-	LastCheckIn        time.Time   `json:"last_checkin,omitempty"`
-	AvailableListfiles []AgentFile `json:"available_listfiles,omitempty"`
-	ActiveJobIDs       []string    `json:"active_job_ids,omitempty"`
+	Status               string      `json:"status"`
+	TimeOfLastHeartbeat  time.Time   `json:"time_of_last_heartbeat,omitempty"`
+	TimeOfLastDisconnect time.Time   `json:"time_of_last_disconnect,omitempty"`
+	TimeOfLastConnect    time.Time   `json:"time_of_last_connect,omitempty"`
+	AvailableListfiles   []AgentFile `json:"available_listfiles,omitempty"`
+	ActiveJobIDs         []string    `json:"active_job_ids,omitempty"`
 }
 
 func (a *AgentFile) ToDTO() apitypes.AgentFileDTO {
@@ -55,7 +58,7 @@ func (a *AgentInfo) ToDTO() apitypes.AgentInfoDTO {
 
 	return apitypes.AgentInfoDTO{
 		Status:             a.Status,
-		LastCheckInTime:    a.LastCheckIn.Unix(),
+		LastCheckInTime:    a.TimeOfLastHeartbeat.Unix(),
 		AvailableListfiles: listfileDTOs,
 		ActiveJobIDs:       a.ActiveJobIDs,
 	}
@@ -97,6 +100,24 @@ func GetAllAgents() ([]Agent, error) {
 		return nil, err
 	}
 	return agents, nil
+}
+
+func GetAllHealthyAgents() ([]Agent, error) {
+	agents := []Agent{}
+	err := GetInstance().Find(&agents, "agent_info-->'status' = ?", AgentStatusHealthy).Error
+	if err != nil {
+		return nil, err
+	}
+	return agents, nil
+}
+
+func GetAgent(id string) (*Agent, error) {
+	var agent Agent
+	err := GetInstance().First(&agent, "id = ?", id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &agent, nil
 }
 
 func FindAgentByAuthKey(authKey string) (*Agent, error) {
