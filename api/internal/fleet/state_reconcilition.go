@@ -89,6 +89,10 @@ func stateReconciliation() error {
 		}
 	}
 
+	for _, jobId := range jobsFailed {
+		db.SetJobExited(jobId, "The agent running this job died", "", time.Now())
+	}
+
 	return nil
 }
 
