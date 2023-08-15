@@ -31,6 +31,7 @@ func stateReconciliation() error {
 	for _, agent := range allAgents {
 		info := agent.AgentInfo.Data
 		activeJobs := agent.AgentInfo.Data.ActiveJobIDs
+		needsSave := false
 
 		newInfo := info
 
@@ -39,16 +40,19 @@ func stateReconciliation() error {
 		case db.AgentStatusHealthy:
 			if time.Since(info.TimeOfLastHeartbeat) > deadtimeToUnhealthy {
 				newInfo.Status = db.AgentStatusUnhealthyButConnected
+				needsSave = true
 			}
 
 		case db.AgentStatusUnhealthyButConnected:
 			if time.Since(info.TimeOfLastHeartbeat) > deadtimetoDead {
 				newInfo.Status = db.AgentStatusDead
+				needsSave = true
 			}
 
 		case db.AgentStatusUnhealthyAndDisconnected:
 			if time.Since(info.TimeOfLastDisconnect) > disconnectTimeToDead {
 				newInfo.Status = db.AgentStatusDead
+				needsSave = true
 			}
 		}
 
@@ -56,24 +60,25 @@ func stateReconciliation() error {
 			jobsFailed = append(jobsFailed, activeJobs...)
 			newInfo.ActiveJobIDs = []string{}
 		} else {
-			// jobsOk = append(jobsOk, activeJobs...)
 			for _, job := range activeJobs {
 				jobsOk[job] = nil
 			}
 		}
 
-		err := db.UpdateAgentInfo(agent.ID.String(), newInfo)
-		if err != nil {
-			log.Printf("Warn: Failed to update status of agent %s: %v", agent.ID.String(), err)
+		if needsSave {
+			err := db.UpdateAgentInfo(agent.ID.String(), newInfo)
+			if err != nil {
+				log.Printf("Warn: Failed to update status of agent %s: %v", agent.ID.String(), err)
+			}
 		}
 	}
 
-	incompleteJobs, err := db.GetAllIncompleteJobs()
+	pendingJobs, err := db.GetAllPendingJobs(true)
 	if err != nil {
 		return err
 	}
 
-	for _, job := range incompleteJobs {
+	for _, job := range pendingJobs {
 		if job.RuntimeData.Status == db.JobStatusAwaitingStart {
 			if time.Since(job.RuntimeData.StartRequestTime) > acceptableJobStartTime {
 				// todo set it failed

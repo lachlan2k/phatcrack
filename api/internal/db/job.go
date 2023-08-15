@@ -204,9 +204,32 @@ func GetJob(jobId string, includeRuntimeData bool) (*Job, error) {
 	return &job, nil
 }
 
-func GetAllIncompleteJobs() ([]Job, error) {
+func GetAllPendingJobs(includeRuntimeData bool) ([]Job, error) {
 	jobs := []Job{}
-	err := GetInstance().
+	inst := GetInstance()
+	if includeRuntimeData {
+		inst = inst.Preload("RuntimeData")
+	}
+
+	err := inst.
+		Joins("join job_runtime_data on job_runtime_data.job_id = jobs.id").
+		Where("job_runtime_data.status = ?", JobStatusAwaitingStart).
+		Find(&jobs).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return jobs, err
+}
+
+func GetAllIncompleteJobs(includeRuntimeData bool) ([]Job, error) {
+	jobs := []Job{}
+	inst := GetInstance()
+	if includeRuntimeData {
+		inst = inst.Preload("RuntimeData")
+	}
+
+	err := inst.
 		Joins("join job_runtime_data on job_runtime_data.job_id = jobs.id").
 		Where("job_runtime_data.status != ?", JobStatusExited).
 		Find(&jobs).Error
