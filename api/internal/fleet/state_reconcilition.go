@@ -93,16 +93,20 @@ func stateReconciliation() error {
 		case db.JobStatusAwaitingStart:
 			{
 				if time.Since(job.RuntimeData.StartRequestTime) > acceptableJobStartTime {
-					// todo set it failed
+					// The job didn't start in time
+
 					_, jobOk := jobsOk[job.ID.String()]
 					if jobOk {
+						// Actually, it looks like it did start? One of our agents says they are running it!
+						// This condition *shouldn't* be reached, but lets handle it anyway
 						log.Printf("Warn: Job was marked as awaiaitng-start in database, but an agent was found to be running it. This probably indicates a race condition, and we'll let it slide for now.")
 						db.SetJobStarted(job.ID.String(), "Unknown", time.Now())
 					} else {
+						// As expected, no agent is running the job.
 						db.SetJobExited(job.ID.String(), db.JobStopReasonTimeout, "The job did not start in time", time.Now())
 
-						// Tell agent to kill this job, incase it *is* running but it just didn't make it through.
-						// It's an unlikely error condition, but just probably tidy to do
+						// Tell agent to kill this job, incase it *is* running but it just didn't make it through, or its in a broken state.
+						// This is an unlikely error condition, but let's handle it just in case.
 						agentConnection, ok := fleet[job.AssignedAgent.ID.String()]
 						if ok {
 							agentConnection.sendMessage(wstypes.JobKillType, wstypes.JobKillDTO{
@@ -113,33 +117,40 @@ func stateReconciliation() error {
 				}
 			}
 
+		// Make sure the job is running somewhere
 		case db.JobStatusCreated, db.JobStatusStarted:
 			{
 				jobId := job.ID.String()
 				_, isJobOk := jobsOk[jobId]
-				// No non-dead agent is running the job. So the agent might have died
-				if !isJobOk {
-					if job.AssignedAgentID == nil {
-						continue
-					}
+				if isJobOk {
+					// We observed that this job is running, no problem here.
+					continue
+				}
 
-					agentThatShouldBeRunningJob, isAgentOk := agentMap[job.AssignedAgentID.String()]
-					if !isAgentOk {
-						continue
-					}
+				if job.AssignedAgentID == nil {
+					// Job hasn't been assigned an agent yet
+					// I don't think this state is reacahble, but always worthwhile before we try to nil deference
+					continue
+				}
 
-					isJobInList := false
-					for _, jobRunningOnAgent := range agentThatShouldBeRunningJob.AgentInfo.Data.ActiveJobIDs {
-						if jobRunningOnAgent == jobId {
-							isJobInList = true
-							break
-						}
-					}
+				agentThatShouldBeRunningJob, isAgentOk := agentMap[job.AssignedAgentID.String()]
+				if !isAgentOk {
+					// Hmm, the agent doesn't exist at all?
+					log.Printf("Warn: Job %s was found assigned to an agent that doesn't exist (%s), this shouldn't happen. Ignoring this job", jobId, job.AssignedAgentID.String())
+					continue
+				}
 
-					// We expected the agent to be running the job, but it wasn't
-					if !isJobInList {
-						db.SetJobExited(jobId, db.JobStopReasonFailed, "The job unexpectedly disappeared from the agent's list of running jobs", time.Now())
+				isJobInList := false
+				for _, jobRunningOnAgent := range agentThatShouldBeRunningJob.AgentInfo.Data.ActiveJobIDs {
+					if jobRunningOnAgent == jobId {
+						isJobInList = true
+						break
 					}
+				}
+
+				// We expected the agent to be running the job, but it wasn't
+				if !isJobInList {
+					db.SetJobExited(jobId, db.JobStopReasonFailed, "The job unexpectedly disappeared from the agent's list of running jobs", time.Now())
 				}
 			}
 		}
