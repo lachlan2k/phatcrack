@@ -20,10 +20,11 @@ func (h *Handler) handleJobStart(msg *wstypes.Message) error {
 	return h.runJob(payload)
 }
 
-func (h *Handler) sendJobStarted(jobId string) {
+func (h *Handler) sendJobStarted(jobId string, hashcatCommand string) {
 	h.sendMessage(wstypes.JobStartedType, wstypes.JobStartedDTO{
-		JobID: jobId,
-		Time:  time.Now(),
+		JobID:          jobId,
+		HashcatCommand: hashcatCommand,
+		Time:           time.Now(),
 	})
 }
 
@@ -133,8 +134,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 	}
 
 	go func() {
-
-		h.sendJobStarted(job.ID)
+		h.sendJobStarted(job.ID, sess.CmdLine())
 
 		statusBackoff := util.Backoff{
 			Entries: backoffTable,

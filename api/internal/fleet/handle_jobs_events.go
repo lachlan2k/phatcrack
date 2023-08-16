@@ -14,7 +14,7 @@ func (a *AgentConnection) handleJobStarted(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to job started dto: %v", msg.Payload, err)
 	}
 
-	return db.SetJobStarted(payload.JobID, payload.Time)
+	return db.SetJobStarted(payload.JobID, payload.HashcatCommand, payload.Time)
 }
 
 func (a *AgentConnection) handleJobCrackedHash(msg *wstypes.Message) error {

@@ -322,6 +322,10 @@ func (sess *HashcatSession) Cleanup() {
 	}
 }
 
+func (sess *HashcatSession) CmdLine() string {
+	return sess.proc.String()
+}
+
 func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *config.Config) (*HashcatSession, error) {
 	binaryPath, err := findBinary(conf)
 	if err != nil {

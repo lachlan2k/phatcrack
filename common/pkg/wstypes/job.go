@@ -35,8 +35,9 @@ type JobFailedToStartDTO struct {
 
 // JobStarted
 type JobStartedDTO struct {
-	JobID string
-	Time  time.Time `json:"time"`
+	JobID          string
+	HashcatCommand string
+	Time           time.Time `json:"time"`
 }
 
 // JobCrackedHash

@@ -63,6 +63,8 @@ type JobRuntimeData struct {
 	StopReason  string
 	ErrorString string
 
+	CmdLine string // hashcat command
+
 	OutputLines   pgJSONBArray[JobRuntimeOutputLine]
 	StatusUpdates pgJSONBArray[hashcattypes.HashcatStatus]
 	CrackedHashes pgJSONBArray[JobCrackedHash]
@@ -269,7 +271,7 @@ func CreateJob(job *Job) (*Job, error) {
 	return job, GetInstance().Create(job).Error
 }
 
-func SetJobStarted(jobId string, startTime time.Time) error {
+func SetJobStarted(jobId string, cmdLine string, startTime time.Time) error {
 	jobUuid, err := uuid.Parse(jobId)
 	if err != nil {
 		return err
@@ -279,6 +281,7 @@ func SetJobStarted(jobId string, startTime time.Time) error {
 		Where("job_id = ?", jobUuid).
 		Updates(&JobRuntimeData{
 			JobID:       jobUuid,
+			CmdLine:     cmdLine,
 			Status:      JobStatusStarted,
 			StartedTime: startTime,
 		}).Error
