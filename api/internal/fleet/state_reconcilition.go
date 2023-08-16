@@ -25,11 +25,13 @@ func stateReconciliation() error {
 		return err
 	}
 
+	// Create a convienient map so we can look up agents by ID later
 	agentMap := make(map[string]*db.Agent, 0)
 
 	// Jobs that we deem to have "failed" because the agent is dead
 	jobsFailed := make([]string, 0)
-	jobsOk := make(map[string]interface{}, 0) // Using like a set
+	// Golang doesn't have a Set type, so using this like a set to check if elements are present
+	jobsOk := make(map[string]interface{}, 0)
 
 	for _, agent := range allAgents {
 		info := agent.AgentInfo.Data
@@ -156,7 +158,7 @@ func stateReconciliationTask() {
 		var err error
 
 		select {
-		case <-time.After(10 * time.Second):
+		case <-time.After(30 * time.Second):
 			err = stateReconciliation()
 		case <-stateReconciliationQueue:
 			err = stateReconciliation()
@@ -169,9 +171,27 @@ func stateReconciliationTask() {
 }
 
 func QueueStateReconciliation() {
-	if len(stateReconciliationQueue) == 0 {
-		stateReconciliationQueue <- nil
+	select {
+	case stateReconciliationQueue <- nil:
+	default: // Channel already full, already been signalled, no need to block
 	}
+}
+
+// Requests that a state reconciliation should happen in the next 3 seconds
+// This is useful when we don't have an urgent need for one to happen now
+// And to avoid a storm if multiple agents heartbeat in rapid succession
+// Effectively a throttle/de-bounce
+var lazyTimer *time.Timer = nil
+
+func LazyQueueStateReconciliation() {
+	if lazyTimer != nil {
+		return
+	}
+
+	lazyTimer = time.AfterFunc(3*time.Second, func() {
+		QueueStateReconciliation()
+		lazyTimer = nil
+	})
 }
 
 func Setup() error {

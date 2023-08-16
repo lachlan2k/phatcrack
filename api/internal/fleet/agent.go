@@ -146,6 +146,8 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 		a.RequestFileDownload(filesToRequestDownload...)
 	}
 
+	LazyQueueStateReconciliation()
+
 	return nil
 }
 
