@@ -63,10 +63,12 @@ func stateReconciliation() error {
 			}
 		}
 
-		if newInfo.Status == db.AgentStatusDead {
+		if newInfo.Status == db.AgentStatusDead && len(activeJobs) > 0 {
 			jobsFailed = append(jobsFailed, activeJobs...)
 			newInfo.ActiveJobIDs = []string{}
+			needsSave = true
 		} else {
+			// Agent is healthy, put all of its jobs into our set
 			for _, job := range activeJobs {
 				jobsOk[job] = nil
 			}
