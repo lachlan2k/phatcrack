@@ -78,8 +78,6 @@ func (a *AgentConnection) sendMessage(msgType string, payload interface{}) error
 		return err
 	}
 
-	log.Printf("Sending %v %v\n", msgType, string(payloadBytes))
-
 	return a.conn.WriteJSON(wstypes.Message{
 		Type:    msgType,
 		Payload: string(payloadBytes),

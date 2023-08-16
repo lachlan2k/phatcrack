@@ -31,6 +31,8 @@ func tellAgentToKillJob(agentId *uuid.UUID, jobId *uuid.UUID) {
 	}
 }
 
+// This function aims to look for inconsistencies between what we expect agents to be doing, and what they're actually doing
+// It's also responsible for evaluating whether agents should be considered unhealthy or dead, etc and marking jobs as failed if the agent has died
 func stateReconciliation() error {
 	fleetLock.Lock()
 	defer fleetLock.Unlock()
@@ -65,14 +67,30 @@ func stateReconciliation() error {
 
 		case db.AgentStatusUnhealthyButConnected:
 			if time.Since(info.TimeOfLastHeartbeat) > deadtimetoDead {
+				log.Printf("Setting agent %s to dead, because it has been %fs since last heartbeat", agent.ID.String(), time.Since(info.TimeOfLastHeartbeat).Seconds())
 				newInfo.Status = db.AgentStatusDead
 				needsSave = true
 			}
 
 		case db.AgentStatusUnhealthyAndDisconnected:
-			if time.Since(info.TimeOfLastDisconnect) > disconnectTimeToDead {
-				newInfo.Status = db.AgentStatusDead
-				needsSave = true
+			if info.TimeOfLastHeartbeat.After(info.TimeOfLastDisconnect) {
+				// In this case, it means the reason it disconnected was because the API died.
+				// This is because we only update TimeOfLastDisconnect when the API is healthy and it's the agent that dies.
+				// Therefore, in this case, we will evaluate it as if it was UnhealthyButConnected
+
+				if time.Since(info.TimeOfLastHeartbeat) > deadtimetoDead {
+					log.Printf("Setting agent %s to dead, because it has been %fs since last heartbeat", agent.ID.String(), time.Since(info.TimeOfLastHeartbeat).Seconds())
+					newInfo.Status = db.AgentStatusDead
+					needsSave = true
+				}
+			} else {
+				// Otherwise, the reason its UnhealthyAndDisconnected is due to the agent disconnecting.
+				// As such, we can trust that TimeOfLastDisconnect is accurate.
+				if time.Since(info.TimeOfLastDisconnect) > disconnectTimeToDead {
+					log.Printf("Setting agent %s to dead, because it has been %fs since it disconnected", agent.ID.String(), time.Since(info.TimeOfLastDisconnect).Seconds())
+					newInfo.Status = db.AgentStatusDead
+					needsSave = true
+				}
 			}
 		}
 
@@ -138,7 +156,7 @@ func stateReconciliation() error {
 			}
 
 		// The job is supposed to be running somewhere, so lets make sure of it
-		case db.JobStatusCreated, db.JobStatusStarted:
+		case db.JobStatusStarted:
 			if job.AssignedAgentID == nil {
 				// Job hasn't been assigned an agent yet
 				// I don't think this state is reachable, but always worthwhile to prevent a nil dereference

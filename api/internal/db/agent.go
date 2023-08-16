@@ -104,7 +104,7 @@ func GetAllAgents() ([]Agent, error) {
 
 func GetAllHealthyAgents() ([]Agent, error) {
 	agents := []Agent{}
-	err := GetInstance().Find(&agents, "agent_info-->'status' = ?", AgentStatusHealthy).Error
+	err := GetInstance().Find(&agents, "agent_info->>'status' = ?", AgentStatusHealthy).Error
 	if err != nil {
 		return nil, err
 	}
