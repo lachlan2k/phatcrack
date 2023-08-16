@@ -3,7 +3,10 @@ import { getAllAgents } from '@/api/agent'
 import { useApi } from '@/composables/useApi'
 import { formatDeviceName } from '@/util/formatDeviceName'
 
-const AgentStatusAlive = 'AgentStatusAlive'
+const AgentStatusHealthy                  = "AgentStatusHealthy"
+const	AgentStatusUnhealthyButConnected    = "AgentStatusUnhealthyButConnected"
+const	AgentStatusUnhealthyAndDisconnected = "AgentStatusUnhealthyAndDisconnected"
+const	AgentStatusDead                     = "AgentStatusDead"
 
 const { data: allAgents } = useApi(getAllAgents)
 </script>
@@ -18,37 +21,16 @@ const { data: allAgents } = useApi(getAllAgents)
       <div class="grow">
         <div class="stats shadow">
           <div class="stat">
-            <div class="stat-title">Agents Online</div>
+            <div class="stat-title">Agents Online & Healthy</div>
             <div class="stat-value flex justify-between">
               <span
                 >{{
-                  allAgents?.agents.filter((x) => x.agent_info.status == AgentStatusAlive).length ??
+                  allAgents?.agents.filter((x) => x.agent_info.status == AgentStatusHealthy).length ??
                   '?'
                 }}/{{ allAgents?.agents.length ?? '?' }}</span
               >
               <span class="mt-1 text-2xl text-primary">
                 <font-awesome-icon icon="fa-solid fa-robot" />
-              </span>
-            </div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-title">Total Power Draw</div>
-            <div class="stat-value flex justify-between">
-              <span>3,801w</span>
-              <span class="ml-4 mt-1 text-2xl text-yellow-400">
-                <font-awesome-icon icon="fa-solid fa-bolt" />
-              </span>
-            </div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-title">Total Attacks Running</div>
-
-            <div class="stat-value flex justify-between">
-              <span>8</span>
-              <span class="mt-1 text-2xl text-info">
-                <font-awesome-icon icon="fa-solid fa-bars-progress" />
               </span>
             </div>
           </div>
@@ -89,9 +71,11 @@ const { data: allAgents } = useApi(getAllAgents)
                 <td class="text-center">
                   <div
                     class="badge badge-accent badge-sm"
-                    v-if="agent.agent_info.status == AgentStatusAlive"
+                    v-if="agent.agent_info.status == AgentStatusHealthy"
+                    title="Healthy"
                   ></div>
-                  <div class="badge badge-ghost badge-sm" v-else></div>
+                  <div class="badge badge-warning badge-sm" title="Unhealthy" v-else-if="agent.agent_info.status == AgentStatusUnhealthyAndDisconnected || agent.agent_info.status == AgentStatusUnhealthyButConnected"></div>
+                  <div class="badge badge-ghost badge-sm" title="Dead" v-else></div>
                 </td>
               </tr>
             </tbody>

@@ -133,6 +133,13 @@ const hashTypeStr = computed(() => {
   }
   return getHashTypeName.value(hashlistData.value!.hash_type)
 })
+
+const quantityStr = (num: number, str: string) => {
+  if (num == 1) {
+    return `${num} ${str}`
+  }
+  return `${num} ${str}s`
+}
 </script>
 
 <template>
@@ -237,20 +244,20 @@ const hashTypeStr = computed(() => {
                     </td>
                     <td v-if="numJobs(attack)">
                       <div class="badge badge-success mr-1" v-if="numJobsFinished(attack) > 0">
-                        {{ numJobsFinished(attack) }} jobs finished
+                        {{ quantityStr(numJobsFinished(attack), 'job') }} finished
                       </div>
                       <div class="badge badge-info mr-1" v-if="numJobsRunning(attack) > 0">
-                        {{ numJobsRunning(attack) }} jobs running
+                        {{ quantityStr(numJobsRunning(attack), 'job') }} running
                       </div>
                       <div class="badge badge-secondary mr-1" v-if="numJobsQueued(attack) > 0">
-                        {{ numJobsQueued(attack) }} jobs pending
+                        {{ quantityStr(numJobsQueued(attack), 'job') }} pending
                       </div>
                       <div class="badge badge-error" v-if="numJobsFailed(attack)">
-                        {{ numJobsFailed(attack) }} jobs failed
+                        {{ quantityStr(numJobsFailed(attack), 'job') }} failed
                       </div>
                     </td>
                     <td v-else>
-                      <div class="badge badge-info">No jobs for attack</div>
+                      <div class="badge badge-ghost">No jobs</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
                     <td class="text-center">
