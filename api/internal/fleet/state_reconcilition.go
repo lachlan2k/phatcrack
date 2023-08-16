@@ -78,7 +78,10 @@ func stateReconciliation() error {
 
 		if newInfo.Status == db.AgentStatusDead && len(activeJobs) > 0 {
 			for _, jobId := range activeJobs {
-				db.SetJobExited(jobId, db.JobStopReasonFailed, "The agent running this job died", time.Now())
+				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The agent running this job died", time.Now())
+				if err != nil {
+					log.Printf("Warn: failed to update job status in database: %v", err)
+				}
 			}
 
 			newInfo.ActiveJobIDs = []string{}
@@ -118,10 +121,16 @@ func stateReconciliation() error {
 				// Actually, it looks like it did start? One of our agents says they are running it!
 				// This condition *shouldn't* be reached, but lets handle it anyway
 				log.Printf("Warn: Job was marked as awaiaitng-start in database, but an agent was found to be running it. This probably indicates a race condition, and we'll let it slide for now.")
-				db.SetJobStarted(job.ID.String(), "Unknown", time.Now())
+				err = db.SetJobStarted(job.ID.String(), "Unknown", time.Now())
+				if err != nil {
+					log.Printf("Warn: failed to update job status in database: %v", err)
+				}
 			} else {
 				// As expected, no agent is running the job.
-				db.SetJobExited(job.ID.String(), db.JobStopReasonTimeout, "The job did not start in time", time.Now())
+				err = db.SetJobExited(job.ID.String(), db.JobStopReasonTimeout, "The job did not start in time", time.Now())
+				if err != nil {
+					log.Printf("Warn: failed to update job status in database: %v", err)
+				}
 
 				// Tell agent to kill this job, incase it *is* running but it just didn't make it through, or its in a broken state.
 				// This is an unlikely error condition, but let's handle it just in case.
@@ -142,13 +151,21 @@ func stateReconciliation() error {
 			if !isAgentOk {
 				// Hmm, the agent doesn't exist at all?
 				log.Printf("Warn: Job %s was found assigned to an agent that doesn't exist (%s), this shouldn't happen. Ignoring this job", jobId, job.AssignedAgentID.String())
-				db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was assigned to an invalid agent.", time.Now())
+				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was assigned to an invalid agent.", time.Now())
+				if err != nil {
+					log.Printf("Warn: failed to update job status in database: %v", err)
+				}
+
 				continue
 			}
 
 			agentRunningJob, jobOk := jobsOk[jobId]
 			if !jobOk {
-				db.SetJobExited(jobId, db.JobStopReasonFailed, "The job disappeared from the agent's list of running jobs. The agent probably died or was restarted.", time.Now())
+				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job disappeared from the agent's list of running jobs. The agent probably died or was restarted.", time.Now())
+				if err != nil {
+					log.Printf("Warn: failed to update job status in database: %v", err)
+				}
+
 				tellAgentToKillJob(&agentRunningJob, &job.ID)
 				continue
 			}
@@ -156,7 +173,11 @@ func stateReconciliation() error {
 			if agentRunningJob.String() != agentThatShouldBeRunningJob.ID.String() {
 				// Absolutely paranoid sanity check, there is no way on earth the wrong agent should end up running the wrong job
 				// But we can check it, so we might as well check it
-				db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was unexpectedly found running on the wrong agent.", time.Now())
+				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was unexpectedly found running on the wrong agent.", time.Now())
+				if err != nil {
+					log.Printf("Warn: failed to update job status in database: %v", err)
+				}
+
 				tellAgentToKillJob(&agentRunningJob, &job.ID)
 				tellAgentToKillJob(&agentThatShouldBeRunningJob.ID, &job.ID)
 				continue
