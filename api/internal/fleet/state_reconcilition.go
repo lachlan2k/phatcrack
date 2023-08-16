@@ -3,9 +3,9 @@ package fleet
 import (
 	"fmt"
 	"log"
-	"slices"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
@@ -16,6 +16,20 @@ const disconnectTimeToDead = 60 * time.Second
 
 // We expect jobs will start within 5 seconds, else we'll consider them to be failed
 const acceptableJobStartTime = 5 * time.Second
+
+// This will soft fail if the agent isn't connected. In which case, we're probably fine
+func tellAgentToKillJob(agentId *uuid.UUID, jobId *uuid.UUID) {
+	if agentId == nil || jobId == nil {
+		return
+	}
+
+	agentConnection, ok := fleet[agentId.String()]
+	if ok {
+		agentConnection.sendMessage(wstypes.JobKillType, wstypes.JobKillDTO{
+			JobID: jobId.String(),
+		})
+	}
+}
 
 func stateReconciliation() error {
 	fleetLock.Lock()
@@ -29,10 +43,8 @@ func stateReconciliation() error {
 	// Create a convienient map so we can look up agents by ID later
 	agentMap := make(map[string]*db.Agent, 0)
 
-	// Jobs that we deem to have "failed" because the agent is dead
-	jobsFailed := make([]string, 0)
-	// Golang doesn't have a Set type, so using this like a set to check if elements are present
-	jobsOk := make(map[string]interface{}, 0)
+	// This is a map from running job ID -> agent ID. This lets us quickly check which agent claims to be running a job
+	jobsOk := make(map[string]uuid.UUID, 0)
 
 	for _, agent := range allAgents {
 		info := agent.AgentInfo.Data
@@ -65,13 +77,16 @@ func stateReconciliation() error {
 		}
 
 		if newInfo.Status == db.AgentStatusDead && len(activeJobs) > 0 {
-			jobsFailed = append(jobsFailed, activeJobs...)
+			for _, jobId := range activeJobs {
+				db.SetJobExited(jobId, db.JobStopReasonFailed, "The agent running this job died", time.Now())
+			}
+
 			newInfo.ActiveJobIDs = []string{}
 			needsSave = true
 		} else {
-			// Agent is healthy, put all of its jobs into our set
-			for _, job := range activeJobs {
-				jobsOk[job] = nil
+			// Agent is healthy, put all of its jobs into our map
+			for _, jobId := range activeJobs {
+				jobsOk[jobId] = agent.ID
 			}
 		}
 
@@ -96,8 +111,8 @@ func stateReconciliation() error {
 				// The job still has time to start before we get grumpy
 				continue
 			}
-			// The job didn't start in time
 
+			// The job didn't start in time
 			_, jobOk := jobsOk[job.ID.String()]
 			if jobOk {
 				// Actually, it looks like it did start? One of our agents says they are running it!
@@ -110,12 +125,7 @@ func stateReconciliation() error {
 
 				// Tell agent to kill this job, incase it *is* running but it just didn't make it through, or its in a broken state.
 				// This is an unlikely error condition, but let's handle it just in case.
-				agentConnection, ok := fleet[job.AssignedAgent.ID.String()]
-				if ok {
-					agentConnection.sendMessage(wstypes.JobKillType, wstypes.JobKillDTO{
-						JobID: job.ID.String(),
-					})
-				}
+				tellAgentToKillJob(job.AssignedAgentID, &job.ID)
 			}
 
 		// The job is supposed to be running somewhere, so lets make sure of it
@@ -132,22 +142,28 @@ func stateReconciliation() error {
 			if !isAgentOk {
 				// Hmm, the agent doesn't exist at all?
 				log.Printf("Warn: Job %s was found assigned to an agent that doesn't exist (%s), this shouldn't happen. Ignoring this job", jobId, job.AssignedAgentID.String())
+				db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was assigned to an invalid agent.", time.Now())
 				continue
 			}
 
-			isJobInList := slices.Contains(agentThatShouldBeRunningJob.AgentInfo.Data.ActiveJobIDs, jobId)
-
-			// We expected the agent to be running the job, but it wasn't
-			if !isJobInList {
-				db.SetJobExited(jobId, db.JobStopReasonFailed, "The job unexpectedly disappeared from the agent's list of running jobs", time.Now())
+			agentRunningJob, jobOk := jobsOk[jobId]
+			if !jobOk {
+				db.SetJobExited(jobId, db.JobStopReasonFailed, "The job disappeared from the agent's list of running jobs. The agent probably died or was restarted.", time.Now())
+				tellAgentToKillJob(&agentRunningJob, &job.ID)
+				continue
 			}
 
+			if agentRunningJob.String() != agentThatShouldBeRunningJob.ID.String() {
+				// Absolutely paranoid sanity check, there is no way on earth the wrong agent should end up running the wrong job
+				// But we can check it, so we might as well check it
+				db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was unexpectedly found running on the wrong agent.", time.Now())
+				tellAgentToKillJob(&agentRunningJob, &job.ID)
+				tellAgentToKillJob(&agentThatShouldBeRunningJob.ID, &job.ID)
+				continue
+			}
+
+			// If we've reached here then the job is indeed running, and its running on the correct agent, nothing to do :)
 		}
-
-	}
-
-	for _, jobId := range jobsFailed {
-		db.SetJobExited(jobId, db.JobStopReasonFailed, "The agent running this job died", time.Now())
 	}
 
 	return nil
