@@ -60,6 +60,9 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 	case wstypes.JobStartType:
 		return h.handleJobStart(msg)
 
+	case wstypes.JobKillType:
+		return h.handleJobKill(msg)
+
 	case wstypes.DownloadFileRequestType:
 		go h.handleDownloadFileRequest(msg)
 		return nil

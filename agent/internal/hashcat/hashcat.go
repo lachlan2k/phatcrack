@@ -307,6 +307,9 @@ func (sess *HashcatSession) Start() error {
 }
 
 func (sess *HashcatSession) Kill() error {
+	if sess.proc == nil || sess.proc.Process == nil {
+		return nil
+	}
 	return sess.proc.Process.Kill()
 }
 

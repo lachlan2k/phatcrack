@@ -9,6 +9,7 @@ import (
 const (
 	// server -> agent types
 	JobStartType = "JobStart"
+	JobKillType  = "JobKill"
 
 	// agent -> server types
 	JobStartedType       = "JobStarted"
@@ -38,6 +39,10 @@ type JobStartedDTO struct {
 	JobID          string
 	HashcatCommand string
 	Time           time.Time `json:"time"`
+}
+
+type JobKillDTO struct {
+	JobID string
 }
 
 // JobCrackedHash

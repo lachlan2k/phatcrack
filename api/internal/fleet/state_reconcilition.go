@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
 const deadtimeToUnhealthy = 60 * time.Second
@@ -88,7 +89,15 @@ func stateReconciliation() error {
 					db.SetJobStarted(job.ID.String(), "Unknown", time.Now())
 				} else {
 					db.SetJobExited(job.ID.String(), db.JobStopReasonTimeout, "The job did not start in time", time.Now())
-					// TODO tell agent to kill it?
+
+					// Tell agent to kill this job, incase it *is* running but it just didn't make it through.
+					// It's an unlikely error condition, but just probably tidy to do
+					agentConnection, ok := fleet[job.AssignedAgent.ID.String()]
+					if ok {
+						agentConnection.sendMessage(wstypes.JobKillType, wstypes.JobKillDTO{
+							JobID: job.ID.String(),
+						})
+					}
 				}
 			}
 		}

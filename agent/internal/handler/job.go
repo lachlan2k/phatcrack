@@ -20,6 +20,15 @@ func (h *Handler) handleJobStart(msg *wstypes.Message) error {
 	return h.runJob(payload)
 }
 
+func (h *Handler) handleJobKill(msg *wstypes.Message) error {
+	payload, err := util.UnmarshalJSON[wstypes.JobKillDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to job start dto: %v", msg.Payload, err)
+	}
+
+	return h.killJob(payload)
+}
+
 func (h *Handler) sendJobStarted(jobId string, hashcatCommand string) {
 	h.sendMessage(wstypes.JobStartedType, wstypes.JobStartedDTO{
 		JobID:          jobId,
@@ -192,4 +201,17 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 	}
 
 	return nil
+}
+
+func (h *Handler) killJob(jobMsg wstypes.JobKillDTO) error {
+	h.jobsLock.Lock()
+	defer h.jobsLock.Unlock()
+
+	job, ok := h.activeJobs[jobMsg.JobID]
+	if !ok {
+		// We aren't running it so alg
+		return nil
+	}
+
+	return job.sess.Kill()
 }
