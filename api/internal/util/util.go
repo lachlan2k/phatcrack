@@ -14,8 +14,30 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type WrappedServerError struct {
+	internal error
+	id       string
+}
+
+func (e WrappedServerError) Error() string {
+	return e.internal.Error()
+}
+
+func (e WrappedServerError) Unwrap() error {
+	return e.internal
+}
+
+func (e WrappedServerError) ID() string {
+	return e.id
+}
+
 func ServerError(message string, internal error) *echo.HTTPError {
-	return echo.NewHTTPError(http.StatusInternalServerError, message).SetInternal(internal)
+	wrapped := WrappedServerError{
+		internal: internal,
+		id:       uuid.NewString(),
+	}
+
+	return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("%s (error id %s)", message, wrapped.id)).SetInternal(wrapped)
 }
 
 func CleanPath(filePath string) string {
@@ -46,7 +68,7 @@ func GenAgentKeyAndHash() (keyStr string, hashStr string, err error) {
 	key := make([]byte, agentKeyLen)
 	_, err = rand.Read(key)
 	if err != nil {
-		err = fmt.Errorf("couldn't generate random agent key: %v", err)
+		err = fmt.Errorf("couldn't generate random agent key: %w", err)
 		return
 	}
 

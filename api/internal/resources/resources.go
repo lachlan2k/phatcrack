@@ -16,7 +16,7 @@ var infomap hashcattypes.HashTypeMap
 func init() {
 	err := json.Unmarshal([]byte(hashInfoJsonStr), &infomap)
 	if err != nil {
-		panic(fmt.Errorf("failed to unmarshal hash_info.json from disk: %v", err))
+		panic(fmt.Errorf("failed to unmarshal hash_info.json from disk: %w", err))
 	}
 
 	for key, val := range infomap {

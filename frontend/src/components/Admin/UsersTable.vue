@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
 import IconButton from '@/components/IconButton.vue'
-import { adminCreateUser, adminGetAllUsers } from '@/api/admin'
+import { adminCreateUser, adminDeleteUser, adminGetAllUsers } from '@/api/admin'
 import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
 import { ref, computed } from 'vue'
 import { AxiosError } from 'axios'
 import { usePagination } from '@/composables/usePagination'
+import { useToastError } from '@/composables/useToastError'
+import { useAuthStore } from '@/stores/auth'
 
 const isUserCreateOpen = ref(false)
 const { data: allUsers, fetchData: fetchUsers } = useApi(adminGetAllUsers)
@@ -20,8 +22,6 @@ const {
   currentItems: paginatedUsers,
   activePage
 } = usePagination(usersToPaginate, 20)
-
-const toast = useToast()
 
 const possibleRoles = ['admin', 'standard']
 
@@ -41,6 +41,9 @@ const newUserValidationError = computed(() => {
   return null
 })
 
+const toast = useToast()
+const { catcher } = useToastError()
+
 async function onCreateUser() {
   try {
     const res = await adminCreateUser({
@@ -51,14 +54,24 @@ async function onCreateUser() {
 
     toast.success('Created new user: ' + res.username)
   } catch (e: any) {
-    let errorString = 'Unknown Error'
-    if (e instanceof AxiosError) {
-      errorString = e.response?.data?.message
-    } else if (e instanceof Error) {
-      errorString = e.message
-    }
+    catcher(e)
+  } finally {
+    fetchUsers()
+  }
+}
 
-    toast.error('Failed to create new user: ' + errorString)
+const authStore = useAuthStore()
+
+async function onDeleteUser(id: string) {
+  if (authStore.loggedInUser?.id === id) {
+    toast.error('You can\'t delete your own user')
+    return
+  }
+
+  try {
+    await adminDeleteUser(id)
+  } catch (e: any) {
+    catcher(e)
   } finally {
     fetchUsers()
   }
@@ -140,7 +153,7 @@ async function onCreateUser() {
           {{ user.roles.join(', ') }}
         </td>
         <td class="text-center">
-          <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+          <IconButton @click="() => onDeleteUser(user.id)" icon="fa-solid fa-trash" color="error" tooltip="Delete" />
         </td>
       </tr>
     </tbody>

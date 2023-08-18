@@ -68,7 +68,7 @@ func Update(updateFunc func(*RuntimeConfig) error) error {
 
 	err = save(newConf)
 	if err != nil {
-		return fmt.Errorf("failed to save new config in db: %v", err)
+		return fmt.Errorf("failed to save new config in db: %w", err)
 	}
 
 	runningConf = newConf

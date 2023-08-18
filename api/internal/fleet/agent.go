@@ -86,7 +86,7 @@ func (a *AgentConnection) sendMessage(msgType string, payload interface{}) error
 func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 	payload, err := util.UnmarshalJSON[wstypes.HeartbeatDTO](msg.Payload)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to hearbeat dto: %v", msg.Payload, err)
+		return fmt.Errorf("couldn't unmarshal %v to hearbeat dto: %w", msg.Payload, err)
 	}
 
 	availableListfiles := make([]db.AgentFile, len(payload.Listfiles))
@@ -192,12 +192,12 @@ func (a *AgentConnection) Handle() error {
 		var msg wstypes.Message
 		err := a.conn.ReadJSON(&msg)
 		if err != nil {
-			return fmt.Errorf("error when trying to read websocket JSON: %v", err)
+			return fmt.Errorf("error when trying to read websocket JSON: %w", err)
 		}
 
 		err = a.handleMessage(&msg)
 		if err != nil {
-			return fmt.Errorf("error when handling %s message: %v", msg.Type, err)
+			return fmt.Errorf("error when handling %s message: %w", msg.Type, err)
 		}
 	}
 }

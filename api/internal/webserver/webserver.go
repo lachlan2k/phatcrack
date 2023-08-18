@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"errors"
 	"net/http"
 	"os"
 	"time"
@@ -56,6 +57,7 @@ func Listen(port string) error {
 	e.Use(middleware.RequestLoggerWithConfig(
 		middleware.RequestLoggerConfig{
 
+			LogError:         true,
 			LogLatency:       true,
 			LogRemoteIP:      true,
 			LogMethod:        true,
@@ -78,12 +80,18 @@ func Listen(port string) error {
 				}
 
 				if values.Error != nil {
+					var wrapped util.WrappedServerError
+					if errors.As(values.Error, &wrapped) {
+						log.WithError(wrapped.Unwrap()).WithFields(fields).WithField("error_id", wrapped.ID()).Error("request error " + wrapped.ID())
+						return nil
+					}
+
 					log.WithError(values.Error).WithFields(fields).Error("request error")
 					return nil
 				}
 
 				if values.Status >= 500 && values.Status <= 599 {
-					log.WithFields(fields).Error("request error")
+					log.WithFields(fields).Error("generic request error")
 					return nil
 				}
 

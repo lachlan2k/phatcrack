@@ -93,7 +93,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 
 		AuditLog(c, nil, "User has changed their password")
 
-		err = user.Save()
+		err = db.Save(user)
 		if err != nil {
 			return util.ServerError("Failed to update password", err)
 		}

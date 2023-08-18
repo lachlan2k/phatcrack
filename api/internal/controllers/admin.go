@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -81,14 +82,11 @@ func HookAdminEndpoints(api *echo.Group) {
 
 	api.POST("/user/create", handleCreateUser)
 	api.POST("/agent/create", handleAgentCreate)
+
+	api.DELETE("/user/:id", handleDeleteUser)
 }
 
 func handleCreateUser(c echo.Context) error {
-	user := auth.UserFromReq(c)
-	if user == nil {
-		return echo.ErrForbidden
-	}
-
 	req, err := util.BindAndValidate[apitypes.AdminUserCreateRequestDTO](c)
 	if err != nil {
 		return err
@@ -122,11 +120,6 @@ func handleCreateUser(c echo.Context) error {
 }
 
 func handleAgentCreate(c echo.Context) error {
-	user := auth.UserFromReq(c)
-	if user == nil {
-		return echo.ErrForbidden
-	}
-
 	req, err := util.BindAndValidate[apitypes.AdminAgentCreateRequestDTO](c)
 	if err != nil {
 		return err
@@ -146,4 +139,30 @@ func handleAgentCreate(c echo.Context) error {
 		ID:   newAgent.ID.String(),
 		Key:  key,
 	})
+}
+
+func handleDeleteUser(c echo.Context) error {
+	return util.ServerError("Test error", errors.New("foobar test"))
+
+	id := c.Param("id")
+
+	user, err := db.GetUserByID(id)
+	if err == db.ErrNotFound {
+		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
+	}
+	if err != nil {
+		return util.ServerError("Failed to retrieve user before deletion", err)
+	}
+
+	AuditLog(c, log.Fields{
+		"user_to_delete": user.ToDTO(),
+	}, "Admin is deleting user")
+
+	// err = user.Delete()
+	err = db.Delete(user)
+	if err != nil {
+		return util.ServerError("Failed to delete user", err)
+	}
+
+	return c.JSON(http.StatusOK, "ok")
 }

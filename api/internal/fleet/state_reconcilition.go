@@ -355,7 +355,7 @@ func Setup() error {
 	// This state re-conciliation we manually invoke will go out and mark any agents as dead and jobs as failed, as necessar1y
 	err = stateReconciliation()
 	if err != nil {
-		return fmt.Errorf("failed to perform initial state reconciliation: %v", err)
+		return fmt.Errorf("failed to perform initial state reconciliation: %w", err)
 	}
 
 	go stateReconciliationTask()

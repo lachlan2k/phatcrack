@@ -12,7 +12,7 @@ import (
 func (a *AgentConnection) handleJobStarted(msg *wstypes.Message) error {
 	payload, err := util.UnmarshalJSON[wstypes.JobStartedDTO](msg.Payload)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to job started dto: %v", msg.Payload, err)
+		return fmt.Errorf("couldn't unmarshal %v to job started dto: %w", msg.Payload, err)
 	}
 
 	log.WithFields(log.Fields{
@@ -28,7 +28,7 @@ func (a *AgentConnection) handleJobStarted(msg *wstypes.Message) error {
 func (a *AgentConnection) handleJobCrackedHash(msg *wstypes.Message) error {
 	payload, err := util.UnmarshalJSON[wstypes.JobCrackedHashDTO](msg.Payload)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to cracked hash dto: %v", msg.Payload, err)
+		return fmt.Errorf("couldn't unmarshal %v to cracked hash dto: %w", msg.Payload, err)
 	}
 
 	err = db.AddJobCrackedHash(payload.JobID, payload.Result.Hash, payload.Result.PlaintextHex)
@@ -52,7 +52,7 @@ func (a *AgentConnection) handleJobCrackedHash(msg *wstypes.Message) error {
 func (a *AgentConnection) handleJobStdLine(msg *wstypes.Message) error {
 	payload, err := util.UnmarshalJSON[wstypes.JobStdLineDTO](msg.Payload)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to job stdline dto: %v", msg.Payload, err)
+		return fmt.Errorf("couldn't unmarshal %v to job stdline dto: %w", msg.Payload, err)
 	}
 
 	return db.AddJobStdline(payload.JobID, payload.Line, payload.Stream)
@@ -61,7 +61,7 @@ func (a *AgentConnection) handleJobStdLine(msg *wstypes.Message) error {
 func (a *AgentConnection) handleJobStatusUpdate(msg *wstypes.Message) error {
 	payload, err := util.UnmarshalJSON[wstypes.JobStatusUpdateDTO](msg.Payload)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to job status update dto: %v", msg.Payload, err)
+		return fmt.Errorf("couldn't unmarshal %v to job status update dto: %w", msg.Payload, err)
 	}
 
 	if len(payload.Status.Devices) > 0 {
@@ -74,7 +74,7 @@ func (a *AgentConnection) handleJobStatusUpdate(msg *wstypes.Message) error {
 func (a *AgentConnection) handleJobExited(msg *wstypes.Message) error {
 	payload, err := util.UnmarshalJSON[wstypes.JobExitedDTO](msg.Payload)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to job exited dto: %v", msg.Payload, err)
+		return fmt.Errorf("couldn't unmarshal %v to job exited dto: %w", msg.Payload, err)
 	}
 
 	reason := db.JobStopReasonFinished
@@ -88,7 +88,7 @@ func (a *AgentConnection) handleJobExited(msg *wstypes.Message) error {
 func (a *AgentConnection) handleJobFailedToStart(msg *wstypes.Message) error {
 	payload, err := util.UnmarshalJSON[wstypes.JobFailedToStartDTO](msg.Payload)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to job failed to start dto: %v", msg.Payload, err)
+		return fmt.Errorf("couldn't unmarshal %v to job failed to start dto: %w", msg.Payload, err)
 	}
 
 	return db.SetJobExited(payload.JobID, db.JobStopReasonFailedToStart, "", payload.Time)

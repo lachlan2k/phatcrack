@@ -81,7 +81,7 @@ func MFAWebAuthnBeginRegister(c echo.Context, sessHandler SessionHandler) (marsh
 	wID := make([]byte, 64)
 	_, err := rand.Read(wID)
 	if err != nil {
-		internalErr = fmt.Errorf("couldn't generated user id for webauthn: %v", err)
+		internalErr = fmt.Errorf("couldn't generated user id for webauthn: %w", err)
 		return
 	}
 
@@ -93,13 +93,13 @@ func MFAWebAuthnBeginRegister(c echo.Context, sessHandler SessionHandler) (marsh
 
 	creation, webauthnSession, err := webauthnHandler.BeginRegistration(wUser)
 	if err != nil {
-		internalErr = fmt.Errorf("couldn't begin registration: %v", err)
+		internalErr = fmt.Errorf("couldn't begin registration: %w", err)
 		return
 	}
 
 	marshalled, err := json.Marshal(creation)
 	if err != nil {
-		internalErr = fmt.Errorf("couldn't marshal webauthn creation data: %v", err)
+		internalErr = fmt.Errorf("couldn't marshal webauthn creation data: %w", err)
 		return
 	}
 
@@ -109,7 +109,7 @@ func MFAWebAuthnBeginRegister(c echo.Context, sessHandler SessionHandler) (marsh
 		return nil
 	})
 	if err != nil {
-		internalErr = fmt.Errorf("couldn't save webauthn session data in session: %v", err)
+		internalErr = fmt.Errorf("couldn't save webauthn session data in session: %w", err)
 		return
 	}
 
@@ -135,7 +135,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 
 	credential, err := webauthnHandler.FinishRegistration(*sessData.PendingWebAuthnUser, *sessData.WebAuthnSession, c.Request())
 	if err != nil {
-		internalErr = fmt.Errorf("failed to finish webauthn registration: %v", err)
+		internalErr = fmt.Errorf("failed to finish webauthn registration: %w", err)
 		return
 	}
 
@@ -143,7 +143,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 
 	marshalledBytes, err := json.Marshal(sessData.PendingWebAuthnUser)
 	if err != nil {
-		internalErr = fmt.Errorf("failed to marshal webauthn user: %v", err)
+		internalErr = fmt.Errorf("failed to marshal webauthn user: %w", err)
 		return
 	}
 
@@ -153,7 +153,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 		return nil
 	})
 	if err != nil {
-		internalErr = fmt.Errorf("couldn't remove webauthn session data: %v", err)
+		internalErr = fmt.Errorf("couldn't remove webauthn session data: %w", err)
 		return
 	}
 
@@ -163,7 +163,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 
 	err = db.GetInstance().Save(user).Error
 	if err != nil {
-		internalErr = fmt.Errorf("failed to save user in database with new MFA data: %v", err)
+		internalErr = fmt.Errorf("failed to save user in database with new MFA data: %w", err)
 		return
 	}
 
@@ -185,13 +185,13 @@ func MFAWebAuthnBeginLogin(c echo.Context, sessHandler SessionHandler) (marshall
 	var wUser = &webauthnUser{}
 	err := json.Unmarshal(user.MFAData, wUser)
 	if err != nil {
-		internalErr = fmt.Errorf("couldn't unmarshal user's MFA data: %v", err)
+		internalErr = fmt.Errorf("couldn't unmarshal user's MFA data: %w", err)
 		return
 	}
 
 	credentialAssertion, webauthnSession, err := webauthnHandler.BeginLogin(wUser)
 	if err != nil {
-		internalErr = fmt.Errorf("failed to begin webauthn login: %v", err)
+		internalErr = fmt.Errorf("failed to begin webauthn login: %w", err)
 		return
 	}
 
@@ -201,13 +201,13 @@ func MFAWebAuthnBeginLogin(c echo.Context, sessHandler SessionHandler) (marshall
 		return nil
 	})
 	if err != nil {
-		internalErr = fmt.Errorf("couldn't save webauthn session data in session: %v", err)
+		internalErr = fmt.Errorf("couldn't save webauthn session data in session: %w", err)
 		return
 	}
 
 	marshalledJSONResponse, err = json.Marshal(credentialAssertion)
 	if err != nil {
-		internalErr = fmt.Errorf("failed to marshal credential assertion: %v", err)
+		internalErr = fmt.Errorf("failed to marshal credential assertion: %w", err)
 		return
 	}
 
@@ -229,13 +229,11 @@ func MFAWebAuthnFinishLogin(c echo.Context, sessHandler SessionHandler) (userPre
 	credential, err := webauthnHandler.FinishLogin(*sessData.PendingWebAuthnUser, *sessData.WebAuthnSession, c.Request())
 	if err != nil {
 		userPresentableErr = fmt.Errorf("MFA verification failed")
-		c.Logger().Printf("User %s (%s) failed MFA verification with error: %v", user.Username, user.ID.String(), err)
 		return
 	}
 
 	if credential.Authenticator.CloneWarning {
 		userPresentableErr = fmt.Errorf("MFA verification failed (potential counter re-use)")
-		c.Logger().Printf("User %s (%s) failed MFA verification due to clone warning", user.Username, user.ID.String())
 		return
 	}
 

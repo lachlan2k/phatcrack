@@ -25,6 +25,14 @@ type SimpleBaseModel struct {
 	ID uint `gorm:"primarykey"`
 }
 
+func Delete[T any](obj *T) error {
+	return GetInstance().Delete(obj).Error
+}
+
+func Save[T any](obj *T) error {
+	return GetInstance().Save(obj).Error
+}
+
 var dbInstance *gorm.DB = nil
 
 var ErrNotFound = gorm.ErrRecordNotFound
@@ -33,7 +41,7 @@ func Connect(dsn string) error {
 	var err error
 	dbInstance, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return fmt.Errorf("failed to connect to db: %v", err)
+		return fmt.Errorf("failed to connect to db: %w", err)
 	}
 
 	runMigrations()

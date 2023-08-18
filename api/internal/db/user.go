@@ -36,9 +36,13 @@ func (u *User) HasRole(roleToCheck string) bool {
 	return false
 }
 
-func (u *User) Save() error {
-	return GetInstance().Save(u).Error
-}
+// func (u *User) Save() error {
+// 	return GetInstance().Save(u).Error
+// }
+
+// func (u *User) Delete() error {
+// 	return GetInstance().Delete(u).Error
+// }
 
 func NormalizeUsername(username string) string {
 	return strings.ToLower(strings.TrimSpace(username))

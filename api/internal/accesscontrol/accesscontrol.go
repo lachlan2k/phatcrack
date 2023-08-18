@@ -26,7 +26,7 @@ func HasRightsToProjectID(user *db.User, projId string) (bool, error) {
 		return false, nil
 	}
 	if err != nil {
-		return false, fmt.Errorf("failed to get underlying project to check access control: %v", err)
+		return false, fmt.Errorf("failed to get underlying project to check access control: %w", err)
 	}
 	return HasRightsToProject(user, proj), nil
 }
@@ -37,7 +37,7 @@ func HasRightsToJobID(user *db.User, jobID string) (bool, error) {
 		return false, nil
 	}
 	if err != nil {
-		return false, fmt.Errorf("failed to get underlying job to check access control: %v", err)
+		return false, fmt.Errorf("failed to get underlying job to check access control: %w", err)
 	}
 	return HasRightsToProjectID(user, projId)
 }

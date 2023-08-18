@@ -19,6 +19,10 @@ export function adminCreateUser(
   return client.post('/api/v1/admin/user/create', newUserData).then((res) => res.data)
 }
 
+export function adminDeleteUser(id: string): Promise<string> {
+  return client.delete('/api/v1/admin/user/' + id).then(res => res.data)
+}
+
 export function adminCreateAgent(
   newAgentData: AdminAgentCreateRequestDTO
 ): Promise<AdminAgentCreateResponseDTO> {

@@ -69,7 +69,7 @@ func (j *JWTSessionHandler) Start(c echo.Context, sess SessionData) error {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(j.Secret)
 	if err != nil {
-		return fmt.Errorf("failed to start jwt session: %v", err)
+		return fmt.Errorf("failed to start jwt session: %w", err)
 	}
 
 	c.SetCookie(&http.Cookie{

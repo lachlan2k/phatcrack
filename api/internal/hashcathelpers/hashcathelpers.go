@@ -18,7 +18,7 @@ func findBinary() (path string, err error) {
 	if path != "" {
 		_, err = os.Stat(path)
 		if err != nil {
-			err = fmt.Errorf("failed to stat the specified hashcat binary (%s): %v (check path and permissions?)", path, err)
+			err = fmt.Errorf("failed to stat the specified hashcat binary (%s): %w (check path and permissions?)", path, err)
 			path = ""
 		}
 		return
@@ -56,7 +56,7 @@ func hashcatCommandWithRandSession(args ...string) (*exec.Cmd, error) {
 func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-identify")
 	if err != nil {
-		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %v", err)
+		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %w", err)
 	}
 	defer tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
@@ -69,7 +69,7 @@ func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 
 	_, err = tmpFile.WriteString(exampleHash)
 	if err != nil {
-		return nil, fmt.Errorf("failed to write example hash to file: %v", err)
+		return nil, fmt.Errorf("failed to write example hash to file: %w", err)
 	}
 
 	cmd, err := hashcatCommandWithRandSession("--identify", tmpFile.Name(), "--machine-readable")
@@ -86,7 +86,7 @@ func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 			}
 		}
 
-		return nil, fmt.Errorf("couldn't run hashcat: %v", err)
+		return nil, fmt.Errorf("couldn't run hashcat: %w", err)
 	}
 
 	candidates := make([]int, 0)
@@ -108,7 +108,7 @@ func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 func NormalizeHashes(hashes []string, hashType uint, hasUsernames bool) ([]string, error) {
 	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-normalize")
 	if err != nil {
-		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %v", err)
+		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %w", err)
 	}
 	defer tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
@@ -123,7 +123,7 @@ func NormalizeHashes(hashes []string, hashType uint, hasUsernames bool) ([]strin
 		// Use the list index as a "username" so hashcat outputs them in a nice way
 		_, err = tmpFile.WriteString(strconv.Itoa(index) + ":" + strings.TrimSpace(hash) + "\n")
 		if err != nil {
-			return nil, fmt.Errorf("failed to write example hash to file: %v", err)
+			return nil, fmt.Errorf("failed to write example hash to file: %w", err)
 		}
 	}
 
@@ -134,7 +134,7 @@ func NormalizeHashes(hashes []string, hashType uint, hasUsernames bool) ([]strin
 
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("couldn't normalize hashes: %v, out: %v", err, out)
+		return nil, fmt.Errorf("couldn't normalize hashes: %w, out: %v", err, out)
 	}
 
 	normalizedHashes := make([]string, len(hashes))
