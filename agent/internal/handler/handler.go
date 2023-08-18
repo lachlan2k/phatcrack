@@ -73,7 +73,7 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 		return nil
 
 	default:
-		fmt.Printf("unrecognized message type: %s", msg.Type)
+		log.Printf("unrecognized message type: %s", msg.Type)
 		return nil
 	}
 }

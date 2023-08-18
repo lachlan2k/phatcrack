@@ -278,7 +278,7 @@ func (sess *HashcatSession) Start() error {
 				var status HashcatStatus
 				err := json.Unmarshal([]byte(line), &status)
 				if err != nil {
-					fmt.Printf("WARN: couldn't unmarshal hashcat status: %v", err)
+					log.Printf("WARN: couldn't unmarshal hashcat status: %v", err)
 					continue
 				}
 				sess.StatusUpdates <- status
