@@ -68,8 +68,13 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 		go h.handleDownloadFileRequest(msg)
 		return nil
 
+	case wstypes.DeleteFileRequestType:
+		go h.handleDeleteFileRequest(msg)
+		return nil
+
 	default:
-		return fmt.Errorf("unreconized message type: %s", msg.Type)
+		fmt.Printf("unrecognized message type: %s", msg.Type)
+		return nil
 	}
 }
 

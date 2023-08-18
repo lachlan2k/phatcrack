@@ -9,6 +9,7 @@ const (
 	HeartbeatType           = "Heartbeat"
 	AgentErrorType          = "AgentError"
 	DownloadFileRequestType = "DownloadFileRequest"
+	DeleteFileRequestType   = "DeleteFileRequest"
 )
 
 type FileDTO struct {
@@ -26,6 +27,10 @@ type HeartbeatDTO struct {
 
 type DownloadFileRequestDTO struct {
 	FileIDs []string `json:"file_id"`
+}
+
+type DeleteFileRequestDTO struct {
+	FileID string `json:"file_id"`
 }
 
 type AgentErrorDTO struct {

@@ -2,6 +2,8 @@ package fleet
 
 import (
 	"fmt"
+	"path/filepath"
+	"slices"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -153,11 +155,34 @@ func stateReconciliation() error {
 
 	// Make sure listfiles are available on all healthy agents
 	for _, listfile := range allListfiles {
-		if len(agentMap) == 0 {
-			break
+		if listfile.PendingDelete {
+			// Check to see if any incompleteJobs is using it as either a wordlist or rulefile
+			isWordlistInUse := slices.ContainsFunc(incompleteJobs, func(job db.Job) bool {
+				predicate := func(fname string) bool {
+					return filepath.Base(fname) == listfile.ID.String()
+				}
+
+				return slices.ContainsFunc(
+					job.HashcatParams.Data.RulesFilenames,
+					predicate,
+				) || slices.ContainsFunc(
+					job.HashcatParams.Data.WordlistFilenames,
+					predicate,
+				)
+			})
+
+			if !isWordlistInUse {
+				// Wordlist can now be safely deleted
+				db.Delete(&listfile)
+				// Tell all agents to delete it
+				broadcastMessageUnsafe(wstypes.DeleteFileRequestType, wstypes.DeleteFileRequestDTO{
+					FileID: listfile.ID.String(),
+				})
+			}
 		}
 
 		availableOnAll := true
+		numPresent := 0
 
 		for _, agent := range agentMap {
 			if agent.AgentInfo.Data.Status != db.AgentStatusHealthy {
@@ -177,11 +202,17 @@ func stateReconciliation() error {
 			if !found {
 				availableOnAll = false
 				break
+			} else {
+				numPresent++
 			}
 		}
 
-		if listfile.AvailableForUse != availableOnAll {
-			log.WithField("listfile_id", listfile.ID.String()).Warn("Marking listfile as unavailable, since it was missing on at least one agent")
+		if numPresent > 0 && listfile.AvailableForUse != availableOnAll {
+			if availableOnAll {
+				log.WithField("listfile_id", listfile.ID.String()).Warn("Marking listfile as available, as it is now present on all agents")
+			} else {
+				log.WithField("listfile_id", listfile.ID.String()).Warn("Marking listfile as unavailable, since it was missing on at least one agent")
+			}
 
 			listfile.AvailableForUse = availableOnAll
 			err := listfile.Save()

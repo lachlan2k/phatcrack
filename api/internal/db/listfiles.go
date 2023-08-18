@@ -16,6 +16,7 @@ type Listfile struct {
 	SizeInBytes          uint64
 	Lines                uint64
 	IsLocked             bool
+	PendingDelete        bool
 }
 
 func (l *Listfile) Save() error {

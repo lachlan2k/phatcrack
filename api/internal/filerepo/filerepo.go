@@ -42,3 +42,12 @@ func Create(id uuid.UUID) (io.WriteCloser, error) {
 
 	return os.OpenFile(filepath.Join(basePath, filename), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 }
+
+func Delete(id uuid.UUID) error {
+	filename, err := GetPathToFile(id)
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(filename)
+}

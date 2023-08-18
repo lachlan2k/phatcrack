@@ -20,6 +20,12 @@ var ErrNoAgentsOnline = errors.New("no agents online")
 var fleetLock sync.Mutex
 var fleet = make(map[string]*AgentConnection)
 
+func broadcastMessageUnsafe(msgType string, message interface{}) {
+	for _, agent := range fleet {
+		agent.sendMessage(msgType, message)
+	}
+}
+
 func RegisterAgentFromWebsocket(conn *websocket.Conn, agentId string) *AgentConnection {
 	fleetLock.Lock()
 	defer fleetLock.Unlock()

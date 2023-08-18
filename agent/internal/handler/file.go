@@ -13,8 +13,20 @@ import (
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
+func (h *Handler) getFilePath(fileID string) (string, error) {
+	filename := filepath.Base(filepath.Clean(fileID))
+	if filename == "." || filename == ".." || filename == "/" {
+		return "", fmt.Errorf("couldn't form a valid path from file ID: %v", fileID)
+	}
+
+	return filepath.Join(h.conf.ListfileDirectory, filename), nil
+}
+
 func (h *Handler) downloadFile(fileID string) error {
-	writePath := filepath.Join(h.conf.ListfileDirectory, filepath.Join("/", fileID))
+	writePath, err := h.getFilePath(fileID)
+	if err != nil {
+		return err
+	}
 
 	outFile, err := os.OpenFile(writePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
@@ -59,7 +71,7 @@ func (h *Handler) handleDownloadFileRequest(msg *wstypes.Message) error {
 
 	payload, err := util.UnmarshalJSON[wstypes.DownloadFileRequestDTO](msg.Payload)
 	if err != nil {
-		return fmt.Errorf("couldn't unmarshal %v to job start dto: %v", msg.Payload, err)
+		return fmt.Errorf("couldn't unmarshal %v to download file request dto: %v", msg.Payload, err)
 	}
 
 	for _, file := range payload.FileIDs {
@@ -69,5 +81,27 @@ func (h *Handler) handleDownloadFileRequest(msg *wstypes.Message) error {
 		}
 	}
 
+	return nil
+}
+
+func (h *Handler) handleDeleteFileRequest(msg *wstypes.Message) error {
+	// To avoid weird races, to be safe, let's make sure we're not downloading any files at the same time
+	h.fileDownloadLock.Lock()
+	defer h.fileDownloadLock.Unlock()
+
+	payload, err := util.UnmarshalJSON[wstypes.DeleteFileRequestDTO](msg.Payload)
+	if err != nil {
+		return fmt.Errorf("couldn't unmarshal %v to delete file request dto: %v", msg.Payload, err)
+	}
+
+	filepath, err := h.getFilePath(payload.FileID)
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(filepath)
+	if err != nil {
+		return fmt.Errorf("failed to remove file: %v", err)
+	}
 	return nil
 }

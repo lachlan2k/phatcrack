@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
@@ -90,12 +92,14 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 	}
 
 	availableListfiles := make([]db.AgentFile, len(payload.Listfiles))
+	listfilesToCheckMap := make(map[string]*db.AgentFile)
 
 	for i, list := range payload.Listfiles {
 		availableListfiles[i] = db.AgentFile{
 			Name: list.Name,
 			Size: list.Size,
 		}
+		listfilesToCheckMap[list.Name] = &availableListfiles[i]
 	}
 
 	info := db.AgentInfo{
@@ -111,35 +115,42 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 		return err
 	}
 
+	// If it's in the middle of downloading a file, let's be polite and not bother it
+	if payload.IsDownloadingFile {
+		return nil
+	}
+
+	expectedListfiles, err := db.GetAllListfiles()
+	if err != nil {
+		return err
+	}
+
 	filesToRequestDownload := []uuid.UUID{}
 
-	// TODO: cache this database query (seems a bit unecessary if we have lots of agents, etc)
-	if !payload.IsDownloadingFile {
-		expectedListfiles, err := db.GetAllListfiles()
-		if err != nil {
-			return err
+	for _, expectedFile := range expectedListfiles {
+		if !expectedFile.AvailableForDownload {
+			continue
 		}
 
-		for _, expectedFile := range expectedListfiles {
-			if !expectedFile.AvailableForDownload {
-				continue
-			}
-
-			found := false
-			for _, file := range availableListfiles {
-				if file.Name == expectedFile.ID.String() && file.Size == int64(expectedFile.SizeInBytes) {
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				filesToRequestDownload = append(filesToRequestDownload, expectedFile.ID)
-			}
+		fileOnAgent, ok := listfilesToCheckMap[expectedFile.ID.String()]
+		if !ok || fileOnAgent.Size != int64(expectedFile.SizeInBytes) {
+			// File is absent, or the length is wrong on disk (probably due to a failed download)
+			filesToRequestDownload = append(filesToRequestDownload, expectedFile.ID)
+		}
+		if ok {
+			delete(listfilesToCheckMap, expectedFile.ID.String())
 		}
 	}
 
+	// Okay, so, any files that are left listfilesToCheckMap are unexpected files.
+	// Let's tell the agent to delete those files
+	for _, file := range listfilesToCheckMap {
+		log.WithField("agent_id", a.agentId).WithField("filename", file.Name).Warn("Found an unexpected file on an agent. Telling it to delete it.")
+		a.RequestFileDelete(file.Name)
+	}
+
 	if len(filesToRequestDownload) > 0 {
+		log.WithField("agent_id", a.agentId).WithField("files_to_download", filesToRequestDownload).Warn("Agent was missing files. Telling it to download them.")
 		a.RequestFileDownload(filesToRequestDownload...)
 	}
 
@@ -168,6 +179,12 @@ func (a *AgentConnection) RequestFileDownload(fileIDs ...uuid.UUID) error {
 
 	return a.sendMessage(wstypes.DownloadFileRequestType, wstypes.DownloadFileRequestDTO{
 		FileIDs: fileIDStrs,
+	})
+}
+
+func (a *AgentConnection) RequestFileDelete(fileID string) error {
+	return a.sendMessage(wstypes.DeleteFileRequestType, wstypes.DeleteFileRequestDTO{
+		FileID: fileID,
 	})
 }
 
