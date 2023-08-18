@@ -141,7 +141,6 @@ const quantityStr = (num: number, str: string) => {
   }
   return `${num} ${str}s`
 }
-
 </script>
 
 <template>
@@ -165,16 +164,27 @@ const quantityStr = (num: number, str: string) => {
                 </h2>
 
                 <div class="dropdown">
-                  <label tabindex="0" class="m-1 btn btn-ghost btn-sm">...</label>
-                  <ul tabindex="0" class="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box">
+                  <label tabindex="0" class="btn btn-ghost btn-sm m-1">...</label>
+                  <ul
+                    tabindex="0"
+                    class="menu dropdown-content rounded-box z-[1] bg-base-100 p-2 shadow"
+                  >
                     <li>
-                      <button class="btn-ghost btn-sm btn"
-                        @click="() => exportResults(hashlistId, ExportFormat.ColonSeparated, onlyShowCracked)">
+                      <button
+                        class="btn btn-ghost btn-sm"
+                        @click="
+                          () =>
+                            exportResults(hashlistId, ExportFormat.ColonSeparated, onlyShowCracked)
+                        "
+                      >
                         Export
                       </button>
                     </li>
                     <li>
-                      <button class="btn-ghost btn-sm btn" @click="() => (isHashlistEditorOpen = true)">
+                      <button
+                        class="btn btn-ghost btn-sm"
+                        @click="() => (isHashlistEditorOpen = true)"
+                      >
                         Edit
                       </button>
                     </li>
@@ -190,12 +200,16 @@ const quantityStr = (num: number, str: string) => {
               <div class="form-control">
                 <label class="label">
                   <span class="label-text">Filter</span>
-                  <input type="text" class="input-bordered input input-sm" placeholder="Hash or plaintext..."
-                    v-model="filterText" />
+                  <input
+                    type="text"
+                    class="input input-bordered input-sm"
+                    placeholder="Hash or plaintext..."
+                    v-model="filterText"
+                  />
                 </label>
               </div>
 
-              <table class="compact-table compact-table hashlist-table table-sm table w-full">
+              <table class="compact-table compact-table hashlist-table table table-sm w-full">
                 <thead>
                   <tr>
                     <th>Original Hash</th>
@@ -213,8 +227,12 @@ const quantityStr = (num: number, str: string) => {
               </table>
 
               <div class="mt-2 w-full text-center">
-                <PaginationControls @next="() => nextPage()" @prev="() => prevPage()" :current-page="activePage"
-                  :total-pages="totalPages" />
+                <PaginationControls
+                  @next="() => nextPage()"
+                  @prev="() => prevPage()"
+                  :current-page="activePage"
+                  :total-pages="totalPages"
+                />
               </div>
             </div>
           </div>
@@ -224,11 +242,14 @@ const quantityStr = (num: number, str: string) => {
             <div class="card-body">
               <div class="flex flex-row justify-between">
                 <Modal v-model:isOpen="isAttackWizardOpen">
-                  <JobWizard :firstStep="2" :existingHashlistId="hashlistId"
-                    :existingProjectId="hashlistData?.project_id" />
+                  <JobWizard
+                    :firstStep="2"
+                    :existingHashlistId="hashlistId"
+                    :existingProjectId="hashlistData?.project_id"
+                  />
                 </Modal>
                 <h2 class="card-title">Attacks</h2>
-                <button class="btn-primary btn-sm btn" @click="() => (isAttackWizardOpen = true)">
+                <button class="btn btn-primary btn-sm" @click="() => (isAttackWizardOpen = true)">
                   New Attack
                 </button>
               </div>
@@ -282,7 +303,7 @@ const quantityStr = (num: number, str: string) => {
 </template>
 
 <style scoped>
-thead>tr>th {
+thead > tr > th {
   background: none !important;
 }
 

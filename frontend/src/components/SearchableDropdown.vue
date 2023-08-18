@@ -54,7 +54,7 @@ function unfocus() {
   <div class="relative">
     <input
       type="text"
-      class="input-bordered input w-full cursor-pointer focus:outline-none"
+      class="input input-bordered w-full cursor-pointer focus:outline-none"
       :placeholder="props.placeholderText"
       v-model="inputText"
       @focus="focus"

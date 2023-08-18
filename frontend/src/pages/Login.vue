@@ -205,7 +205,7 @@ const cardTitle = computed(() => {
             <input
               type="text"
               placeholder="john.doe"
-              class="input-bordered input"
+              class="input input-bordered"
               v-model="username"
             />
           </div>
@@ -216,7 +216,7 @@ const cardTitle = computed(() => {
             <input
               type="password"
               placeholder="hunter2"
-              class="input-bordered input"
+              class="input input-bordered"
               v-model="password"
             />
           </div>
@@ -224,7 +224,7 @@ const cardTitle = computed(() => {
             <p>{{ loginError }}</p>
           </div>
           <div class="form-control mt-6">
-            <button type="submit" class="btn-primary btn" :disabled="isLoginLoading">
+            <button type="submit" class="btn btn-primary" :disabled="isLoginLoading">
               <span class="loading loading-spinner loading-md" v-if="isLoginLoading"></span>
               Login
             </button>
@@ -237,7 +237,7 @@ const cardTitle = computed(() => {
             <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem" />
           </div>
           <div>
-            <button class="btn-ghost btn" @click="verifyKey">Verify</button>
+            <button class="btn btn-ghost" @click="verifyKey">Verify</button>
           </div>
         </div>
 
@@ -247,7 +247,7 @@ const cardTitle = computed(() => {
             <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem" />
           </div>
           <div>
-            <button class="btn-primary btn" @click="enrollKey">Enroll Key</button>
+            <button class="btn btn-primary" @click="enrollKey">Enroll Key</button>
           </div>
         </div>
 
@@ -261,7 +261,7 @@ const cardTitle = computed(() => {
               <input
                 type="password"
                 placeholder="hunter2"
-                class="input-bordered input"
+                class="input input-bordered"
                 v-model="password"
               />
             </div>
@@ -272,7 +272,7 @@ const cardTitle = computed(() => {
               <input
                 type="password"
                 placeholder="hunter2"
-                class="input-bordered input"
+                class="input input-bordered"
                 v-model="newPassword"
               />
             </div>
@@ -280,7 +280,7 @@ const cardTitle = computed(() => {
               <p>{{ loginError }}</p>
             </div>
             <div class="form-control mt-6">
-              <button type="submit" class="btn-primary btn" :disabled="isPasswordChangeLoading">
+              <button type="submit" class="btn btn-primary" :disabled="isPasswordChangeLoading">
                 <span class="loading loading-spinner loading-md" v-if="isLoginLoading"></span>
                 Change Password
               </button>

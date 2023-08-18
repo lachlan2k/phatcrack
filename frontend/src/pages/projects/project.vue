@@ -43,7 +43,7 @@ const isLoading = computed(() => {
             <div class="flex flex-row justify-between">
               <h2 class="card-title">Hashlists</h2>
 
-              <button class="btn-primary btn-sm btn" @click="() => (isWizardOpen = true)">
+              <button class="btn btn-primary btn-sm" @click="() => (isWizardOpen = true)">
                 New Hashlist
               </button>
 

@@ -63,6 +63,6 @@ async function onSave() {
     </div>
   </div>
   <div class="card-actions justify-end">
-    <button class="btn-primary btn" @click="() => onSave()">Save</button>
+    <button class="btn btn-primary" @click="() => onSave()">Save</button>
   </div>
 </template>

@@ -83,6 +83,7 @@ func HookAdminEndpoints(api *echo.Group) {
 	api.POST("/agent/create", handleAgentCreate)
 
 	api.DELETE("/user/:id", handleDeleteUser)
+	api.DELETE("/agent/:id", handleDeleteAgent)
 }
 
 func handleCreateUser(c echo.Context) error {
@@ -155,10 +156,32 @@ func handleDeleteUser(c echo.Context) error {
 		"user_to_delete": user.ToDTO(),
 	}, "Admin is deleting user")
 
-	// err = user.Delete()
 	err = db.Delete(user)
 	if err != nil {
 		return util.ServerError("Failed to delete user", err)
+	}
+
+	return c.JSON(http.StatusOK, "ok")
+}
+
+func handleDeleteAgent(c echo.Context) error {
+	id := c.Param("id")
+
+	agent, err := db.GetAgent(id)
+	if err == db.ErrNotFound {
+		return echo.NewHTTPError(http.StatusNotFound, "Agent does not exist")
+	}
+	if err != nil {
+		return util.ServerError("Failed to retrieve agent before deletion", err)
+	}
+
+	AuditLog(c, log.Fields{
+		"agent_to_delete": agent.ToDTO(),
+	}, "Admin is deleting agent")
+
+	err = db.Delete(agent)
+	if err != nil {
+		return util.ServerError("Failed to delete agent", err)
 	}
 
 	return c.JSON(http.StatusOK, "ok")

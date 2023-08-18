@@ -32,7 +32,7 @@ loadListfiles()
               <FileUpload fileType="Wordlist" />
             </Modal>
             <h2 class="card-title">Wordlists</h2>
-            <button class="btn-primary btn-sm btn" @click="() => (isWordlistUploadOpen = true)">
+            <button class="btn btn-primary btn-sm" @click="() => (isWordlistUploadOpen = true)">
               Upload Wordlist
             </button>
           </div>
@@ -71,7 +71,7 @@ loadListfiles()
               <FileUpload fileType="Rulefile" />
             </Modal>
             <h2 class="card-title">Rulefiles</h2>
-            <button class="btn-primary btn-sm btn" @click="() => (isRulefileUploadOpen = true)">
+            <button class="btn btn-primary btn-sm" @click="() => (isRulefileUploadOpen = true)">
               Upload Rulefile
             </button>
           </div>

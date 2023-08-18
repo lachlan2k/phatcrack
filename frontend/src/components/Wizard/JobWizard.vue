@@ -284,7 +284,7 @@ async function saveAndStartAttack() {
       <li
         v-for="(step, index) in stepsToDisplay"
         :key="index"
-        :class="index + props.firstStep <= inputs.activeStep ? 'step-primary step' : 'step'"
+        :class="index + props.firstStep <= inputs.activeStep ? 'step step-primary' : 'step'"
       >
         {{ step.name }}
       </li>
@@ -320,7 +320,7 @@ async function saveAndStartAttack() {
               v-model="inputs.projectName"
               type="text"
               placeholder="12345 Example Corp"
-              class="input-bordered input w-full max-w-xs"
+              class="input input-bordered w-full max-w-xs"
             />
             <label class="label mt-4 font-bold">
               <span class="label-text">New Project Description (optional)</span>
@@ -329,7 +329,7 @@ async function saveAndStartAttack() {
               v-model="inputs.projectDesc"
               type="text"
               placeholder="Internal Network Pentest"
-              class="input-bordered input w-full max-w-xs"
+              class="input input-bordered w-full max-w-xs"
             />
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
@@ -340,7 +340,7 @@ async function saveAndStartAttack() {
               <div class="card-actions justify-end">
                 <div class="tooltip" :data-tip="projectStepValidationError">
                   <button
-                    class="btn-primary btn"
+                    class="btn btn-primary"
                     @click="inputs.activeStep++"
                     :disabled="projectStepValidationError != null"
                   >
@@ -372,10 +372,10 @@ async function saveAndStartAttack() {
                 </button>
               </div>
               <div class="card-actions justify-end">
-                <button class="btn-ghost btn" @click="inputs.activeStep--">Previous</button>
+                <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
                 <div class="tooltip" :data-tip="hashlistStepValidationError">
                   <button
-                    class="btn-primary btn"
+                    class="btn btn-primary"
                     @click="inputs.activeStep++"
                     :disabled="hashlistStepValidationError != null"
                   >
@@ -394,7 +394,7 @@ async function saveAndStartAttack() {
               type="radio"
               name="options"
               :data-title="attackMode.name"
-              class="btn-neutral join-item btn"
+              class="btn btn-neutral join-item"
               :key="attackMode.value"
               :value="attackMode.value"
               v-model="inputs.attackMode"
@@ -504,8 +504,8 @@ async function saveAndStartAttack() {
             </div>
 
             <div class="card-actions justify-end">
-              <button class="btn-ghost btn" @click="inputs.activeStep--">Previous</button>
-              <button class="btn-primary btn" @click="inputs.activeStep++">Next</button>
+              <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
+              <button class="btn btn-primary" @click="inputs.activeStep++">Next</button>
             </div>
           </div>
         </template>
@@ -547,8 +547,8 @@ async function saveAndStartAttack() {
             </div>
 
             <div class="card-actions justify-end">
-              <button class="btn-ghost btn" @click="inputs.activeStep--">Previous</button>
-              <button class="btn-success btn" @click="saveAndStartAttack">Start Attack</button>
+              <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
+              <button class="btn btn-success" @click="saveAndStartAttack">Start Attack</button>
             </div>
           </div>
         </template>

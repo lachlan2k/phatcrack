@@ -127,7 +127,7 @@ async function onSubmit(event: Event) {
     </label>
     <input
       type="text"
-      class="input-bordered input"
+      class="input input-bordered"
       v-model="fileName"
       :placeholder="fileType == 'Rulefile' ? 'best64.rule' : 'rockyou.txt'"
     />
@@ -137,7 +137,7 @@ async function onSubmit(event: Event) {
     <label class="label font-bold">
       <span class="label-text">Number of lines</span>
     </label>
-    <input type="number" class="input-bordered input" v-model="lineCount" />
+    <input type="number" class="input input-bordered" v-model="lineCount" />
     <label class="label" v-if="lineCount == 0">
       <span class="label-text text-error"
         >Files larger {{ bytesToReadable(MaxSizeForAutoLineCount) }} require a line count</span
@@ -149,7 +149,7 @@ async function onSubmit(event: Event) {
     <label class="label font-bold">
       <span class="label-text">File type</span>
     </label>
-    <select class="select-bordered select" v-model="fileType">
+    <select class="select select-bordered" v-model="fileType">
       <option value="Wordlist">Wordlist</option>
       <option value="Rulefile">Rulefile</option>
     </select>
@@ -163,13 +163,13 @@ async function onSubmit(event: Event) {
       type="file"
       ref="fileInputEl"
       @change="onFileSelect"
-      class="file-input-bordered file-input-ghost file-input"
+      class="file-input file-input-bordered file-input-ghost"
       name="file"
     />
   </div>
   <div v-if="isLoading && progress != null && progress.total != null">
     <progress
-      class="progress-primary progress w-full"
+      class="progress progress-primary w-full"
       :value="(progress.loaded / progress.total) * 100"
       max="100"
     ></progress>
@@ -180,7 +180,7 @@ async function onSubmit(event: Event) {
       <button
         @click="onSubmit"
         :disabled="validationError != null || isLoading"
-        class="btn-primary btn w-full"
+        class="btn btn-primary w-full"
       >
         <span class="loading loading-spinner loading-md" v-if="isLoading"></span>
         {{ buttonText }}

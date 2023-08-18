@@ -26,7 +26,7 @@ export const useAuthStore = defineStore({
 
       // When the app first loads, we don't want to assume a session timeout, so we want to check auth at least once
       hasTriedAuth: false
-    }) as AuthState,
+    } as AuthState),
 
   actions: {
     async login(username: string, password: string): Promise<boolean> {

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
+import ConfirmModal from '../ConfirmModal.vue'
 import IconButton from '@/components/IconButton.vue'
+import PaginationControls from '@/components/PaginationControls.vue'
 import { adminCreateUser, adminDeleteUser, adminGetAllUsers } from '@/api/admin'
 import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
 import { ref, computed } from 'vue'
-import { AxiosError } from 'axios'
 import { usePagination } from '@/composables/usePagination'
 import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
@@ -21,7 +22,7 @@ const {
   totalPages: totalPages,
   currentItems: paginatedUsers,
   activePage
-} = usePagination(usersToPaginate, 20)
+} = usePagination(usersToPaginate, 10)
 
 const possibleRoles = ['admin', 'standard']
 
@@ -64,12 +65,13 @@ const authStore = useAuthStore()
 
 async function onDeleteUser(id: string) {
   if (authStore.loggedInUser?.id === id) {
-    toast.error('You can\'t delete your own user')
+    toast.error("You can't delete your own user")
     return
   }
 
   try {
     await adminDeleteUser(id)
+    toast.info('Deleted user')
   } catch (e: any) {
     catcher(e)
   } finally {
@@ -91,7 +93,7 @@ async function onDeleteUser(id: string) {
           v-model="newUserUsername"
           type="text"
           placeholder="j.smith"
-          class="input-bordered input w-full max-w-xs"
+          class="input input-bordered w-full max-w-xs"
         />
       </div>
 
@@ -103,7 +105,7 @@ async function onDeleteUser(id: string) {
           v-model="newUserPassword"
           type="password"
           placeholder="hunter2"
-          class="input-bordered input w-full max-w-xs"
+          class="input input-bordered w-full max-w-xs"
         />
       </div>
 
@@ -111,7 +113,7 @@ async function onDeleteUser(id: string) {
         <label class="label font-bold">
           <span class="label-text">Role</span>
         </label>
-        <select class="select-bordered select" v-model="newUserRole">
+        <select class="select select-bordered" v-model="newUserRole">
           <option v-for="role in possibleRoles" :value="role" :key="role">
             {{ role }}
           </option>
@@ -123,7 +125,7 @@ async function onDeleteUser(id: string) {
           <button
             @click="onCreateUser"
             :disabled="newUserValidationError != null"
-            class="btn-primary btn w-full"
+            class="btn btn-primary w-full"
           >
             Create
           </button>
@@ -131,7 +133,7 @@ async function onDeleteUser(id: string) {
       </div>
     </Modal>
     <h2 class="card-title">Users</h2>
-    <button class="btn-primary btn-sm btn" @click="() => (isUserCreateOpen = true)">
+    <button class="btn btn-primary btn-sm" @click="() => (isUserCreateOpen = true)">
       Create User
     </button>
   </div>
@@ -153,7 +155,9 @@ async function onDeleteUser(id: string) {
           {{ user.roles.join(', ') }}
         </td>
         <td class="text-center">
-          <IconButton @click="() => onDeleteUser(user.id)" icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+          <ConfirmModal @on-confirm="() => onDeleteUser(user.id)">
+            <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+          </ConfirmModal>
         </td>
       </tr>
     </tbody>

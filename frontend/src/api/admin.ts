@@ -20,13 +20,17 @@ export function adminCreateUser(
 }
 
 export function adminDeleteUser(id: string): Promise<string> {
-  return client.delete('/api/v1/admin/user/' + id).then(res => res.data)
+  return client.delete('/api/v1/admin/user/' + id).then((res) => res.data)
+}
+
+export function adminDeleteAgent(id: string): Promise<string> {
+  return client.delete('/api/v1/admin/agent/' + id).then((res) => res.data)
 }
 
 export function adminCreateAgent(
   newAgentData: AdminAgentCreateRequestDTO
 ): Promise<AdminAgentCreateResponseDTO> {
-  return client.post('/api/v1/admin/agent/create', newAgentData).then(res => res.data)
+  return client.post('/api/v1/admin/agent/create', newAgentData).then((res) => res.data)
 }
 
 export function adminGetConfig(): Promise<AdminConfigResponseDTO> {

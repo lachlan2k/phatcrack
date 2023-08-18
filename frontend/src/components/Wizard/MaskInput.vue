@@ -20,7 +20,7 @@ const value = computed({
     type="text"
     placeholder="Mask"
     v-model="value"
-    class="input-bordered input w-full max-w-xs"
+    class="input input-bordered w-full max-w-xs"
   />
   <div class="mt-4">
     <span
@@ -32,7 +32,7 @@ const value = computed({
       <button
         text="foo"
         @click="value += maskCharset.mask"
-        class="btn-outline btn-xs btn mr-1 normal-case"
+        class="btn btn-outline btn-xs mr-1 normal-case"
       >
         {{ maskCharset.mask }}
       </button>

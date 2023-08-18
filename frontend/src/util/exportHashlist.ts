@@ -20,46 +20,51 @@ const hexToString = (hex: string) => {
 function getExportBlob(hashes: HashlistHashDTO[], format: ExportFormat) {
   switch (format) {
     case ExportFormat.JSON:
-      return new Blob([JSON.stringify(hashes)], { type: "application/json" })
-    case ExportFormat.CSV:
+      return new Blob([JSON.stringify(hashes)], { type: 'application/json' })
+    case ExportFormat.CSV: {
       // Poor man's CSV, vulnerable to csv injection etc, but bleh
       // TODO: something proper csv generation
       const stringified = [['hash', 'plaintext']]
-        .concat(
-          hashes.map(x =>
-            ([x.input_hash, hexToString(x.plaintext_hex)])
-          )
-        ).map(x => x.join(',')).join(',')
+        .concat(hashes.map((x) => [x.input_hash, hexToString(x.plaintext_hex)]))
+        .map((x) => x.join(','))
+        .join(',')
 
-      return new Blob([stringified], { type: "text/csv" })
+      return new Blob([stringified], { type: 'text/csv' })
+    }
 
-    case ExportFormat.ColonSeparated:
-      const textBlob = hashes.map(x => `${x.input_hash}:${hexToString(x.plaintext_hex)}`).join('\n')
-      return new Blob([textBlob], { type: "text/plain" })
+    case ExportFormat.ColonSeparated: {
+      const textBlob = hashes
+        .map((x) => `${x.input_hash}:${hexToString(x.plaintext_hex)}`)
+        .join('\n')
+      return new Blob([textBlob], { type: 'text/plain' })
+    }
   }
 }
 
 function getExportFilename(hashlist: HashlistDTO, format: ExportFormat) {
-    switch (format) {
-      case ExportFormat.JSON:
-        return `${hashlist.name}.json`
-      case ExportFormat.CSV:
-        return `${hashlist.name}.csv`
-      case ExportFormat.ColonSeparated:
-        return `${hashlist.name}.txt`
-    }
+  switch (format) {
+    case ExportFormat.JSON:
+      return `${hashlist.name}.json`
+    case ExportFormat.CSV:
+      return `${hashlist.name}.csv`
+    case ExportFormat.ColonSeparated:
+      return `${hashlist.name}.txt`
   }
-  
-export  async function exportResults(hashlistId: string, format: ExportFormat, crackedOnly: boolean) {
-    const hashlist = await getHashlist(hashlistId)
-    const filtered = crackedOnly ? hashlist.hashes.filter(x => x.is_cracked) : hashlist.hashes
-  
-    const blob = getExportBlob(filtered, format)
-    const url = URL.createObjectURL(blob)
-  
-    const a = document.createElement('a')
-    a.href = url
-    a.download = getExportFilename(hashlist, format)
-    a.click()
-  }
-  
+}
+
+export async function exportResults(
+  hashlistId: string,
+  format: ExportFormat,
+  crackedOnly: boolean
+) {
+  const hashlist = await getHashlist(hashlistId)
+  const filtered = crackedOnly ? hashlist.hashes.filter((x) => x.is_cracked) : hashlist.hashes
+
+  const blob = getExportBlob(filtered, format)
+  const url = URL.createObjectURL(blob)
+
+  const a = document.createElement('a')
+  a.href = url
+  a.download = getExportFilename(hashlist, format)
+  a.click()
+}

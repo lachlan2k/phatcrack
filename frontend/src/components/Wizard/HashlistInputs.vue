@@ -78,7 +78,7 @@ const hashTypeOptionsToShow = computed(() =>
     type="text"
     placeholder="Dumped Admin NTLM Hashes"
     v-model="hashlistName"
-    class="input-bordered input w-full max-w-xs"
+    class="input input-bordered w-full max-w-xs"
   />
   <hr class="my-4" />
   <label class="label font-bold">
@@ -106,12 +106,12 @@ const hashTypeOptionsToShow = computed(() =>
   </label>
   <textarea
     placeholder="Hashes"
-    class="hashes-input textarea-bordered textarea w-full font-mono focus:outline-none"
+    class="hashes-input textarea textarea-bordered w-full font-mono focus:outline-none"
     rows="8"
     v-model="hashes"
   ></textarea>
   <div v-if="props.includeSaveButton" class="mt-4 flex justify-end">
-    <button class="btn-primary btn" @click="emit('savePressed')">Save</button>
+    <button class="btn btn-primary" @click="emit('savePressed')">Save</button>
   </div>
 </template>
 

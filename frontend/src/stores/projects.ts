@@ -12,7 +12,7 @@ export const useProjectsStore = defineStore({
   state: () =>
     ({
       projects: []
-    }) as ProjectsState,
+    } as ProjectsState),
 
   actions: {
     async load() {

@@ -3,10 +3,10 @@ import { getAllAgents } from '@/api/agent'
 import { useApi } from '@/composables/useApi'
 import { formatDeviceName } from '@/util/formatDeviceName'
 
-const AgentStatusHealthy                  = "AgentStatusHealthy"
-const	AgentStatusUnhealthyButConnected    = "AgentStatusUnhealthyButConnected"
-const	AgentStatusUnhealthyAndDisconnected = "AgentStatusUnhealthyAndDisconnected"
-const	AgentStatusDead                     = "AgentStatusDead"
+const AgentStatusHealthy = 'AgentStatusHealthy'
+const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'
+const AgentStatusUnhealthyAndDisconnected = 'AgentStatusUnhealthyAndDisconnected'
+// const AgentStatusDead = 'AgentStatusDead'
 
 const { data: allAgents } = useApi(getAllAgents)
 </script>
@@ -25,8 +25,8 @@ const { data: allAgents } = useApi(getAllAgents)
             <div class="stat-value flex justify-between">
               <span
                 >{{
-                  allAgents?.agents.filter((x) => x.agent_info.status == AgentStatusHealthy).length ??
-                  '?'
+                  allAgents?.agents.filter((x) => x.agent_info.status == AgentStatusHealthy)
+                    .length ?? '?'
                 }}/{{ allAgents?.agents.length ?? '?' }}</span
               >
               <span class="mt-1 text-2xl text-primary">
@@ -74,7 +74,14 @@ const { data: allAgents } = useApi(getAllAgents)
                     v-if="agent.agent_info.status == AgentStatusHealthy"
                     title="Healthy"
                   ></div>
-                  <div class="badge badge-warning badge-sm" title="Unhealthy" v-else-if="agent.agent_info.status == AgentStatusUnhealthyAndDisconnected || agent.agent_info.status == AgentStatusUnhealthyButConnected"></div>
+                  <div
+                    class="badge badge-warning badge-sm"
+                    title="Unhealthy"
+                    v-else-if="
+                      agent.agent_info.status == AgentStatusUnhealthyAndDisconnected ||
+                      agent.agent_info.status == AgentStatusUnhealthyButConnected
+                    "
+                  ></div>
                   <div class="badge badge-ghost badge-sm" title="Dead" v-else></div>
                 </td>
               </tr>

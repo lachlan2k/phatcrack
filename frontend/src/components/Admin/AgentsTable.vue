@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
 import IconButton from '@/components/IconButton.vue'
-import { adminCreateAgent, adminGetAllUsers } from '@/api/admin'
+import { adminCreateAgent, adminDeleteAgent } from '@/api/admin'
 import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
 import { ref, computed } from 'vue'
-import { AxiosError } from 'axios'
 import { getAllAgents } from '@/api/agent'
+import { useToastError } from '@/composables/useToastError'
+import ConfirmModal from '../ConfirmModal.vue'
 
 const isAgentCreateOpen = ref(false)
 const { data: agents, fetchData: fetchAgents } = useApi(getAllAgents)
 
 const toast = useToast()
+const { catcher } = useToastError()
 
 const newAgentName = ref('')
 const newAgentValidationError = computed(() => {
@@ -29,20 +31,24 @@ const newAgentValidationError = computed(() => {
 async function onCreateAgent() {
   try {
     const res = await adminCreateAgent({
-        name: newAgentName.value,
+      name: newAgentName.value
     })
 
     toast.success('Created new agent: ' + res.name)
     alert(`New agent's auth key: ${res.key} (this won't be displayed again)`)
   } catch (e: any) {
-    let errorString = 'Unknown Error'
-    if (e instanceof AxiosError) {
-      errorString = e.response?.data?.message
-    } else if (e instanceof Error) {
-      errorString = e.message
-    }
+    catcher(e)
+  } finally {
+    fetchAgents()
+  }
+}
 
-    toast.error('Failed to create new agent: ' + errorString)
+async function onDeleteAgent(id: string) {
+  try {
+    await adminDeleteAgent(id)
+    toast.info('Deleted agent')
+  } catch (e: any) {
+    catcher(e)
   } finally {
     fetchAgents()
   }
@@ -62,7 +68,7 @@ async function onCreateAgent() {
           v-model="newAgentName"
           type="text"
           placeholder="crack01"
-          class="input-bordered input w-full max-w-xs"
+          class="input input-bordered w-full max-w-xs"
         />
       </div>
 
@@ -71,7 +77,7 @@ async function onCreateAgent() {
           <button
             @click="onCreateAgent"
             :disabled="newAgentValidationError != null"
-            class="btn-primary btn w-full"
+            class="btn btn-primary w-full"
           >
             Create
           </button>
@@ -79,7 +85,7 @@ async function onCreateAgent() {
       </div>
     </Modal>
     <h2 class="card-title">Agents</h2>
-    <button class="btn-primary btn-sm btn ml-12" @click="() => (isAgentCreateOpen = true)">
+    <button class="btn btn-primary btn-sm ml-12" @click="() => (isAgentCreateOpen = true)">
       Create Agent
     </button>
   </div>
@@ -97,7 +103,9 @@ async function onCreateAgent() {
           <strong>{{ agent.name }}</strong>
         </td>
         <td class="text-center">
-          <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+          <ConfirmModal @on-confirm="() => onDeleteAgent(agent.id)">
+            <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+          </ConfirmModal>
         </td>
       </tr>
     </tbody>
