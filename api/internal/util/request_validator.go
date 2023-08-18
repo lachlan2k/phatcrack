@@ -13,7 +13,8 @@ func BindAndValidate[DTO interface{}](c echo.Context) (DTO, error) {
 	if err := c.Bind(&req); err != nil {
 		return req, echo.NewHTTPError(http.StatusBadRequest, "Bad request").SetInternal(err)
 	}
-	if err := c.Validate(&req); err != nil {
+	err := c.Validate(&req)
+	if err != nil {
 		return req, err
 	}
 	return req, nil

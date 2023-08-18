@@ -7,7 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/labstack/echo/v4"
+	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
@@ -31,6 +34,11 @@ func HookListsEndpoints(api *echo.Group) {
 }
 
 func handleListfileUpload(c echo.Context) error {
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
 	fileType := c.FormValue("file-type")
 	if fileType != db.ListfileTypeRulefile && fileType != db.ListfileTypeWordlist {
 		return echo.ErrBadRequest
@@ -80,7 +88,14 @@ func handleListfileUpload(c echo.Context) error {
 		uploadedFileHandle.Seek(0, io.SeekStart)
 	}
 
-	// TODO rollback on later failures
+	AuditLog(c, log.Fields{
+		"listfile_size":      uploadedFile.Size,
+		"listfile_linecount": lineCount,
+		"listfile_filename":  uploadedFile.Filename,
+		"listfile_type":      fileType,
+	}, "User uploaded a new %s", fileType)
+
+	// TODO rollback on later failures?
 	listfile, err := db.CreateListfile(&db.Listfile{
 		Name:        uploadedFile.Filename,
 		FileType:    fileType,

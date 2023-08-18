@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path"
 	"strconv"
 	"strings"
 	"time"
+
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/agent/internal/config"

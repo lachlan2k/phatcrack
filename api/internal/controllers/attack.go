@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
@@ -237,6 +239,12 @@ func handleAttackCreate(c echo.Context) error {
 		return util.ServerError("Failed to create new attack", err)
 	}
 
+	AuditLog(c, log.Fields{
+		"project_id":   projId,
+		"project_name": proj.Name,
+		"hashlist_id":  req.HashlistID,
+	}, "New attack created")
+
 	return c.JSON(http.StatusCreated, attack.ToDTO())
 }
 
@@ -305,6 +313,14 @@ func handleAttackStart(c echo.Context) error {
 	if err != nil {
 		return util.ServerError("Couldn't create attack job", err)
 	}
+
+	AuditLog(c, log.Fields{
+		"attack_id":     attack.ID,
+		"project_id":    projId,
+		"project_name":  proj.Name,
+		"hashlist_id":   attack.HashlistID,
+		"hashlist_name": hashlist.Name,
+	}, "User has started attack")
 
 	_, err = fleet.ScheduleJobs([]string{newJob.ID.String()})
 

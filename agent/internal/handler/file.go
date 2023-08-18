@@ -3,10 +3,11 @@ package handler
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"log"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"

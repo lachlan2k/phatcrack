@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+
 	"log"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"

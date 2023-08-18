@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
@@ -22,6 +24,11 @@ func HookAdminEndpoints(api *echo.Group) {
 	})
 
 	api.PUT("/config", func(c echo.Context) error {
+		user := auth.UserFromReq(c)
+		if user == nil {
+			return echo.ErrForbidden
+		}
+
 		req, err := util.BindAndValidate[apitypes.AdminConfigRequestDTO](c)
 		if err != nil {
 			return err
@@ -36,6 +43,8 @@ func HookAdminEndpoints(api *echo.Group) {
 		if err != nil {
 			return util.ServerError("Failed to update config", err)
 		}
+
+		AuditLog(c, nil, "Admin updated configuration to %v", req)
 
 		conf := config.Get()
 		return c.JSON(http.StatusOK, apitypes.AdminConfigResponseDTO{
@@ -75,6 +84,11 @@ func HookAdminEndpoints(api *echo.Group) {
 }
 
 func handleCreateUser(c echo.Context) error {
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
 	req, err := util.BindAndValidate[apitypes.AdminUserCreateRequestDTO](c)
 	if err != nil {
 		return err
@@ -96,6 +110,10 @@ func handleCreateUser(c echo.Context) error {
 		return util.ServerError("Couldn't create user", err)
 	}
 
+	AuditLog(c, log.Fields{
+		"new_user": newUser.ToDTO(),
+	}, "New user created")
+
 	return c.JSON(http.StatusCreated, apitypes.AdminUserCreateResponseDTO{
 		ID:       newUser.ID.String(),
 		Username: newUser.Username,
@@ -104,6 +122,11 @@ func handleCreateUser(c echo.Context) error {
 }
 
 func handleAgentCreate(c echo.Context) error {
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
 	req, err := util.BindAndValidate[apitypes.AdminAgentCreateRequestDTO](c)
 	if err != nil {
 		return err
@@ -113,6 +136,10 @@ func handleAgentCreate(c echo.Context) error {
 	if err != nil {
 		return util.ServerError("Failed to create agent", err)
 	}
+
+	AuditLog(c, log.Fields{
+		"new_agent": newAgent.ToDTO(),
+	}, "New agent created")
 
 	return c.JSON(http.StatusCreated, apitypes.AdminAgentCreateResponseDTO{
 		Name: req.Name,

@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
@@ -25,6 +27,8 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 
 	api.POST("/logout", func(c echo.Context) error {
 		sessHandler.Destroy(c)
+		AuditLog(c, nil, "User has logged out")
+
 		return c.JSON(http.StatusOK, "Goodbye")
 	})
 
@@ -87,6 +91,8 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			}
 		}
 
+		AuditLog(c, nil, "User has changed their password")
+
 		err = user.Save()
 		if err != nil {
 			return util.ServerError("Failed to update password", err)
@@ -119,14 +125,25 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Unsupported MFA type")
 		}
 
+		AuditLog(c, log.Fields{
+			"mfa_method": method,
+		}, "User is attempting to enroll MFA")
+
 		resp, userPresentableError, internalErr := auth.MFAWebAuthnBeginRegister(c, sessHandler)
+		if userPresentableError != nil || internalErr != nil {
+			AuditLog(c, log.Fields{
+				"user_presentable_error": userPresentableError,
+				"internal_err":           internalErr,
+			}, "User failed to start MFA enrollment")
+		}
 		if internalErr != nil {
 			return util.ServerError("Something went wrong with MFA enrollment", internalErr)
 		}
-
 		if userPresentableError != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, userPresentableError.Error()).SetInternal(userPresentableError)
 		}
+
+		AuditLog(c, nil, "User started MFA enrollment successfully")
 
 		return c.JSONBlob(http.StatusOK, resp)
 	})
@@ -138,14 +155,24 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Unsupported MFA type")
 		}
 
+		AuditLog(c, nil, "User is attempting to finish MFA enrollment")
+
 		userPresentableError, internalErr := auth.MFAWebAuthnFinishRegister(c, sessHandler)
+		if userPresentableError != nil || internalErr != nil {
+			AuditLog(c, log.Fields{
+				"user_presentable_error": userPresentableError,
+				"internal_err":           internalErr,
+			}, "User failed to finish MFA enrollment")
+			sessHandler.Destroy(c)
+		}
 		if internalErr != nil {
 			return util.ServerError("Something went wrong with MFA enrollment", internalErr)
 		}
-
 		if userPresentableError != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, userPresentableError.Error()).SetInternal(userPresentableError)
 		}
+
+		AuditLog(c, nil, "User successfully finished MFA enrollment")
 
 		return c.JSON(http.StatusCreated, "Ok")
 	})
@@ -167,11 +194,19 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Incorrect MFA type")
 		}
 
-		resp, userPresentableError, internalErr := auth.MFAWebAuthnBeginLogin(c, sessHandler)
-		if internalErr != nil {
-			return util.ServerError("Something went wrong with MFA registration", internalErr)
-		}
+		AuditLog(c, nil, "User has begun MFA challenge")
 
+		resp, userPresentableError, internalErr := auth.MFAWebAuthnBeginLogin(c, sessHandler)
+		if userPresentableError != nil || internalErr != nil {
+			AuditLog(c, log.Fields{
+				"user_presentable_error": userPresentableError,
+				"internal_err":           internalErr,
+			}, "User failed to begin MFA challenge")
+			sessHandler.Destroy(c)
+		}
+		if internalErr != nil {
+			return util.ServerError("Something went wrong with starting MFA challenge", internalErr)
+		}
 		if userPresentableError != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, userPresentableError.Error()).SetInternal(userPresentableError)
 		}
@@ -196,11 +231,19 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Incorrect MFA type")
 		}
 
+		AuditLog(c, nil, "User is completing MFA Challenge")
+
 		userPresentableError, internalErr := auth.MFAWebAuthnFinishLogin(c, sessHandler)
+		if userPresentableError != nil || internalErr != nil {
+			AuditLog(c, log.Fields{
+				"user_presentable_error": userPresentableError,
+				"internal_err":           internalErr,
+			}, "User failed to complete MFA challenge")
+			sessHandler.Destroy(c)
+		}
 		if internalErr != nil {
 			return util.ServerError("Something went wrong with MFA completion", internalErr)
 		}
-
 		if userPresentableError != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, userPresentableError.Error()).SetInternal(userPresentableError)
 		}
@@ -213,6 +256,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return util.ServerError("Something went wrong with MFA completion", err)
 		}
 
+		AuditLog(c, nil, "User has authenticated")
 		return c.JSON(http.StatusOK, "Ok")
 	})
 }
@@ -261,6 +305,9 @@ func handleLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 
 		hashingTest := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 		if hashingTest == bcrypt.ErrMismatchedHashAndPassword {
+			AuditLog(c, log.Fields{
+				"attempted_username": user.Username,
+			}, "Incorrect password submitted")
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		}
 		if hashingTest != nil {
@@ -272,7 +319,7 @@ func handleLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			HasCompletedMFA: false,
 		})
 
-		return c.JSON(http.StatusOK, apitypes.AuthLoginResponseDTO{
+		response := apitypes.AuthLoginResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
 				ID:       user.ID.String(),
 				Username: user.Username,
@@ -281,6 +328,23 @@ func handleLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			IsAwaitingMFA:          user.HasRole(auth.RoleMFAEnrolled),
 			RequiresPasswordChange: user.HasRole(auth.RoleRequiresPasswordChange),
 			RequiresMFAEnrollment:  !user.HasRole(auth.RoleMFAEnrolled) && config.Get().IsMFARequired,
-		})
+		}
+
+		logMessage := "Session started"
+		if response.IsAwaitingMFA {
+			logMessage += ", user needs to complete MFA"
+		}
+		if response.RequiresPasswordChange {
+			logMessage += ", user needs to change password"
+		}
+		if response.RequiresMFAEnrollment {
+			logMessage += ", user needs to enroll MFA"
+		}
+
+		AuditLog(c, log.Fields{
+			"authenticated_username": user.Username,
+		}, logMessage)
+
+		return c.JSON(http.StatusOK, response)
 	}
 }

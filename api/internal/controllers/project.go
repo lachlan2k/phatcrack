@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
@@ -43,6 +45,11 @@ func handleProjectCreate(c echo.Context) error {
 		return util.ServerError("Failed to create project", err)
 	}
 
+	AuditLog(c, log.Fields{
+		"project_id":   newProj.ID,
+		"project_name": newProj.Name,
+	}, "User created a new project")
+
 	return c.JSON(http.StatusCreated, newProj.ToDTO())
 }
 
@@ -67,7 +74,7 @@ func handleProjectGet(c echo.Context) error {
 
 	// Even though our DB query should've constrained it, sanity check with access control regardless
 	if !accesscontrol.HasRightsToProject(user, proj) {
-		c.Logger().Printf("Something went wrong with getting project %s for user %s, the query returned it, but the user should not have access", proj.ID.String(), user.ID)
+		log.Errorf("Access control violation: Something went wrong with getting project %s for user %s, the query returned it, but the user should not have access", proj.ID.String(), user.ID)
 		return echo.ErrForbidden
 	}
 
@@ -95,7 +102,7 @@ func handleProjectGetAll(c echo.Context) error {
 	for _, project := range projects {
 		// Sanity check access control
 		if !accesscontrol.HasRightsToProject(user, &project) {
-			c.Logger().Printf("Something went wrong with getting all projects for user %s, the database query returned project %s, which the user should NOT have access to", user.ID, project.ID.String())
+			log.Errorf("Access control violation: Something went wrong with getting all projects for user %s, the database query returned project %s, which the user should NOT have access to", user.ID, project.ID.String())
 			continue
 		}
 

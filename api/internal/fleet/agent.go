@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -173,7 +172,6 @@ func (a *AgentConnection) RequestFileDownload(fileIDs ...uuid.UUID) error {
 }
 
 func (a *AgentConnection) Handle() error {
-	log.Printf("handling agent")
 	defer a.MarkDisconnected()
 
 	agentInfo, err := db.GetAgent(a.agentId)

@@ -11,6 +11,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/controllers"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
+	log "github.com/sirupsen/logrus"
 )
 
 func makeSessionHandler() auth.SessionHandler {
@@ -40,7 +41,63 @@ func Listen(port string) error {
 	validator := &util.RequestValidator{Validator: validator.New()}
 	validator.Init()
 	e.Validator = validator
-	e.Use(middleware.Logger())
+
+	// e.Use(middleware.LoggerWithConfig(
+	// 	middleware.LoggerConfig{
+	// 		Skipper: func(c echo.Context) bool {
+	// 			return false
+	// 			if c.Response().Status == 200 {
+	// 				return true
+	// 			}
+	// 			return false
+	// 		},
+	// 	},
+	// ))
+	e.Use(middleware.RequestLoggerWithConfig(
+		middleware.RequestLoggerConfig{
+
+			LogLatency:       true,
+			LogRemoteIP:      true,
+			LogMethod:        true,
+			LogURI:           true,
+			LogUserAgent:     true,
+			LogStatus:        true,
+			LogContentLength: true,
+			LogResponseSize:  true,
+
+			LogValuesFunc: func(c echo.Context, values middleware.RequestLoggerValues) error {
+				fields := log.Fields{
+					"latency_ms":     values.Latency.Milliseconds(),
+					"remote_ip":      values.RemoteIP,
+					"method":         values.Method,
+					"URI":            values.URI,
+					"user_agent":     values.UserAgent,
+					"status":         values.Status,
+					"content_length": values.ContentLength,
+					"response_size":  values.ResponseSize,
+				}
+
+				if values.Error != nil {
+					fields["err"] = values.Error.Error()
+					log.WithFields(fields).Error("request error")
+					return nil
+				}
+
+				if values.Status >= 500 && values.Status <= 599 {
+					log.WithFields(fields).Error("request error")
+					return nil
+				}
+
+				if values.Status == 400 || values.Status == 403 {
+					log.WithFields(fields).Warn("bad request")
+					return nil
+				}
+
+				log.WithFields(fields).Info("request")
+				return nil
+			},
+		},
+	))
 	e.Use(middleware.Recover())
 
 	// Slightly annoying, the auth middleware, by default, uses a 400 error when the auth is missing

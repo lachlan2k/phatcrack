@@ -2,8 +2,9 @@ package handler
 
 import (
 	"fmt"
-	"log"
 	"time"
+
+	"log"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
 	"github.com/lachlan2k/phatcrack/agent/internal/util"

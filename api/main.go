@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/url"
 	"os"
 
@@ -11,9 +10,20 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/webserver"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+	// Log as JSON instead of the default ASCII formatter.
+	log.SetFormatter(&log.JSONFormatter{})
+
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	log.SetOutput(os.Stdout)
+
+	// Only log the warning severity or above.
+	log.SetLevel(log.WarnLevel)
+
 	if os.Getenv("DB_DSN") == "" {
 		log.Fatal("DB_DSN was not specified")
 	}
@@ -39,7 +49,7 @@ func main() {
 	}
 
 	if os.Getenv("HC_PATH") == "" {
-		log.Printf("HC_PATH was not specified, some API endpoints may not work if hashcat is not in PATH\n")
+		log.Warnf("HC_PATH was not specified, some API endpoints may not work if hashcat is not in PATH\n")
 	}
 
 	if os.Getenv("FILEREPO_PATH") == "" {

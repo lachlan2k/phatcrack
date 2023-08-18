@@ -2,8 +2,9 @@ package fleet
 
 import (
 	"fmt"
-	"log"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
@@ -67,7 +68,11 @@ func stateReconciliation() error {
 
 		case db.AgentStatusUnhealthyButConnected:
 			if time.Since(info.TimeOfLastHeartbeat) > deadtimetoDead {
-				log.Printf("Setting agent %s to dead, because it has been %fs since last heartbeat", agent.ID.String(), time.Since(info.TimeOfLastHeartbeat).Seconds())
+				log.
+					WithField("agent_id", agent.ID.String()).
+					WithField("time_since_last_heartbeat", time.Since(info.TimeOfLastHeartbeat).Seconds()).
+					Warn("Setting agent to dead, because it has been too long since last heartbeat")
+
 				newInfo.Status = db.AgentStatusDead
 				needsSave = true
 			}
@@ -79,7 +84,11 @@ func stateReconciliation() error {
 				// Therefore, in this case, we will evaluate it as if it was UnhealthyButConnected
 
 				if time.Since(info.TimeOfLastHeartbeat) > deadtimetoDead {
-					log.Printf("Setting agent %s to dead, because it has been %fs since last heartbeat", agent.ID.String(), time.Since(info.TimeOfLastHeartbeat).Seconds())
+					log.
+						WithField("agent_id", agent.ID.String()).
+						WithField("time_since_last_heartbeat", time.Since(info.TimeOfLastHeartbeat).Seconds()).
+						Warn("Setting disconnected agent to dead, because it has been too long since last heartbeat")
+
 					newInfo.Status = db.AgentStatusDead
 					needsSave = true
 				}
@@ -87,7 +96,11 @@ func stateReconciliation() error {
 				// Otherwise, the reason its UnhealthyAndDisconnected is due to the agent disconnecting.
 				// As such, we can trust that TimeOfLastDisconnect is accurate.
 				if time.Since(info.TimeOfLastDisconnect) > disconnectTimeToDead {
-					log.Printf("Setting agent %s to dead, because it has been %fs since it disconnected", agent.ID.String(), time.Since(info.TimeOfLastDisconnect).Seconds())
+					log.
+						WithField("agent_id", agent.ID.String()).
+						WithField("time_since_last_disconnect", time.Since(info.TimeOfLastDisconnect).Seconds()).
+						Warn("Setting disconnect agent to dead, because it has been too long since it last disconnected")
+
 					newInfo.Status = db.AgentStatusDead
 					needsSave = true
 				}
@@ -98,7 +111,10 @@ func stateReconciliation() error {
 			for _, jobId := range activeJobs {
 				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The agent running this job died", time.Now())
 				if err != nil {
-					log.Printf("Warn: failed to update job status in database: %v", err)
+					log.
+						WithField("agent_id", agent.ID.String()).
+						WithField("job_id", jobId).
+						Errorf("Failed to update job status in database: %v", err)
 				}
 			}
 
@@ -114,7 +130,9 @@ func stateReconciliation() error {
 		if needsSave {
 			err := db.UpdateAgentInfo(agent.ID.String(), newInfo)
 			if err != nil {
-				log.Printf("Warn: Failed to update status of agent %s: %v", agent.ID.String(), err)
+				log.
+					WithField("agent_id", agent.ID.String()).
+					Errorf("Failed to update status of agent: %v", err)
 			}
 		}
 	}
@@ -134,20 +152,28 @@ func stateReconciliation() error {
 			}
 
 			// The job didn't start in time
-			_, jobOk := jobsOk[job.ID.String()]
+			runningAgent, jobOk := jobsOk[job.ID.String()]
 			if jobOk {
 				// Actually, it looks like it did start? One of our agents says they are running it!
 				// This condition *shouldn't* be reached, but lets handle it anyway
-				log.Printf("Warn: Job was marked as awaiaitng-start in database, but an agent was found to be running it. This probably indicates a race condition, and we'll let it slide for now.")
+				log.
+					WithField("job_id", job.ID.String()).
+					WithField("agent_id", runningAgent.String()).
+					Warn("Job was marked as awaiting-start in database, but an agent was found to be running it. This probably indactes a race condition? We'll let it slide.")
+
 				err = db.SetJobStarted(job.ID.String(), "Unknown", time.Now())
 				if err != nil {
-					log.Printf("Warn: failed to update job status in database: %v", err)
+					log.
+						WithField("job_id", job.ID.String()).
+						Errorf("Failed to update job status in database: %v", err)
 				}
 			} else {
 				// As expected, no agent is running the job.
 				err = db.SetJobExited(job.ID.String(), db.JobStopReasonTimeout, "The job did not start in time", time.Now())
 				if err != nil {
-					log.Printf("Warn: failed to update job status in database: %v", err)
+					log.
+						WithField("job_id", job.ID.String()).
+						Errorf("Failed to update job status in database: %v", err)
 				}
 
 				// Tell agent to kill this job, incase it *is* running but it just didn't make it through, or its in a broken state.
@@ -168,10 +194,16 @@ func stateReconciliation() error {
 			agentThatShouldBeRunningJob, isAgentOk := agentMap[job.AssignedAgentID.String()]
 			if !isAgentOk {
 				// Hmm, the agent doesn't exist at all?
-				log.Printf("Warn: Job %s was found assigned to an agent that doesn't exist (%s), this shouldn't happen. Ignoring this job", jobId, job.AssignedAgentID.String())
+				log.
+					WithField("job_id", job.ID.String()).
+					WithField("assigned_agent_id", job.AssignedAgentID.String()).
+					Warn("Job was assigned to an agent that doesn't exist, this shouldn't hapen. Failing this job.")
+
 				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was assigned to an invalid agent.", time.Now())
 				if err != nil {
-					log.Printf("Warn: failed to update job status in database: %v", err)
+					log.
+						WithField("job_id", job.ID.String()).
+						Errorf("Failed to update job status in database: %v", err)
 				}
 
 				continue
@@ -181,7 +213,9 @@ func stateReconciliation() error {
 			if !jobOk {
 				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job disappeared from the agent's list of running jobs. The agent probably died or was restarted.", time.Now())
 				if err != nil {
-					log.Printf("Warn: failed to update job status in database: %v", err)
+					log.
+						WithField("job_id", job.ID.String()).
+						Errorf("Failed to update job status in database: %v", err)
 				}
 
 				tellAgentToKillJob(&agentRunningJob, &job.ID)
@@ -193,7 +227,9 @@ func stateReconciliation() error {
 				// But we can check it, so we might as well check it
 				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was unexpectedly found running on the wrong agent.", time.Now())
 				if err != nil {
-					log.Printf("Warn: failed to update job status in database: %v", err)
+					log.
+						WithField("job_id", job.ID.String()).
+						Errorf("Failed to update job status in database: %v", err)
 				}
 
 				tellAgentToKillJob(&agentRunningJob, &job.ID)
@@ -222,7 +258,7 @@ func stateReconciliationTask() {
 		}
 
 		if err != nil {
-			log.Printf("Error during state reconciliation: %v", err)
+			log.Errorf("State reconciliation failed: %v", err)
 		}
 	}
 }

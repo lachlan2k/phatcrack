@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
@@ -67,9 +69,15 @@ func handleAgentWs(c echo.Context) error {
 	defer ws.Close()
 
 	agent := fleet.RegisterAgentFromWebsocket(ws, agentData.ID.String())
+
+	AuditLog(c, log.Fields{
+		"agent_id":   agentData.ID.String(),
+		"agent_name": agentData.Name,
+	}, "Agent has connected and is being handled")
+
 	err = agent.Handle()
 	if err != nil {
-		c.Logger().Printf("Error from agent: %v", err)
+		log.Warnf("Error from agent: %v", err)
 	}
 
 	return nil

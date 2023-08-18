@@ -3,6 +3,8 @@ package controllers
 import (
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
@@ -88,13 +90,15 @@ func handleHashlistGet(c echo.Context) error {
 	return c.JSON(http.StatusOK, hashlist.ToDTO(true))
 }
 
+// TODO: this endpoint doesn't validate that parameters like the name are of a sane length/charset
 func handleHashlistCreate(c echo.Context) error {
 	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
 	}
 
-	req, err := util.BindAndValidate[apitypes.HashlistCreateRequestDTO](c)
+	var req apitypes.HashlistCreateRequestDTO
+	err := c.Bind(&req)
 	if err != nil {
 		return err
 	}
@@ -108,10 +112,12 @@ func handleHashlistCreate(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
+	log.Infof("Validating hashes for new hashlist (%s) for project %s", req.Name, req.ProjectID)
+
 	// Ensure provided algorithm type is valid and normalize
 	normalizedHashes, err := hashcathelpers.NormalizeHashes(req.InputHashes, req.HashType, req.HasUsernames)
 	if err != nil {
-		c.Logger().Printf("Failed to validated hashes for project %s because %v", req.ProjectID, err)
+		log.Warnf("Failed to validated hashes for project %s because %v", req.ProjectID, err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate and normalize hashes. Please ensure your hashes are valid for the given hash type.").SetInternal(err)
 	}
 
@@ -134,6 +140,12 @@ func handleHashlistCreate(c echo.Context) error {
 	if err != nil {
 		return util.ServerError("Failed to create hashlist", err)
 	}
+
+	AuditLog(c, log.Fields{
+		"hashlist_name": newHashlist.Name,
+		"hashlist_id":   newHashlist.ID.String(),
+		"project_id":    req.ProjectID,
+	}, "User created a new hashlist")
 
 	return c.JSON(http.StatusCreated, apitypes.HashlistCreateResponseDTO{
 		ID: newHashlist.ID.String(),

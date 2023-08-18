@@ -1,6 +1,8 @@
 package auth
 
 import (
+	log "github.com/sirupsen/logrus"
+
 	"github.com/NHAS/webauthn/webauthn"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
@@ -54,7 +56,7 @@ func UserAndSessFromReq(c echo.Context) (*db.User, *SessionData) {
 
 	user, err := db.GetUserByID(sess.UserID)
 	if err != nil || user == nil {
-		c.Logger().Printf("Couldn't fetch user ID %s for session", sess.UserID)
+		log.Errorf("Couldn't fetch user ID %s for session", sess.UserID)
 		return nil, nil
 	}
 
