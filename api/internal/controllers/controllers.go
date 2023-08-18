@@ -15,10 +15,7 @@ func AuditLog(c echo.Context, fields log.Fields, format string, args ...interfac
 	fields["remote_ip"] = c.RealIP()
 
 	user := auth.UserFromReq(c)
-	if user == nil {
-		fields["user_username"] = "Unknown"
-		fields["user_id"] = "Unknown"
-	} else {
+	if user != nil {
 		fields["user_username"] = user.Username
 		fields["user_id"] = user.ID.String()
 	}

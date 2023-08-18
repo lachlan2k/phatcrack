@@ -79,7 +79,14 @@ func Listen(port string) error {
 					"response_size":  values.ResponseSize,
 				}
 
-				if values.Error != nil {
+				user := auth.UserFromReq(c)
+				if user != nil {
+					fields["user_username"] = user.Username
+					fields["user_id"] = user.ID.String()
+				}
+
+				// 401 messagse are noisy if a user's status has timed out
+				if values.Error != nil && values.Status != 401 {
 					var wrapped util.WrappedServerError
 					if errors.As(values.Error, &wrapped) {
 						log.WithError(wrapped.Unwrap()).WithFields(fields).WithField("error_id", wrapped.ID()).Error("request error " + wrapped.ID())
