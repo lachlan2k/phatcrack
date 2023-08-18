@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
@@ -101,6 +102,8 @@ func handleListfileUpload(c echo.Context) error {
 		FileType:    fileType,
 		SizeInBytes: uint64(uploadedFile.Size),
 		Lines:       uint64(lineCount),
+		// When an admin uploads a listfile, its locked
+		IsLocked: user.HasRole(auth.RoleAdmin),
 	})
 	if err != nil {
 		return util.ServerError("Failed to create new listfile", err)
@@ -172,6 +175,10 @@ func handleGetAllWordlists(c echo.Context) error {
 		res.Wordlists[i] = list.ToDTO()
 	}
 
+	slices.SortFunc(res.Wordlists, func(a, b apitypes.ListfileDTO) int {
+		return int(b.Lines) - int(a.Lines)
+	})
+
 	return c.JSON(http.StatusOK, res)
 }
 
@@ -186,6 +193,10 @@ func handleGetAllRuleFiles(c echo.Context) error {
 	for i, list := range lists {
 		res.RuleFiles[i] = list.ToDTO()
 	}
+
+	slices.SortFunc(res.RuleFiles, func(a, b apitypes.ListfileDTO) int {
+		return int(b.Lines) - int(a.Lines)
+	})
 
 	return c.JSON(http.StatusOK, res)
 }

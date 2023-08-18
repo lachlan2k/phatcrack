@@ -177,6 +177,8 @@ func stateReconciliation() error {
 		}
 
 		if listfile.AvailableForUse != availableOnAll {
+			log.WithField("listfile_id", listfile.ID.String()).Warn("Marking listfile as unavailable, since it was missing on at least one agent")
+
 			listfile.AvailableForUse = availableOnAll
 			err := listfile.Save()
 			if err != nil {

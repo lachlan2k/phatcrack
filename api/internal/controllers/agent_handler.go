@@ -47,7 +47,15 @@ func handleAgentDownloadFile(c echo.Context) error {
 		return util.ServerError("Failed to get file", err)
 	}
 
-	return c.File(filename)
+	err = c.File(filename)
+	if err == echo.ErrNotFound {
+		log.WithField("file_id", fileId).WithField("agent_id", agentId).WithError(err).Warn("Agent tried to download a file that doesn't exist")
+		return err
+	}
+	if err != nil {
+		log.WithField("file_id", fileId).WithField("agent_id", agentId).WithError(err).Warn("Agent tried to download a file but encountered an error")
+	}
+	return err
 }
 
 func handleAgentWs(c echo.Context) error {
