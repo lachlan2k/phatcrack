@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -142,8 +141,6 @@ func handleAgentCreate(c echo.Context) error {
 }
 
 func handleDeleteUser(c echo.Context) error {
-	return util.ServerError("Test error", errors.New("foobar test"))
-
 	id := c.Param("id")
 
 	user, err := db.GetUserByID(id)
