@@ -6,6 +6,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
+	log "github.com/sirupsen/logrus"
 )
 
 func (a *AgentConnection) handleJobStarted(msg *wstypes.Message) error {
@@ -13,6 +14,13 @@ func (a *AgentConnection) handleJobStarted(msg *wstypes.Message) error {
 	if err != nil {
 		return fmt.Errorf("couldn't unmarshal %v to job started dto: %v", msg.Payload, err)
 	}
+
+	log.WithFields(log.Fields{
+		"log_type":        "audit",
+		"agent_id":        a.agentId,
+		"job_id":          payload.JobID,
+		"hashcat_command": payload.HashcatCommand,
+	}).Warn("Job started")
 
 	return db.SetJobStarted(payload.JobID, payload.HashcatCommand, payload.Time)
 }
