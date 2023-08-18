@@ -78,8 +78,7 @@ func Listen(port string) error {
 				}
 
 				if values.Error != nil {
-					fields["err"] = values.Error.Error()
-					log.WithFields(fields).Error("request error")
+					log.WithError(values.Error).WithFields(fields).Error("request error")
 					return nil
 				}
 

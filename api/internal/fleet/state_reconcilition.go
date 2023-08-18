@@ -43,6 +43,16 @@ func stateReconciliation() error {
 		return err
 	}
 
+	allListfiles, err := db.GetAllListfiles()
+	if err != nil {
+		return err
+	}
+
+	incompleteJobs, err := db.GetAllIncompleteJobs(true)
+	if err != nil {
+		return err
+	}
+
 	// Create a convienient map so we can look up agents by ID later
 	agentMap := make(map[string]*db.Agent, 0)
 
@@ -114,7 +124,8 @@ func stateReconciliation() error {
 					log.
 						WithField("agent_id", agent.ID.String()).
 						WithField("job_id", jobId).
-						Errorf("Failed to update job status in database: %v", err)
+						WithError(err).
+						Error("Failed to update job status in database")
 				}
 			}
 
@@ -132,14 +143,46 @@ func stateReconciliation() error {
 			if err != nil {
 				log.
 					WithField("agent_id", agent.ID.String()).
-					Errorf("Failed to update status of agent: %v", err)
+					WithError(err).
+					Error("Failed to update status of agent")
 			}
 		}
+
+		agent.AgentInfo.Data = newInfo
 	}
 
-	incompleteJobs, err := db.GetAllIncompleteJobs(true)
-	if err != nil {
-		return err
+	// Make sure listfiles are available on all healthy agents
+	for _, listfile := range allListfiles {
+		availableOnAll := true
+
+		for _, agent := range agentMap {
+			if agent.AgentInfo.Data.Status != db.AgentStatusHealthy {
+				continue
+			}
+
+			// Triple nested for loops lets gooo
+			// (in all seriousness yes this is really gross but i dont quite care enough)
+			// (should refactor listfile to a map but meh)
+			found := false
+			for _, availableListfile := range agent.AgentInfo.Data.AvailableListfiles {
+				if availableListfile.Name == listfile.ID.String() && availableListfile.Size == int64(listfile.SizeInBytes) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				availableOnAll = false
+				break
+			}
+		}
+
+		if listfile.AvailableForUse != availableOnAll {
+			listfile.AvailableForUse = availableOnAll
+			err := listfile.Save()
+			if err != nil {
+				log.WithError(err).WithField("listfile_id", listfile.ID.String()).Error("Failed to save listfile's new availability")
+			}
+		}
 	}
 
 	for _, job := range incompleteJobs {
@@ -165,7 +208,8 @@ func stateReconciliation() error {
 				if err != nil {
 					log.
 						WithField("job_id", job.ID.String()).
-						Errorf("Failed to update job status in database: %v", err)
+						WithError(err).
+						Error("Failed to update job status in database")
 				}
 			} else {
 				// As expected, no agent is running the job.
@@ -173,7 +217,8 @@ func stateReconciliation() error {
 				if err != nil {
 					log.
 						WithField("job_id", job.ID.String()).
-						Errorf("Failed to update job status in database: %v", err)
+						WithError(err).
+						Error("Failed to update job status in database")
 				}
 
 				// Tell agent to kill this job, incase it *is* running but it just didn't make it through, or its in a broken state.
@@ -203,7 +248,8 @@ func stateReconciliation() error {
 				if err != nil {
 					log.
 						WithField("job_id", job.ID.String()).
-						Errorf("Failed to update job status in database: %v", err)
+						WithError(err).
+						Error("Failed to update job status in database")
 				}
 
 				continue
@@ -215,7 +261,8 @@ func stateReconciliation() error {
 				if err != nil {
 					log.
 						WithField("job_id", job.ID.String()).
-						Errorf("Failed to update job status in database: %v", err)
+						WithError(err).
+						Error("Failed to update job status in database")
 				}
 
 				tellAgentToKillJob(&agentRunningJob, &job.ID)
@@ -229,7 +276,8 @@ func stateReconciliation() error {
 				if err != nil {
 					log.
 						WithField("job_id", job.ID.String()).
-						Errorf("Failed to update job status in database: %v", err)
+						WithError(err).
+						Error("Failed to update job status in database")
 				}
 
 				tellAgentToKillJob(&agentRunningJob, &job.ID)
@@ -258,7 +306,7 @@ func stateReconciliationTask() {
 		}
 
 		if err != nil {
-			log.Errorf("State reconciliation failed: %v", err)
+			log.WithError(err).Error("State reconciliation failed")
 		}
 	}
 }

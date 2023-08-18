@@ -56,7 +56,7 @@ func UserAndSessFromReq(c echo.Context) (*db.User, *SessionData) {
 
 	user, err := db.GetUserByID(sess.UserID)
 	if err != nil || user == nil {
-		log.Errorf("Couldn't fetch user ID %s for session", sess.UserID)
+		log.WithError(err).WithField("user_id", sess.UserID).Error("Failed to retrieve user's information from DB for session")
 		return nil, nil
 	}
 

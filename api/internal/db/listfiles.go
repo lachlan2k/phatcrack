@@ -11,19 +11,26 @@ type Listfile struct {
 	UUIDBaseModel
 	Name                 string
 	AvailableForDownload bool
+	AvailableForUse      bool
 	FileType             string
 	SizeInBytes          uint64
 	Lines                uint64
 	IsLocked             bool
 }
 
+func (l *Listfile) Save() error {
+	return GetInstance().Save(l).Error
+}
+
 func (w *Listfile) ToDTO() apitypes.ListfileDTO {
 	return apitypes.ListfileDTO{
-		ID:          w.ID.String(),
-		Name:        w.Name,
-		FileType:    w.FileType,
-		SizeInBytes: w.SizeInBytes,
-		Lines:       w.Lines,
+		ID:              w.ID.String(),
+		Name:            w.Name,
+		FileType:        w.FileType,
+		SizeInBytes:     w.SizeInBytes,
+		Lines:           w.Lines,
+		AvailableForUse: w.AvailableForUse,
+		IsLocked:        w.IsLocked,
 	}
 }
 
