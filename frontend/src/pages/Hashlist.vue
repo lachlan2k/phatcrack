@@ -21,6 +21,7 @@ import decodeHex from '@/util/decodeHex'
 import { usePagination } from '@/composables/usePagination'
 import { storeToRefs } from 'pinia'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
+import { timeDurationToReadable } from '@/util/units'
 import type { AttackWithJobsDTO } from '@/api/types'
 import { getAttacksWithJobsForHashlist } from '@/api/project'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
@@ -68,16 +69,11 @@ const isHashlistEditorOpen = ref(false)
 const filterText = ref('')
 const onlyShowCracked = ref(false)
 
-const crackedHashes = computed(() => {
-  return hashlistData.value?.hashes.filter((x) => x.is_cracked) ?? []
-})
+const allHashes = computed(() => hashlistData.value?.hashes ?? [])
+const crackedHashes = computed(() => allHashes.value.filter((x) => x.is_cracked))
 
 const filteredHashes = computed(() => {
-  if (onlyShowCracked.value) {
-    return crackedHashes.value
-  }
-
-  const arr = hashlistData.value?.hashes ?? []
+  const arr = onlyShowCracked.value ? crackedHashes.value : allHashes.value
 
   if (filterText.value == '') {
     return arr
@@ -260,6 +256,7 @@ const quantityStr = (num: number, str: string) => {
                     <th>Attack Mode</th>
                     <th>Status</th>
                     <th>Total Hashrate</th>
+                    <th>Time remaining</th>
                     <th>Controls</th>
                   </tr>
                 </thead>
@@ -286,6 +283,7 @@ const quantityStr = (num: number, str: string) => {
                       <div class="badge badge-ghost">No jobs</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
+                    <td>{{ timeDurationToReadable(Math.max(...attack.jobs.map(x => x.runtime_summary.estimated_time_remaining))) }} left</td>
                     <td class="text-center">
                       <IconButton tooltip="Start" icon="fa-solid fa-play" color="success" />
                       <IconButton tooltip="Stop" icon="fa-solid fa-stop" color="warning" />
