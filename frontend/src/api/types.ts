@@ -351,7 +351,9 @@ export interface ListfileDTO {
   name: string
   size_in_bytes: number
   lines: number
-  is_locked: boolean
+  available_for_use: boolean
+  pending_delete: boolean
+  created_by_user_id: string
 }
 export interface GetAllWordlistsDTO {
   wordlists: ListfileDTO[]

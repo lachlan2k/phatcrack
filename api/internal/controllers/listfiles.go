@@ -32,6 +32,37 @@ func HookListsEndpoints(api *echo.Group) {
 
 	api.GET("/wordlist/:id", handleGetWordlist)
 	api.GET("/rulefile/:id", handlGetRuleFile)
+
+	api.DELETE("/listfile/:id", handleListfileDelete)
+}
+
+func handleListfileDelete(c echo.Context) error {
+	id := c.Param("id")
+	if !util.AreValidUUIDs(id) {
+		return echo.ErrBadRequest
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	listfile, err := db.GetListfile(id)
+	if err != nil {
+		return util.ServerError("Failed to get listfile prior to deletion", err)
+	}
+
+	isAllowed := user.HasRole(auth.RoleAdmin) || listfile.CreatedByUserID == user.ID
+	if !isAllowed {
+		return echo.ErrForbidden
+	}
+
+	err = db.MarkListfileForDeletion(id)
+	if err != nil {
+		return util.ServerError("Failed to mark listfile for deletion", err)
+	}
+
+	return c.JSON(http.StatusOK, "ok")
 }
 
 func handleListfileUpload(c echo.Context) error {
@@ -96,14 +127,13 @@ func handleListfileUpload(c echo.Context) error {
 		"listfile_type":      fileType,
 	}, "User uploaded a new %s", fileType)
 
-	// TODO rollback on later failures?
+	// TODO rollback on later failures? We might run out of disk space on the io.Copy, etc
 	listfile, err := db.CreateListfile(&db.Listfile{
-		Name:        uploadedFile.Filename,
-		FileType:    fileType,
-		SizeInBytes: uint64(uploadedFile.Size),
-		Lines:       uint64(lineCount),
-		// When an admin uploads a listfile, its locked
-		IsLocked: user.HasRole(auth.RoleAdmin),
+		Name:            uploadedFile.Filename,
+		FileType:        fileType,
+		SizeInBytes:     uint64(uploadedFile.Size),
+		Lines:           uint64(lineCount),
+		CreatedByUserID: user.ID,
 	})
 	if err != nil {
 		return util.ServerError("Failed to create new listfile", err)

@@ -1,6 +1,9 @@
 package db
 
-import "github.com/lachlan2k/phatcrack/common/pkg/apitypes"
+import (
+	"github.com/google/uuid"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
+)
 
 const (
 	ListfileTypeWordlist = "Wordlist"
@@ -15,8 +18,9 @@ type Listfile struct {
 	FileType             string
 	SizeInBytes          uint64
 	Lines                uint64
-	IsLocked             bool
 	PendingDelete        bool
+	CreatedByUser        User      `gorm:"constraint:OnDelete:SET NULL;"`
+	CreatedByUserID      uuid.UUID `gorm:"type:uuid"`
 }
 
 func (l *Listfile) Save() error {
@@ -29,9 +33,9 @@ func (w *Listfile) ToDTO() apitypes.ListfileDTO {
 		Name:            w.Name,
 		FileType:        w.FileType,
 		SizeInBytes:     w.SizeInBytes,
+		PendingDelete:   w.PendingDelete,
 		Lines:           w.Lines,
 		AvailableForUse: w.AvailableForUse,
-		IsLocked:        w.IsLocked,
 	}
 }
 
@@ -50,6 +54,10 @@ func CreateListfile(listfile *Listfile) (*Listfile, error) {
 
 func MarkListfileAsAvailable(id string) error {
 	return GetInstance().Model(&Listfile{}).Where("id = ?", id).Updates(&Listfile{AvailableForDownload: true}).Error
+}
+
+func MarkListfileForDeletion(id string) error {
+	return GetInstance().Model(&Listfile{}).Where("id = ?", id).Updates(&Listfile{PendingDelete: true}).Error
 }
 
 func GetAllRulefiles() ([]Listfile, error) {

@@ -7,6 +7,12 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { bytesToReadable } from '@/util/units'
 import { useListfilesStore } from '@/stores/listfiles'
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import type { ListfileDTO } from '@/api/types'
+import { useAuthStore } from '@/stores/auth'
+import { useToastError } from '@/composables/useToastError'
+import { deleteListfile } from '@/api/listfiles'
+import { useToast } from 'vue-toastification'
 
 const listfilesStore = useListfilesStore()
 const { load: loadListfiles } = listfilesStore
@@ -16,6 +22,37 @@ const isWordlistUploadOpen = ref(false)
 const isRulefileUploadOpen = ref(false)
 
 loadListfiles()
+
+const authStore = useAuthStore()
+
+function canDelete(listfile: ListfileDTO) {
+  if (listfile.pending_delete) {
+    return false
+  }
+
+  if (authStore.loggedInUser?.roles.includes('admin')) {
+    return true
+  }
+  return listfile.created_by_user_id == authStore.loggedInUser?.id
+}
+
+function isGreyed(listfile: ListfileDTO) {
+  return listfile.pending_delete || !listfile.available_for_use
+}
+
+const toast = useToast()
+const { catcher } = useToastError()
+
+async function onDeleteListfile(listfile: ListfileDTO) {
+  try {
+    await deleteListfile(listfile.id)
+    toast.info(`Marked ${listfile.name} for deletion`)
+  } catch (e: any) {
+    catcher(e)
+  } finally {
+    loadListfiles(true)
+  }
+}
 </script>
 
 <template>
@@ -38,7 +75,6 @@ loadListfiles()
           </div>
 
           <table class="table w-full">
-            <!-- head -->
             <thead>
               <tr>
                 <th>Name</th>
@@ -48,15 +84,29 @@ loadListfiles()
               </tr>
             </thead>
             <tbody>
-              <!-- row 1 -->
-              <tr class="hover" v-for="wordlist in wordlists" :key="wordlist.id">
+              <tr
+                :class="isGreyed(wordlist) ? 'hover text-gray-500 greyed-out-row' : 'hover'"
+                v-for="wordlist in wordlists"
+                :key="wordlist.id"
+              >
                 <td>
                   <strong>{{ wordlist.name }}</strong>
+                  <span class="text-sm pl-2 text-gray-500" v-if="wordlist.pending_delete">
+                    <font-awesome-icon icon="fa-solid fa-skull-crossbones" />
+                  </span>
                 </td>
+
                 <td>{{ bytesToReadable(wordlist.size_in_bytes) }}</td>
                 <td>{{ wordlist.lines }}</td>
                 <td class="text-center">
-                  <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                  <ConfirmModal @on-confirm="() => onDeleteListfile(wordlist)" v-if="canDelete(wordlist)">
+                    <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                  </ConfirmModal>
+                  <div v-else class="cursor-not-allowed tooltip text-gray-300" :data-tip="'You can\'t delete this'">
+                    <button class="cursor-not-allowed btn btn-ghost btn-xs">
+                      <font-awesome-icon icon="fa-solid fa-lock" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -86,14 +136,24 @@ loadListfiles()
               </tr>
             </thead>
             <tbody>
-              <tr class="hover" v-for="rulefile in rulefiles" :key="rulefile.id">
+              <tr  :class="isGreyed(rulefile) ? 'hover text-gray-500 greyed-out-row' : 'hover'" v-for="rulefile in rulefiles" :key="rulefile.id">
                 <td>
                   <strong>{{ rulefile.name }}</strong>
+                  <span class="text-sm pl-2 text-gray-500" v-if="rulefile.pending_delete">
+                    <font-awesome-icon icon="fa-solid fa-skull-crossbones" />
+                  </span>
                 </td>
                 <td>{{ bytesToReadable(rulefile.size_in_bytes) }}</td>
                 <td>{{ rulefile.lines }}</td>
                 <td class="text-center">
-                  <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                  <ConfirmModal @on-confirm="() => onDeleteListfile(rulefile)" v-if="canDelete(rulefile)">
+                    <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                  </ConfirmModal>
+                  <div v-else class="cursor-not-allowed tooltip text-gray-300" :data-tip="'You can\'t delete this'">
+                    <button class="cursor-not-allowed btn btn-ghost btn-xs">
+                      <font-awesome-icon icon="fa-solid fa-lock" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -103,3 +163,9 @@ loadListfiles()
     </div>
   </main>
 </template>
+
+<style scoped>
+.greyed-out-row strong {
+  font-weight: normal;
+}
+</style>

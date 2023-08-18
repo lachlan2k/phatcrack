@@ -10,6 +10,10 @@ export function getAllRulefiles(): Promise<GetAllRuleFilesDTO> {
   return client.get('/api/v1/list/rulefile/all').then((res) => res.data)
 }
 
+export function deleteListfile(id: string): Promise<string> {
+  return client.delete('/api/v1/list/listfile/' + id).then((res) => res.data)
+}
+
 export function uploadListfile(
   body: FormData,
   onUploadProgress: (progress: AxiosProgressEvent) => void
