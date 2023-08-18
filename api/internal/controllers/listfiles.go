@@ -47,6 +47,10 @@ func handleListfileDelete(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
+	AuditLog(c, log.Fields{
+		"listfile_id": id,
+	}, "User is deleting listfile")
+
 	listfile, err := db.GetListfile(id)
 	if err != nil {
 		return util.ServerError("Failed to get listfile prior to deletion", err)
@@ -205,7 +209,7 @@ func handleGetAllWordlists(c echo.Context) error {
 		res.Wordlists[i] = list.ToDTO()
 	}
 
-	slices.SortFunc(res.Wordlists, func(a, b apitypes.ListfileDTO) int {
+	slices.SortStableFunc(res.Wordlists, func(a, b apitypes.ListfileDTO) int {
 		return int(b.Lines) - int(a.Lines)
 	})
 
@@ -224,7 +228,7 @@ func handleGetAllRuleFiles(c echo.Context) error {
 		res.RuleFiles[i] = list.ToDTO()
 	}
 
-	slices.SortFunc(res.RuleFiles, func(a, b apitypes.ListfileDTO) int {
+	slices.SortStableFunc(res.RuleFiles, func(a, b apitypes.ListfileDTO) int {
 		return int(b.Lines) - int(a.Lines)
 	})
 
