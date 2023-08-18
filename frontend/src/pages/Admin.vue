@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Config from '@/components/Admin/Config.vue'
 import UsersTable from '@/components/Admin/UsersTable.vue'
+import AgentsTable from '@/components/Admin/AgentsTable.vue'
 </script>
 
 <template>
@@ -13,6 +14,12 @@ import UsersTable from '@/components/Admin/UsersTable.vue'
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <UsersTable />
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <AgentsTable />
         </div>
       </div>
 

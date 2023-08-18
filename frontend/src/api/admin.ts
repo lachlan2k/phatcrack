@@ -1,5 +1,7 @@
 import { client } from '.'
 import type {
+  AdminAgentCreateRequestDTO,
+  AdminAgentCreateResponseDTO,
   AdminConfigRequestDTO,
   AdminConfigResponseDTO,
   AdminGetAllUsersResponseDTO,
@@ -15,6 +17,12 @@ export function adminCreateUser(
   newUserData: AdminUserCreateRequestDTO
 ): Promise<AdminUserCreateResponseDTO> {
   return client.post('/api/v1/admin/user/create', newUserData).then((res) => res.data)
+}
+
+export function adminCreateAgent(
+  newAgentData: AdminAgentCreateRequestDTO
+): Promise<AdminAgentCreateResponseDTO> {
+  return client.post('/api/v1/admin/agent/create', newAgentData).then(res => res.data)
 }
 
 export function adminGetConfig(): Promise<AdminConfigResponseDTO> {

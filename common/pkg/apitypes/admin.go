@@ -1,7 +1,7 @@
 package apitypes
 
 type AdminAgentCreateRequestDTO struct {
-	Name string `json:"name" validate:"required,min=5,max=30"`
+	Name string `json:"name" validate:"required,min=4,max=64"`
 }
 
 type AdminAgentCreateResponseDTO struct {
