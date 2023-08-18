@@ -97,8 +97,7 @@ func handleHashlistCreate(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	var req apitypes.HashlistCreateRequestDTO
-	err := c.Bind(&req)
+	req, err := util.BindAndValidate[apitypes.HashlistCreateRequestDTO](c)
 	if err != nil {
 		return err
 	}
