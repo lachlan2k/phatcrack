@@ -114,6 +114,10 @@ async function logout() {
   padding: 0.6rem 1.25rem;
 }
 
+.menu {
+  font-size: 1rem;
+}
+
 .menu li.hover-bordered {
   @apply border-l-4 border-transparent hover:border-primary;
 }

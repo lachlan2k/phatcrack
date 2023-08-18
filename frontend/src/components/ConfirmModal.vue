@@ -12,6 +12,11 @@ const body =
 
 const emit = defineEmits(['onConfirm'])
 const isOpen = ref(false)
+
+function confirm() {
+  isOpen.value = false
+  emit('onConfirm')
+}
 </script>
 
 <template>
@@ -28,7 +33,7 @@ const isOpen = ref(false)
 
       <div class="modal-action">
         <button class="btn m-1" @click="() => (isOpen = false)">Cancel</button>
-        <button class="btn btn-error m-1" @click="() => emit('onConfirm')">Proceed</button>
+        <button class="btn btn-error m-1" @click="() => confirm()">Proceed</button>
       </div>
     </form>
     <form method="dialog" class="modal-backdrop">
