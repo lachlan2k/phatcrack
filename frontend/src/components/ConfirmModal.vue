@@ -8,7 +8,7 @@ const props = defineProps<{
 
 const title = props.title ?? 'Confirm'
 const body =
-  props.body ?? 'Are you sure you want to do proceed? You might not be able to undo this action.'
+  props.body ?? 'Are you sure you want to proceed? You might not be able to undo this action.'
 
 const emit = defineEmits(['onConfirm'])
 const isOpen = ref(false)
