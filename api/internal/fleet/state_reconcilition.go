@@ -153,6 +153,10 @@ func stateReconciliation() error {
 
 	// Make sure listfiles are available on all healthy agents
 	for _, listfile := range allListfiles {
+		if len(agentMap) == 0 {
+			break
+		}
+
 		availableOnAll := true
 
 		for _, agent := range agentMap {
