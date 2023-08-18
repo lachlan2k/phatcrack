@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -129,7 +129,7 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 
 	wordlists := make([]string, len(params.WordlistFilenames))
 	for i, list := range params.WordlistFilenames {
-		wordlists[i] = path.Join(conf.ListfileDirectory, path.Clean(list))
+		wordlists[i] = filepath.Join(conf.ListfileDirectory, filepath.Clean(list))
 		if _, err = os.Stat(wordlists[i]); err != nil {
 			err = fmt.Errorf("provided wordlist %s couldn't be opened on filesystem", wordlists[i])
 			return
@@ -138,7 +138,7 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 
 	rules := make([]string, len(params.RulesFilenames))
 	for i, rule := range params.RulesFilenames {
-		rules[i] = path.Join(conf.ListfileDirectory, path.Clean(rule))
+		rules[i] = filepath.Join(conf.ListfileDirectory, filepath.Clean(rule))
 		if _, err = os.Stat(rules[i]); err != nil {
 			err = fmt.Errorf("provided rules file %s couldn't be opened on filesystem", wordlists[i])
 			return
