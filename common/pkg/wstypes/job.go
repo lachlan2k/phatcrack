@@ -22,9 +22,9 @@ const (
 
 // JobStart
 type JobStartDTO struct {
-	ID            string                     `json:"id"`
+	ID            string                     `json:"id" validate:"required,uuid"`
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_parms"`
-	TargetHashes  []string                   `json:"target_hashes"`
+	TargetHashes  []string                   `json:"target_hashes" validate:"required,min=1,dive,required,min=4"`
 }
 
 // JobFailedToStart

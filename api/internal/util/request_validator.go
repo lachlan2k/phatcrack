@@ -50,15 +50,15 @@ func (v *RequestValidator) Init() {
 		return true
 	})
 
-	projectNameRegex := regexp.MustCompile(`^[\w \-\.]+$`)
+	standardNameRegex := regexp.MustCompile(`^[\w \-\.]+$`)
 
-	v.Validator.RegisterValidation("projectname", func(fl validator.FieldLevel) bool {
-		projectName, ok := fl.Field().Interface().(string)
+	v.Validator.RegisterValidation("standardname", func(fl validator.FieldLevel) bool {
+		name, ok := fl.Field().Interface().(string)
 		if !ok {
 			return false
 		}
 
-		return projectNameRegex.MatchString(projectName)
+		return standardNameRegex.MatchString(name)
 	})
 
 	usernameRegex := regexp.MustCompile(`^[\w]+$`)

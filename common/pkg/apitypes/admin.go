@@ -11,8 +11,8 @@ type AdminAgentCreateResponseDTO struct {
 }
 
 type AdminUserCreateRequestDTO struct {
-	Username string   `json:"username" validate:"required,min=4,max=64"`
-	Password string   `json:"password" validate:"required,min=8,max=128"`
+	Username string   `json:"username" validate:"required,min=4,max=64,username"`
+	Password string   `json:"password" validate:"required,min=16,max=128"`
 	Roles    []string `json:"roles" validate:"required,userroles"`
 }
 

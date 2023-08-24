@@ -8,10 +8,10 @@ import (
 
 type JobCreateRequestDTO struct {
 	HashcatParams    hashcattypes.HashcatParams `json:"hashcat_params" validate:"required"`
-	Hashes           []string                   `json:"hashes" validate:"required"`
+	Hashes           []string                   `json:"hashes" validate:"required,min=1,dive,min=4,required"`
 	StartImmediately bool                       `json:"start_immediately"`
-	Name             string                     `json:"name" validate:"required,min=5,max=30"`
-	Description      string                     `json:"description" validate:"max=1000"`
+	Name             string                     `json:"name" validate:"required,standardname,min=5,max=30"`
+	Description      string                     `json:"description" validate:"printascii,max=1000"`
 }
 
 type JobCreateResponseDTO struct {

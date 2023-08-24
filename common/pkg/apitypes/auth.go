@@ -3,8 +3,8 @@ package apitypes
 import "github.com/NHAS/webauthn/protocol"
 
 type AuthLoginRequestDTO struct {
-	Username string `json:"username" validate:"required,min=4,max=64"`
-	Password string `json:"password" validate:"required"`
+	Username string `json:"username" validate:"required,min=4,max=64,username"`
+	Password string `json:"password" validate:"required,min=16,max=128"`
 }
 
 type AuthCurrentUserDTO struct {
@@ -43,6 +43,6 @@ type AuthWebAuthnStartChallengeResponseDTO struct {
 }
 
 type AuthChangePasswordRequestDTO struct {
-	OldPassword string `json:"old_password"`
+	OldPassword string `json:"old_password" validate:"required"`
 	NewPassword string `json:"new_password" validate:"required,min=16,max=128"`
 }
