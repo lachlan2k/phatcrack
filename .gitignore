@@ -3,5 +3,5 @@
 certs/cert.pem
 certs/key.pem
 filerepo/*
-cloc.sh.dev.env
+cloc.sh
 
