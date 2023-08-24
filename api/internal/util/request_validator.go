@@ -2,6 +2,7 @@ package util
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
@@ -47,6 +48,28 @@ func (v *RequestValidator) Init() {
 		}
 
 		return true
+	})
+
+	projectNameRegex := regexp.MustCompile(`^[\w \-\.]+$`)
+
+	v.Validator.RegisterValidation("projectname", func(fl validator.FieldLevel) bool {
+		projectName, ok := fl.Field().Interface().(string)
+		if !ok {
+			return false
+		}
+
+		return projectNameRegex.MatchString(projectName)
+	})
+
+	usernameRegex := regexp.MustCompile(`^[\w]+$`)
+
+	v.Validator.RegisterValidation("username", func(fl validator.FieldLevel) bool {
+		username, ok := fl.Field().Interface().(string)
+		if !ok {
+			return false
+		}
+
+		return usernameRegex.MatchString(username)
 	})
 }
 

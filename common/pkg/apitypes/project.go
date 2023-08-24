@@ -1,8 +1,8 @@
 package apitypes
 
 type ProjectCreateDTO struct {
-	Name        string `json:"name" validate:"required,min=4,max=64"`
-	Description string `json:"description" validate:"required,max=1000"`
+	Name        string `json:"name" validate:"required,printascii,min=4,max=64"`
+	Description string `json:"description" validate:"required,printascii,max=1000"`
 }
 
 type ProjectDTO struct {
