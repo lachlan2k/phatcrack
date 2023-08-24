@@ -59,7 +59,7 @@ type JobDTO struct {
 	AttackID        string                     `json:"attack_id"`
 	HashcatParams   hashcattypes.HashcatParams `json:"hashcat_params"`
 	TargetHashes    []string                   `json:"target_hashes"`
-	HashType        uint                       `json:"hash_type"`
+	HashType        int                        `json:"hash_type"`
 	RuntimeData     JobRuntimeDataDTO          `json:"runtime_data"`
 	RuntimeSummary  JobRuntimeSummaryDTO       `json:"runtime_summary"`
 	AssignedAgentID string                     `json:"assigned_agent_id"`
@@ -69,7 +69,7 @@ type JobSimpleDTO struct {
 	ID              string `json:"id"`
 	HashlistVersion uint   `json:"hashlist_version"`
 	AttackID        string `json:"attack_id"`
-	HashType        uint   `json:"hash_type"`
+	HashType        int    `json:"hash_type"`
 	AssignedAgentID string `json:"assigned_agent_id"`
 }
 

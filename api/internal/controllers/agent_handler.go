@@ -85,7 +85,7 @@ func handleAgentWs(c echo.Context) error {
 
 	err = agent.Handle()
 	if err != nil {
-		log.Warnf("Error from agent: %w", err)
+		log.Warnf("Error from agent: %v", err)
 	}
 
 	return nil

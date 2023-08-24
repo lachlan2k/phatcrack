@@ -51,7 +51,7 @@ type Hashlist struct {
 	Name    string
 	Version uint
 
-	HashType uint
+	HashType int
 	Hashes   []HashlistHash `gorm:"constraint:OnDelete:CASCADE;"`
 
 	Attacks []Attack `gorm:"constraint:OnDelete:CASCADE;"`

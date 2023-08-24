@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
+	"github.com/lachlan2k/phatcrack/api/internal/resources"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
@@ -70,6 +71,16 @@ func (v *RequestValidator) Init() {
 		}
 
 		return usernameRegex.MatchString(username)
+	})
+
+	v.Validator.RegisterValidation("hashtype", func(fl validator.FieldLevel) bool {
+		t, ok := fl.Field().Interface().(int)
+		if !ok {
+			return false
+		}
+
+		_, ok = resources.GetHashTypeMap()[t]
+		return ok
 	})
 }
 

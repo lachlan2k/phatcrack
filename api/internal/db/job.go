@@ -42,7 +42,7 @@ type Job struct {
 	HashcatParams datatypes.JSONType[hashcattypes.HashcatParams]
 
 	TargetHashes pq.StringArray `gorm:"type:text[]"`
-	HashType     uint
+	HashType     int
 
 	RuntimeData JobRuntimeData
 

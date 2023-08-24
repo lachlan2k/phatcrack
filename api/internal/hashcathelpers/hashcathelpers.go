@@ -105,7 +105,7 @@ func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 	return candidates, nil
 }
 
-func NormalizeHashes(hashes []string, hashType uint, hasUsernames bool) ([]string, error) {
+func NormalizeHashes(hashes []string, hashType int, hasUsernames bool) ([]string, error) {
 	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-normalize")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %w", err)
