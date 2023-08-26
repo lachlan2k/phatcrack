@@ -9,7 +9,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
     "eslint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/",
+    "format": "prettier --cache --write src/",
     "lint": "npm run format; npm run type-check; npm run eslint;",
     "docker-dev-entry": "npm i; npm run dev -- --host 0.0.0.0"
   },
