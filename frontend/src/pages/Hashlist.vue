@@ -283,7 +283,16 @@ const quantityStr = (num: number, str: string) => {
                       <div class="badge badge-ghost">No jobs</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
-                    <td>{{ timeDurationToReadable(Math.max(...attack.jobs.map(x => x.runtime_summary.estimated_time_remaining))) }} left</td>
+                    <td>
+                      {{
+                        timeDurationToReadable(
+                          Math.max(
+                            ...attack.jobs.map((x) => x.runtime_summary.estimated_time_remaining)
+                          )
+                        )
+                      }}
+                      left
+                    </td>
                     <td class="text-center">
                       <IconButton tooltip="Start" icon="fa-solid fa-play" color="success" />
                       <IconButton tooltip="Stop" icon="fa-solid fa-stop" color="warning" />

@@ -85,13 +85,13 @@ async function onDeleteListfile(listfile: ListfileDTO) {
             </thead>
             <tbody>
               <tr
-                :class="isGreyed(wordlist) ? 'hover text-gray-500 greyed-out-row' : 'hover'"
+                :class="isGreyed(wordlist) ? 'greyed-out-row hover text-gray-500' : 'hover'"
                 v-for="wordlist in wordlists"
                 :key="wordlist.id"
               >
                 <td>
                   <strong>{{ wordlist.name }}</strong>
-                  <span class="text-sm pl-2 text-gray-500" v-if="wordlist.pending_delete">
+                  <span class="pl-2 text-sm text-gray-500" v-if="wordlist.pending_delete">
                     <font-awesome-icon icon="fa-solid fa-skull-crossbones" />
                   </span>
                 </td>
@@ -99,11 +99,18 @@ async function onDeleteListfile(listfile: ListfileDTO) {
                 <td>{{ bytesToReadable(wordlist.size_in_bytes) }}</td>
                 <td>{{ wordlist.lines }}</td>
                 <td class="text-center">
-                  <ConfirmModal @on-confirm="() => onDeleteListfile(wordlist)" v-if="canDelete(wordlist)">
+                  <ConfirmModal
+                    @on-confirm="() => onDeleteListfile(wordlist)"
+                    v-if="canDelete(wordlist)"
+                  >
                     <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                   </ConfirmModal>
-                  <div v-else class="cursor-not-allowed tooltip text-gray-300" :data-tip="'You can\'t delete this'">
-                    <button class="cursor-not-allowed btn btn-ghost btn-xs">
+                  <div
+                    v-else
+                    class="tooltip cursor-not-allowed text-gray-300"
+                    :data-tip="'You can\'t delete this'"
+                  >
+                    <button class="btn btn-ghost btn-xs cursor-not-allowed">
                       <font-awesome-icon icon="fa-solid fa-lock" />
                     </button>
                   </div>
@@ -136,21 +143,32 @@ async function onDeleteListfile(listfile: ListfileDTO) {
               </tr>
             </thead>
             <tbody>
-              <tr  :class="isGreyed(rulefile) ? 'hover text-gray-500 greyed-out-row' : 'hover'" v-for="rulefile in rulefiles" :key="rulefile.id">
+              <tr
+                :class="isGreyed(rulefile) ? 'greyed-out-row hover text-gray-500' : 'hover'"
+                v-for="rulefile in rulefiles"
+                :key="rulefile.id"
+              >
                 <td>
                   <strong>{{ rulefile.name }}</strong>
-                  <span class="text-sm pl-2 text-gray-500" v-if="rulefile.pending_delete">
+                  <span class="pl-2 text-sm text-gray-500" v-if="rulefile.pending_delete">
                     <font-awesome-icon icon="fa-solid fa-skull-crossbones" />
                   </span>
                 </td>
                 <td>{{ bytesToReadable(rulefile.size_in_bytes) }}</td>
                 <td>{{ rulefile.lines }}</td>
                 <td class="text-center">
-                  <ConfirmModal @on-confirm="() => onDeleteListfile(rulefile)" v-if="canDelete(rulefile)">
+                  <ConfirmModal
+                    @on-confirm="() => onDeleteListfile(rulefile)"
+                    v-if="canDelete(rulefile)"
+                  >
                     <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                   </ConfirmModal>
-                  <div v-else class="cursor-not-allowed tooltip text-gray-300" :data-tip="'You can\'t delete this'">
-                    <button class="cursor-not-allowed btn btn-ghost btn-xs">
+                  <div
+                    v-else
+                    class="tooltip cursor-not-allowed text-gray-300"
+                    :data-tip="'You can\'t delete this'"
+                  >
+                    <button class="btn btn-ghost btn-xs cursor-not-allowed">
                       <font-awesome-icon icon="fa-solid fa-lock" />
                     </button>
                   </div>

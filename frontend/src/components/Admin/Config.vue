@@ -9,6 +9,7 @@ const { data: settingsData, fetchData: reloadSettings } = useApi(adminGetConfig)
 
 const settings = reactive({
   is_mfa_required: false,
+  auto_sync_listfiles: false,
   require_password_change_on_first_login: false
 })
 
@@ -26,8 +27,8 @@ const toast = useToast()
 
 async function onSave() {
   try {
-    const { is_mfa_required, require_password_change_on_first_login } = settings
-    await adminSetConfig({ is_mfa_required, require_password_change_on_first_login })
+    const { is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles } = settings
+    await adminSetConfig({ is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles  })
   } catch (e: any) {
     let errorString = 'Unknown Error'
     if (e instanceof AxiosError) {
@@ -59,6 +60,12 @@ async function onSave() {
           v-model="settings.require_password_change_on_first_login"
           class="toggle"
         />
+      </label>
+    </div>
+    <div class="form-control">
+      <label class="label font-bold">
+        <span class="label-text pr-3">Automatically sync files to agents?</span>
+        <input type="checkbox" v-model="settings.auto_sync_listfiles" class="toggle" />
       </label>
     </div>
   </div>

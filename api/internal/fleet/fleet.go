@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
@@ -143,6 +144,10 @@ func scheduleJobUnsafe(jobIds []string) ([]string, error) {
 }
 
 func RequestFileDownload(fileIDs ...uuid.UUID) {
+	if !config.Get().AutomaticallySyncListfiles {
+		return
+	}
+
 	fleetLock.Lock()
 	defer fleetLock.Unlock()
 

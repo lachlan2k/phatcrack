@@ -36,6 +36,7 @@ func HookAdminEndpoints(api *echo.Group) {
 
 		err = config.Update(func(newConf *config.RuntimeConfig) error {
 			newConf.IsMFARequired = req.IsMFARequired
+			newConf.AutomaticallySyncListfiles = req.AutomaticallySyncListfiles
 			newConf.RequirePasswordChangeOnFirstLogin = req.RequirePasswordChangeOnFirstLogin
 			return nil
 		})
@@ -50,6 +51,7 @@ func HookAdminEndpoints(api *echo.Group) {
 		return c.JSON(http.StatusOK, apitypes.AdminConfigResponseDTO{
 			IsSetupComplete:                   conf.IsSetupComplete,
 			IsMFARequired:                     conf.IsMFARequired,
+			AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
 			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
 		})
 	})
@@ -59,6 +61,7 @@ func HookAdminEndpoints(api *echo.Group) {
 		return c.JSON(http.StatusOK, apitypes.AdminConfigResponseDTO{
 			IsSetupComplete:                   conf.IsSetupComplete,
 			IsMFARequired:                     conf.IsMFARequired,
+			AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
 			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
 		})
 	})

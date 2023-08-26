@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
@@ -113,6 +114,10 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 
 	if err != nil {
 		return err
+	}
+
+	if !config.Get().AutomaticallySyncListfiles {
+		return nil
 	}
 
 	// If it's in the middle of downloading a file, let's be polite and not bother it

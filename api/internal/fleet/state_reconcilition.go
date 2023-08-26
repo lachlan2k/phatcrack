@@ -9,7 +9,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/google/uuid"
+	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
@@ -174,10 +176,15 @@ func stateReconciliation() error {
 			if !isWordlistInUse {
 				// Wordlist can now be safely deleted
 				db.Delete(&listfile)
-				// Tell all agents to delete it
-				broadcastMessageUnsafe(wstypes.DeleteFileRequestType, wstypes.DeleteFileRequestDTO{
-					FileID: listfile.ID.String(),
-				})
+
+				if config.Get().AutomaticallySyncListfiles {
+					// Tell all agents to delete it
+					broadcastMessageUnsafe(wstypes.DeleteFileRequestType, wstypes.DeleteFileRequestDTO{
+						FileID: listfile.ID.String(),
+					})
+				}
+
+				filerepo.Delete(listfile.ID)
 			}
 		}
 

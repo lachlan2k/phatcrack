@@ -24,10 +24,12 @@ export interface AdminIsSetupCompleteResponseDTO {
 export interface AdminConfigResponseDTO {
   is_setup_complete: boolean
   is_mfa_required: boolean
+  auto_sync_listfiles: boolean
   require_password_change_on_first_login: boolean
 }
 export interface AdminConfigRequestDTO {
   is_mfa_required: boolean
+  auto_sync_listfiles: boolean
   require_password_change_on_first_login: boolean
 }
 export interface UserDTO {

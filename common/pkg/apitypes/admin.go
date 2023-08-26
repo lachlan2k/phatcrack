@@ -29,11 +29,13 @@ type AdminIsSetupCompleteResponseDTO struct {
 type AdminConfigResponseDTO struct {
 	IsSetupComplete                   bool `json:"is_setup_complete"`
 	IsMFARequired                     bool `json:"is_mfa_required"`
+	AutomaticallySyncListfiles        bool `json:"auto_sync_listfiles"`
 	RequirePasswordChangeOnFirstLogin bool `json:"require_password_change_on_first_login"`
 }
 
 type AdminConfigRequestDTO struct {
 	IsMFARequired                     bool `json:"is_mfa_required"`
+	AutomaticallySyncListfiles        bool `json:"auto_sync_listfiles"`
 	RequirePasswordChangeOnFirstLogin bool `json:"require_password_change_on_first_login"`
 }
 
