@@ -49,7 +49,7 @@ async function logout() {
             class="mt-2"
           >
             <RouterLink :to="link.to" :class="route.path == link.to ? 'active' : ''">
-              <span class="active"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
+              <span class="w-6 text-center"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
 
               {{ link.name }}
             </RouterLink>
@@ -65,14 +65,14 @@ async function logout() {
             :class="route.path == 'admin' ? 'bordered' : 'hover-bordered'"
           >
             <RouterLink to="/admin" :class="route.path == '/admin' ? 'active' : ''">
-              <span><font-awesome-icon icon="fa-solid fa-lock" /></span>
+              <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
               Admin
             </RouterLink>
           </li>
           <li class="hover-bordered">
             <div class="text-content-neutral dropdown dropdown-top">
               <label tabindex="0" class="w-full cursor-pointer">
-                <span><font-awesome-icon icon="fa-solid fa-user" /></span>
+                <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-user" /></span>
                 <span
                   >Welcome, <strong>{{ authStore.loggedInUser?.username }}</strong></span
                 >
