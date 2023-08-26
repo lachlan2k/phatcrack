@@ -22,7 +22,7 @@ type AttackMultipleDTO struct {
 }
 
 type AttackCreateRequestDTO struct {
-	HashlistID    string                     `json:"hashlist_id" validate:"required"`
+	HashlistID    string                     `json:"hashlist_id" validate:"required,uuid"`
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_params" validate:"required"`
 }
 

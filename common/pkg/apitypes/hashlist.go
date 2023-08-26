@@ -1,10 +1,10 @@
 package apitypes
 
 type HashlistCreateRequestDTO struct {
-	ProjectID    string   `json:"project_id"`
-	Name         string   `json:"name"`
-	HashType     uint     `json:"hash_type"`
-	InputHashes  []string `json:"input_hashes"`
+	ProjectID    string   `json:"project_id" validate:"required,uuid"`
+	Name         string   `json:"name" validate:"required,standardname,min=5,max=30"`
+	HashType     int      `json:"hash_type" validate:"required,hashtype"`
+	InputHashes  []string `json:"input_hashes" validate:"required,min=1,dive,required,min=4"`
 	HasUsernames bool     `json:"has_usernames"`
 }
 
@@ -24,7 +24,7 @@ type HashlistDTO struct {
 	ProjectID   string            `json:"project_id"`
 	Name        string            `json:"name"`
 	TimeCreated int64             `json:"time_created"`
-	HashType    uint              `json:"hash_type"`
+	HashType    int               `json:"hash_type"`
 	Hashes      []HashlistHashDTO `json:"hashes"`
 	Version     uint              `json:"version"`
 }

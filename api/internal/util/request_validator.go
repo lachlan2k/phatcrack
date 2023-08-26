@@ -2,9 +2,11 @@ package util
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
+	"github.com/lachlan2k/phatcrack/api/internal/resources"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
@@ -47,6 +49,38 @@ func (v *RequestValidator) Init() {
 		}
 
 		return true
+	})
+
+	standardNameRegex := regexp.MustCompile(`^[\w \-\.]+$`)
+
+	v.Validator.RegisterValidation("standardname", func(fl validator.FieldLevel) bool {
+		name, ok := fl.Field().Interface().(string)
+		if !ok {
+			return false
+		}
+
+		return standardNameRegex.MatchString(name)
+	})
+
+	usernameRegex := regexp.MustCompile(`^[\w]+$`)
+
+	v.Validator.RegisterValidation("username", func(fl validator.FieldLevel) bool {
+		username, ok := fl.Field().Interface().(string)
+		if !ok {
+			return false
+		}
+
+		return usernameRegex.MatchString(username)
+	})
+
+	v.Validator.RegisterValidation("hashtype", func(fl validator.FieldLevel) bool {
+		t, ok := fl.Field().Interface().(int)
+		if !ok {
+			return false
+		}
+
+		_, ok = resources.GetHashTypeMap()[t]
+		return ok
 	})
 }
 

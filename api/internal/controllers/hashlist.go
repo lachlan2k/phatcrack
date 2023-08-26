@@ -116,7 +116,7 @@ func handleHashlistCreate(c echo.Context) error {
 	// Ensure provided algorithm type is valid and normalize
 	normalizedHashes, err := hashcathelpers.NormalizeHashes(req.InputHashes, req.HashType, req.HasUsernames)
 	if err != nil {
-		log.Warnf("Failed to validated hashes for project %s because %w", req.ProjectID, err)
+		log.Warnf("Failed to validated hashes for project %s because %v", req.ProjectID, err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate and normalize hashes. Please ensure your hashes are valid for the given hash type.").SetInternal(err)
 	}
 

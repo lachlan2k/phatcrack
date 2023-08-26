@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
@@ -37,6 +38,14 @@ func Reload() error {
 	newConf, err := db.GetConfig[RuntimeConfig]()
 	if err == db.ErrNotFound {
 		err = db.SeedConfig[RuntimeConfig](MakeDefaultConfig())
+		if err != nil {
+			return err
+		}
+
+		newConf, err = db.GetConfig[RuntimeConfig]()
+		if err != nil {
+			return errors.New("failed to fetch configuration even after seeding: " + err.Error())
+		}
 	}
 
 	if err != nil {
