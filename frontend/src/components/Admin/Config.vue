@@ -19,6 +19,7 @@ watch(settingsData, (newSettings) => {
   }
 
   settings.is_mfa_required = newSettings.is_mfa_required
+  settings.auto_sync_listfiles = newSettings.auto_sync_listfiles
   settings.require_password_change_on_first_login =
     newSettings.require_password_change_on_first_login
 })
@@ -34,6 +35,7 @@ async function onSave() {
       require_password_change_on_first_login,
       auto_sync_listfiles
     })
+    toast.success('Settings saved')
   } catch (e: any) {
     let errorString = 'Unknown Error'
     if (e instanceof AxiosError) {
