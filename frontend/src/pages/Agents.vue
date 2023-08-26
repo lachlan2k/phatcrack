@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { getAllAgents } from '@/api/agent'
-import { useApi } from '@/composables/useApi'
+import { useAgentsStore } from '@/stores/agents'
 import { formatDeviceName } from '@/util/formatDeviceName'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
@@ -8,7 +7,10 @@ const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'
 const AgentStatusUnhealthyAndDisconnected = 'AgentStatusUnhealthyAndDisconnected'
 // const AgentStatusDead = 'AgentStatusDead'
 
-const { data: allAgents } = useApi(getAllAgents)
+const agentsStore = useAgentsStore()
+
+agentsStore.load(true)
+const allAgents = agentsStore.agents
 </script>
 
 <template>
@@ -25,9 +27,8 @@ const { data: allAgents } = useApi(getAllAgents)
             <div class="stat-value flex justify-between">
               <span
                 >{{
-                  allAgents?.agents.filter((x) => x.agent_info.status == AgentStatusHealthy)
-                    .length ?? '?'
-                }}/{{ allAgents?.agents.length ?? '?' }}</span
+                  allAgents.filter((x) => x.agent_info.status == AgentStatusHealthy).length ?? '?'
+                }}/{{ allAgents.length ?? '?' }}</span
               >
               <span class="mt-1 text-2xl text-primary">
                 <font-awesome-icon icon="fa-solid fa-robot" />
@@ -51,7 +52,7 @@ const { data: allAgents } = useApi(getAllAgents)
               </tr>
             </thead>
             <tbody class="first-col-bold">
-              <tr class="hover" v-for="agent in allAgents?.agents" :key="agent.id">
+              <tr class="hover" v-for="agent in allAgents" :key="agent.id">
                 <td>{{ agent.name }}</td>
                 <td>
                   <span

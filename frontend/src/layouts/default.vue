@@ -49,7 +49,9 @@ async function logout() {
             class="mt-2"
           >
             <RouterLink :to="link.to" :class="route.path == link.to ? 'active' : ''">
-              <span class="w-6 text-center"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
+              <span class="w-6 text-center"
+                ><font-awesome-icon :icon="'fa-solid ' + link.icon"
+              /></span>
 
               {{ link.name }}
             </RouterLink>
@@ -80,7 +82,7 @@ async function logout() {
 
               <ul
                 tabindex="0"
-                class="menu dropdown-content rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow"
+                class="dropdown-content menu rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow"
               >
                 <li>
                   <a>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
-import IconButton from '@/components/IconButton.vue'
 import HashlistEditor from '@/components/HashlistEditor.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
 
@@ -25,6 +24,7 @@ import { timeDurationToReadable } from '@/util/units'
 import type { AttackWithJobsDTO } from '@/api/types'
 import { getAttacksWithJobsForHashlist } from '@/api/project'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
+import AttackDetailsModal from '@/components/AttackDetailsModal.vue'
 
 const hashlistId = useRoute().params.id as string
 const {
@@ -137,9 +137,27 @@ const quantityStr = (num: number, str: string) => {
   }
   return `${num} ${str}s`
 }
+
+const isAttackModalOpen = ref(false)
+const attackModalAttackIndex = ref(-1)
+
+const selectedAttack = computed(() => {
+  return attacksData.value?.attacks[attackModalAttackIndex.value] ?? null
+})
+
+function openAttackModal(attackIndex: number) {
+  attackModalAttackIndex.value = attackIndex
+  isAttackModalOpen.value = true
+}
 </script>
 
 <template>
+  <AttackDetailsModal
+    v-if="selectedAttack != null"
+    :attack="selectedAttack"
+    v-model:isOpen="isAttackModalOpen"
+  ></AttackDetailsModal>
+
   <main class="w-full p-4">
     <p v-if="isLoading">Loading</p>
     <div v-else>
@@ -163,7 +181,7 @@ const quantityStr = (num: number, str: string) => {
                   <label tabindex="0" class="btn btn-ghost btn-sm m-1">...</label>
                   <ul
                     tabindex="0"
-                    class="menu dropdown-content rounded-box z-[1] bg-base-100 p-2 shadow"
+                    class="dropdown-content menu rounded-box z-[1] bg-base-100 p-2 shadow"
                   >
                     <li>
                       <button
@@ -257,11 +275,15 @@ const quantityStr = (num: number, str: string) => {
                     <th>Status</th>
                     <th>Total Hashrate</th>
                     <th>Time remaining</th>
-                    <th>Controls</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="attack in attacksData?.attacks" :key="attack.id">
+                  <tr
+                    class="cursor-pointer"
+                    @click="() => openAttackModal(attackIndex)"
+                    v-for="(attack, attackIndex) in attacksData?.attacks"
+                    :key="attack.id"
+                  >
                     <td>
                       {{ getAttackModeName(attack.hashcat_params.attack_mode) }}
                     </td>
@@ -287,16 +309,12 @@ const quantityStr = (num: number, str: string) => {
                       {{
                         timeDurationToReadable(
                           Math.max(
-                            ...attack.jobs.map((x) => x.runtime_summary.estimated_time_remaining)
+                            ...attack.jobs.map((x) => x.runtime_summary.estimated_time_remaining),
+                            0
                           )
                         )
                       }}
                       left
-                    </td>
-                    <td class="text-center">
-                      <IconButton tooltip="Start" icon="fa-solid fa-play" color="success" />
-                      <IconButton tooltip="Stop" icon="fa-solid fa-stop" color="warning" />
-                      <IconButton tooltip="Delete" icon="fa-solid fa-trash" color="error" />
                     </td>
                   </tr>
                 </tbody>
