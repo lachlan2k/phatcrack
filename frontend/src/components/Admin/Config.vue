@@ -27,8 +27,13 @@ const toast = useToast()
 
 async function onSave() {
   try {
-    const { is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles } = settings
-    await adminSetConfig({ is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles  })
+    const { is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles } =
+      settings
+    await adminSetConfig({
+      is_mfa_required,
+      require_password_change_on_first_login,
+      auto_sync_listfiles
+    })
   } catch (e: any) {
     let errorString = 'Unknown Error'
     if (e instanceof AxiosError) {
