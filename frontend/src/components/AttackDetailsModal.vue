@@ -107,7 +107,7 @@ async function stop() {
           <td>
             <strong>{{ getAgentName(job.assigned_agent_id) }}</strong>
           </td>
-          <td>
+          <td style="min-width: 130px;">
             <div
               class="badge badge-success mr-1"
               v-if="
@@ -144,6 +144,8 @@ async function stop() {
             </div>
 
             <div class="badget badge-ghost" v-else>Unknown state</div>
+
+            <p style="max-width: 300px;" class="pt-1 font-mono" v-if="job.runtime_data.error_string != ''">{{ job.runtime_data.error_string }}</p>
           </td>
           <td>{{ hashrateStr(job.runtime_summary.hashrate) }}</td>
           <td>{{ timeSince(job.runtime_summary.started_time * 1000) }}</td>

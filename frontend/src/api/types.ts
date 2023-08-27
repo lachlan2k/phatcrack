@@ -366,7 +366,7 @@ export interface GetAllRuleFilesDTO {
 export interface ListfileUploadResponseDTO {
   listfile: ListfileDTO
 }
-export interface ProjectCreateDTO {
+export interface ProjectCreateRequestDTO {
   name: string
   description: string
 }

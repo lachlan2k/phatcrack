@@ -11,7 +11,7 @@ import type { AttackCreateRequestDTO } from './types'
 import type {
   HashlistCreateRequestDTO,
   HashlistCreateResponseDTO,
-  ProjectCreateDTO,
+  ProjectCreateRequestDTO,
   ProjectDTO,
   ProjectResponseMultipleDTO
 } from './types'
@@ -21,7 +21,7 @@ export function createProject(name: string, description: string): Promise<Projec
     .post('/api/v1/project/create', {
       name,
       description
-    } as ProjectCreateDTO)
+    } as ProjectCreateRequestDTO)
     .then((res) => res.data)
 }
 

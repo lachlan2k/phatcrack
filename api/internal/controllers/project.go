@@ -31,7 +31,7 @@ func handleProjectCreate(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	req, err := util.BindAndValidate[apitypes.ProjectCreateDTO](c)
+	req, err := util.BindAndValidate[apitypes.ProjectCreateRequestDTO](c)
 	if err != nil {
 		return err
 	}
