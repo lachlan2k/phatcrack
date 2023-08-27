@@ -77,9 +77,13 @@ func (a *AgentConnection) handleJobExited(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to job exited dto: %w", msg.Payload, err)
 	}
 
-	reason := db.JobStopReasonFinished
-	if payload.Error != "" {
-		reason = db.JobStopReasonFailed
+	reason := payload.StopReason
+
+	if reason == "" {
+		reason = db.JobStopReasonFinished
+		if payload.Error != "" {
+			reason = db.JobStopReasonFailed
+		}
 	}
 
 	return db.SetJobExited(payload.JobID, reason, payload.Error, payload.Time)

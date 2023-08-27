@@ -143,6 +143,10 @@ func scheduleJobUnsafe(jobIds []string) ([]string, error) {
 	return agentsJobsScheduledTo, nil
 }
 
+func StopJob(job db.Job, reason string) {
+	tellAgentToKillJob(job.AssignedAgentID, &job.ID, reason)
+}
+
 func RequestFileDownload(fileIDs ...uuid.UUID) {
 	if !config.Get().AutomaticallySyncListfiles {
 		return

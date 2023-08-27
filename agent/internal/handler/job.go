@@ -54,7 +54,7 @@ func (h *Handler) sendJobStderrLine(jobId, line string) {
 	})
 }
 
-func (h *Handler) sendJobExited(jobId string, err error) {
+func (h *Handler) sendJobExited(jobId string, reason string, err error) {
 	errStr := ""
 	if err != nil {
 		errStr = err.Error()
@@ -69,9 +69,10 @@ func (h *Handler) sendJobExited(jobId string, err error) {
 	}
 
 	h.sendMessage(wstypes.JobExitedType, wstypes.JobExitedDTO{
-		JobID: jobId,
-		Error: errStr,
-		Time:  time.Now(),
+		JobID:      jobId,
+		Error:      errStr,
+		StopReason: reason,
+		Time:       time.Now(),
 	})
 }
 
@@ -143,6 +144,13 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 		return err
 	}
 
+	activeJob := &ActiveJob{
+		job:  job,
+		sess: sess,
+	}
+
+	h.activeJobs[job.ID] = activeJob
+
 	go func() {
 		h.sendJobStarted(job.ID, sess.CmdLine())
 
@@ -181,7 +189,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 				}
 
 			case err := <-sess.DoneChan:
-				h.sendJobExited(job.ID, err)
+				h.sendJobExited(job.ID, activeJob.stopReason, err)
 				break procLoop
 			}
 		}
@@ -193,13 +201,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 		defer h.jobsLock.Unlock()
 
 		delete(h.activeJobs, job.ID)
-
 	}()
-
-	h.activeJobs[job.ID] = ActiveJob{
-		job:  job,
-		sess: sess,
-	}
 
 	return nil
 }
@@ -213,6 +215,8 @@ func (h *Handler) killJob(jobMsg wstypes.JobKillDTO) error {
 		// We aren't running it so alg
 		return nil
 	}
+
+	job.stopReason = jobMsg.StopReason
 
 	return job.sess.Kill()
 }

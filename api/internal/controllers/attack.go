@@ -26,6 +26,8 @@ func HookAttackEndpoints(api *echo.Group) {
 	api.PUT("/:attack-id/start", handleAttackStart)
 	api.POST("/create", handleAttackCreate)
 
+	api.DELETE("/:attack-id/stop", handleAttackStopAllJobs)
+
 	api.GET("/:attack-id/jobs", handleAttackJobGetAll)
 }
 
@@ -71,6 +73,45 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 	return c.JSON(http.StatusOK, apitypes.AttackMultipleDTO{
 		Attacks: attackDTOs,
 	})
+}
+
+func handleAttackStopAllJobs(c echo.Context) error {
+	attackId := c.Param("attack-id")
+	if !util.AreValidUUIDs(attackId) {
+		return echo.ErrBadRequest
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	projId, err := db.GetAttackProjID(attackId)
+	if err != nil {
+		return util.ServerError("Failed to fetch project id for hashlist", err)
+	}
+
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	if err == db.ErrNotFound {
+		return echo.ErrForbidden
+	}
+	if err != nil {
+		return util.ServerError("Failed to fetch project", err)
+	}
+
+	if !accesscontrol.HasRightsToProject(user, proj) {
+		return echo.ErrForbidden
+	}
+
+	jobs, err := db.GetJobsForAttack(attackId, false)
+	if err != nil {
+		return util.ServerError("Failed to get jobs for attack", err)
+	}
+
+	for _, job := range jobs {
+		fleet.StopJob(job, db.JobStopReasonUserStopped)
+	}
+	return c.JSON(http.StatusOK, "ok")
 }
 
 func handleAttackJobGetAll(c echo.Context) error {
@@ -292,7 +333,7 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Something went wrong getting hashlist to start attack on", err)
 	}
 
-	targetHashes := make([]string, len(hashlist.Hashes))
+	targetHashes := make([]string, 0)
 	for _, hash := range hashlist.Hashes {
 		if !hash.IsCracked {
 			targetHashes = append(targetHashes, hash.NormalizedHash)

@@ -32,7 +32,7 @@ func (w webauthnUser) WebAuthnDisplayName() string {
 }
 
 func (w webauthnUser) WebAuthnCredentials() []*webauthn.Credential {
-	creds := make([]*webauthn.Credential, 0, len(w.CredentialMap))
+	creds := make([]*webauthn.Credential, 0)
 	for _, cred := range w.CredentialMap {
 		creds = append(creds, cred)
 	}

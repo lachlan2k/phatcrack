@@ -18,8 +18,9 @@ import (
 )
 
 type ActiveJob struct {
-	job  wstypes.JobStartDTO
-	sess *hashcat.HashcatSession
+	job        wstypes.JobStartDTO
+	stopReason string
+	sess       *hashcat.HashcatSession
 }
 
 type Handler struct {
@@ -28,7 +29,7 @@ type Handler struct {
 	jobsLock          sync.Mutex
 	fileDownloadLock  sync.Mutex
 	isDownloadingFile bool
-	activeJobs        map[string]ActiveJob
+	activeJobs        map[string]*ActiveJob
 }
 
 func (h *Handler) sendMessage(msgType string, payload interface{}) error {
@@ -171,7 +172,7 @@ func Run(conf *config.Config) error {
 	h := &Handler{
 		conn:       conn,
 		conf:       conf,
-		activeJobs: make(map[string]ActiveJob),
+		activeJobs: make(map[string]*ActiveJob),
 	}
 
 	conn.Setup()

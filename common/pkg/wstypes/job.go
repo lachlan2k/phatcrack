@@ -42,7 +42,8 @@ type JobStartedDTO struct {
 }
 
 type JobKillDTO struct {
-	JobID string
+	JobID      string
+	StopReason string
 }
 
 // JobCrackedHash
@@ -65,9 +66,10 @@ type JobStdLineDTO struct {
 
 // JobExited
 type JobExitedDTO struct {
-	JobID string    `json:"job_id"`
-	Time  time.Time `json:"time"`
-	Error string    `json:"error"`
+	JobID      string    `json:"job_id"`
+	Time       time.Time `json:"time"`
+	Error      string    `json:"error"`
+	StopReason string    `json:"stop_reason"`
 }
 
 // JobStatusUpdate

@@ -9,6 +9,7 @@ import {
   JobStatusExited,
   JobStatusStarted,
   JobStopReasonFinished,
+  JobStopReasonUserStopped,
   getHashlist
 } from '@/api/project'
 import { exportResults, ExportFormat } from '@/util/exportHashlist'
@@ -110,11 +111,18 @@ const numJobsFinished = (attack: AttackWithJobsDTO) =>
       x.runtime_data.status == JobStatusExited &&
       x.runtime_data.stop_reason == JobStopReasonFinished
   ).length
+const numJobsStopped = (attack: AttackWithJobsDTO) =>
+  attack.jobs.filter(
+    (x) =>
+      x.runtime_data.status == JobStatusExited &&
+      x.runtime_data.stop_reason == JobStopReasonUserStopped
+  ).length
 const numJobsFailed = (attack: AttackWithJobsDTO) =>
   attack.jobs.filter(
     (x) =>
       x.runtime_data.status == JobStatusExited &&
-      x.runtime_data.stop_reason != JobStopReasonFinished
+      x.runtime_data.stop_reason != JobStopReasonFinished &&
+      x.runtime_data.stop_reason != JobStopReasonUserStopped
   ).length
 const numJobsQueued = (attack: AttackWithJobsDTO) =>
   attack.jobs.filter(
@@ -181,7 +189,7 @@ function openAttackModal(attackIndex: number) {
                   <label tabindex="0" class="btn btn-ghost btn-sm m-1">...</label>
                   <ul
                     tabindex="0"
-                    class="dropdown-content menu rounded-box z-[1] bg-base-100 p-2 shadow"
+                    class="menu dropdown-content rounded-box z-[1] bg-base-100 p-2 shadow"
                   >
                     <li>
                       <button
@@ -297,7 +305,10 @@ function openAttackModal(attackIndex: number) {
                       <div class="badge badge-secondary mr-1" v-if="numJobsQueued(attack) > 0">
                         {{ quantityStr(numJobsQueued(attack), 'job') }} pending
                       </div>
-                      <div class="badge badge-error" v-if="numJobsFailed(attack)">
+                      <div class="badge badge-warning mr-1" v-if="numJobsStopped(attack)">
+                        {{ quantityStr(numJobsStopped(attack), 'job') }} stopped
+                      </div>
+                      <div class="badge badge-error mr-1" v-if="numJobsFailed(attack)">
                         {{ quantityStr(numJobsFailed(attack), 'job') }} failed
                       </div>
                     </td>

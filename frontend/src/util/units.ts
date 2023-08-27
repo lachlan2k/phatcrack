@@ -10,8 +10,8 @@ export function timeSince(timestamp: number): string {
 
   const date = new Date(timestamp)
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
-  const interval = intervals.find((i) => i.seconds < seconds)
-  const count = Math.floor(seconds / interval!.seconds)
+  const interval = intervals.find((i) => i.seconds < seconds) ?? intervals[0]
+  const count = Math.floor(seconds / interval.seconds)
   return `${count} ${interval!.label}${count !== 1 ? 's' : ''} ago`
 }
 
@@ -26,8 +26,8 @@ export function timeBetween(startTime: number, endTime: number): string {
   ]
 
   const seconds = Math.floor((endTime - startTime) / 1000)
-  const interval = intervals.find((i) => i.seconds < seconds)
-  const count = Math.floor(seconds / interval!.seconds)
+  const interval = intervals.find((i) => i.seconds < seconds) ?? intervals[0]
+  const count = Math.floor(seconds / interval.seconds)
   return `${count} ${interval!.label}${count !== 1 ? 's' : ''}`
 }
 
@@ -45,8 +45,8 @@ export function timeDurationToReadable(durationInSeconds: number): string {
     { label: 'second', seconds: 0 }
   ]
 
-  const interval = intervals.find((i) => i.seconds < durationInSeconds)
-  const count = Math.floor(durationInSeconds / interval!.seconds)
+  const interval = intervals.find((i) => i.seconds < durationInSeconds) ?? intervals[0]
+  const count = Math.floor(durationInSeconds / interval.seconds)
   return `${count} ${interval!.label}${count !== 1 ? 's' : ''}`
 }
 

@@ -41,6 +41,10 @@ export function createAttack(body: AttackCreateRequestDTO): Promise<AttackDTO> {
   return client.post(`/api/v1/attack/create`, body).then((res) => res.data)
 }
 
+export function stopAttack(attackId: string): Promise<string> {
+  return client.delete(`/api/v1/attack/${attackId}/stop`).then((res) => res.data)
+}
+
 export function startAttack(attackId: string): Promise<AttackStartResponseDTO> {
   return client.put(`/api/v1/attack/${attackId}/start`).then((res) => res.data)
 }

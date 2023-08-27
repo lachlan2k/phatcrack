@@ -41,6 +41,7 @@ export const useListfilesStore = defineStore({
   },
 
   getters: {
-    byId: state => (id: string) => (state.wordlists.find(x => x.id == id) ?? state.rulefiles.find(x => x.id == id))
+    byId: (state) => (id: string) =>
+      state.wordlists.find((x) => x.id == id) ?? state.rulefiles.find((x) => x.id == id)
   }
 })

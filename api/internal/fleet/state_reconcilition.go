@@ -23,7 +23,7 @@ const disconnectTimeToDead = 60 * time.Second
 const acceptableJobStartTime = 5 * time.Second
 
 // This will soft fail if the agent isn't connected. In which case, we're probably fine
-func tellAgentToKillJob(agentId *uuid.UUID, jobId *uuid.UUID) {
+func tellAgentToKillJob(agentId *uuid.UUID, jobId *uuid.UUID, reason string) {
 	if agentId == nil || jobId == nil {
 		return
 	}
@@ -31,7 +31,8 @@ func tellAgentToKillJob(agentId *uuid.UUID, jobId *uuid.UUID) {
 	agentConnection, ok := fleet[agentId.String()]
 	if ok {
 		agentConnection.sendMessage(wstypes.JobKillType, wstypes.JobKillDTO{
-			JobID: jobId.String(),
+			JobID:      jobId.String(),
+			StopReason: reason,
 		})
 	}
 }
@@ -267,7 +268,7 @@ func stateReconciliation() error {
 
 				// Tell agent to kill this job, incase it *is* running but it just didn't make it through, or its in a broken state.
 				// This is an unlikely error condition, but let's handle it just in case.
-				tellAgentToKillJob(job.AssignedAgentID, &job.ID)
+				tellAgentToKillJob(job.AssignedAgentID, &job.ID, db.JobStopReasonFailed)
 			}
 
 		// The job is supposed to be running somewhere, so lets make sure of it
@@ -309,7 +310,7 @@ func stateReconciliation() error {
 						Error("Failed to update job status in database")
 				}
 
-				tellAgentToKillJob(&agentRunningJob, &job.ID)
+				tellAgentToKillJob(&agentRunningJob, &job.ID, db.JobStopReasonFailed)
 				continue
 			}
 
@@ -324,8 +325,8 @@ func stateReconciliation() error {
 						Error("Failed to update job status in database")
 				}
 
-				tellAgentToKillJob(&agentRunningJob, &job.ID)
-				tellAgentToKillJob(&agentThatShouldBeRunningJob.ID, &job.ID)
+				tellAgentToKillJob(&agentRunningJob, &job.ID, db.JobStopReasonFailed)
+				tellAgentToKillJob(&agentThatShouldBeRunningJob.ID, &job.ID, db.JobStopReasonFailed)
 				continue
 			}
 
