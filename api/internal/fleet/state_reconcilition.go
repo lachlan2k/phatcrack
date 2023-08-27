@@ -300,6 +300,12 @@ func stateReconciliation() error {
 				continue
 			}
 
+			if job.RuntimeData.StartRequestTime.After(agentThatShouldBeRunningJob.AgentInfo.Data.TimeOfLastHeartbeat) {
+				// The job was started after the last heartbeat
+				// So we can't know whether or not its in the list of running jobs
+				continue
+			}
+
 			agentRunningJob, jobOk := jobsOk[jobId]
 			if !jobOk {
 				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job disappeared from the agent's list of running jobs. The agent probably died or was restarted.", time.Now())
