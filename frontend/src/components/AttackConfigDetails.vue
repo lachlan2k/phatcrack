@@ -63,7 +63,7 @@ const extraOptionsStr = computed(() => {
 
       <tr v-if="hashcatParams.mask != ''">
         <td><strong>Mask</strong></td>
-        <td>{{ hashcatParams.mask }}</td>
+        <td class="font-mono">{{ hashcatParams.mask }}</td>
       </tr>
 
       <tr v-if="extraOptionsStr != ''">
