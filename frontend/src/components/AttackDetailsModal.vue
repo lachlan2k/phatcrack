@@ -15,6 +15,7 @@ import { timeDurationToReadable } from '@/util/units'
 import { timeSince } from '@/util/units'
 
 import { computed } from 'vue'
+import AttackConfigDetails from './AttackConfigDetails.vue'
 
 const props = defineProps<{
   isOpen: boolean
@@ -35,10 +36,11 @@ const getAgentName = (id: string) => agentStore.byId(id)?.name ?? 'Unknown'
 
 <template>
   <Modal v-model:isOpen="isOpen">
-    <h2 class="mb-4 text-center text-xl font-bold">
+    <h2 class="mb-8 text-center text-xl font-bold">
       {{ getAttackModeName(props.attack.hashcat_params.attack_mode) }} Attack
     </h2>
-    <h2 class="font-bold">Jobs</h2>
+    <AttackConfigDetails :attack="attack"></AttackConfigDetails>
+    <div class="my-8"></div>
 
     <table class="compact-table table w-full">
       <!-- head -->

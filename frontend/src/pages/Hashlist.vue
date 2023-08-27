@@ -285,7 +285,7 @@ function openAttackModal(attackIndex: number) {
                     :key="attack.id"
                   >
                     <td>
-                      {{ getAttackModeName(attack.hashcat_params.attack_mode) }}
+                      <strong>{{ getAttackModeName(attack.hashcat_params.attack_mode) }}</strong>
                     </td>
                     <td v-if="numJobs(attack)">
                       <div class="badge badge-success mr-1" v-if="numJobsFinished(attack) > 0">

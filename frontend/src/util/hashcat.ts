@@ -16,6 +16,10 @@ export function getAttackModeName(id: number): string {
   return attackModes.find((x) => x.value == id)?.name ?? ''
 }
 
+export function modeHasMask(value: number): boolean {
+  return value == 1 || value == 3 || value == 6 || value == 7
+}
+
 export interface MaskInfo {
   mask: string
   charset: string
