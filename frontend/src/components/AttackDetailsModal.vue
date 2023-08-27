@@ -11,7 +11,7 @@ import type { AttackWithJobsDTO } from '@/api/types'
 import Modal from '@/components/Modal.vue'
 import { useAgentsStore } from '@/stores/agents'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
-import { timeDurationToReadable } from '@/util/units'
+import { timeBetween, timeDurationToReadable } from '@/util/units'
 import { timeSince } from '@/util/units'
 
 import { computed } from 'vue'
@@ -39,10 +39,10 @@ const getAgentName = (id: string) => agentStore.byId(id)?.name ?? 'Unknown'
     <h2 class="mb-8 text-center text-xl font-bold">
       {{ getAttackModeName(props.attack.hashcat_params.attack_mode) }} Attack
     </h2>
-    <AttackConfigDetails :attack="attack"></AttackConfigDetails>
+    <AttackConfigDetails :hashcatParams="attack.hashcat_params"></AttackConfigDetails>
     <div class="my-8"></div>
 
-    <table class="compact-table table w-full">
+    <table class="compact-table table w-full" v-if="attack.jobs.length > 0">
       <!-- head -->
       <thead>
         <tr>
@@ -51,7 +51,7 @@ const getAgentName = (id: string) => agentStore.byId(id)?.name ?? 'Unknown'
           <th>Total Hashrate</th>
           <th>Time Started</th>
           <th>Time Remaining</th>
-          <th>Time Finished</th>
+          <th>Time Taken</th>
         </tr>
       </thead>
       <tbody>
@@ -99,11 +99,13 @@ const getAgentName = (id: string) => agentStore.byId(id)?.name ?? 'Unknown'
           <td v-else>-</td>
 
           <td v-if="job.runtime_summary.stopped_time > 0">
-            {{ timeSince(job.runtime_summary.stopped_time * 1000) }}
+            {{ timeBetween(job.runtime_summary.started_time * 1000, job.runtime_summary.stopped_time * 1000) }}
           </td>
           <td v-else>-</td>
         </tr>
       </tbody>
     </table>
+
+    <p v-else>No jobs were found for this attack</p>
   </Modal>
 </template>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { AxiosError } from 'axios'
+import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
 import HashlistInputs from './HashlistInputs.vue'
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
 import MaskInput from './MaskInput.vue'
@@ -246,6 +248,10 @@ function makeHashcatParams(): HashcatParams {
   }
 }
 
+const computedHashcatParams = computed(() => {
+  return makeHashcatParams()
+})
+
 async function saveUptoAttack(): Promise<AttackDTO> {
   const hashlist = await saveOrGetHashlist()
 
@@ -265,15 +271,22 @@ async function saveUptoAttack(): Promise<AttackDTO> {
 async function saveAndStartAttack() {
   const attack = await saveUptoAttack()
   try {
-    startAttack(attack.id)
+    await startAttack(attack.id)
     emit('successfulStart', {
       projectId: inputs.selectedProjectId,
       hashlistId: inputs.selectedHashlistId,
       attackId: attack.id
     })
     toast.success('Started attack!')
-  } catch (err: any) {
-    toast.warning('Failed to start attack: ' + err.message)
+  } catch (e: any) {
+    let errorString = 'Unknown Error'
+    if (e instanceof AxiosError) {
+      errorString = e.response?.data?.message
+    } else if (e instanceof Error) {
+      errorString = e.message
+    }
+
+    toast.warning('Failed to start: ' + errorString)
   }
 }
 </script>
@@ -540,6 +553,8 @@ async function saveAndStartAttack() {
               </div>
             </tbody>
           </table>
+
+          <AttackConfigDetails :hashcatParams="computedHashcatParams"></AttackConfigDetails>
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">

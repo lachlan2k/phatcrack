@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import type { AttackWithJobsDTO } from '@/api/types'
+import type { HashcatParams } from '@/api/types'
 import { modeHasMask } from '@/util/hashcat'
 import { useListfilesStore } from '@/stores/listfiles'
 
 const props = defineProps<{
-  attack: AttackWithJobsDTO
+  hashcatParams: HashcatParams
 }>()
 
 const listfileStore = useListfilesStore()
@@ -17,7 +17,7 @@ function listfileName(id: string): string {
 }
 
 const extraOptionsStr = computed(() => {
-    const params = props.attack.hashcat_params
+    const params = props.hashcatParams
     const arr = []
 
     if (params.optimized_kernels) {
@@ -49,19 +49,19 @@ const extraOptionsStr = computed(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-if="attack.hashcat_params.wordlist_filenames.length > 0">
+        <tr v-if="hashcatParams.wordlist_filenames.length > 0">
           <td><strong>Wordlist</strong></td>
-          <td>{{ attack.hashcat_params.wordlist_filenames.map(id => listfileName(id)).join(', ') }}</td>
+          <td>{{ hashcatParams.wordlist_filenames.map(id => listfileName(id)).join(', ') }}</td>
         </tr>
 
-        <tr v-if="attack.hashcat_params.rules_filenames.length > 0">
+        <tr v-if="hashcatParams.rules_filenames.length > 0">
             <td><strong>Rules</strong></td>
-            <td>{{ attack.hashcat_params.rules_filenames.map(id => listfileName(id)).join(', ') }}</td>
+            <td>{{ hashcatParams.rules_filenames.map(id => listfileName(id)).join(', ') }}</td>
         </tr>
 
-        <tr v-if="attack.hashcat_params.mask != ''">
+        <tr v-if="hashcatParams.mask != ''">
             <td><strong>Mask</strong></td>
-            <td>{{ attack.hashcat_params.mask }}</td>
+            <td>{{ hashcatParams.mask }}</td>
         </tr>
 
         <tr v-if="extraOptionsStr != ''">
