@@ -42,6 +42,7 @@ const router = createRouter({
 
     route('/wizard', 'Wizard', () => import('@/pages/Wizard.vue')),
 
+    route('/account', 'Account', () => import('@/pages/Account.vue')),
     route('/admin', 'Admin', () => import('@/pages/Admin.vue'))
   ]
 })

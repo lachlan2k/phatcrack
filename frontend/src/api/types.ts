@@ -1,5 +1,9 @@
 /* Do not change, this code is generated from Golang structs */
 
+export interface AccountChangePasswordRequestDTO {
+  new_password: string
+  current_password: string
+}
 export interface AdminAgentCreateRequestDTO {
   name: string
 }

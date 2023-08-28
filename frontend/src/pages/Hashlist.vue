@@ -295,7 +295,7 @@ function openAttackModal(attackIndex: number) {
                     <td>
                       <strong>{{ getAttackModeName(attack.hashcat_params.attack_mode) }}</strong>
                     </td>
-                    <td v-if="numJobs(attack)" style="min-width: 130px;">
+                    <td v-if="numJobs(attack)" style="min-width: 130px">
                       <div class="badge badge-success mr-1" v-if="numJobsFinished(attack) > 0">
                         {{ quantityStr(numJobsFinished(attack), 'job') }} finished
                       </div>
@@ -312,7 +312,7 @@ function openAttackModal(attackIndex: number) {
                         {{ quantityStr(numJobsFailed(attack), 'job') }} failed
                       </div>
                     </td>
-                    <td style="min-width: 130px;" v-else>
+                    <td style="min-width: 130px" v-else>
                       <div class="badge badge-ghost">No jobs</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>

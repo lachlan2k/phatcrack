@@ -43,17 +43,6 @@ func Listen(port string) error {
 	validator.Init()
 	e.Validator = validator
 
-	// e.Use(middleware.LoggerWithConfig(
-	// 	middleware.LoggerConfig{
-	// 		Skipper: func(c echo.Context) bool {
-	// 			return false
-	// 			if c.Response().Status == 200 {
-	// 				return true
-	// 			}
-	// 			return false
-	// 		},
-	// 	},
-	// ))
 	e.Use(middleware.RequestLoggerWithConfig(
 		middleware.RequestLoggerConfig{
 
@@ -156,6 +145,7 @@ func Listen(port string) error {
 	controllers.HookAttackEndpoints(api.Group(("/attack")))
 	controllers.HookAgentEndpoints(api.Group("/agent"))
 	controllers.HookJobEndpoints(api.Group("/job"))
+	controllers.HookAccountEndpoints(api.Group("/account"))
 
 	adminAPI := api.Group("/admin")
 	adminAPI.Use(auth.AdminOnlyMiddleware(sessionHandler))

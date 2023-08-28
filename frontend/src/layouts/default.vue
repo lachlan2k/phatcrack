@@ -64,14 +64,14 @@ async function logout() {
           <li
             class="hover-bordered"
             v-if="authStore.isAdmin"
-            :class="route.path == 'admin' ? 'bordered' : 'hover-bordered'"
+            :class="route.path == '/admin' ? 'bordered' : 'hover-bordered'"
           >
             <RouterLink to="/admin" :class="route.path == '/admin' ? 'active' : ''">
               <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
               Admin
             </RouterLink>
           </li>
-          <li class="hover-bordered">
+          <li class="hover-bordered" :class="route.path == '/account' ? 'bordered' : 'hover-bordered'">
             <div class="text-content-neutral dropdown dropdown-top">
               <label tabindex="0" class="w-full cursor-pointer">
                 <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-user" /></span>
@@ -85,10 +85,10 @@ async function logout() {
                 class="dropdown-content menu rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow"
               >
                 <li>
-                  <a>
+                  <RouterLink to="/account">
                     <span><font-awesome-icon icon="fa-solid fa-user" /></span>
                     <span>My account</span>
-                  </a>
+                  </RouterLink>
                 </li>
                 <li>
                   <a @click="logout()">
