@@ -71,7 +71,10 @@ async function logout() {
               Admin
             </RouterLink>
           </li>
-          <li class="hover-bordered" :class="route.path == '/account' ? 'bordered' : 'hover-bordered'">
+          <li
+            class="hover-bordered"
+            :class="route.path == '/account' ? 'bordered' : 'hover-bordered'"
+          >
             <div class="text-content-neutral dropdown dropdown-top">
               <label tabindex="0" class="w-full cursor-pointer">
                 <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-user" /></span>

@@ -96,20 +96,20 @@ async function onChangePassword() {
             />
           </div>
 
-            <span class="tooltip w-full mt-2" :data-tip="changePasswordValidationErrors">
-              <button
-                type="submit"
-                class="btn btn-primary w-full"
-                :disabled="changePasswordValidationErrors != null"
-                @click="() => onChangePassword()"
-              >
-                <span
-                  class="loading loading-spinner loading-md"
-                  v-if="isChangePasswordLoading"
-                ></span>
-                Change Password
-              </button>
-            </span>
+          <span class="tooltip mt-2 w-full" :data-tip="changePasswordValidationErrors">
+            <button
+              type="submit"
+              class="btn btn-primary w-full"
+              :disabled="changePasswordValidationErrors != null"
+              @click="() => onChangePassword()"
+            >
+              <span
+                class="loading loading-spinner loading-md"
+                v-if="isChangePasswordLoading"
+              ></span>
+              Change Password
+            </button>
+          </span>
         </div>
       </div>
     </div>
