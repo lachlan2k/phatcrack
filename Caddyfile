@@ -4,9 +4,16 @@
     # This technically allows any caddy entry to be added here
     # But we'll just use it for TLS
     {$TLS_OPTS}
-    
-    reverse_proxy /api/* http://api:3000
-    file_server {
-        root /srv
+
+    encode gzip
+
+    handle /api/* {
+        reverse_proxy http://api:3000
+    }
+
+    handle {
+        root * /srv
+        try_files {path} /index.html
+		file_server
     }
 }
