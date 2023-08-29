@@ -50,8 +50,7 @@ const logLines = computed<string>(() => {
     selectedJob.value.runtime_data.cmd_line +
     '\n\n' +
     selectedJob.value.runtime_data.output_lines.map((x) => x.stream).join('\n') +
-    '\n\n> Error: ' +
-    selectedJob.value.runtime_data.error_string
+    (selectedJob.value.runtime_data.error_string != '' ? '\n\n> Error: ' + selectedJob.value.runtime_data.error_string : '')
   )
 })
 </script>

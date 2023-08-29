@@ -32,11 +32,9 @@ const isLoading = computed(() => {
   <main class="w-full p-4">
     <p v-if="isLoading">Loading</p>
     <div v-else>
-      <div class="prose">
-        <h1>{{ projectData?.name }}</h1>
-      </div>
+      <h1 class="text-4xl font-bold">{{ projectData?.name }}</h1>
       <div class="mt-6 flex flex-wrap gap-6">
-        <div class="card min-w-[400px] bg-base-100 shadow-xl">
+        <div class="card w-full bg-base-100 shadow-xl">
           <div class="card-body">
             <div class="flex flex-row justify-between">
               <h2 class="card-title">Hashlists</h2>

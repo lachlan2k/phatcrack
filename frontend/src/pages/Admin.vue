@@ -6,9 +6,7 @@ import AgentsTable from '@/components/Admin/AgentsTable.vue'
 
 <template>
   <main class="w-full p-4">
-    <div class="prose">
-      <h1>Admin</h1>
-    </div>
+    <h1 class="text-4xl font-bold">Admin</h1>
 
     <div class="mt-6 flex flex-wrap gap-6">
       <div class="card bg-base-100 shadow-xl">

@@ -10,12 +10,10 @@ const projects = computed(() => data.value?.projects)
 
 <template>
   <main class="w-full p-4">
-    <div class="prose">
-      <h1>Projects</h1>
-    </div>
+    <h1 class="text-4xl font-bold">Projects</h1>
     <p v-if="isLoading">Loading</p>
     <div class="mt-6 flex flex-wrap gap-6" v-else>
-      <div class="min-w-56 card bg-base-100 shadow-xl">
+      <div class="card w-full bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">My Projects & Projects Shared with Me</h2>
           <table class="table w-full">
@@ -24,8 +22,6 @@ const projects = computed(() => data.value?.projects)
               <tr>
                 <th>Name</th>
                 <th>Created</th>
-                <th>Hashlists</th>
-                <th>Attacks</th>
               </tr>
             </thead>
             <tbody class="first-col-bold">
@@ -33,10 +29,6 @@ const projects = computed(() => data.value?.projects)
                 <tr class="hover cursor-pointer" @click="navigate">
                   <td>{{ project.name }}</td>
                   <td>{{ timeSince(project.time_created * 1000) }}</td>
-                  <td>foo</td>
-                  <td>bar</td>
-                  <!-- <td>8</td> -->
-                  <!-- <td><div class="badge badge-info">4 attacks running</div></td> -->
                 </tr>
               </RouterLink>
             </tbody>

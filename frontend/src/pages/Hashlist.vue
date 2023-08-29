@@ -142,9 +142,7 @@ function openAttackModal(attackIndex: number) {
   <main class="w-full p-4">
     <p v-if="isLoading">Loading</p>
     <div v-else>
-      <div class="prose">
-        <h1>{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
-      </div>
+      <h1 class="text-4xl font-bold">{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
       <div class="flex gap-4">
         <div class="mt-6 flex flex-wrap gap-6">
           <div class="card bg-base-100 shadow-xl">

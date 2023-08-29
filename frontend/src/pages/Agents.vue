@@ -15,10 +15,7 @@ const allAgents = agentsStore.agents
 
 <template>
   <main class="w-full p-4">
-    <div class="prose">
-      <h1>Agents</h1>
-    </div>
-
+    <h1 class="text-4xl font-bold">Agents</h1>
     <div class="mt-6 flex flex-wrap gap-6">
       <div class="grow">
         <div class="stats shadow">
