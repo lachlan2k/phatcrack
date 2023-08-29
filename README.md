@@ -17,11 +17,12 @@ adduser --system --no-create-home phatcrack-server
 mkdir -p /srv/containers/phatcrack
 cd /srv/containers/phatcrack
 
-wget https://raw.githubusercontent.com/lachlan2k/phatcrack/main/docker-compose.prod.yml
+wget https://raw.githubusercontent.com/lachlan2k/phatcrack/main/docker-compose.prod.yml -O docker-compose.yml
 
 echo "HOST_NAME=phatcrack.lan" >> .env
 echo "DB_PASS=$(openssl rand -hex 16)" >> .env
 echo "PHATCRACK_USER=phatcrack-server" >> .env
+chmod 600 .env
 
 # Make a directory to persist files in
 mkdir -p /srv/containers/phatcrack/filerepo
