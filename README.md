@@ -11,6 +11,9 @@ Distributed hash cracking for chonkers. Phatcrack is a frontend for Hashcat that
 Docker is the only supported deployment method for the server. 
 
 ```sh
+# Ideally the container processes should be run rootless, so we'll create an unprivileged user.
+adduser --system --no-create-home phatcrack-server
+
 mkdir -p /srv/containers/phatcrack
 cd /srv/containers/phatcrack
 
@@ -18,9 +21,11 @@ wget https://raw.githubusercontent.com/lachlan2k/phatcrack/main/docker-compose.p
 
 echo "HOST_NAME=phatcrack.lan" >> .env
 echo "DB_PASS=$(openssl rand -hex 16)" >> .env
+echo "PHATCRACK_USER=phatcrack-server" >> .env
 
 # Make a directory to persist files in
-mkdir filerepo
+mkdir -p /srv/containers/phatcrack/filerepo
+chown phatcrack-server:phatcrack-server /srv/containers/phatcrack/filerepo
 
 # If you chose a hostname that is publicly accessible and expose this to the world (not recommended), Caddy will automatically deploy TLS.
 
