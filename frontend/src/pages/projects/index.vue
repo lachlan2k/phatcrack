@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { getAllProjects } from '@/api/project'
-import { useApi } from '@/composables/useApi'
-import { computed } from 'vue'
 import { timeSince } from '@/util/units'
+import { useProjectsStore } from '@/stores/projects';
+import { storeToRefs } from 'pinia';
 
-const { data, isLoading } = useApi(getAllProjects)
-const projects = computed(() => data.value?.projects)
+const projectsStore = useProjectsStore()
+projectsStore.load()
+
+const { projects } = storeToRefs(projectsStore)
 </script>
 
 <template>
   <main class="w-full p-4">
     <h1 class="text-4xl font-bold">Projects</h1>
-    <p v-if="isLoading">Loading</p>
-    <div class="mt-6 flex flex-wrap gap-6" v-else>
+    <div class="mt-6 flex flex-wrap gap-6">
       <div class="card w-full bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">My Projects & Projects Shared with Me</h2>
