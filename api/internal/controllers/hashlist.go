@@ -111,12 +111,12 @@ func handleHashlistCreate(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	log.Infof("Validating hashes for new hashlist (%s) for project %s", req.Name, req.ProjectID)
+	log.Infof("Validating hashes for new hashlist (%q) for project %q", req.Name, req.ProjectID)
 
 	// Ensure provided algorithm type is valid and normalize
 	normalizedHashes, err := hashcathelpers.NormalizeHashes(req.InputHashes, req.HashType, req.HasUsernames)
 	if err != nil {
-		log.Warnf("Failed to validated hashes for project %s because %v", req.ProjectID, err)
+		log.Warnf("Failed to validated hashes for project %q because %v", req.ProjectID, err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate and normalize hashes. Please ensure your hashes are valid for the given hash type.").SetInternal(err)
 	}
 

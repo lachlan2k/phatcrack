@@ -74,7 +74,7 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 		return nil
 
 	default:
-		log.Printf("unrecognized message type: %s", msg.Type)
+		log.Printf("unrecognized message type: %q", msg.Type)
 		return nil
 	}
 }
@@ -160,7 +160,7 @@ func Run(conf *config.Config) error {
 
 	wsEndpoint, err := apiEndpointToWSEndpoint(conf.APIEndpoint)
 	if err != nil {
-		return fmt.Errorf("invalid API endpoint (%s): %v", conf.APIEndpoint, err)
+		return fmt.Errorf("invalid API endpoint (%q): %w", conf.APIEndpoint, err)
 	}
 
 	conn := &wswrapper.WSWrapper{

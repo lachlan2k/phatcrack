@@ -220,6 +220,6 @@ func MakeJobs(attack *db.Attack, maxNumJobs int) ([]*db.Job, *db.Hashlist, error
 		return shardMaskAttack(attack, maxNumJobs)
 
 	default:
-		return nil, nil, fmt.Errorf("unrecognized hash type: %d", attack.HashcatParams.Data.HashType)
+		return nil, nil, fmt.Errorf("unrecognized attack mode: %d", attack.HashcatParams.Data.AttackMode)
 	}
 }

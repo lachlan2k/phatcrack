@@ -19,7 +19,7 @@ type Config struct {
 func LoadConfig(configPath string) (config Config) {
 	configJSON, err := os.ReadFile(configPath)
 	if err != nil {
-		log.Fatalf("couldn't read config file (%s): %v", configPath, err)
+		log.Fatalf("couldn't read config file (%q): %v", configPath, err)
 	}
 
 	err = json.Unmarshal(configJSON, &config)
@@ -34,7 +34,7 @@ func LoadConfig(configPath string) (config Config) {
 
 		authKeyBytes, err := os.ReadFile(config.AuthKeyFile)
 		if err != nil {
-			log.Fatalf("couldn't read provided auth key file (%s): %v", config.AuthKeyFile, err)
+			log.Fatalf("couldn't read provided auth key file (%q): %v", config.AuthKeyFile, err)
 		}
 
 		config.AuthKey = strings.TrimSpace(string(authKeyBytes))

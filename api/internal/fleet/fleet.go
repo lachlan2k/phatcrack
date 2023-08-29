@@ -110,7 +110,7 @@ func scheduleJobUnsafe(jobIds []string) ([]string, error) {
 	for _, agent := range healthyAgents {
 		_, ok := fleet[agent.ID.String()]
 		if !ok {
-			return nil, fmt.Errorf("agent %s was supposed to be healthy, but couldn't be found in the fleet", agent.ID.String())
+			return nil, fmt.Errorf("agent %q was supposed to be healthy, but couldn't be found in the fleet", agent.ID.String())
 		}
 	}
 

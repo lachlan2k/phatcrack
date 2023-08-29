@@ -148,7 +148,7 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 	for i, list := range params.WordlistFilenames {
 		wordlists[i] = filepath.Join(conf.ListfileDirectory, filepath.Clean(list))
 		if _, err = os.Stat(wordlists[i]); err != nil {
-			err = fmt.Errorf("provided wordlist %s couldn't be opened on filesystem", wordlists[i])
+			err = fmt.Errorf("provided wordlist %q couldn't be opened on filesystem", wordlists[i])
 			return
 		}
 	}
@@ -157,7 +157,7 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 	for i, rule := range params.RulesFilenames {
 		rules[i] = filepath.Join(conf.ListfileDirectory, filepath.Clean(rule))
 		if _, err = os.Stat(rules[i]); err != nil {
-			err = fmt.Errorf("provided rules file %s couldn't be opened on filesystem", wordlists[i])
+			err = fmt.Errorf("provided rules file %q couldn't be opened on filesystem", wordlists[i])
 			return
 		}
 	}
@@ -201,7 +201,7 @@ func findBinary(conf *config.Config) (path string, err error) {
 	if path != "" {
 		_, err = os.Stat(path)
 		if err != nil {
-			err = fmt.Errorf("failed to stat the specified hashcat binary (%s): %v (check path and permissions?)", path, err)
+			err = fmt.Errorf("failed to stat the specified hashcat binary (%q): %v (check path and permissions?)", path, err)
 			path = ""
 		}
 		return
@@ -235,25 +235,25 @@ type HashcatSession struct {
 func (sess *HashcatSession) Start() error {
 	pStdout, err := sess.proc.StdoutPipe()
 	if err != nil {
-		return fmt.Errorf("couldn't attach stdout to hashcat: %v", err)
+		return fmt.Errorf("couldn't attach stdout to hashcat: %w", err)
 	}
 
 	pStderr, err := sess.proc.StderrPipe()
 	if err != nil {
-		return fmt.Errorf("couldn't attach stderr to hashcat: %v", err)
+		return fmt.Errorf("couldn't attach stderr to hashcat: %w", err)
 	}
 
-	log.Printf("Running hashcat command: %s", sess.proc.String())
+	log.Printf("Running hashcat command: %q", sess.proc.String())
 
 	err = sess.proc.Start()
 	if err != nil {
-		return fmt.Errorf("couldn't start hashcat: %v", err)
+		return fmt.Errorf("couldn't start hashcat: %w", err)
 	}
 
 	tailer, err := tail.TailFile(sess.outFile.Name(), tail.Config{Follow: true})
 	if err != nil {
 		sess.Kill()
-		return fmt.Errorf("couldn't tail outfile %s: %v", sess.outFile.Name(), err)
+		return fmt.Errorf("couldn't tail outfile %q: %w", sess.outFile.Name(), err)
 	}
 
 	go func() {
@@ -261,7 +261,7 @@ func (sess *HashcatSession) Start() error {
 			line := tLine.Text
 			values := strings.Split(line, ":")
 			if len(values) != 3 {
-				log.Printf("unexpected line contents: %s", line)
+				log.Printf("unexpected line contents: %q", line)
 				continue
 			}
 			timestamp := values[0]
@@ -270,7 +270,7 @@ func (sess *HashcatSession) Start() error {
 
 			timestampI, err := strconv.ParseInt(timestamp, 10, 64)
 			if err != nil {
-				log.Printf("couldn't parse hashcat timestamp %s: %v", timestamp, err)
+				log.Printf("couldn't parse hashcat timestamp %q: %v", timestamp, err)
 				continue
 			}
 
@@ -318,7 +318,7 @@ func (sess *HashcatSession) Start() error {
 	go func() {
 		scanner := bufio.NewScanner(pStderr)
 		for scanner.Scan() {
-			log.Printf("read stderr: %s", scanner.Text())
+			log.Printf("read stderr: %q", scanner.Text())
 			sess.StderrMessages <- scanner.Text()
 		}
 	}()

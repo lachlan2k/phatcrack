@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
-	"github.com/sirupsen/logrus"
 )
 
 func findBinary() (path string, err error) {
@@ -122,8 +121,6 @@ func CalculateKeyspace(params hashcattypes.HashcatParams) (int64, error) {
 		return 0, err
 	}
 
-	logrus.Warnf("cmd is: %v", cmd.Args)
-
 	out, err := cmd.Output()
 	if err != nil {
 		ee, ok := err.(*exec.ExitError)
@@ -230,15 +227,15 @@ func NormalizeHashes(hashes []string, hashType int, hasUsernames bool) ([]string
 		hashline := strings.TrimSpace(scanner.Text())
 		usernameField, hash, found := strings.Cut(hashline, ":")
 		if !found {
-			return nil, fmt.Errorf("username delim (:) not found in hashline: %s", hashline)
+			return nil, fmt.Errorf("username delim (:) not found in hashline: %q", hashline)
 		}
 
 		index, err := strconv.Atoi(usernameField)
 		if err != nil {
-			return nil, fmt.Errorf("found invalid index in hashline: %s", hashline)
+			return nil, fmt.Errorf("found invalid index in hashline: %q", hashline)
 		}
 		if index >= len(hashes) || index < 0 {
-			return nil, fmt.Errorf("hashcat gave us back an index out of range in hashline (%d): %s", index, hashline)
+			return nil, fmt.Errorf("hashcat gave us back an index out of range in hashline (%d): %q", index, hashline)
 		}
 
 		normalizedHashes[index] = hash

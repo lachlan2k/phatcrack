@@ -66,7 +66,7 @@ func (a *AgentConnection) handleMessage(msg *wstypes.Message) error {
 		return a.handleJobFailedToStart(msg)
 
 	default:
-		return fmt.Errorf("unrecognized message type: %s", msg.Type)
+		return fmt.Errorf("unrecognized message type: %q", msg.Type)
 	}
 }
 
@@ -219,7 +219,7 @@ func (a *AgentConnection) Handle() error {
 
 		err = a.handleMessage(&msg)
 		if err != nil {
-			return fmt.Errorf("error when handling %s message: %w", msg.Type, err)
+			return fmt.Errorf("error when handling %q message: %w", msg.Type, err)
 		}
 	}
 }

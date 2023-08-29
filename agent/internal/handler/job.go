@@ -127,7 +127,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 
 	_, alredyExists := h.activeJobs[job.ID]
 	if alredyExists {
-		return fmt.Errorf("job %s already exists", job.ID)
+		return fmt.Errorf("job %q already exists", job.ID)
 	}
 
 	sess, err := hashcat.NewHashcatSession(job.ID, job.TargetHashes, hashcat.HashcatParams(job.HashcatParams), h.conf)
@@ -136,7 +136,7 @@ func (h *Handler) runJob(job wstypes.JobStartDTO) error {
 		return err
 	}
 
-	log.Printf("Starting job %s", job.ID)
+	log.Printf("Starting job %q", job.ID)
 
 	err = sess.Start()
 	if err != nil {
