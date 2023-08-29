@@ -38,6 +38,7 @@ func HookAdminEndpoints(api *echo.Group) {
 			newConf.IsMFARequired = req.IsMFARequired
 			newConf.AutomaticallySyncListfiles = req.AutomaticallySyncListfiles
 			newConf.RequirePasswordChangeOnFirstLogin = req.RequirePasswordChangeOnFirstLogin
+			newConf.SplitJobsPerAgent = req.SplitJobsPerAgent
 			return nil
 		})
 
@@ -53,6 +54,7 @@ func HookAdminEndpoints(api *echo.Group) {
 			IsMFARequired:                     conf.IsMFARequired,
 			AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
 			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
+			SplitJobsPerAgent:                 conf.SplitJobsPerAgent,
 		})
 	})
 
@@ -63,6 +65,7 @@ func HookAdminEndpoints(api *echo.Group) {
 			IsMFARequired:                     conf.IsMFARequired,
 			AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
 			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
+			SplitJobsPerAgent:                 conf.SplitJobsPerAgent,
 		})
 	})
 

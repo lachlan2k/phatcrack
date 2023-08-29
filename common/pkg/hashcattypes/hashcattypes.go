@@ -10,6 +10,7 @@ type HashcatParams struct {
 	MaskIncrement      bool     `json:"mask_increment"`
 	MaskIncrementMin   uint     `json:"mask_increment_min"`
 	MaskIncrementMax   uint     `json:"mask_increment_max"`
+	MaskShardedCharset string   `json:"mask_sharded_charset"` // Internal use: for sharding charsets
 	MaskCustomCharsets []string `json:"mask_custom_charsets"`
 
 	WordlistFilenames []string `json:"wordlist_filenames"`
@@ -17,6 +18,9 @@ type HashcatParams struct {
 	AdditionalArgs    []string `json:"additional_args"`
 	OptimizedKernels  bool     `json:"optimized_kernels"`
 	SlowCandidates    bool     `json:"slow_candidates"`
+
+	Skip  int64 `json:"skip"`
+	Limit int64 `json:"limit"`
 }
 
 type HashcatStatusGuess struct {

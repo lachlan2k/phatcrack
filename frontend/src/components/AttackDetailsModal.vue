@@ -62,7 +62,8 @@ async function cloneAndStart() {
   try {
     const res = await createAttack({
       hashcat_params: props.attack.hashcat_params,
-      hashlist_id: props.attack.hashlist_id
+      hashlist_id: props.attack.hashlist_id,
+      is_distributed: props.attack.is_distributed
     })
     toast.success('Created clone of attack')
     await startAttack(res.id)

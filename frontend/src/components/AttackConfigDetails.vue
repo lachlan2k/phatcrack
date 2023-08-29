@@ -7,6 +7,7 @@ import { useListfilesStore } from '@/stores/listfiles'
 
 const props = defineProps<{
   hashcatParams: HashcatParams
+  isDistributed?: boolean
 }>()
 
 const listfileStore = useListfilesStore()
@@ -36,6 +37,10 @@ const extraOptionsStr = computed(() => {
     } else {
       arr.push('Mask increment')
     }
+  }
+
+  if (props.isDistributed) {
+    arr.push('Distributed')
   }
 
   return arr.join(', ')

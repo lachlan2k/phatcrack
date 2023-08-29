@@ -26,12 +26,14 @@ export interface AdminIsSetupCompleteResponseDTO {
   is_complete: boolean
 }
 export interface AdminConfigResponseDTO {
+  split_jobs_per_agent: number
   is_setup_complete: boolean
   is_mfa_required: boolean
   auto_sync_listfiles: boolean
   require_password_change_on_first_login: boolean
 }
 export interface AdminConfigRequestDTO {
+  split_jobs_per_agent: number
   is_mfa_required: boolean
   auto_sync_listfiles: boolean
   require_password_change_on_first_login: boolean
@@ -79,17 +81,21 @@ export interface HashcatParams {
   mask_increment: boolean
   mask_increment_min: number
   mask_increment_max: number
+  mask_sharded_charset: string
   mask_custom_charsets: string[]
   wordlist_filenames: string[]
   rules_filenames: string[]
   additional_args: string[]
   optimized_kernels: boolean
   slow_candidates: boolean
+  skip: number
+  limit: number
 }
 export interface AttackDTO {
   id: string
   hashlist_id: string
   hashcat_params: HashcatParams
+  is_distributed: boolean
 }
 export interface JobRuntimeSummaryDTO {
   hashrate: number
@@ -97,6 +103,7 @@ export interface JobRuntimeSummaryDTO {
   percent_complete: number
   started_time: number
   stopped_time: number
+  cmd_line: string
 }
 export interface JobCrackedHashDTO {
   hash: string
@@ -141,6 +148,7 @@ export interface JobRuntimeDataDTO {
   status: string
   stop_reason: string
   error_string: string
+  cmd_line: string
   output_lines: JobRuntimeOutputLineDTO[]
   status_updates: HashcatStatus[]
   cracked_hashes: JobCrackedHashDTO[]
@@ -160,6 +168,7 @@ export interface AttackWithJobsDTO {
   id: string
   hashlist_id: string
   hashcat_params: HashcatParams
+  is_distributed: boolean
   jobs: JobDTO[]
 }
 export interface AttackWithJobsMultipleDTO {
@@ -171,6 +180,7 @@ export interface AttackMultipleDTO {
 export interface AttackCreateRequestDTO {
   hashlist_id: string
   hashcat_params: HashcatParams
+  is_distributed: boolean
 }
 export interface AttackStartResponseDTO {
   new_job_id: string[]

@@ -72,8 +72,12 @@ func (params HashcatParams) Validate() error {
 }
 
 func (params HashcatParams) maskArgs() ([]string, error) {
-	if len(params.MaskCustomCharsets) > 4 {
-		return nil, fmt.Errorf("too many custom charsets supplied (%d), the max is 4", len(params.MaskCustomCharsets))
+	maxCharsets := 4
+	if params.MaskShardedCharset != "" {
+		maxCharsets = 3
+	}
+	if len(params.MaskCustomCharsets) > maxCharsets {
+		return nil, fmt.Errorf("too many custom charsets supplied (%d), the max is %d", len(params.MaskCustomCharsets), maxCharsets)
 	}
 
 	args := []string{}
@@ -81,6 +85,11 @@ func (params HashcatParams) maskArgs() ([]string, error) {
 	for i, charset := range params.MaskCustomCharsets {
 		// Hashcat accepts paramters --custom-charset1 to --custom-charset4
 		args = append(args, fmt.Sprintf("--custom-charset%d", i+1), charset)
+	}
+
+	// 4 is the "magic" charset used when sharding attacks
+	if params.MaskShardedCharset != "" {
+		args = append(args, "--custom-charset4", params.MaskShardedCharset)
 	}
 
 	if params.MaskIncrement {
@@ -125,6 +134,14 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 
 	if params.SlowCandidates {
 		args = append(args, "-S")
+	}
+
+	if params.Skip > 0 {
+		args = append(args, "--skip", strconv.FormatInt(params.Skip, 10))
+	}
+
+	if params.Limit > 0 {
+		args = append(args, "--limit", strconv.FormatInt(params.Limit, 10))
 	}
 
 	wordlists := make([]string, len(params.WordlistFilenames))
@@ -203,14 +220,16 @@ func findBinary(conf *config.Config) (path string, err error) {
 }
 
 type HashcatSession struct {
-	proc           *exec.Cmd
-	hashFile       *os.File
-	outFile        *os.File
-	CrackedHashes  chan HashcatResult
-	StatusUpdates  chan HashcatStatus
-	StderrMessages chan string
-	StdoutLines    chan string
-	DoneChan       chan error
+	proc               *exec.Cmd
+	hashFile           *os.File
+	outFile            *os.File
+	charsetFiles       []*os.File
+	shardedCharsetFile *os.File
+	CrackedHashes      chan HashcatResult
+	StatusUpdates      chan HashcatStatus
+	StderrMessages     chan string
+	StdoutLines        chan string
+	DoneChan           chan error
 }
 
 func (sess *HashcatSession) Start() error {
@@ -324,6 +343,16 @@ func (sess *HashcatSession) Cleanup() {
 		os.Remove(sess.outFile.Name())
 		sess.outFile = nil
 	}
+
+	for _, f := range sess.charsetFiles {
+		if f != nil {
+			os.Remove(f.Name())
+		}
+	}
+
+	if sess.shardedCharsetFile != nil {
+		os.Remove(sess.shardedCharsetFile.Name())
+	}
 }
 
 func (sess *HashcatSession) CmdLine() string {
@@ -331,22 +360,79 @@ func (sess *HashcatSession) CmdLine() string {
 }
 
 func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *config.Config) (*HashcatSession, error) {
+	var err error
+
+	var hashFile *os.File
+	var outFile *os.File
+	var shardedCharsetFile *os.File
+	charsetFiles := []*os.File{}
+
+	defer func() {
+		if err == nil {
+			return
+		}
+		// We returned because of an error, clean up temp files
+		if hashFile != nil {
+			os.Remove(hashFile.Name())
+		}
+		if outFile != nil {
+			os.Remove(outFile.Name())
+		}
+		if shardedCharsetFile != nil {
+			os.Remove(shardedCharsetFile.Name())
+		}
+		for _, f := range charsetFiles {
+			if f != nil {
+				os.Remove(f.Name())
+			}
+		}
+	}()
+
 	binaryPath, err := findBinary(conf)
 	if err != nil {
 		return nil, err
 	}
 
-	hashFile, err := os.CreateTemp("/tmp", "phatcrack-hashes")
+	hashFile, err = os.CreateTemp("/tmp", "phatcrack-hashes")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't make a temp file to store hashes: %v", err)
 	}
 	hashFile.Chmod(0600)
 
-	outFile, err := os.CreateTemp("/tmp", "phatcrack-output")
+	outFile, err = os.CreateTemp("/tmp", "phatcrack-output")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't make a temp file to store output: %v", err)
 	}
 	outFile.Chmod(0600)
+
+	charsetFiles = []*os.File{}
+	for i, charset := range params.MaskCustomCharsets {
+		charsetFile, err := os.CreateTemp("/tmp", "phatcrack-charset")
+		if err != nil {
+			return nil, fmt.Errorf("couldn't make a temp file to store charset")
+		}
+		_, err = charsetFile.Write([]byte(charset))
+		if err != nil {
+			return nil, err
+		}
+
+		params.MaskCustomCharsets[i] = charsetFile.Name()
+		charsetFiles = append(charsetFiles, charsetFile)
+	}
+
+	if params.MaskShardedCharset != "" {
+		shardedCharsetFile, err = os.CreateTemp("/tmp", "phatcrack-charset")
+		if err != nil {
+			return nil, fmt.Errorf("couldn't make a temp file to store charset")
+		}
+		outFile.Chmod(0600)
+		_, err = shardedCharsetFile.Write([]byte(params.MaskShardedCharset))
+		if err != nil {
+			return nil, err
+		}
+
+		params.MaskShardedCharset = shardedCharsetFile.Name()
+	}
 
 	args, err := params.ToCmdArgs(conf, id, hashFile.Name(), outFile.Name())
 	if err != nil {
@@ -361,13 +447,15 @@ func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *c
 	}
 
 	return &HashcatSession{
-		proc:           exec.Command(binaryPath, args...),
-		hashFile:       hashFile,
-		outFile:        outFile,
-		CrackedHashes:  make(chan HashcatResult, 5),
-		StatusUpdates:  make(chan HashcatStatus, 5),
-		StderrMessages: make(chan string, 5),
-		StdoutLines:    make(chan string, 5),
-		DoneChan:       make(chan error),
+		proc:               exec.Command(binaryPath, args...),
+		hashFile:           hashFile,
+		outFile:            outFile,
+		charsetFiles:       charsetFiles,
+		shardedCharsetFile: shardedCharsetFile,
+		CrackedHashes:      make(chan HashcatResult, 5),
+		StatusUpdates:      make(chan HashcatStatus, 5),
+		StderrMessages:     make(chan string, 5),
+		StdoutLines:        make(chan string, 5),
+		DoneChan:           make(chan error),
 	}, nil
 }

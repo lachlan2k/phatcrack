@@ -108,6 +108,8 @@ const inputs = reactive({
   combinatorLeft: [] as string[],
   combinatorRight: [] as string[],
 
+  isDistributed: true,
+
   activeStep: props.firstStep
 })
 
@@ -237,6 +239,7 @@ function makeHashcatParams(): HashcatParams {
     mask_increment_min: 0,
     mask_increment_max: 0,
     mask_custom_charsets: [],
+    mask_sharded_charset: '',
 
     wordlist_filenames: inputs.selectedWordlists,
     rules_filenames: inputs.selectedRulefiles,
@@ -244,7 +247,9 @@ function makeHashcatParams(): HashcatParams {
     optimized_kernels: inputs.optimizedKernels,
     slow_candidates: inputs.slowCandidates,
 
-    additional_args: []
+    additional_args: [],
+    skip: 0,
+    limit: 0
   }
 }
 
@@ -258,7 +263,8 @@ async function saveUptoAttack(): Promise<AttackDTO> {
   try {
     const attack = await createAttack({
       hashlist_id: hashlist.id,
-      hashcat_params: makeHashcatParams()
+      hashcat_params: makeHashcatParams(),
+      is_distributed: inputs.isDistributed
     })
     toast.success('Created attack!')
     return attack
@@ -488,6 +494,14 @@ async function saveAndStartAttack() {
             <label class="label cursor-pointer justify-start">
               <input
                 type="checkbox"
+                v-model="inputs.isDistributed"
+                class="checkbox-primary checkbox checkbox-xs"
+              />
+              <span><span class="label-text ml-4 font-bold">Distribute attack?</span></span>
+            </label>
+            <label class="label cursor-pointer justify-start">
+              <input
+                type="checkbox"
                 v-model="inputs.enableLoopback"
                 class="checkbox-primary checkbox checkbox-xs"
               />
@@ -554,7 +568,10 @@ async function saveAndStartAttack() {
             </tbody>
           </table>
 
-          <AttackConfigDetails :hashcatParams="computedHashcatParams"></AttackConfigDetails>
+          <AttackConfigDetails
+            :hashcatParams="computedHashcatParams"
+            :is-distributed="inputs.isDistributed"
+          ></AttackConfigDetails>
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">

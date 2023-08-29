@@ -11,6 +11,9 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
+	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
+	"github.com/sirupsen/logrus"
 )
 
 func findBinary() (path string, err error) {
@@ -53,6 +56,88 @@ func hashcatCommandWithRandSession(args ...string) (*exec.Cmd, error) {
 	return hashcatCommand(fullArgs...)
 }
 
+func CalculateKeyspace(params hashcattypes.HashcatParams) (int64, error) {
+	wordlistPaths := []string{}
+	for _, wordlist := range params.WordlistFilenames {
+		wordlistId, err := uuid.Parse(wordlist)
+		if err != nil {
+			return 0, fmt.Errorf("invalid wordlist id provided: %q", wordlist)
+		}
+
+		filePath, err := filerepo.GetPathToFile(wordlistId)
+		if err != nil {
+			return 0, err
+		}
+
+		wordlistPaths = append(wordlistPaths, filePath)
+	}
+
+	rulefilePaths := []string{}
+	for _, rulefile := range params.RulesFilenames {
+		rulefileId, err := uuid.Parse(rulefile)
+		if err != nil {
+			return 0, fmt.Errorf("invalid rulefile id provided: %q", rulefile)
+		}
+
+		filePath, err := filerepo.GetPathToFile(rulefileId)
+		if err != nil {
+			return 0, err
+		}
+
+		rulefilePaths = append(rulefilePaths, filePath)
+	}
+
+	switch params.AttackMode {
+	case hashcattypes.AttackModeDictionary:
+		if len(rulefilePaths) > 1 || len(wordlistPaths) != 1 {
+			return 0, fmt.Errorf("keyspace calculation for dicitonary attack requires exactly 0 or 1 rulefiles and 1 wordlist. found %d and %d", len(rulefilePaths), len(wordlistPaths))
+		}
+
+	case hashcattypes.AttackModeCombinator:
+		if len(rulefilePaths) != 0 || len(wordlistPaths) != 2 {
+			return 0, fmt.Errorf("keyspace calculation for combinator requires exactly 0 rulefiles and 2 wordlists. found %d and %d", len(rulefilePaths), len(wordlistPaths))
+		}
+
+	default:
+		return 0, fmt.Errorf("keyspace calculation not implemented for attack mode %d", params.AttackMode)
+	}
+
+	args := []string{"--keyspace", "-m", strconv.Itoa(int(params.AttackMode))}
+	for _, rule := range rulefilePaths {
+		args = append(args, "-r", rule)
+	}
+
+	args = append(args, wordlistPaths...)
+
+	if params.OptimizedKernels {
+		args = append(args, "-O")
+	}
+
+	if params.SlowCandidates {
+		args = append(args, "-S")
+	}
+
+	cmd, err := hashcatCommandWithRandSession(args...)
+	if err != nil {
+		return 0, err
+	}
+
+	logrus.Warnf("cmd is: %v", cmd.Args)
+
+	out, err := cmd.Output()
+	if err != nil {
+		ee, ok := err.(*exec.ExitError)
+		if ok {
+			return 0, fmt.Errorf("hashcat gave an exit error: %w, %q, %q", ee, string(out), string(ee.Stderr))
+		}
+		return 0, fmt.Errorf("couldn't run hashcat: %w", err)
+	}
+
+	trimmedOut := strings.TrimSpace(strings.TrimSuffix(string(out), "\n"))
+
+	return strconv.ParseInt(trimmedOut, 10, 64)
+}
+
 func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-identify")
 	if err != nil {
@@ -61,7 +146,7 @@ func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 	defer tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
 
-	_ = tmpFile.Chmod(0600)
+	tmpFile.Chmod(0600)
 
 	if hasUsername {
 		_, exampleHash, _ = strings.Cut(exampleHash, ":")
@@ -113,7 +198,7 @@ func NormalizeHashes(hashes []string, hashType int, hasUsernames bool) ([]string
 	defer tmpFile.Close()
 	defer os.Remove(tmpFile.Name())
 
-	_ = tmpFile.Chmod(0600)
+	tmpFile.Chmod(0600)
 
 	for index, hash := range hashes {
 		if hasUsernames {

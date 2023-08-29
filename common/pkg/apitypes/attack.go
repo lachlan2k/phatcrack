@@ -6,6 +6,7 @@ type AttackDTO struct {
 	ID            string                     `json:"id"`
 	HashlistID    string                     `json:"hashlist_id"`
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_params"`
+	IsDistributed bool                       `json:"is_distributed"`
 }
 
 type AttackWithJobsDTO struct {
@@ -24,6 +25,7 @@ type AttackMultipleDTO struct {
 type AttackCreateRequestDTO struct {
 	HashlistID    string                     `json:"hashlist_id" validate:"required,uuid"`
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_params" validate:"required"`
+	IsDistributed bool                       `json:"is_distributed"`
 }
 
 type AttackStartResponseDTO struct {

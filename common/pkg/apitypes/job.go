@@ -34,6 +34,7 @@ type JobRuntimeDataDTO struct {
 	Status           string    `json:"status"`
 	StopReason       string    `json:"stop_reason"`
 	ErrorString      string    `json:"error_string"`
+	CmdLine          string    `json:"cmd_line"`
 
 	OutputLines   []JobRuntimeOutputLineDTO    `json:"output_lines"`
 	StatusUpdates []hashcattypes.HashcatStatus `json:"status_updates"`
@@ -46,6 +47,7 @@ type JobRuntimeSummaryDTO struct {
 	PercentComplete        float32 `json:"percent_complete"`
 	StartedTime            int64   `json:"started_time"`
 	StoppedTime            int64   `json:"stopped_time"`
+	CmdLine                string  `json:"cmd_line"`
 }
 
 type JobCrackedHashDTO struct {

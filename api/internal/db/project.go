@@ -102,6 +102,7 @@ func (h *HashlistHash) ToDTO() apitypes.HashlistHashDTO {
 type Attack struct {
 	UUIDBaseModel
 	HashcatParams datatypes.JSONType[hashcattypes.HashcatParams]
+	IsDistributed bool
 
 	Jobs       []Job     `gorm:"constraint:OnDelete:CASCADE;"`
 	HashlistID uuid.UUID `gorm:"type:uuid"`
@@ -116,6 +117,7 @@ func (a *Attack) ToDTO() apitypes.AttackDTO {
 		ID:            a.ID.String(),
 		HashlistID:    a.HashlistID.String(),
 		HashcatParams: a.HashcatParams.Data,
+		IsDistributed: a.IsDistributed,
 	}
 }
 

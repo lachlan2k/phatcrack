@@ -129,6 +129,7 @@ func (r *JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
 		OutputLines:   outlines,
 		StatusUpdates: r.StatusUpdates.Unwrap(),
 		CrackedHashes: cracked,
+		CmdLine:       r.CmdLine,
 	}
 }
 
@@ -136,6 +137,7 @@ func (r *JobRuntimeData) ToSummaryDTO() apitypes.JobRuntimeSummaryDTO {
 	dto := apitypes.JobRuntimeSummaryDTO{
 		StartedTime:            r.StartedTime.Unix(),
 		StoppedTime:            r.StoppedTime.Unix(),
+		CmdLine:                r.CmdLine,
 		Hashrate:               0,
 		PercentComplete:        -1,
 		EstimatedTimeRemaining: -1,
@@ -269,6 +271,17 @@ func CreateJob(job *Job) (*Job, error) {
 	}
 
 	return job, GetInstance().Create(job).Error
+}
+
+func CreateJobTx(job *Job, tx *gorm.DB) (*Job, error) {
+	if job.RuntimeData.Status == "" {
+		job.RuntimeData.Status = JobStatusCreated
+		job.RuntimeData.OutputLines.Init()
+		job.RuntimeData.StatusUpdates.Init()
+		job.RuntimeData.CrackedHashes.Init()
+	}
+
+	return job, tx.Create(job).Error
 }
 
 func SetJobStarted(jobId string, cmdLine string, startTime time.Time) error {

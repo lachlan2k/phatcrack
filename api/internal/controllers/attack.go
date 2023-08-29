@@ -8,7 +8,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
+	"github.com/lachlan2k/phatcrack/api/internal/attacksharder"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
+	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
@@ -274,6 +276,7 @@ func handleAttackCreate(c echo.Context) error {
 
 	attack, err := db.CreateAttack(&db.Attack{
 		HashcatParams: hashcatParams,
+		IsDistributed: req.IsDistributed,
 		HashlistID:    uuid.MustParse(req.HashlistID),
 	})
 	if err != nil {
@@ -325,31 +328,19 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Something went wrong getting attack to start", err)
 	}
 
-	hashlist, err := db.GetHashlistWithHashes(attack.HashlistID.String())
+	jobMultiplier := config.Get().SplitJobsPerAgent
+	if jobMultiplier <= 0 {
+		jobMultiplier = 1
+	}
+	numJobs := fleet.NumActiveAgents() * jobMultiplier
+
+	newJobs, hashlist, err := attacksharder.MakeJobs(attack, numJobs)
 	if err == db.ErrNotFound {
 		return echo.ErrNotFound
 	}
 	if err != nil {
-		return util.ServerError("Something went wrong getting hashlist to start attack on", err)
+		return util.ServerError("Something went wrong getting creating attack job", err)
 	}
-
-	targetHashes := make([]string, 0)
-	for _, hash := range hashlist.Hashes {
-		if !hash.IsCracked {
-			targetHashes = append(targetHashes, hash.NormalizedHash)
-		}
-	}
-
-	// TODO: this will eventually be replaced by some special sauce responsible for sharding and creating jobs
-	// Could possibly go into the fleet package, or another package called "sharding", idk
-
-	newJob, err := db.CreateJob(&db.Job{
-		HashlistVersion: hashlist.Version,
-		AttackID:        &attack.ID,
-		HashcatParams:   attack.HashcatParams,
-		TargetHashes:    targetHashes,
-		HashType:        hashlist.HashType,
-	})
 
 	if err != nil {
 		return util.ServerError("Couldn't create attack job", err)
@@ -363,20 +354,23 @@ func handleAttackStart(c echo.Context) error {
 		"hashlist_name": hashlist.Name,
 	}, "User has started attack")
 
-	_, err = fleet.ScheduleJobs([]string{newJob.ID.String()})
+	jobIDs := []string{}
+	for _, job := range newJobs {
+		jobIDs = append(jobIDs, job.ID.String())
+	}
+	_, err = fleet.ScheduleJobs(jobIDs)
 
-	// TODO: now that we've refactored the relationship between attacks and jobs...
-	// ...we should probably just delete the job if it fails, right?
-	// TODO: ...done?
 	if err != nil {
-		// If the deletion fails, there's not much for us to do really
-		db.GetInstance().Delete(newJob)
+		for _, newJob := range newJobs {
+			// If the deletion fails, there's not much for us to do really
+			db.GetInstance().Delete(newJob)
+		}
 	}
 
 	switch err {
 	case nil:
 		return c.JSON(http.StatusOK, apitypes.AttackStartResponseDTO{
-			JobIDs: []string{newJob.ID.String()},
+			JobIDs: jobIDs,
 		})
 
 	case fleet.ErrJobDoesntExist:

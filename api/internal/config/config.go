@@ -14,6 +14,7 @@ type RuntimeConfig struct {
 	IsSetupComplete                   bool  `json:"is_setup_complete"`
 	IsMFARequired                     bool  `json:"is_mfa_required"`
 	AutomaticallySyncListfiles        bool  `json:"auto_sync_listfiles"`
+	SplitJobsPerAgent                 int   `json:"split_jobs_per_agent"`
 	RequirePasswordChangeOnFirstLogin bool  `json:"require_password_change_on_first_login"`
 	MaximumUploadedFileSize           int64 `json:"maximum_uploaded_file_size"`
 	MaximumUploadedFileLineScanSize   int64 `json:"maximum_uploaded_file_line_scan_size"`
@@ -27,6 +28,7 @@ func MakeDefaultConfig() RuntimeConfig {
 		IsMFARequired:                     false,
 		AutomaticallySyncListfiles:        true,
 		RequirePasswordChangeOnFirstLogin: true,
+		SplitJobsPerAgent:                 1,
 		MaximumUploadedFileSize:           10 * 1000 * 1000 * 1000, // 10GB
 		MaximumUploadedFileLineScanSize:   500 * 1000 * 1000,       // 100MB
 	}
