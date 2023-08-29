@@ -1,6 +1,5 @@
 name: Docker Build & Publish API and Frontend
 
-
 on:
   schedule:
     - cron: '18 11 * * *'
@@ -12,8 +11,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  API_IMAGE_NAME: ${{ github.repository }}-api
-  FRONTEND_IMAGE_NAME: ${{ github.repository }}-frontend
+  API_IMAGE_NAME: ${{ github.repository }}/api
+  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
 
 
 jobs:
@@ -51,13 +50,13 @@ jobs:
       #####
       ### API
       #####
-      - name: Extract Docker metadata
+      - name: Extract Docker API metadata
         id: meta-api
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}
 
-      - name: Build and push Docker image
+      - name: Build and push API Docker image
         id: build-and-push-api
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
@@ -69,7 +68,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Sign the published Docker image
+      - name: Sign the published API Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
           TAGS: ${{ steps.meta-api.outputs.tags }}
@@ -80,13 +79,13 @@ jobs:
       #####
       ### Frontend
       #####
-      - name: Extract Docker metadata
+      - name: Extract Docker frontend metadata
         id: meta-frontend
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
 
-      - name: Build and push Docker image
+      - name: Build and push frontend Docker image
         id: build-and-push-frontend
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
         with:
@@ -98,7 +97,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Sign the published Docker image
+      - name: Sign the published frontend Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
           TAGS: ${{ steps.meta-frontend.outputs.tags }}
