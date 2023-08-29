@@ -4,7 +4,6 @@ services:
   frontend:
     image: ghcr.io/lachlan2k/phatcrack/frontend:latest
     restart: unless-stopped
-    user: ${PHATCRACK_USER:-root}
     environment:
       - TLS_OPTS
       - HOST_NAME
