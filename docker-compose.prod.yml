@@ -2,24 +2,27 @@ version: '3'
 
 services:
   frontend:
-    image: ghcr.io/lachlan2k/phatcrack-frontend:latest
+    image: ghcr.io/lachlan2k/phatcrack/frontend:latest
     restart: unless-stopped
+    user: ${PHATCRACK_USER:-root}
     environment:
       - TLS_OPTS
       - HOST_NAME
     ports:
       - ${HTTP_PORT:-80}:80
       - ${HTTPS_PORT:-443}:443
-    volumes:
-      - ./certs:/etc/caddy/certs
 
   api:
-    image: ghcr.io/lachlan2k/phatcrack-api:latest
+    image: ghcr.io/lachlan2k/phatcrack/api:latest
     restart: unless-stopped
+    user: ${PHATCRACK_USER:-root}
     environment:
-      - JWT_KEY
       - PORT=3000
       - DB_DSN=host=db user=phatcrack password=${DB_PASS:-phatcrack} dbname=phatcrack
+      - FILEREPO_PATH=/srv/filerepo
+      - BASE_URL=https://${HOST_NAME}
+    volumes:
+      - ./filerepo:/srv/filerepo:z
 
   db:
     image: postgres:15
