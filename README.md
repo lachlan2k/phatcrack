@@ -24,10 +24,6 @@ echo "DB_PASS=$(openssl rand -hex 16)" >> .env
 echo "PHATCRACK_USER=phatcrack-server" >> .env
 chmod 600 .env
 
-# Make a directory to persist files in
-mkdir -p /srv/containers/phatcrack/filerepo
-chown phatcrack-server:phatcrack-server /srv/containers/phatcrack/filerepo
-
 # If you chose a hostname that is publicly accessible and expose this to the world (not recommended), Caddy will automatically deploy TLS.
 
 ## Otherwise, use the following for self-signed TLS
@@ -36,6 +32,11 @@ chown phatcrack-server:phatcrack-server /srv/containers/phatcrack/filerepo
 ## If you want to supply custom certificates, place them in a directory called `certs`
 ## And add ./certs:/etc/caddy/certs:ro as a mount in docker-compose.prod.yml for 
 # echo "TLS_OPTS=tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem" >> .env
+
+
+# Make a directory to persist files in
+mkdir -p /srv/containers/phatcrack/filerepo
+chown phatcrack-server:phatcrack-server /srv/containers/phatcrack/filerepo
 
 docker compose up -d
 ```
