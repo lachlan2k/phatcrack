@@ -21,7 +21,7 @@ wget https://raw.githubusercontent.com/lachlan2k/phatcrack/main/docker-compose.p
 
 echo "HOST_NAME=phatcrack.lan" >> .env
 echo "DB_PASS=$(openssl rand -hex 16)" >> .env
-echo "PHATCRACK_USER=phatcrack-server" >> .env
+echo "PHATCRACK_USER=$(id -u phatcrack-server)" >> .env
 chmod 600 .env
 
 # If you chose a hostname that is publicly accessible and expose this to the world (not recommended), Caddy will automatically deploy TLS.
