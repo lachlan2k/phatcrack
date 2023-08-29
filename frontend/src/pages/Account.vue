@@ -76,12 +76,7 @@ async function onChangePassword() {
             <label class="label font-bold">
               <span class="label-text">New Password</span>
             </label>
-            <input
-              v-model="changePasswordNewPassword"
-              type="password"
-              placeholder="hunter2"
-              class="input input-bordered w-full max-w-xs"
-            />
+            <input v-model="changePasswordNewPassword" type="password" placeholder="hunter2" class="input input-bordered w-full max-w-xs" />
           </div>
 
           <div class="form-control">
@@ -103,10 +98,7 @@ async function onChangePassword() {
               :disabled="changePasswordValidationErrors != null"
               @click="() => onChangePassword()"
             >
-              <span
-                class="loading loading-spinner loading-md"
-                v-if="isChangePasswordLoading"
-              ></span>
+              <span class="loading loading-spinner loading-md" v-if="isChangePasswordLoading"></span>
               Change Password
             </button>
           </span>

@@ -7,8 +7,7 @@ const props = defineProps<{
 }>()
 
 const title = props.title ?? 'Confirm'
-const body =
-  props.body ?? 'Are you sure you want to proceed? You might not be able to undo this action.'
+const body = props.body ?? 'Are you sure you want to proceed? You might not be able to undo this action.'
 
 const emit = defineEmits(['onConfirm'])
 const isOpen = ref(false)
@@ -22,12 +21,7 @@ function confirm() {
 <template>
   <div :class="isOpen ? 'modal modal-open' : 'modal'">
     <form method="dialog" class="remove-card-backgrounds modal-box text-left">
-      <button
-        @click="() => (isOpen = false)"
-        class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
-      >
-        ✕
-      </button>
+      <button @click="() => (isOpen = false)" class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">✕</button>
       <h2 class="my-4 text-xl font-bold">{{ title }}</h2>
       <p>{{ body }}</p>
 

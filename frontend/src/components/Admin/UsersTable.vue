@@ -89,24 +89,14 @@ async function onDeleteUser(id: string) {
         <label class="label font-bold">
           <span class="label-text">Username</span>
         </label>
-        <input
-          v-model="newUserUsername"
-          type="text"
-          placeholder="j.smith"
-          class="input input-bordered w-full max-w-xs"
-        />
+        <input v-model="newUserUsername" type="text" placeholder="j.smith" class="input input-bordered w-full max-w-xs" />
       </div>
 
       <div class="form-control">
         <label class="label font-bold">
           <span class="label-text">Password</span>
         </label>
-        <input
-          v-model="newUserPassword"
-          type="password"
-          placeholder="hunter2"
-          class="input input-bordered w-full max-w-xs"
-        />
+        <input v-model="newUserPassword" type="password" placeholder="hunter2" class="input input-bordered w-full max-w-xs" />
       </div>
 
       <div class="form-control">
@@ -122,20 +112,12 @@ async function onDeleteUser(id: string) {
 
       <div class="form-control mt-3">
         <span class="tooltip" :data-tip="newUserValidationError">
-          <button
-            @click="onCreateUser"
-            :disabled="newUserValidationError != null"
-            class="btn btn-primary w-full"
-          >
-            Create
-          </button>
+          <button @click="onCreateUser" :disabled="newUserValidationError != null" class="btn btn-primary w-full">Create</button>
         </span>
       </div>
     </Modal>
     <h2 class="card-title">Users</h2>
-    <button class="btn btn-primary btn-sm" @click="() => (isUserCreateOpen = true)">
-      Create User
-    </button>
+    <button class="btn btn-primary btn-sm" @click="() => (isUserCreateOpen = true)">Create User</button>
   </div>
 
   <table class="table w-full">
@@ -163,11 +145,6 @@ async function onDeleteUser(id: string) {
     </tbody>
   </table>
   <div class="mt-2 w-full text-center">
-    <PaginationControls
-      @next="() => nextPage()"
-      @prev="() => prevPage()"
-      :current-page="activePage"
-      :total-pages="totalPages"
-    />
+    <PaginationControls @next="() => nextPage()" @prev="() => prevPage()" :current-page="activePage" :total-pages="totalPages" />
   </div>
 </template>

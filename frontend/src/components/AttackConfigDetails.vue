@@ -31,9 +31,7 @@ const extraOptionsStr = computed(() => {
 
   if (modeHasMask(params.attack_mode) && params.mask_increment) {
     if (params.mask_increment_max > 0) {
-      arr.push(
-        `Mask increment (min ${params.mask_increment_min}, max ${params.mask_increment_max})`
-      )
+      arr.push(`Mask increment (min ${params.mask_increment_min}, max ${params.mask_increment_max})`)
     } else {
       arr.push('Mask increment')
     }

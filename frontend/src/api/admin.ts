@@ -13,9 +13,7 @@ export function adminGetAllUsers(): Promise<AdminGetAllUsersResponseDTO> {
   return client.get('/api/v1/admin/user/all').then((res) => res.data)
 }
 
-export function adminCreateUser(
-  newUserData: AdminUserCreateRequestDTO
-): Promise<AdminUserCreateResponseDTO> {
+export function adminCreateUser(newUserData: AdminUserCreateRequestDTO): Promise<AdminUserCreateResponseDTO> {
   return client.post('/api/v1/admin/user/create', newUserData).then((res) => res.data)
 }
 
@@ -27,9 +25,7 @@ export function adminDeleteAgent(id: string): Promise<string> {
   return client.delete('/api/v1/admin/agent/' + id).then((res) => res.data)
 }
 
-export function adminCreateAgent(
-  newAgentData: AdminAgentCreateRequestDTO
-): Promise<AdminAgentCreateResponseDTO> {
+export function adminCreateAgent(newAgentData: AdminAgentCreateRequestDTO): Promise<AdminAgentCreateResponseDTO> {
   return client.post('/api/v1/admin/agent/create', newAgentData).then((res) => res.data)
 }
 

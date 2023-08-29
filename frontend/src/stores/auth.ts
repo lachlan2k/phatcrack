@@ -1,10 +1,6 @@
 import { defineStore } from 'pinia'
 import { login as apiLogin, refreshAuth as apiRefreshAuth, logout as apiLogout } from '@/api/auth'
-import type {
-  AuthLoginResponseDTO,
-  AuthRefreshResponseDTO,
-  AuthWhoamiResponseDTO
-} from '@/api/types'
+import type { AuthLoginResponseDTO, AuthRefreshResponseDTO, AuthWhoamiResponseDTO } from '@/api/types'
 
 export type AuthState = {
   whoamiDetails: AuthLoginResponseDTO | AuthWhoamiResponseDTO | AuthRefreshResponseDTO | null

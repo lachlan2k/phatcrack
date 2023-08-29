@@ -64,30 +64,17 @@ async function onDeleteAgent(id: string) {
         <label class="label font-bold">
           <span class="label-text">Agent Name</span>
         </label>
-        <input
-          v-model="newAgentName"
-          type="text"
-          placeholder="crack01"
-          class="input input-bordered w-full max-w-xs"
-        />
+        <input v-model="newAgentName" type="text" placeholder="crack01" class="input input-bordered w-full max-w-xs" />
       </div>
 
       <div class="form-control mt-3">
         <span class="tooltip" :data-tip="newAgentValidationError">
-          <button
-            @click="onCreateAgent"
-            :disabled="newAgentValidationError != null"
-            class="btn btn-primary w-full"
-          >
-            Create
-          </button>
+          <button @click="onCreateAgent" :disabled="newAgentValidationError != null" class="btn btn-primary w-full">Create</button>
         </span>
       </div>
     </Modal>
     <h2 class="card-title">Agents</h2>
-    <button class="btn btn-primary btn-sm ml-12" @click="() => (isAgentCreateOpen = true)">
-      Create Agent
-    </button>
+    <button class="btn btn-primary btn-sm ml-12" @click="() => (isAgentCreateOpen = true)">Create Agent</button>
   </div>
 
   <table class="table w-full">

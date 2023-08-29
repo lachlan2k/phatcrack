@@ -59,12 +59,7 @@ function toggleSelected(id: string) {
         <td>Name</td>
         <td>Number of lines</td>
       </tr>
-      <tr
-        v-for="file in props.list"
-        :key="file.id"
-        @click="toggleSelected(file.id)"
-        class="cursor-pointer"
-      >
+      <tr v-for="file in props.list" :key="file.id" @click="toggleSelected(file.id)" class="cursor-pointer">
         <td>
           <input
             v-if="props.limit > 1"

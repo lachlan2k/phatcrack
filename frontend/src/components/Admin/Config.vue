@@ -21,8 +21,7 @@ watch(settingsData, (newSettings) => {
 
   settings.is_mfa_required = newSettings.is_mfa_required
   settings.auto_sync_listfiles = newSettings.auto_sync_listfiles
-  settings.require_password_change_on_first_login =
-    newSettings.require_password_change_on_first_login
+  settings.require_password_change_on_first_login = newSettings.require_password_change_on_first_login
   settings.split_jobs_per_agent = newSettings.split_jobs_per_agent
 })
 
@@ -30,12 +29,7 @@ const toast = useToast()
 
 async function onSave() {
   try {
-    const {
-      is_mfa_required,
-      require_password_change_on_first_login,
-      auto_sync_listfiles,
-      split_jobs_per_agent
-    } = settings
+    const { is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles, split_jobs_per_agent } = settings
     await adminSetConfig({
       is_mfa_required,
       require_password_change_on_first_login,
@@ -69,11 +63,7 @@ async function onSave() {
     <div>
       <label class="label font-bold">
         <span class="label-text pr-3">Require password change on first login?</span>
-        <input
-          type="checkbox"
-          v-model="settings.require_password_change_on_first_login"
-          class="toggle"
-        />
+        <input type="checkbox" v-model="settings.require_password_change_on_first_login" class="toggle" />
       </label>
     </div>
     <div class="form-control">
@@ -85,11 +75,7 @@ async function onSave() {
     <div class="form-control">
       <label class="label font-bold">
         <span class="label-text pr-3">How many jobs per-agent to split (recommended: 1)?</span>
-        <input
-          type="number"
-          v-model.number="settings.split_jobs_per_agent"
-          class="input input-bordered input-sm w-16"
-        />
+        <input type="number" v-model.number="settings.split_jobs_per_agent" class="input input-bordered input-sm w-16" />
       </label>
     </div>
   </div>

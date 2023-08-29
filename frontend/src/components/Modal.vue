@@ -16,12 +16,7 @@ const isOpen = computed({
 <template>
   <div :class="isOpen ? 'modal modal-open' : 'modal'">
     <form method="dialog" class="remove-card-backgrounds modal-box">
-      <button
-        @click="() => (isOpen = false)"
-        class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2"
-      >
-        ✕
-      </button>
+      <button @click="() => (isOpen = false)" class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2">✕</button>
       <slot></slot>
     </form>
     <form method="dialog" class="modal-backdrop">

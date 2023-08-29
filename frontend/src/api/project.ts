@@ -61,15 +61,9 @@ export function getAttacksForHashlist(hashlistId: string): Promise<AttackMultipl
   return client.get(`/api/v1/hashlist/${hashlistId}/attacks`).then((res) => res.data)
 }
 
-export function getAttacksWithJobsForHashlist(
-  hashlistId: string,
-  includeRuntimeData: boolean = true
-): Promise<AttackWithJobsMultipleDTO> {
+export function getAttacksWithJobsForHashlist(hashlistId: string, includeRuntimeData: boolean = true): Promise<AttackWithJobsMultipleDTO> {
   return client
-    .get(
-      `/api/v1/hashlist/${hashlistId}/attacks-with-jobs` +
-        (includeRuntimeData ? '?includeRuntimeData' : '')
-    )
+    .get(`/api/v1/hashlist/${hashlistId}/attacks-with-jobs` + (includeRuntimeData ? '?includeRuntimeData' : ''))
     .then((res) => res.data)
 }
 

@@ -69,9 +69,7 @@ async function onDeleteListfile(listfile: ListfileDTO) {
               <FileUpload fileType="Wordlist" />
             </Modal>
             <h2 class="card-title">Wordlists</h2>
-            <button class="btn btn-primary btn-sm" @click="() => (isWordlistUploadOpen = true)">
-              Upload Wordlist
-            </button>
+            <button class="btn btn-primary btn-sm" @click="() => (isWordlistUploadOpen = true)">Upload Wordlist</button>
           </div>
 
           <table class="table w-full">
@@ -99,17 +97,10 @@ async function onDeleteListfile(listfile: ListfileDTO) {
                 <td>{{ bytesToReadable(wordlist.size_in_bytes) }}</td>
                 <td>{{ wordlist.lines }}</td>
                 <td class="text-center">
-                  <ConfirmModal
-                    @on-confirm="() => onDeleteListfile(wordlist)"
-                    v-if="canDelete(wordlist)"
-                  >
+                  <ConfirmModal @on-confirm="() => onDeleteListfile(wordlist)" v-if="canDelete(wordlist)">
                     <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                   </ConfirmModal>
-                  <div
-                    v-else
-                    class="tooltip cursor-not-allowed text-gray-300"
-                    :data-tip="'You can\'t delete this'"
-                  >
+                  <div v-else class="tooltip cursor-not-allowed text-gray-300" :data-tip="'You can\'t delete this'">
                     <button class="btn btn-ghost btn-xs cursor-not-allowed">
                       <font-awesome-icon icon="fa-solid fa-lock" />
                     </button>
@@ -128,9 +119,7 @@ async function onDeleteListfile(listfile: ListfileDTO) {
               <FileUpload fileType="Rulefile" />
             </Modal>
             <h2 class="card-title">Rulefiles</h2>
-            <button class="btn btn-primary btn-sm" @click="() => (isRulefileUploadOpen = true)">
-              Upload Rulefile
-            </button>
+            <button class="btn btn-primary btn-sm" @click="() => (isRulefileUploadOpen = true)">Upload Rulefile</button>
           </div>
 
           <table class="table w-full">
@@ -157,17 +146,10 @@ async function onDeleteListfile(listfile: ListfileDTO) {
                 <td>{{ bytesToReadable(rulefile.size_in_bytes) }}</td>
                 <td>{{ rulefile.lines }}</td>
                 <td class="text-center">
-                  <ConfirmModal
-                    @on-confirm="() => onDeleteListfile(rulefile)"
-                    v-if="canDelete(rulefile)"
-                  >
+                  <ConfirmModal @on-confirm="() => onDeleteListfile(rulefile)" v-if="canDelete(rulefile)">
                     <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                   </ConfirmModal>
-                  <div
-                    v-else
-                    class="tooltip cursor-not-allowed text-gray-300"
-                    :data-tip="'You can\'t delete this'"
-                  >
+                  <div v-else class="tooltip cursor-not-allowed text-gray-300" :data-tip="'You can\'t delete this'">
                     <button class="btn btn-ghost btn-xs cursor-not-allowed">
                       <font-awesome-icon icon="fa-solid fa-lock" />
                     </button>

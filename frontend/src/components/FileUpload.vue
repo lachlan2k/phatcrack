@@ -92,10 +92,7 @@ async function onSubmit(event: Event) {
 
   try {
     isLoading.value = true
-    const uploadedFile = await uploadListfile(
-      formData,
-      (newProgress: AxiosProgressEvent) => (progress.value = newProgress)
-    )
+    const uploadedFile = await uploadListfile(formData, (newProgress: AxiosProgressEvent) => (progress.value = newProgress))
     toast.success('Successfully uploaded file: ' + uploadedFile.name)
     listfilesStore.load(true)
 
@@ -139,9 +136,7 @@ async function onSubmit(event: Event) {
     </label>
     <input type="number" class="input input-bordered" v-model="lineCount" />
     <label class="label" v-if="lineCount == 0">
-      <span class="label-text text-error"
-        >Files larger {{ bytesToReadable(MaxSizeForAutoLineCount) }} require a line count</span
-      >
+      <span class="label-text text-error">Files larger {{ bytesToReadable(MaxSizeForAutoLineCount) }} require a line count</span>
     </label>
   </div>
 
@@ -159,29 +154,15 @@ async function onSubmit(event: Event) {
     <label class="label font-bold">
       <span class="label-text">Pick a file (max {{ bytesToReadable(MaxSizeInBytes) }})</span>
     </label>
-    <input
-      type="file"
-      ref="fileInputEl"
-      @change="onFileSelect"
-      class="file-input file-input-bordered file-input-ghost"
-      name="file"
-    />
+    <input type="file" ref="fileInputEl" @change="onFileSelect" class="file-input file-input-bordered file-input-ghost" name="file" />
   </div>
   <div v-if="isLoading && progress != null && progress.total != null">
-    <progress
-      class="progress progress-primary w-full"
-      :value="(progress.loaded / progress.total) * 100"
-      max="100"
-    ></progress>
+    <progress class="progress progress-primary w-full" :value="(progress.loaded / progress.total) * 100" max="100"></progress>
   </div>
 
   <div class="form-control mt-3">
     <span class="tooltip" :data-tip="validationError">
-      <button
-        @click="onSubmit"
-        :disabled="validationError != null || isLoading"
-        class="btn btn-primary w-full"
-      >
+      <button @click="onSubmit" :disabled="validationError != null || isLoading" class="btn btn-primary w-full">
         <span class="loading loading-spinner loading-md" v-if="isLoading"></span>
         {{ buttonText }}
       </button>

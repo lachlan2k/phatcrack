@@ -14,9 +14,7 @@ import { timeSince } from '@/util/units'
 const projId = useRoute().params.id as string
 
 const { data: projectData, isLoading: isLoadingProject } = useApi(() => getProject(projId))
-const { data: hashlistData, isLoading: isLoadingHashlists } = useApi(() =>
-  getHashlistsForProject(projId)
-)
+const { data: hashlistData, isLoading: isLoadingHashlists } = useApi(() => getHashlistsForProject(projId))
 
 const isWizardOpen = ref(false)
 
@@ -43,9 +41,7 @@ const isLoading = computed(() => {
             <div class="flex flex-row justify-between">
               <h2 class="card-title">Hashlists</h2>
 
-              <button class="btn btn-primary btn-sm" @click="() => (isWizardOpen = true)">
-                New Hashlist
-              </button>
+              <button class="btn btn-primary btn-sm" @click="() => (isWizardOpen = true)">New Hashlist</button>
 
               <Modal v-model:isOpen="isWizardOpen">
                 <JobWizard :firstStep="1" :existingProjectId="projId" />

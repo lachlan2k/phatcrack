@@ -24,9 +24,7 @@ function urlSafeB64Encode(value: ArrayBuffer) {
 }
 
 export function startMFAEnrollment(): Promise<AuthWebAuthnStartEnrollmentResponseDTO> {
-  return client
-    .post('/api/v1/auth/mfa/start-enrollment?method=MFATypeWebAuthn')
-    .then((res) => res.data)
+  return client.post('/api/v1/auth/mfa/start-enrollment?method=MFATypeWebAuthn').then((res) => res.data)
 }
 
 export function finishMFAEnrollment(cred: PublicKeyCredential): Promise<string> {
@@ -46,9 +44,7 @@ export function finishMFAEnrollment(cred: PublicKeyCredential): Promise<string> 
 }
 
 export function startMFAChallenge(): Promise<AuthWebAuthnStartChallengeResponseDTO> {
-  return client
-    .post('/api/v1/auth/mfa/start-challenge?method=MFATypeWebAuthn')
-    .then((res) => res.data)
+  return client.post('/api/v1/auth/mfa/start-challenge?method=MFATypeWebAuthn').then((res) => res.data)
 }
 
 export function finishMFAChallenge(cred: PublicKeyCredential): Promise<string> {

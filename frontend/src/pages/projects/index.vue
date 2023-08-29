@@ -29,13 +29,7 @@ const projects = computed(() => data.value?.projects)
               </tr>
             </thead>
             <tbody class="first-col-bold">
-              <RouterLink
-                custom
-                v-slot="{ navigate }"
-                v-for="project in projects"
-                :key="project.id"
-                :to="`/project/${project.id}`"
-              >
+              <RouterLink custom v-slot="{ navigate }" v-for="project in projects" :key="project.id" :to="`/project/${project.id}`">
                 <tr class="hover cursor-pointer" @click="navigate">
                   <td>{{ project.name }}</td>
                   <td>{{ timeSince(project.time_created * 1000) }}</td>
@@ -48,9 +42,7 @@ const projects = computed(() => data.value?.projects)
             </tbody>
           </table>
           <p class="mt-2">
-            <span class="text-sm text-slate-500">
-              <font-awesome-icon icon="fa-solid fa-link" /> = Shared
-            </span>
+            <span class="text-sm text-slate-500"> <font-awesome-icon icon="fa-solid fa-link" /> = Shared </span>
           </p>
         </div>
       </div>

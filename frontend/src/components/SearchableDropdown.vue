@@ -27,9 +27,7 @@ watch(
   }
 )
 
-const filteredOptions = computed(() =>
-  props.options.filter((x) => x.text.toLowerCase().includes(inputText.value.toLowerCase()))
-)
+const filteredOptions = computed(() => props.options.filter((x) => x.text.toLowerCase().includes(inputText.value.toLowerCase())))
 
 const optionsVisible = ref(false)
 
@@ -60,10 +58,7 @@ function unfocus() {
       @focus="focus"
       @blur="unfocus"
     />
-    <div
-      v-if="optionsVisible"
-      class="floating-dropdown-content absolute w-full border-solid border-black shadow-md"
-    >
+    <div v-if="optionsVisible" class="floating-dropdown-content absolute w-full border-solid border-black shadow-md">
       <div
         :key="option.value"
         :class="modelValue == option.value ? 'active' : ''"

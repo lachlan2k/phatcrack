@@ -2,13 +2,7 @@
 import { AxiosError } from 'axios'
 import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import {
-  finishMFAChallenge,
-  startMFAEnrollment,
-  startMFAChallenge,
-  finishMFAEnrollment,
-  changeTemporaryPassword
-} from '@/api/auth'
+import { finishMFAChallenge, startMFAEnrollment, startMFAChallenge, finishMFAEnrollment, changeTemporaryPassword } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
@@ -17,15 +11,8 @@ const toast = useToast()
 const authStore = useAuthStore()
 const router = useRouter()
 
-const {
-  hasCompletedAuth,
-  isAwaitingMFA,
-  requiresPasswordChange,
-  requiresMFAEnrollment,
-  loginError,
-  isLoginLoading,
-  loggedInUser
-} = storeToRefs(authStore)
+const { hasCompletedAuth, isAwaitingMFA, requiresPasswordChange, requiresMFAEnrollment, loginError, isLoginLoading, loggedInUser } =
+  storeToRefs(authStore)
 
 enum ActiveScreens {
   Credentials,
@@ -202,23 +189,13 @@ const cardTitle = computed(() => {
             <label class="label">
               <span class="label-text">Username</span>
             </label>
-            <input
-              type="text"
-              placeholder="john.doe"
-              class="input input-bordered"
-              v-model="username"
-            />
+            <input type="text" placeholder="john.doe" class="input input-bordered" v-model="username" />
           </div>
           <div class="form-control">
             <label class="label">
               <span class="label-text">Password</span>
             </label>
-            <input
-              type="password"
-              placeholder="hunter2"
-              class="input input-bordered"
-              v-model="password"
-            />
+            <input type="password" placeholder="hunter2" class="input input-bordered" v-model="password" />
           </div>
           <div v-if="loginError != null" class="mt-4 text-center text-red-500">
             <p>{{ loginError }}</p>
@@ -258,23 +235,13 @@ const cardTitle = computed(() => {
               <label class="label">
                 <span class="label-text">Old Password</span>
               </label>
-              <input
-                type="password"
-                placeholder="hunter2"
-                class="input input-bordered"
-                v-model="password"
-              />
+              <input type="password" placeholder="hunter2" class="input input-bordered" v-model="password" />
             </div>
             <div class="form-control">
               <label class="label">
                 <span class="label-text">New Password</span>
               </label>
-              <input
-                type="password"
-                placeholder="hunter2"
-                class="input input-bordered"
-                v-model="newPassword"
-              />
+              <input type="password" placeholder="hunter2" class="input input-bordered" v-model="newPassword" />
             </div>
             <div v-if="loginError != null" class="mt-4 text-center text-red-500">
               <p>{{ loginError }}</p>
@@ -290,11 +257,7 @@ const cardTitle = computed(() => {
 
         <div v-if="activeScreen == ActiveScreens.Done" class="text-center">
           <p>Welcome</p>
-          <font-awesome-icon
-            icon="fa-solid fa-check"
-            class="my-8 text-success"
-            style="font-size: 5rem"
-          />
+          <font-awesome-icon icon="fa-solid fa-check" class="my-8 text-success" style="font-size: 5rem" />
         </div>
       </div>
     </div>

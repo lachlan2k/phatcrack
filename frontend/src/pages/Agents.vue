@@ -26,9 +26,7 @@ const allAgents = agentsStore.agents
             <div class="stat-title">Agents Online & Healthy</div>
             <div class="stat-value flex justify-between">
               <span
-                >{{
-                  allAgents.filter((x) => x.agent_info.status == AgentStatusHealthy).length ?? '?'
-                }}/{{ allAgents.length ?? '?' }}</span
+                >{{ allAgents.filter((x) => x.agent_info.status == AgentStatusHealthy).length ?? '?' }}/{{ allAgents.length ?? '?' }}</span
               >
               <span class="mt-1 text-2xl text-primary">
                 <font-awesome-icon icon="fa-solid fa-robot" />
@@ -55,14 +53,8 @@ const allAgents = agentsStore.agents
               <tr class="hover" v-for="agent in allAgents" :key="agent.id">
                 <td>{{ agent.name }}</td>
                 <td>
-                  <span
-                    v-for="device in agent.agent_devices"
-                    :key="device.device_id + device.device_name"
-                  >
-                    <font-awesome-icon
-                      icon="fa-solid fa-memory"
-                      v-if="device.device_type == 'GPU'"
-                    />
+                  <span v-for="device in agent.agent_devices" :key="device.device_id + device.device_name">
+                    <font-awesome-icon icon="fa-solid fa-memory" v-if="device.device_type == 'GPU'" />
                     <font-awesome-icon icon="fa-solid fa-microchip" v-else />
                     {{ formatDeviceName(device.device_name) }} ({{ device.temp }} °c)
                     <br />
@@ -70,11 +62,7 @@ const allAgents = agentsStore.agents
                 </td>
 
                 <td class="text-center">
-                  <div
-                    class="badge badge-accent badge-sm"
-                    v-if="agent.agent_info.status == AgentStatusHealthy"
-                    title="Healthy"
-                  ></div>
+                  <div class="badge badge-accent badge-sm" v-if="agent.agent_info.status == AgentStatusHealthy" title="Healthy"></div>
                   <div
                     class="badge badge-warning badge-sm"
                     title="Unhealthy"

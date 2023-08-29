@@ -42,16 +42,9 @@ async function logout() {
         </RouterLink>
 
         <ul class="menu mt-4">
-          <li
-            v-for="link in pageLinks"
-            :key="link.name"
-            :class="route.path == link.to ? 'bordered' : 'hover-bordered'"
-            class="mt-2"
-          >
+          <li v-for="link in pageLinks" :key="link.name" :class="route.path == link.to ? 'bordered' : 'hover-bordered'" class="mt-2">
             <RouterLink :to="link.to" :class="route.path == link.to ? 'active' : ''">
-              <span class="w-6 text-center"
-                ><font-awesome-icon :icon="'fa-solid ' + link.icon"
-              /></span>
+              <span class="w-6 text-center"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
 
               {{ link.name }}
             </RouterLink>
@@ -61,20 +54,13 @@ async function logout() {
         <div class="flex flex-grow"></div>
 
         <ul class="menu justify-self-end">
-          <li
-            class="hover-bordered"
-            v-if="authStore.isAdmin"
-            :class="route.path == '/admin' ? 'bordered' : 'hover-bordered'"
-          >
+          <li class="hover-bordered" v-if="authStore.isAdmin" :class="route.path == '/admin' ? 'bordered' : 'hover-bordered'">
             <RouterLink to="/admin" :class="route.path == '/admin' ? 'active' : ''">
               <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
               Admin
             </RouterLink>
           </li>
-          <li
-            class="hover-bordered"
-            :class="route.path == '/account' ? 'bordered' : 'hover-bordered'"
-          >
+          <li class="hover-bordered" :class="route.path == '/account' ? 'bordered' : 'hover-bordered'">
             <div class="text-content-neutral dropdown dropdown-top">
               <label tabindex="0" class="w-full cursor-pointer">
                 <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-user" /></span>
@@ -83,10 +69,7 @@ async function logout() {
                 >
               </label>
 
-              <ul
-                tabindex="0"
-                class="dropdown-content menu rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow"
-              >
+              <ul tabindex="0" class="dropdown-content menu rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow">
                 <li>
                   <RouterLink to="/account">
                     <span><font-awesome-icon icon="fa-solid fa-user" /></span>

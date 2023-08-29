@@ -22,9 +22,7 @@ export const useResourcesStore = defineStore({
         this.loading = true
         try {
           const hashTypes = await loadHashTypes()
-          this.hashTypes = Object.values(hashTypes.hashtypes).sort(
-            (a: HashType, b: HashType) => a.id - b.id
-          )
+          this.hashTypes = Object.values(hashTypes.hashtypes).sort((a: HashType, b: HashType) => a.id - b.id)
         } finally {
           this.loading = false
         }
@@ -38,7 +36,6 @@ export const useResourcesStore = defineStore({
 
   getters: {
     isHashTypesLoaded: (state) => state.hashTypes.length > 0,
-    getHashTypeName: (state) => (hashId: number) =>
-      state.hashTypes.find((x) => x.id == hashId)?.name ?? ''
+    getHashTypeName: (state) => (hashId: number) => state.hashTypes.find((x) => x.id == hashId)?.name ?? ''
   }
 })

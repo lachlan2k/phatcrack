@@ -16,12 +16,7 @@ const value = computed({
 
 <template>
   <label class="label font-bold">Select Mask</label>
-  <input
-    type="text"
-    placeholder="Mask"
-    v-model="value"
-    class="input input-bordered w-full max-w-xs"
-  />
+  <input type="text" placeholder="Mask" v-model="value" class="input input-bordered w-full max-w-xs" />
   <div class="mt-4">
     <span
       class="tooltip tooltip-bottom"
@@ -29,11 +24,7 @@ const value = computed({
       v-for="maskCharset in maskCharsets"
       :key="maskCharset.mask"
     >
-      <button
-        text="foo"
-        @click="value += maskCharset.mask"
-        class="btn btn-outline btn-xs mr-1 normal-case"
-      >
+      <button text="foo" @click="value += maskCharset.mask" class="btn btn-outline btn-xs mr-1 normal-case">
         {{ maskCharset.mask }}
       </button>
     </span>

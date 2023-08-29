@@ -7,14 +7,7 @@ import MaskInput from './MaskInput.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import HrOr from '@/components/HrOr.vue'
 import { computed, watch, reactive } from 'vue'
-import {
-  createHashlist,
-  createProject,
-  createAttack,
-  startAttack,
-  getProject,
-  getHashlist
-} from '@/api/project'
+import { createHashlist, createProject, createAttack, startAttack, getProject, getHashlist } from '@/api/project'
 import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
 import { useApi } from '@/composables/useApi'
@@ -148,9 +141,7 @@ const hashesArr = computed(() => {
   return inputs.hashes.split(/\s+/).filter((x) => !!x)
 })
 
-const selectedHashType = computed(() =>
-  allHashTypes.value.find((x) => x.id.toString() === inputs.hashType)
-)
+const selectedHashType = computed(() => allHashTypes.value.find((x) => x.id.toString() === inputs.hashType))
 
 /*
  * Step validations
@@ -308,10 +299,7 @@ async function saveAndStartAttack() {
         {{ step.name }}
       </li>
     </ul>
-    <div
-      class="card min-w-max self-center bg-base-100 shadow-xl"
-      style="min-width: 800px; max-width: 80%"
-    >
+    <div class="card min-w-max self-center bg-base-100 shadow-xl" style="min-width: 800px; max-width: 80%">
       <div class="card-body">
         <h2 class="card-title mb-4 w-96 justify-center self-center text-center">
           Step {{ inputs.activeStep + 1 - props.firstStep }}. {{ steps[inputs.activeStep].name }}
@@ -335,12 +323,7 @@ async function saveAndStartAttack() {
             <label class="label font-bold">
               <span class="label-text">New Project Name</span>
             </label>
-            <input
-              v-model="inputs.projectName"
-              type="text"
-              placeholder="12345 Example Corp"
-              class="input input-bordered w-full max-w-xs"
-            />
+            <input v-model="inputs.projectName" type="text" placeholder="12345 Example Corp" class="input input-bordered w-full max-w-xs" />
             <label class="label mt-4 font-bold">
               <span class="label-text">New Project Description (optional)</span>
             </label>
@@ -352,19 +335,11 @@ async function saveAndStartAttack() {
             />
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
-                <button class="link" @click="saveOrGetProject" v-if="inputs.projectName != ''">
-                  Create empty project and finish
-                </button>
+                <button class="link" @click="saveOrGetProject" v-if="inputs.projectName != ''">Create empty project and finish</button>
               </div>
               <div class="card-actions justify-end">
                 <div class="tooltip" :data-tip="projectStepValidationError">
-                  <button
-                    class="btn btn-primary"
-                    @click="inputs.activeStep++"
-                    :disabled="projectStepValidationError != null"
-                  >
-                    Next
-                  </button>
+                  <button class="btn btn-primary" @click="inputs.activeStep++" :disabled="projectStepValidationError != null">Next</button>
                 </div>
               </div>
             </div>
@@ -374,32 +349,16 @@ async function saveAndStartAttack() {
         <!-- Create Hashlist -->
         <template v-if="inputs.activeStep == StepIndex.Hashlist">
           <div class="form-control">
-            <HashlistInputs
-              v-model:hashes="inputs.hashes"
-              v-model:hashType="inputs.hashType"
-              v-model:hashlistName="inputs.hashlistName"
-            />
+            <HashlistInputs v-model:hashes="inputs.hashes" v-model:hashType="inputs.hashType" v-model:hashlistName="inputs.hashlistName" />
 
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
-                <button
-                  class="link"
-                  @click="saveOrGetHashlist"
-                  v-if="hashlistStepValidationError == null"
-                >
-                  Save hashlist and finish
-                </button>
+                <button class="link" @click="saveOrGetHashlist" v-if="hashlistStepValidationError == null">Save hashlist and finish</button>
               </div>
               <div class="card-actions justify-end">
                 <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
                 <div class="tooltip" :data-tip="hashlistStepValidationError">
-                  <button
-                    class="btn btn-primary"
-                    @click="inputs.activeStep++"
-                    :disabled="hashlistStepValidationError != null"
-                  >
-                    Next
-                  </button>
+                  <button class="btn btn-primary" @click="inputs.activeStep++" :disabled="hashlistStepValidationError != null">Next</button>
                 </div>
               </div>
             </div>
@@ -492,35 +451,19 @@ async function saveAndStartAttack() {
           <label class="label font-bold">Additional Options</label>
           <div class="pl-3">
             <label class="label cursor-pointer justify-start">
-              <input
-                type="checkbox"
-                v-model="inputs.isDistributed"
-                class="checkbox-primary checkbox checkbox-xs"
-              />
+              <input type="checkbox" v-model="inputs.isDistributed" class="checkbox-primary checkbox checkbox-xs" />
               <span><span class="label-text ml-4 font-bold">Distribute attack?</span></span>
             </label>
             <label class="label cursor-pointer justify-start">
-              <input
-                type="checkbox"
-                v-model="inputs.enableLoopback"
-                class="checkbox-primary checkbox checkbox-xs"
-              />
+              <input type="checkbox" v-model="inputs.enableLoopback" class="checkbox-primary checkbox checkbox-xs" />
               <span><span class="label-text ml-4 font-bold">Loopback?</span> (--loopback)</span>
             </label>
             <label class="label cursor-pointer justify-start">
-              <input
-                type="checkbox"
-                v-model="inputs.optimizedKernels"
-                class="checkbox-primary checkbox checkbox-xs"
-              />
+              <input type="checkbox" v-model="inputs.optimizedKernels" class="checkbox-primary checkbox checkbox-xs" />
               <span><span class="label-text ml-4 font-bold">Optimized Kernels?</span> (-O)</span>
             </label>
             <label class="label cursor-pointer justify-start">
-              <input
-                type="checkbox"
-                v-model="inputs.slowCandidates"
-                class="checkbox-primary checkbox checkbox-xs"
-              />
+              <input type="checkbox" v-model="inputs.slowCandidates" class="checkbox-primary checkbox checkbox-xs" />
               <span><span class="label-text ml-4 font-bold">Slow Candidates?</span> (-S)</span>
             </label>
           </div>
@@ -568,10 +511,7 @@ async function saveAndStartAttack() {
             </tbody>
           </table>
 
-          <AttackConfigDetails
-            :hashcatParams="computedHashcatParams"
-            :is-distributed="inputs.isDistributed"
-          ></AttackConfigDetails>
+          <AttackConfigDetails :hashcatParams="computedHashcatParams" :is-distributed="inputs.isDistributed"></AttackConfigDetails>
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">

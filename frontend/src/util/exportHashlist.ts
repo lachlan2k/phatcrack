@@ -33,9 +33,7 @@ function getExportBlob(hashes: HashlistHashDTO[], format: ExportFormat) {
     }
 
     case ExportFormat.ColonSeparated: {
-      const textBlob = hashes
-        .map((x) => `${x.input_hash}:${hexToString(x.plaintext_hex)}`)
-        .join('\n')
+      const textBlob = hashes.map((x) => `${x.input_hash}:${hexToString(x.plaintext_hex)}`).join('\n')
       return new Blob([textBlob], { type: 'text/plain' })
     }
   }
@@ -52,11 +50,7 @@ function getExportFilename(hashlist: HashlistDTO, format: ExportFormat) {
   }
 }
 
-export async function exportResults(
-  hashlistId: string,
-  format: ExportFormat,
-  crackedOnly: boolean
-) {
+export async function exportResults(hashlistId: string, format: ExportFormat, crackedOnly: boolean) {
   const hashlist = await getHashlist(hashlistId)
   const filtered = crackedOnly ? hashlist.hashes.filter((x) => x.is_cracked) : hashlist.hashes
 

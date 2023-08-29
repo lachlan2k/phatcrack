@@ -25,14 +25,10 @@ import { timeDurationToReadable } from '@/util/units'
 import type { AttackWithJobsDTO } from '@/api/types'
 import { getAttacksWithJobsForHashlist } from '@/api/project'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
-import AttackDetailsModal from '@/components/AttackDetailsModal.vue'
+import AttackDetailsModal from '@/components/AttackDetailsModal/index.vue'
 
 const hashlistId = useRoute().params.id as string
-const {
-  data: hashlistData,
-  isLoading: isLoadingHashlist,
-  silentlyRefresh: refreshHashlist
-} = useApi(() => getHashlist(hashlistId))
+const { data: hashlistData, isLoading: isLoadingHashlist, silentlyRefresh: refreshHashlist } = useApi(() => getHashlist(hashlistId))
 
 const {
   data: attacksData,
@@ -88,13 +84,7 @@ const filteredHashes = computed(() => {
   )
 })
 
-const {
-  next: nextPage,
-  prev: prevPage,
-  totalPages,
-  currentItems: currentHashes,
-  activePage
-} = usePagination(filteredHashes, 20)
+const { next: nextPage, prev: prevPage, totalPages, currentItems: currentHashes, activePage } = usePagination(filteredHashes, 20)
 
 const numberOfHashesCracked = computed(() => {
   return crackedHashes.value?.length ?? 0
@@ -103,20 +93,11 @@ const numberOfHashesCracked = computed(() => {
 // TODO: this will almost certainl perform terribly, and the code isn't super tidy?
 // When maturing this page, it might be worthwhile pulling this out to a weakmap or something computed
 const numJobs = (attack: AttackWithJobsDTO) => attack.jobs.length
-const numJobsRunning = (attack: AttackWithJobsDTO) =>
-  attack.jobs.filter((x) => x.runtime_data.status == JobStatusStarted).length
+const numJobsRunning = (attack: AttackWithJobsDTO) => attack.jobs.filter((x) => x.runtime_data.status == JobStatusStarted).length
 const numJobsFinished = (attack: AttackWithJobsDTO) =>
-  attack.jobs.filter(
-    (x) =>
-      x.runtime_data.status == JobStatusExited &&
-      x.runtime_data.stop_reason == JobStopReasonFinished
-  ).length
+  attack.jobs.filter((x) => x.runtime_data.status == JobStatusExited && x.runtime_data.stop_reason == JobStopReasonFinished).length
 const numJobsStopped = (attack: AttackWithJobsDTO) =>
-  attack.jobs.filter(
-    (x) =>
-      x.runtime_data.status == JobStatusExited &&
-      x.runtime_data.stop_reason == JobStopReasonUserStopped
-  ).length
+  attack.jobs.filter((x) => x.runtime_data.status == JobStatusExited && x.runtime_data.stop_reason == JobStopReasonUserStopped).length
 const numJobsFailed = (attack: AttackWithJobsDTO) =>
   attack.jobs.filter(
     (x) =>
@@ -125,12 +106,8 @@ const numJobsFailed = (attack: AttackWithJobsDTO) =>
       x.runtime_data.stop_reason != JobStopReasonUserStopped
   ).length
 const numJobsQueued = (attack: AttackWithJobsDTO) =>
-  attack.jobs.filter(
-    (x) =>
-      x.runtime_data.status == JobStatusAwaitingStart || x.runtime_data.status == JobStatusCreated
-  ).length
-const hashrateSum = (attack: AttackWithJobsDTO) =>
-  attack.jobs.map((x) => x.runtime_summary.hashrate).reduce((a, b) => a + b, 0)
+  attack.jobs.filter((x) => x.runtime_data.status == JobStatusAwaitingStart || x.runtime_data.status == JobStatusCreated).length
+const hashrateSum = (attack: AttackWithJobsDTO) => attack.jobs.map((x) => x.runtime_summary.hashrate).reduce((a, b) => a + b, 0)
 
 const hashTypeStr = computed(() => {
   if (isLoading.value) {
@@ -160,11 +137,7 @@ function openAttackModal(attackIndex: number) {
 </script>
 
 <template>
-  <AttackDetailsModal
-    v-if="selectedAttack != null"
-    :attack="selectedAttack"
-    v-model:isOpen="isAttackModalOpen"
-  ></AttackDetailsModal>
+  <AttackDetailsModal v-if="selectedAttack != null" :attack="selectedAttack" v-model:isOpen="isAttackModalOpen"></AttackDetailsModal>
 
   <main class="w-full p-4">
     <p v-if="isLoading">Loading</p>
@@ -187,28 +160,17 @@ function openAttackModal(attackIndex: number) {
 
                 <div class="dropdown">
                   <label tabindex="0" class="btn btn-ghost btn-sm m-1">...</label>
-                  <ul
-                    tabindex="0"
-                    class="menu dropdown-content rounded-box z-[1] bg-base-100 p-2 shadow"
-                  >
+                  <ul tabindex="0" class="menu dropdown-content rounded-box z-[1] bg-base-100 p-2 shadow">
                     <li>
                       <button
                         class="btn btn-ghost btn-sm"
-                        @click="
-                          () =>
-                            exportResults(hashlistId, ExportFormat.ColonSeparated, onlyShowCracked)
-                        "
+                        @click="() => exportResults(hashlistId, ExportFormat.ColonSeparated, onlyShowCracked)"
                       >
                         Export
                       </button>
                     </li>
                     <li>
-                      <button
-                        class="btn btn-ghost btn-sm"
-                        @click="() => (isHashlistEditorOpen = true)"
-                      >
-                        Edit
-                      </button>
+                      <button class="btn btn-ghost btn-sm" @click="() => (isHashlistEditorOpen = true)">Edit</button>
                     </li>
                   </ul>
                 </div>
@@ -222,12 +184,7 @@ function openAttackModal(attackIndex: number) {
               <div class="form-control">
                 <label class="label">
                   <span class="label-text">Filter</span>
-                  <input
-                    type="text"
-                    class="input input-bordered input-sm"
-                    placeholder="Hash or plaintext..."
-                    v-model="filterText"
-                  />
+                  <input type="text" class="input input-bordered input-sm" placeholder="Hash or plaintext..." v-model="filterText" />
                 </label>
               </div>
 
@@ -264,16 +221,10 @@ function openAttackModal(attackIndex: number) {
             <div class="card-body">
               <div class="flex flex-row justify-between">
                 <Modal v-model:isOpen="isAttackWizardOpen">
-                  <JobWizard
-                    :firstStep="2"
-                    :existingHashlistId="hashlistId"
-                    :existingProjectId="hashlistData?.project_id"
-                  />
+                  <JobWizard :firstStep="2" :existingHashlistId="hashlistId" :existingProjectId="hashlistData?.project_id" />
                 </Modal>
                 <h2 class="card-title">Attacks</h2>
-                <button class="btn btn-primary btn-sm" @click="() => (isAttackWizardOpen = true)">
-                  New Attack
-                </button>
+                <button class="btn btn-primary btn-sm" @click="() => (isAttackWizardOpen = true)">New Attack</button>
               </div>
               <table class="compact-table table w-full">
                 <!-- head -->
@@ -282,7 +233,7 @@ function openAttackModal(attackIndex: number) {
                     <th>Attack Mode</th>
                     <th>Status</th>
                     <th>Total Hashrate</th>
-                    <th>Time remaining</th>
+                    <th>Time Remaining</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -316,17 +267,11 @@ function openAttackModal(attackIndex: number) {
                       <div class="badge badge-ghost">No jobs</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
-                    <td>
-                      {{
-                        timeDurationToReadable(
-                          Math.max(
-                            ...attack.jobs.map((x) => x.runtime_summary.estimated_time_remaining),
-                            0
-                          )
-                        )
-                      }}
+                    <td v-if="attack.jobs.some((x) => x.runtime_summary.estimated_time_remaining > 0)">
+                      {{ timeDurationToReadable(Math.max(...attack.jobs.map((x) => x.runtime_summary.estimated_time_remaining), 0)) }}
                       left
                     </td>
+                    <td v-else>-</td>
                   </tr>
                 </tbody>
               </table>

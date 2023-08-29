@@ -37,13 +37,7 @@ const hashesArr = computed(() => {
   return hashes.value.split(/\s+/).filter((x) => !!x)
 })
 
-const {
-  detectButtonClass,
-  detectButtonClick,
-  detectButtonText,
-  suggestedHashTypes,
-  isLoadingSuggestions
-} = useWizardHashDetect(hashesArr)
+const { detectButtonClass, detectButtonClick, detectButtonText, suggestedHashTypes, isLoadingSuggestions } = useWizardHashDetect(hashesArr)
 
 watch(suggestedHashTypes, (newHashTypes) => {
   const types = newHashTypes?.possible_types
@@ -74,24 +68,14 @@ const hashTypeOptionsToShow = computed(() =>
   <label class="label font-bold">
     <span class="label-text">Hashlist Name</span>
   </label>
-  <input
-    type="text"
-    placeholder="Dumped Admin NTLM Hashes"
-    v-model="hashlistName"
-    class="input input-bordered w-full max-w-xs"
-  />
+  <input type="text" placeholder="Dumped Admin NTLM Hashes" v-model="hashlistName" class="input input-bordered w-full max-w-xs" />
   <hr class="my-4" />
   <label class="label font-bold">
     <span class="label-text">Hash Type ({{ filteredHashTypes.length }} options)</span>
   </label>
 
   <div class="flex justify-between">
-    <SearchableDropdown
-      class="flex-grow"
-      v-model="hashType"
-      :options="hashTypeOptionsToShow"
-      placeholder-text="Search for a hashtype..."
-    />
+    <SearchableDropdown class="flex-grow" v-model="hashType" :options="hashTypeOptionsToShow" placeholder-text="Search for a hashtype..." />
     <button
       class="btn ml-1"
       :class="detectButtonClass"
