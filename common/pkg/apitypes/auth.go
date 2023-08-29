@@ -4,7 +4,7 @@ import "github.com/NHAS/webauthn/protocol"
 
 type AuthLoginRequestDTO struct {
 	Username string `json:"username" validate:"required,min=4,max=64,username"`
-	Password string `json:"password" validate:"required,min=16,max=128"`
+	Password string `json:"password" validate:"required"`
 }
 
 type AuthCurrentUserDTO struct {
