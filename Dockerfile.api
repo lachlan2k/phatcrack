@@ -9,32 +9,34 @@ RUN wget https://github.com/hashcat/hashcat/releases/download/v6.2.6/hashcat-6.2
 RUN 7z x hashcat.7z
 
 # Buidler
-FROM golang:1.18 AS builder
+FROM golang:1.21 AS builder
 
 # Before copying all the source, first copy the dependency files
 # This lets us download these and cache the downloads
 WORKDIR /app/api
-COPY ./api/go.mod ./api/go.sum /app/
-RUN go mod download -x
+COPY ./api/go.mod ./api/go.sum /app/api/
 
 WORKDIR /app/common
-COPY ./api/go.mod ./api/go.sum /app/
+COPY ./common/go.mod ./common/go.sum /app/common/
+RUN go mod download -x
+
+WORKDIR /app/api
 RUN go mod download -x
 
 # Now copy over the source code
-WORKDIR /app/api
-COPY ./api .
-
 WORKDIR /app/common
-COPY ./common .
+COPY ./common/ /app/common/
 
-RUN go build -o phatcrack-api main.go
+WORKDIR /app/api
+COPY ./api/ /app/api/
+
+RUN go build -o phatcrack-api
 
 # Back to runtime
 FROM runtime
 
 WORKDIR /app
-COPY --from=builder /app/phatcrack-api .
+COPY --from=builder /app/api/phatcrack-api .
 ENV HC_PATH=/opt/hashcat-6.2.6/hashcat.bin
 
 ENTRYPOINT [ "/app/phatcrack-api" ]

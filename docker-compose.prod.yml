@@ -1,10 +1,8 @@
 version: '3'
 
 services:
-  webserver:
-    build:
-      context: .
-      dockerfile: Dockerfile.webserver
+  frontend:
+    image: ghcr.io/lachlan2k/phatcrack-frontend:latest
     restart: unless-stopped
     environment:
       - TLS_OPTS
@@ -16,9 +14,7 @@ services:
       - ./certs:/etc/caddy/certs
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile.api
+    image: ghcr.io/lachlan2k/phatcrack-api:latest
     restart: unless-stopped
     environment:
       - JWT_KEY

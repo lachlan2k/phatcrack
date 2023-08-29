@@ -1,6 +1,6 @@
 module github.com/lachlan2k/phatcrack/api
 
-go 1.18
+go 1.21
 
 require (
 	github.com/NHAS/webauthn v0.0.0-20230504065245-b02b90a155a3

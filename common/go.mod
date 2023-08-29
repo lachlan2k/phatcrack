@@ -1,6 +1,6 @@
 module github.com/lachlan2k/phatcrack/common
 
-go 1.18
+go 1.21
 
 require (
 	github.com/tkrajina/go-reflector v0.5.5 // indirect
