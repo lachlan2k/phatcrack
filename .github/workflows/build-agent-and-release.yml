@@ -1,8 +1,7 @@
-name: Build Agent
+name: Build Agent and Create Release
 
 on:
   push:
-    branches: [ "main" ]
     tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
