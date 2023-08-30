@@ -17,7 +17,7 @@ type DetectHashTypeResponseDTO struct {
 
 type VerifyHashesRequestDTO struct {
 	Hashes       []string `json:"hashes" validate:"required,min=1,dive,required,min=4"`
-	HashType     int      `json:"hash_type" validate:"required,hashtype"`
+	HashType     int      `json:"hash_type" validate:"hashtype"`
 	HasUsernames bool     `json:"has_usernames"`
 }
 
