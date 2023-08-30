@@ -1,0 +1,72 @@
+name: Build Agent
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Build Agent
+      run: CGO_ENABLED=0 go build agent/main.go
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: phatcrack-agent
+        path: ./main
+
+    - name: Create Release
+      if: github.event_name != 'pull_request'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        body: |
+          Release
+        draft: false
+        prerelease: false
+
+    - name: Upload Agent as Release Asset
+      if: github.event_name != 'pull_request'
+      id: upload-agent-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./main
+        asset_name: agent
+        asset_content_type: application/octet-stream
+
+    # Repalce :latest with specific version tag for release
+    - run: sed -i 's/:latest/:${{ github.ref }}/' docker-compose.prod.yml
+    
+    - name: Upload Docker Compose as Release Asset
+      if: github.event_name != 'pull_request'
+      id: upload-docker-compose-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./docker-compose.prod.yml
+        asset_name: docker-compose.yml
+        asset_content_type: application/x-yaml
+
+    
