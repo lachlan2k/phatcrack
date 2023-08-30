@@ -39,7 +39,7 @@ const {
 const intervalId = ref(0)
 
 async function intervalLoop() {
-  await Promise.all([refreshAttack(), refreshHashlist])
+  await Promise.all([refreshAttack(), refreshHashlist()])
   intervalId.value = setTimeout(intervalLoop, 3 * 1000)
 }
 
