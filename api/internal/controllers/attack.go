@@ -287,7 +287,7 @@ func handleAttackCreate(c echo.Context) error {
 	}
 
 	AuditLog(c, log.Fields{
-		"project_id":   projId,
+		"project_id":   proj.ID.String(),
 		"project_name": proj.Name,
 		"hashlist_id":  req.HashlistID,
 	}, "New attack created")
