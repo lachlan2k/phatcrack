@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { useAgentsStore } from '@/stores/agents'
 import { formatDeviceName } from '@/util/formatDeviceName'
 
@@ -10,7 +11,7 @@ const AgentStatusUnhealthyAndDisconnected = 'AgentStatusUnhealthyAndDisconnected
 const agentsStore = useAgentsStore()
 
 agentsStore.load(true)
-const allAgents = agentsStore.agents
+const allAgents = storeToRefs(agentsStore).agents
 </script>
 
 <template>
