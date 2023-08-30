@@ -27,6 +27,11 @@ jobs:
         name: phatcrack-agent
         path: ./main
 
+    - id: get_version
+      if: github.event_name != 'pull_request'
+      uses: battila7/get-version-action@v2
+
+
     - name: Create Release
       if: github.event_name != 'pull_request'
       id: create_release
@@ -54,7 +59,7 @@ jobs:
         asset_content_type: application/octet-stream
 
     # Repalce :latest with specific version tag for release
-    - run: sed -i 's/:latest/:${{ github.ref }}/' docker-compose.prod.yml
+    - run: sed -i 's/:latest/:${{ steps.get_version.outputs.version }}/' docker-compose.prod.yml
     
     - name: Upload Docker Compose as Release Asset
       if: github.event_name != 'pull_request'
