@@ -19,7 +19,7 @@ jobs:
         go-version: '1.21'
 
     - name: Build Agent
-      run: go build agent/main.go
+      run: CGO_ENABLED=0 go build agent/main.go
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
