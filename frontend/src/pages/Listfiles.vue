@@ -21,19 +21,20 @@ const { wordlists, rulefiles } = storeToRefs(useListfilesStore())
 const isWordlistUploadOpen = ref(false)
 const isRulefileUploadOpen = ref(false)
 
-loadListfiles()
+loadListfiles(true)
 
 const authStore = useAuthStore()
+const { loggedInUser } = storeToRefs(authStore)
 
 function canDelete(listfile: ListfileDTO) {
   if (listfile.pending_delete) {
     return false
   }
 
-  if (authStore.loggedInUser?.roles.includes('admin')) {
+  if (loggedInUser.value?.roles.includes('admin')) {
     return true
   }
-  return listfile.created_by_user_id == authStore.loggedInUser?.id
+  return listfile.created_by_user_id == loggedInUser.value?.id
 }
 
 function isGreyed(listfile: ListfileDTO) {
