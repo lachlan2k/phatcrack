@@ -33,9 +33,13 @@ async function onCreateAgent() {
     const res = await adminCreateAgent({
       name: newAgentName.value
     })
-
-    toast.success('Created new agent: ' + res.name)
-    alert(`New agent's auth key: ${res.key} (this won't be displayed again)`)
+  
+    toast.info(`Created new agent ${res.name}.\n\nNew agent's auth key (note this down, won't be displayed again):\n${res.key}`, {
+      // force user to dismiss this
+      timeout: false,
+      closeOnClick: false,
+      draggable: false
+    })
   } catch (e: any) {
     catcher(e)
   } finally {
