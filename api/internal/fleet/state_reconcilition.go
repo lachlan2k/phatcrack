@@ -59,7 +59,7 @@ func stateReconciliation() error {
 	}
 
 	// Create a convienient map so we can look up agents by ID later
-	agentMap := make(map[string]*db.Agent, 0)
+	agentMap := make(map[string]db.Agent, 0)
 
 	// This is a map from running job ID -> agent ID. This lets us quickly check which agent claims to be running a job
 	jobsOk := make(map[string]uuid.UUID, 0)
@@ -69,7 +69,7 @@ func stateReconciliation() error {
 		activeJobs := agent.AgentInfo.Data.ActiveJobIDs
 		needsSave := false
 
-		agentMap[agent.ID.String()] = &agent
+		agentMap[agent.ID.String()] = agent
 
 		newInfo := info
 
@@ -343,6 +343,12 @@ func stateReconciliation() error {
 						WithError(err).
 						Error("Failed to update job status in database")
 				}
+
+				log.
+					WithField("job_id", jobId).
+					WithField("agent_found_running_id", agentRunningJob.String()).
+					WithField("agent_that_should_be_running_id", agentThatShouldBeRunningJob.ID.String()).
+					Warn("Job was found running on the wrong agent")
 
 				tellAgentToKillJob(&agentRunningJob, &job.ID, db.JobStopReasonFailed)
 				tellAgentToKillJob(&agentThatShouldBeRunningJob.ID, &job.ID, db.JobStopReasonFailed)
