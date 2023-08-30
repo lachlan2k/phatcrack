@@ -22,28 +22,28 @@ const (
 
 // JobStart
 type JobStartDTO struct {
-	ID            string                     `json:"id" validate:"required,uuid"`
+	ID            string                     `json:"id"`
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_parms"`
-	TargetHashes  []string                   `json:"target_hashes" validate:"required,min=1,dive,required,min=4"`
+	TargetHashes  []string                   `json:"target_hashes"`
 }
 
 // JobFailedToStart
 type JobFailedToStartDTO struct {
-	JobID string
+	JobID string    `json:"job_id"`
 	Time  time.Time `json:"time"`
-	Error error
+	Error string    `json:"error"`
 }
 
 // JobStarted
 type JobStartedDTO struct {
-	JobID          string
-	HashcatCommand string
+	JobID          string    `json:"job_id"`
+	HashcatCommand string    `json:"hashcat_command"`
 	Time           time.Time `json:"time"`
 }
 
 type JobKillDTO struct {
-	JobID      string
-	StopReason string
+	JobID      string `json:"job_id"`
+	StopReason string `json:"stop_reason"`
 }
 
 // JobCrackedHash

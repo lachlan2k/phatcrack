@@ -94,7 +94,7 @@ func (h *Handler) sendJobFailedToStart(jobId string, err error) {
 	h.sendMessage(wstypes.JobFailedToStartType, wstypes.JobFailedToStartDTO{
 		JobID: jobId,
 		Time:  time.Now(),
-		Error: err,
+		Error: err.Error(),
 	})
 }
 

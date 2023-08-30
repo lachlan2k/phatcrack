@@ -306,15 +306,36 @@ func SetJobExited(jobId string, reason string, errStr string, exitTime time.Time
 		return err
 	}
 
-	return GetInstance().
-		Where("job_id = ?", jobUuid).
-		Updates(&JobRuntimeData{
-			JobID:       jobUuid,
-			Status:      JobStatusExited,
-			StopReason:  reason,
-			StoppedTime: exitTime,
-			ErrorString: errStr,
-		}).Error
+	return GetInstance().Transaction(func(tx *gorm.DB) error {
+		var current struct {
+			ErrorString string
+		}
+
+		err := tx.
+			Table("job_runtime_data").
+			Where("job_id = ?", jobId).
+			Find(&current).
+			Error
+
+		if err != nil {
+			return err
+		}
+
+		newErrStr := current.ErrorString
+		if newErrStr != "" {
+			newErrStr += "\n"
+		}
+		newErrStr += errStr
+
+		return tx.Where("job_id = ?", jobUuid).
+			Updates(&JobRuntimeData{
+				JobID:       jobUuid,
+				Status:      JobStatusExited,
+				StopReason:  reason,
+				StoppedTime: exitTime,
+				ErrorString: newErrStr,
+			}).Error
+	})
 }
 
 func SetJobScheduled(jobId string, agentId string) error {

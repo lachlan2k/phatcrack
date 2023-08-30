@@ -95,5 +95,5 @@ func (a *AgentConnection) handleJobFailedToStart(msg *wstypes.Message) error {
 		return fmt.Errorf("couldn't unmarshal %v to job failed to start dto: %w", msg.Payload, err)
 	}
 
-	return db.SetJobExited(payload.JobID, db.JobStopReasonFailedToStart, "", payload.Time)
+	return db.SetJobExited(payload.JobID, db.JobStopReasonFailedToStart, payload.Error, payload.Time)
 }

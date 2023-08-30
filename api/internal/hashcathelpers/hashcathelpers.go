@@ -166,6 +166,7 @@ func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 			if bytes.Contains(ee.Stderr, []byte("No hash-mode matches")) {
 				return []int{}, nil
 			}
+			return nil, fmt.Errorf("hashcat gave an exit error: %w, %q, %q", ee, string(out), string(ee.Stderr))
 		}
 
 		return nil, fmt.Errorf("couldn't run hashcat: %w", err)

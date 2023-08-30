@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -248,7 +249,7 @@ func handleAttackCreate(c echo.Context) error {
 		}
 
 		if !found {
-			return echo.NewHTTPError(http.StatusBadRequest, "Invalid wordlist supplied: %v", suppliedWordlist)
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid wordlist supplied: %q", suppliedWordlist))
 		}
 	}
 
