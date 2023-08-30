@@ -33,7 +33,7 @@ async function onCreateAgent() {
     const res = await adminCreateAgent({
       name: newAgentName.value
     })
-  
+
     toast.info(`Created new agent ${res.name}.\n\nNew agent's auth key (note this down, won't be displayed again):\n${res.key}`, {
       // force user to dismiss this
       timeout: false,

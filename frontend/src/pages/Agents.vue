@@ -11,7 +11,7 @@ const AgentStatusUnhealthyAndDisconnected = 'AgentStatusUnhealthyAndDisconnected
 const agentsStore = useAgentsStore()
 
 agentsStore.load(true)
-const allAgents = storeToRefs(agentsStore).agents
+const { agents: allAgents } = storeToRefs(agentsStore)
 </script>
 
 <template>

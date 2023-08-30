@@ -2,10 +2,12 @@
 import { accountChangePassword } from '@/api/account'
 import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import { useToast } from 'vue-toastification'
 
 const authStore = useAuthStore()
+const { loggedInUser } = storeToRefs(authStore)
 
 const changePasswordCurrentPassword = ref('')
 const changePasswordNewPassword = ref('')
@@ -51,7 +53,7 @@ async function onChangePassword() {
 
 <template>
   <main class="w-full p-4">
-    <h1 class="text-4xl font-bold">Welcome {{ authStore.loggedInUser?.username }}</h1>
+    <h1 class="text-4xl font-bold">Welcome {{ loggedInUser?.username }}</h1>
     <div class="mt-6 flex flex-wrap gap-6">
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">

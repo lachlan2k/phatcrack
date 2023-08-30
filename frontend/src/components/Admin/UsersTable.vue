@@ -10,6 +10,7 @@ import { ref, computed } from 'vue'
 import { usePagination } from '@/composables/usePagination'
 import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 
 const isUserCreateOpen = ref(false)
 const { data: allUsers, fetchData: fetchUsers } = useApi(adminGetAllUsers)
@@ -62,9 +63,10 @@ async function onCreateUser() {
 }
 
 const authStore = useAuthStore()
+const { loggedInUser } = storeToRefs(authStore)
 
 async function onDeleteUser(id: string) {
-  if (authStore.loggedInUser?.id === id) {
+  if (loggedInUser.value?.id === id) {
     toast.error("You can't delete your own user")
     return
   }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { timeSince } from '@/util/units'
-import { useProjectsStore } from '@/stores/projects';
-import { storeToRefs } from 'pinia';
+import { useProjectsStore } from '@/stores/projects'
+import { storeToRefs } from 'pinia'
 
 const projectsStore = useProjectsStore()
 projectsStore.load()

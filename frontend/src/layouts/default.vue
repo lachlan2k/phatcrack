@@ -2,8 +2,10 @@
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { logout as apiLogout } from '@/api/auth'
+import { storeToRefs } from 'pinia'
 
 const authStore = useAuthStore()
+const { loggedInUser, isAdmin } = storeToRefs(authStore)
 
 const router = useRouter()
 const route = useRoute()
@@ -54,7 +56,7 @@ async function logout() {
         <div class="flex flex-grow"></div>
 
         <ul class="menu justify-self-end">
-          <li class="hover-bordered" v-if="authStore.isAdmin" :class="route.path == '/admin' ? 'bordered' : 'hover-bordered'">
+          <li class="hover-bordered" v-if="isAdmin" :class="route.path == '/admin' ? 'bordered' : 'hover-bordered'">
             <RouterLink to="/admin" :class="route.path == '/admin' ? 'active' : ''">
               <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
               Admin
@@ -65,7 +67,7 @@ async function logout() {
               <label tabindex="0" class="w-full cursor-pointer">
                 <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-user" /></span>
                 <span
-                  >Welcome, <strong>{{ authStore.loggedInUser?.username }}</strong></span
+                  >Welcome, <strong>{{ loggedInUser?.username }}</strong></span
                 >
               </label>
 
