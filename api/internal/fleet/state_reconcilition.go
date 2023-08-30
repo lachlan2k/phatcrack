@@ -258,6 +258,12 @@ func stateReconciliation() error {
 				}
 			} else {
 				// As expected, no agent is running the job.
+				log.
+					WithField("job_id", job.ID.String()).
+					WithField("agent_id", runningAgent.String()).
+					WithField("start_request_time", job.RuntimeData.StartRequestTime).
+					Warn("Job did not start in time")
+
 				err = db.SetJobExited(job.ID.String(), db.JobStopReasonTimeout, "The job did not start in time", time.Now())
 				if err != nil {
 					log.
