@@ -39,7 +39,7 @@ const allAgents = storeToRefs(agentsStore).agents
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <h2 class="card-title">Agent List</h2>
-          <table class="compact-table table w-full">
+          <table class="table w-full">
             <thead>
               <tr>
                 <th>Hostname</th>
