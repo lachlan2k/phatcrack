@@ -3,7 +3,7 @@ import IconButton from '@/components/IconButton.vue'
 import Modal from '@/components/Modal.vue'
 import FileUpload from '@/components/FileUpload.vue'
 
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { bytesToReadable } from '@/util/units'
 import { useListfilesStore } from '@/stores/listfiles'
@@ -22,6 +22,18 @@ const isWordlistUploadOpen = ref(false)
 const isRulefileUploadOpen = ref(false)
 
 loadListfiles(true)
+
+const refreshTimer = ref(0)
+
+onMounted(() => {
+  refreshTimer.value = setInterval(() => {
+    loadListfiles(true)
+  }, 1000 * 60) // every 60 seconds
+})
+
+onBeforeUnmount(() => {
+  clearInterval(refreshTimer.value)
+})
 
 const authStore = useAuthStore()
 const { loggedInUser } = storeToRefs(authStore)
