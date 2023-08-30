@@ -211,12 +211,12 @@ func handleAttackCreate(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	projId, err := db.GetHashlistProjID(req.HashlistID)
+	hashlist, err := db.GetHashlist(req.HashlistID)
 	if err != nil {
-		return util.ServerError("Failed to fetch project id for hashlist", err)
+		return util.ServerError("Failed to fetch hahlist for attack", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(hashlist.ProjectID.String(), user.ID.String())
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -269,6 +269,9 @@ func handleAttackCreate(c echo.Context) error {
 
 	// Don't allow any additional args
 	req.HashcatParams.AdditionalArgs = []string{}
+
+	// Enforce correct hashtype
+	req.HashcatParams.HashType = uint(hashlist.HashType)
 
 	hashcatParams := datatypes.JSONType[hashcattypes.HashcatParams]{
 		Data: req.HashcatParams,
