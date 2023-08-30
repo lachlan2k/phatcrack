@@ -33,7 +33,14 @@ const toast = useToast()
 
 async function onSave() {
   try {
-    const { is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles, split_jobs_per_agent, maximum_uploaded_file_size, maximum_uploaded_file_line_scan_size } = settings
+    const {
+      is_mfa_required,
+      require_password_change_on_first_login,
+      auto_sync_listfiles,
+      split_jobs_per_agent,
+      maximum_uploaded_file_size,
+      maximum_uploaded_file_line_scan_size
+    } = settings
     await adminSetConfig({
       is_mfa_required,
       require_password_change_on_first_login,
@@ -82,6 +89,18 @@ async function onSave() {
       <label class="label font-bold">
         <span class="label-text pr-3">How many jobs per-agent to split (recommended: 1)?</span>
         <input type="number" v-model.number="settings.split_jobs_per_agent" class="input input-bordered input-sm w-16" />
+      </label>
+    </div>
+    <div class="form-control">
+      <label class="label font-bold">
+        <span class="label-text pr-3">Max upload size (bytes)</span>
+        <input type="number" v-model.number="settings.maximum_uploaded_file_size" class="input input-bordered input-sm w-40" />
+      </label>
+    </div>
+    <div class="form-control">
+      <label class="label font-bold">
+        <span class="label-text pr-3">Max size uploaded file to scan (bytes)</span>
+        <input type="number" v-model.number="settings.maximum_uploaded_file_line_scan_size" class="input input-bordered input-sm w-40" />
       </label>
     </div>
   </div>
