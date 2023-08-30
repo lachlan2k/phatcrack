@@ -11,7 +11,9 @@ const settings = reactive({
   is_mfa_required: false,
   auto_sync_listfiles: false,
   require_password_change_on_first_login: false,
-  split_jobs_per_agent: 1
+  split_jobs_per_agent: 1,
+  maximum_uploaded_file_size: 1,
+  maximum_uploaded_file_line_scan_size: 1
 })
 
 watch(settingsData, (newSettings) => {
@@ -23,18 +25,22 @@ watch(settingsData, (newSettings) => {
   settings.auto_sync_listfiles = newSettings.auto_sync_listfiles
   settings.require_password_change_on_first_login = newSettings.require_password_change_on_first_login
   settings.split_jobs_per_agent = newSettings.split_jobs_per_agent
+  settings.maximum_uploaded_file_size = newSettings.maximum_uploaded_file_size
+  settings.maximum_uploaded_file_line_scan_size = newSettings.maximum_uploaded_file_line_scan_size
 })
 
 const toast = useToast()
 
 async function onSave() {
   try {
-    const { is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles, split_jobs_per_agent } = settings
+    const { is_mfa_required, require_password_change_on_first_login, auto_sync_listfiles, split_jobs_per_agent, maximum_uploaded_file_size, maximum_uploaded_file_line_scan_size } = settings
     await adminSetConfig({
       is_mfa_required,
       require_password_change_on_first_login,
       auto_sync_listfiles,
-      split_jobs_per_agent
+      split_jobs_per_agent,
+      maximum_uploaded_file_size,
+      maximum_uploaded_file_line_scan_size
     })
     toast.success('Settings saved')
   } catch (e: any) {

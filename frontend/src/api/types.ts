@@ -31,12 +31,16 @@ export interface AdminConfigResponseDTO {
   is_mfa_required: boolean
   auto_sync_listfiles: boolean
   require_password_change_on_first_login: boolean
+  maximum_uploaded_file_size: number
+  maximum_uploaded_file_line_scan_size: number
 }
 export interface AdminConfigRequestDTO {
   split_jobs_per_agent: number
   is_mfa_required: boolean
   auto_sync_listfiles: boolean
   require_password_change_on_first_login: boolean
+  maximum_uploaded_file_size: number
+  maximum_uploaded_file_line_scan_size: number
 }
 export interface UserDTO {
   id: string

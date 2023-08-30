@@ -39,6 +39,8 @@ func HookAdminEndpoints(api *echo.Group) {
 			newConf.AutomaticallySyncListfiles = req.AutomaticallySyncListfiles
 			newConf.RequirePasswordChangeOnFirstLogin = req.RequirePasswordChangeOnFirstLogin
 			newConf.SplitJobsPerAgent = req.SplitJobsPerAgent
+			newConf.MaximumUploadedFileSize = req.MaximumUploadedFileSize
+			newConf.MaximumUploadedFileLineScanSize = req.MaximumUploadedFileLineScanSize
 			return nil
 		})
 
@@ -55,6 +57,8 @@ func HookAdminEndpoints(api *echo.Group) {
 			AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
 			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
 			SplitJobsPerAgent:                 conf.SplitJobsPerAgent,
+			MaximumUploadedFileSize:           conf.MaximumUploadedFileSize,
+			MaximumUploadedFileLineScanSize:   conf.MaximumUploadedFileLineScanSize,
 		})
 	})
 
@@ -66,6 +70,8 @@ func HookAdminEndpoints(api *echo.Group) {
 			AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
 			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
 			SplitJobsPerAgent:                 conf.SplitJobsPerAgent,
+			MaximumUploadedFileSize:           conf.MaximumUploadedFileSize,
+			MaximumUploadedFileLineScanSize:   conf.MaximumUploadedFileLineScanSize,
 		})
 	})
 
