@@ -32,7 +32,9 @@ async function logout() {
     </div>
     <div class="drawer-side bg-neutral text-neutral-content">
       <aside class="flex h-full w-72 flex-col p-4">
-        <h2 class="btn btn-ghost w-full text-center text-3xl">Phatcrack</h2>
+        <RouterLink to="/dashboard">
+          <h2 class="btn btn-ghost w-full text-center text-3xl">Phatcrack</h2>
+        </RouterLink>
         <hr class="mb-8 mt-4 h-px border-0 bg-gray-200 dark:bg-gray-700" />
         <RouterLink to="/wizard">
           <a class="btn btn-neutral w-full gap-2 bg-slate-600">
