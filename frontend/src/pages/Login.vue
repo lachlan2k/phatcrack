@@ -42,6 +42,10 @@ const activeScreen = computed(() => {
   return ActiveScreens.Done
 })
 
+if (hasCompletedAuth.value) {
+  router.push('/dashboard')
+}
+
 watch(hasCompletedAuth, (hasCompletedAuth) => {
   if (hasCompletedAuth) {
     router.push('/dashboard')
