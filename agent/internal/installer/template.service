@@ -1,0 +1,13 @@
+[Unit]
+Description=Phatcrack Agent
+After=network.target
+
+[Service]
+User={{.AgentUser}}
+Group={{.AgentGroup}}
+Restart=on-failure
+RestartSec=5s
+ExecStart={{.AgentBinPath}} -config {{.ConfigPath}}
+
+[Install]
+WantedBy=multi-user.target

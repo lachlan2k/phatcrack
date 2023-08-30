@@ -2,14 +2,21 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"log"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/agent/internal/handler"
+	"github.com/lachlan2k/phatcrack/agent/internal/installer"
 )
 
 func main() {
+	if len(os.Args) >= 2 && os.Args[1] == "install" {
+		installer.RunInteractive()
+		return
+	}
+
 	configPath := flag.String("config", "/etc/phatcrack-agent/config.json", "Location of config file")
 	flag.Parse()
 

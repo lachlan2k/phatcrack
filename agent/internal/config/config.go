@@ -11,7 +11,7 @@ import (
 type Config struct {
 	AuthKeyFile       string `json:"auth_key_file"`
 	AuthKey           string `json:"auth_key"`
-	HashcatBinary     string `json:"hashcat_binary"`
+	HashcatPath       string `json:"hashcat_binary"`
 	ListfileDirectory string `json:"listfile_directory"`
 	APIEndpoint       string `json:"api_endpoint"`
 }

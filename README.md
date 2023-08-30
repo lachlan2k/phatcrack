@@ -17,7 +17,7 @@ adduser --system --no-create-home phatcrack-server
 mkdir -p /srv/containers/phatcrack
 cd /srv/containers/phatcrack
 
-wget https://raw.githubusercontent.com/lachlan2k/phatcrack/main/docker-compose.prod.yml -O docker-compose.yml
+wget https://github.com/lachlan2k/phatcrack/releases/download/v0.0.3/docker-compose.yml
 
 echo "HOST_NAME=phatcrack.lan" >> .env
 echo "DB_PASS=$(openssl rand -hex 16)" >> .env
@@ -59,6 +59,10 @@ adduser --system --no-create-home phatcrack-agent
 # Place the compiled agent binary in /opt/phatcrack/
 mkdir -p /opt/phatcrack/hashcat
 mkdir -p /opt/phatcrack/listfiles
+
+cd /opt/phatcrack/
+wget https://github.com/lachlan2k/phatcrack/releases/download/v0.0.3/agent
+chmod +x agent
 
 cd /opt/phatcrack/hashcat/
 wget https://github.com/hashcat/hashcat/releases/download/v6.2.6/hashcat-6.2.6.7z -q -O hashcat.7z

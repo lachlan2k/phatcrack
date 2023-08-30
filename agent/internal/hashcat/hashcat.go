@@ -197,7 +197,7 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 }
 
 func findBinary(conf *config.Config) (path string, err error) {
-	path = conf.HashcatBinary
+	path = conf.HashcatPath
 	if path != "" {
 		_, err = os.Stat(path)
 		if err != nil {
