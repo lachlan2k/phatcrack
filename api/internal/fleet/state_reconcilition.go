@@ -291,14 +291,14 @@ func stateReconciliation() error {
 			if !isAgentOk {
 				// Hmm, the agent doesn't exist at all?
 				log.
-					WithField("job_id", job.ID.String()).
+					WithField("job_id", jobId).
 					WithField("assigned_agent_id", job.AssignedAgentID.String()).
 					Warn("Job was assigned to an agent that doesn't exist, this shouldn't hapen. Failing this job.")
 
 				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job was assigned to an invalid agent.", time.Now())
 				if err != nil {
 					log.
-						WithField("job_id", job.ID.String()).
+						WithField("job_id", jobId).
 						WithError(err).
 						Error("Failed to update job status in database")
 				}
@@ -306,8 +306,8 @@ func stateReconciliation() error {
 				continue
 			}
 
-			if job.RuntimeData.StartRequestTime.After(agentThatShouldBeRunningJob.AgentInfo.Data.TimeOfLastHeartbeat) {
-				// The job was started after the last heartbeat
+			if job.RuntimeData.StartRequestTime.Add(30 * time.Second).After(agentThatShouldBeRunningJob.AgentInfo.Data.TimeOfLastHeartbeat) {
+				// The job was started after the last heartbeat (plus some wiggle room)
 				// So we can't know whether or not its in the list of running jobs
 				continue
 			}
@@ -317,10 +317,17 @@ func stateReconciliation() error {
 				err = db.SetJobExited(jobId, db.JobStopReasonFailed, "The job disappeared from the agent's list of running jobs. The agent probably died or was restarted.", time.Now())
 				if err != nil {
 					log.
-						WithField("job_id", job.ID.String()).
+						WithField("job_id", jobId).
 						WithError(err).
 						Error("Failed to update job status in database")
 				}
+
+				log.
+					WithField("job_id", jobId).
+					WithField("agent_id", agentThatShouldBeRunningJob.ID.String()).
+					WithField("agent_running_jobs", agentThatShouldBeRunningJob.AgentInfo.Data.ActiveJobIDs).
+					WithField("agent_time_of_list_heartbeat", agentThatShouldBeRunningJob.AgentInfo.Data.TimeOfLastHeartbeat).
+					Warn("Job disappeared from list of running jobs")
 
 				tellAgentToKillJob(&agentRunningJob, &job.ID, db.JobStopReasonFailed)
 				continue
