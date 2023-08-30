@@ -20,7 +20,7 @@ const deadtimetoDead = 120 * time.Second
 const disconnectTimeToDead = 60 * time.Second
 
 // We expect jobs will start within 5 seconds, else we'll consider them to be failed
-const acceptableJobStartTime = 5 * time.Second
+const acceptableJobStartTime = 30 * time.Second
 
 // This will soft fail if the agent isn't connected. In which case, we're probably fine
 func tellAgentToKillJob(agentId *uuid.UUID, jobId *uuid.UUID, reason string) {
