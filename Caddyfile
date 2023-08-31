@@ -18,7 +18,7 @@
     }
 
     handle {
-        header Content-Security-Policy "default-src 'self'; object-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self' data: 'unsafe-inline'"
+        header Content-Security-Policy "default-src 'self'; object-src 'none'; script-src 'self' 'unsafe-eval'; img-src 'self' data:; style-src 'self' data: 'unsafe-inline'"
         root * /srv
         try_files {path} /index.html
         file_server
