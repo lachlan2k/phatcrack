@@ -82,7 +82,7 @@ func handleListfileUpload(c echo.Context) error {
 
 	uploadedFile, err := c.FormFile("file")
 	if err != nil {
-		return echo.ErrBadRequest
+		return util.ServerError("Failed to get file for upload. Perhaps disk space is low?", err)
 	}
 
 	maxFileSize := config.Get().MaximumUploadedFileSize
