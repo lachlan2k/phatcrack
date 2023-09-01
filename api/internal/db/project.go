@@ -101,8 +101,9 @@ func (h *HashlistHash) ToDTO() apitypes.HashlistHashDTO {
 
 type Attack struct {
 	UUIDBaseModel
-	HashcatParams datatypes.JSONType[hashcattypes.HashcatParams]
-	IsDistributed bool
+	HashcatParams  datatypes.JSONType[hashcattypes.HashcatParams]
+	IsDistributed  bool
+	ProgressString string
 
 	Jobs       []Job     `gorm:"constraint:OnDelete:CASCADE;"`
 	HashlistID uuid.UUID `gorm:"type:uuid"`
@@ -114,10 +115,11 @@ func CreateAttack(attack *Attack) (*Attack, error) {
 
 func (a *Attack) ToDTO() apitypes.AttackDTO {
 	return apitypes.AttackDTO{
-		ID:            a.ID.String(),
-		HashlistID:    a.HashlistID.String(),
-		HashcatParams: a.HashcatParams.Data,
-		IsDistributed: a.IsDistributed,
+		ID:             a.ID.String(),
+		HashlistID:     a.HashlistID.String(),
+		HashcatParams:  a.HashcatParams.Data,
+		IsDistributed:  a.IsDistributed,
+		ProgressString: a.ProgressString,
 	}
 }
 
@@ -238,4 +240,11 @@ func GetAttackProjID(attackId string) (string, error) {
 		return "", err
 	}
 	return result.ProjectID.String(), nil
+}
+
+func SetAttackProgressString(attackId string, progressString string) error {
+	return GetInstance().
+		Table("attacks").
+		Update("progress_string", progressString).
+		Where("id = ?", attackId).Error
 }

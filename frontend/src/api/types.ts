@@ -100,6 +100,7 @@ export interface AttackDTO {
   hashlist_id: string
   hashcat_params: HashcatParams
   is_distributed: boolean
+  progress_string: string
 }
 export interface JobRuntimeSummaryDTO {
   hashrate: number
@@ -173,6 +174,7 @@ export interface AttackWithJobsDTO {
   hashlist_id: string
   hashcat_params: HashcatParams
   is_distributed: boolean
+  progress_string: string
   jobs: JobDTO[]
 }
 export interface AttackWithJobsMultipleDTO {

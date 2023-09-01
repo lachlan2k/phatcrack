@@ -244,20 +244,23 @@ function openAttackModal(attackIndex: number) {
                     <td>
                       <strong>{{ getAttackModeName(attack.hashcat_params.attack_mode) }}</strong>
                     </td>
-                    <td v-if="numJobs(attack)" style="min-width: 130px">
-                      <div class="badge badge-success mr-1" v-if="numJobsFinished(attack) > 0">
+                    <td v-if="attack.progress_string != ''">
+                      <div class="badge badge-neutral my-1 mr-1">{{ attack.progress_string }}</div>
+                    </td>
+                    <td v-else-if="numJobs(attack)" style="min-width: 130px">
+                      <div class="badge badge-success my-1 mr-1" v-if="numJobsFinished(attack) > 0">
                         {{ quantityStr(numJobsFinished(attack), 'job') }} finished
                       </div>
-                      <div class="badge badge-info mr-1" v-if="numJobsRunning(attack) > 0">
+                      <div class="badge badge-info my-1 mr-1" v-if="numJobsRunning(attack) > 0">
                         {{ quantityStr(numJobsRunning(attack), 'job') }} running
                       </div>
-                      <div class="badge badge-secondary mr-1" v-if="numJobsQueued(attack) > 0">
+                      <div class="badge badge-secondary my-1 mr-1" v-if="numJobsQueued(attack) > 0">
                         {{ quantityStr(numJobsQueued(attack), 'job') }} pending
                       </div>
-                      <div class="badge badge-warning mr-1" v-if="numJobsStopped(attack)">
+                      <div class="badge badge-warning my-1 mr-1" v-if="numJobsStopped(attack)">
                         {{ quantityStr(numJobsStopped(attack), 'job') }} stopped
                       </div>
-                      <div class="badge badge-error mr-1" v-if="numJobsFailed(attack)">
+                      <div class="badge badge-error my-1 mr-1" v-if="numJobsFailed(attack)">
                         {{ quantityStr(numJobsFailed(attack), 'job') }} failed
                       </div>
                     </td>

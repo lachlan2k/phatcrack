@@ -3,10 +3,11 @@ package apitypes
 import "github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 
 type AttackDTO struct {
-	ID            string                     `json:"id"`
-	HashlistID    string                     `json:"hashlist_id"`
-	HashcatParams hashcattypes.HashcatParams `json:"hashcat_params"`
-	IsDistributed bool                       `json:"is_distributed"`
+	ID             string                     `json:"id"`
+	HashlistID     string                     `json:"hashlist_id"`
+	HashcatParams  hashcattypes.HashcatParams `json:"hashcat_params"`
+	IsDistributed  bool                       `json:"is_distributed"`
+	ProgressString string                     `json:"progress_string"`
 }
 
 type AttackWithJobsDTO struct {

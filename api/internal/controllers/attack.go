@@ -279,9 +279,10 @@ func handleAttackCreate(c echo.Context) error {
 	}
 
 	attack, err := db.CreateAttack(&db.Attack{
-		HashcatParams: hashcatParams,
-		IsDistributed: req.IsDistributed,
-		HashlistID:    uuid.MustParse(req.HashlistID),
+		HashcatParams:  hashcatParams,
+		IsDistributed:  req.IsDistributed,
+		HashlistID:     uuid.MustParse(req.HashlistID),
+		ProgressString: "Created...",
 	})
 	if err != nil {
 		return util.ServerError("Failed to create new attack", err)
@@ -332,6 +333,9 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Something went wrong getting attack to start", err)
 	}
 
+	db.SetAttackProgressString(attackId, "Distributing work...")
+	defer db.SetAttackProgressString(attackId, "")
+
 	jobMultiplier := config.Get().SplitJobsPerAgent
 	if jobMultiplier <= 0 {
 		jobMultiplier = 1
@@ -357,6 +361,8 @@ func handleAttackStart(c echo.Context) error {
 		"hashlist_id":   attack.HashlistID,
 		"hashlist_name": hashlist.Name,
 	}, "User has started attack")
+
+	db.SetAttackProgressString(attackId, "Scheduling jobs...")
 
 	jobIDs := []string{}
 	for _, job := range newJobs {
