@@ -17,7 +17,7 @@ adduser --system --no-create-home phatcrack-server
 mkdir -p /opt/phatcrack-server
 cd /opt/phatcrack-server
 
-wget https://github.com/lachlan2k/phatcrack/releases/download/v0.0.3/docker-compose.yml
+wget https://github.com/lachlan2k/phatcrack/releases/download//docker-compose.yml
 
 echo "HOST_NAME=phatcrack.lan" >> .env
 echo "DB_PASS=$(openssl rand -hex 16)" >> .env
@@ -68,7 +68,7 @@ chown -R phatcrack-agent:phatcrack-agent ./hashcat
 
 
 wget https://phatcrack.lan/phatcrack-agent
-# Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download/v0.0.4/phatcrack-agent
+# Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download//phatcrack-agent
 
 chmod +x ./phatcrack-agent
 ./phatcrack-agent install -defaults -auth-key API_KEY_FROM_SERVER_HERE
