@@ -12,24 +12,21 @@ RUN 7z x hashcat.7z
 
 # Before copying all the source, first copy the dependency files
 # This lets us download these and cache the downloads
-WORKDIR /app/api
-COPY ./api/go.mod ./api/go.sum /app/api/
+COPY api/go.mod api/go.sum /app/api/
+COPY common/go.mod common/go.sum /app/common/
 
 WORKDIR /app/common
-COPY ./common/go.mod ./common/go.sum /app/common/
 RUN go mod download -x
 
 WORKDIR /app/api
 RUN go mod download -x
 
 # Now copy over the source code
-WORKDIR /app/common
-COPY ./common/ /app/common/
+COPY common /app/common/
+COPY api /app/api/
+COPY .git /app/.git/
 
-WORKDIR /app/api
-COPY ./api/ /app/api/
-
-RUN go build -o phatcrack-api
+RUN bash build.sh
 
 # Runtime
 FROM redhat/ubi9-minimal AS runtime

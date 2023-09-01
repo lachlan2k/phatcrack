@@ -36,6 +36,7 @@ type AgentDeviceInfo struct {
 
 type AgentInfo struct {
 	Status               string      `json:"status"`
+	Version              string      `json:"version"`
 	TimeOfLastHeartbeat  time.Time   `json:"time_of_last_heartbeat,omitempty"`
 	TimeOfLastDisconnect time.Time   `json:"time_of_last_disconnect,omitempty"`
 	TimeOfLastConnect    time.Time   `json:"time_of_last_connect,omitempty"`
@@ -58,6 +59,7 @@ func (a *AgentInfo) ToDTO() apitypes.AgentInfoDTO {
 
 	return apitypes.AgentInfoDTO{
 		Status:             a.Status,
+		Version:            a.Version,
 		LastCheckInTime:    a.TimeOfLastHeartbeat.Unix(),
 		AvailableListfiles: listfileDTOs,
 		ActiveJobIDs:       a.ActiveJobIDs,

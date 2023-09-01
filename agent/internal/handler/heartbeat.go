@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/lachlan2k/phatcrack/agent/internal/version"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
@@ -43,6 +44,7 @@ func (h *Handler) sendHeartbeat() error {
 
 	payload := wstypes.HeartbeatDTO{
 		Time:           time.Now().Unix(),
+		Version:        version.Version(),
 		AgentStartTime: startTime.Unix(),
 		ActiveJobIDs:   make([]string, len(h.activeJobs)),
 	}

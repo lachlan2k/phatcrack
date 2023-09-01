@@ -105,6 +105,7 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 
 	info := db.AgentInfo{
 		Status:              db.AgentStatusHealthy,
+		Version:             payload.Version,
 		TimeOfLastHeartbeat: time.Now(),
 		AvailableListfiles:  availableListfiles,
 		ActiveJobIDs:        payload.ActiveJobIDs,

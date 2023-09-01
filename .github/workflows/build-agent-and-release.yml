@@ -19,18 +19,17 @@ jobs:
         go-version: '1.21'
 
     - name: Build Agent
-      run: CGO_ENABLED=0 go build agent/main.go
+      run: cd agent; bash build.sh
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: phatcrack-agent
-        path: ./main
+        path: ./agent/phatcrack-agent
 
     - id: get_version
       if: github.event_name != 'pull_request'
       uses: battila7/get-version-action@v2
-
 
     - name: Create Release
       if: github.event_name != 'pull_request'

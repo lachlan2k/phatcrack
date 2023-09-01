@@ -43,6 +43,11 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
+  # Optional: just a local server for the agent binary
+  agent-server:
+    image: ghcr.io/lachlan2k/phatcrack/agent-server:latest
+    restart: unless-stopped
+
 volumes:
   db-data:
   caddy-data:

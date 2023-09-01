@@ -12,6 +12,10 @@
         Referrer-Policy no-referrer-when-downgrade
     }
 
+    handle /phatcrack-agent {
+        reverse_proxy http://agent-server
+    }
+
     handle /api/* {
         header Content-Security-Policy "default-src 'none'"
         reverse_proxy http://api:3000

@@ -13,6 +13,7 @@ env:
   REGISTRY: ghcr.io
   API_IMAGE_NAME: ${{ github.repository }}/api
   FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
+  AGENT_SERVER_IMAGE_NAME: ${{ github.repository }}/agent-server
 
 
 jobs:
@@ -102,4 +103,33 @@ jobs:
         env:
           TAGS: ${{ steps.meta-frontend.outputs.tags }}
           DIGEST: ${{ steps.build-and-push-frontend.outputs.digest }}
+        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+
+      #####
+      ### Agent Server
+      #####
+      - name: Extract Docker agent server metadata
+        id: meta-agent
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.AGENT_SERVER_IMAGE_NAME }}
+
+      - name: Build and push agent server Docker image
+        id: build-and-push-agent
+        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        with:
+          context: .
+          file: Dockerfile.agent
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-agent.outputs.tags }}
+          labels: ${{ steps.meta-agent.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Sign the published agent Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          TAGS: ${{ steps.meta-agent.outputs.tags }}
+          DIGEST: ${{ steps.build-and-push-agent.outputs.digest }}
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}

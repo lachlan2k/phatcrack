@@ -10,6 +10,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
+	"github.com/lachlan2k/phatcrack/api/internal/version"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
@@ -21,6 +22,10 @@ func HookAdminEndpoints(api *echo.Group) {
 	api.GET("/whoami", func(c echo.Context) error {
 		user := c.Get("user")
 		return c.JSON(http.StatusOK, user)
+	})
+
+	api.GET("/version", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, version.Version())
 	})
 
 	api.PUT("/config", func(c echo.Context) error {

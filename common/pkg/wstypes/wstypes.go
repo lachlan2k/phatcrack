@@ -19,6 +19,7 @@ type FileDTO struct {
 
 type HeartbeatDTO struct {
 	Time              int64     `json:"time"`
+	Version           string    `json:"version"`
 	AgentStartTime    int64     `json:"agent_start_time"`
 	ActiveJobIDs      []string  `json:"active_job_ids"`
 	Listfiles         []FileDTO `json:"listifles"`

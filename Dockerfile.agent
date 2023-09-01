@@ -1,0 +1,17 @@
+# This Dockerfile builds and serves the agent
+FROM golang:1.21 AS builder
+
+COPY agent /app/agent
+COPY common /app/common
+COPY .git /app/.git
+
+WORKDIR /app/common
+RUN go mod download -x
+
+WORKDIR /app/agent
+RUN bash build.sh
+
+FROM caddy:2-alpine
+
+RUN rm /usr/share/caddy/index.html
+COPY --from=builder /app/agent/phatcrack-agent /usr/share/caddy/

@@ -16,6 +16,7 @@ type AgentFileDTO struct {
 
 type AgentInfoDTO struct {
 	Status             string         `json:"status"`
+	Version            string         `json:"version"`
 	LastCheckInTime    int64          `json:"last_checkin,omitempty"`
 	AvailableListfiles []AgentFileDTO `json:"available_listfiles,omitempty"`
 	ActiveJobIDs       []string       `json:"active_job_ids,omitempty"`
