@@ -5,6 +5,8 @@ Distributed hash cracking for chonkers. Phatcrack is a frontend for Hashcat that
 * Multi-user and project access control
 * Work distribution across multiple workers
 
+![image](https://github.com/lachlan2k/phatcrack/assets/4683714/b10df9ec-ed5a-4678-9442-89003636bbce)
+
 ### Deployment
 
 #### Server
