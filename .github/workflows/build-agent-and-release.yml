@@ -57,7 +57,7 @@ jobs:
         asset_name: agent
         asset_content_type: application/octet-stream
 
-    # Repalce :latest with specific version tag for release
+    # Replace :latest with specific version tag for release
     - run: sed -i 's/:latest/:${{ steps.get_version.outputs.version }}/' docker-compose.prod.yml
     
     - name: Upload Docker Compose as Release Asset
@@ -71,5 +71,22 @@ jobs:
         asset_path: ./docker-compose.prod.yml
         asset_name: docker-compose.yml
         asset_content_type: application/x-yaml
+
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - id: get_version
+        if: github.event_name != 'pull_request'
+        uses: battila7/get-version-action@v2
+
+      - uses: actions/checkout@v3
+        if: github.event_name != 'pull_request'
+        run: |
+          sed -i 's@lachlan2k/phatcrack/releases/download/.*/@lachlan2k/phatcrack/releases/download/${{ steps.get_version.outputs.version }}/@' README.md
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add README.md
+          git commit -m "chore: Bump version in README"
+          git push
 
     
