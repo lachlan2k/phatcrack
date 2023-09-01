@@ -104,7 +104,9 @@ async function stop() {
           >
             Job finished
           </div>
-          <div class="badge badge-info mr-1" v-else-if="job.runtime_data.status == JobStatusStarted">Job running</div>
+          <div class="badge badge-info mr-1" v-else-if="job.runtime_data.status == JobStatusStarted">
+            {{ job.runtime_data.output_lines.length > 0 ? 'Job running' : 'Hashcat starting...' }}
+          </div>
           <div
             class="badge badge-secondary mr-1"
             v-else-if="job.runtime_data.status == JobStatusAwaitingStart || job.runtime_data.status == JobStatusCreated"
@@ -112,10 +114,10 @@ async function stop() {
             Job pending
           </div>
 
-          <div class="badge badge-warning" v-else-if="job.runtime_data.stop_reason == JobStopReasonUserStopped">Job stopped</div>
-          <div class="badge badge-error" v-else-if="job.runtime_data.status == JobStatusExited">Job failed</div>
+          <div class="badge badge-warning mr-1" v-else-if="job.runtime_data.stop_reason == JobStopReasonUserStopped">Job stopped</div>
+          <div class="badge badge-error mr-1" v-else-if="job.runtime_data.status == JobStatusExited">Job failed</div>
 
-          <div class="badget badge-ghost" v-else>Unknown state</div>
+          <div class="badge badge-ghost mr-1" v-else>Unknown state</div>
         </td>
         <td>{{ hashrateStr(job.runtime_summary.hashrate) }}</td>
         <td>{{ timeSince(job.runtime_summary.started_time * 1000) }}</td>
