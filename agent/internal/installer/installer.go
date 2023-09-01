@@ -192,8 +192,11 @@ func applyDefaults(installConf *InstallConfig) {
 
 	if installConf.HashcatPath == "" {
 		path, err := exec.LookPath("hashcat")
-		if err != nil {
-			path, _ = exec.LookPath("hashcat.bin")
+		if err != nil || path == "" {
+			path, err = exec.LookPath("hashcat.bin")
+			if err != nil || path == "" {
+				path = "/opt/phatcrack-agent/hashcat/hashcat.bin"
+			}
 		}
 		installConf.HashcatPath = path
 	}

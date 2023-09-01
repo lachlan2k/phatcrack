@@ -14,8 +14,8 @@ Docker is the only supported deployment method for the server.
 # Ideally the container processes should be run rootless, so we'll create an unprivileged user.
 adduser --system --no-create-home phatcrack-server
 
-mkdir -p /srv/containers/phatcrack
-cd /srv/containers/phatcrack
+mkdir -p /opt/phatcrack-server
+cd /opt/phatcrack-server
 
 wget https://github.com/lachlan2k/phatcrack/releases/download/v0.0.3/docker-compose.yml
 
@@ -35,8 +35,8 @@ chmod 600 .env
 
 
 # Make a directory to persist files in
-mkdir -p /srv/containers/phatcrack/filerepo
-chown phatcrack-server:phatcrack-server /srv/containers/phatcrack/filerepo
+mkdir filerepo
+chown phatcrack-server:phatcrack-server filerepo
 
 docker compose up -d
 ```
@@ -56,33 +56,23 @@ adduser --system --no-create-home phatcrack-agent
 # Depending on your distro, you may need to the phatcrack-agent to a group
 # usermod -aG video phatcrack-agent
 
-# Place the compiled agent binary in /opt/phatcrack/
-mkdir -p /opt/phatcrack/hashcat
-mkdir -p /opt/phatcrack/listfiles
+mkdir -p /opt/phatcrack-agent/
+cd /opt/phatcrack-agent/
 
-cd /opt/phatcrack/
-wget https://github.com/lachlan2k/phatcrack/releases/download/v0.0.3/agent
-chmod +x agent
-
-cd /opt/phatcrack/hashcat/
+# Download hashcat
 wget https://github.com/hashcat/hashcat/releases/download/v6.2.6/hashcat-6.2.6.7z -q -O hashcat.7z
 7z x hashcat.7z
 rm hashcat.7z
 mv hashcat-6.2.6 hashcat
+chown -R phatcrack-agent:phatcrack-agent ./hashcat
 
-mkdir -p /etc/phatcrack-agent/
-wget https://raw.githubusercontent.com/lachlan2k/phatcrack/main/agent/example_config.json -O /etc/phatcrack-agent/config.json
-echo -n "API KEY HERE" > /etc/phatcrack-agent/auth.key
 
-# Update api_endpoint to point to your phatcrack installation. Ensure to use HTTPS if you have deployed it.
-vi /etc/phatcrack-agent/config.json
+wget https://phatcrack.lan/phatcrack-agent
+# Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download/v0.0.4/phatcrack-agent
 
-# Set secure permissions
-chown -R phatcrack-agent:phatcrack-agent /etc/phatcrack-agent
-chmod 700 /etc/phatcrack-agent
-chmod 600 /etc/phatcrack-agent/auth.key
-chmod 600 /etc/phatcrack-agent/config.json
+chmod +x ./phatcrack-agent
+./phatcrack-agent install -defaults -auth-key API_KEY_FROM_SERVER_HERE
 
-# Now, for testing, you can just manually invoke it. TODO: Systemd
-/opt/phatcrack/agent
+systemctl enable phatcrack-agent
+systemctl start phatcrack-agent
 ```
