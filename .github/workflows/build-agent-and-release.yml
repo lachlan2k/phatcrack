@@ -72,8 +72,16 @@ jobs:
         asset_name: docker-compose.yml
         asset_content_type: application/x-yaml
 
+  bump-readme:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref_name }}
+
     - name: Bump readme
-      if: github.event_name != 'pull_request'
       run: |
         sed -i 's@lachlan2k/phatcrack/releases/download/.*/@lachlan2k/phatcrack/releases/download/${{ steps.get_version.outputs.version }}/@' README.md
         git config user.name github-actions
