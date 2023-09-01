@@ -20,18 +20,25 @@ const props = defineProps<{
   attack: AttackWithJobsDTO
 }>()
 
+const selectedJobID = ref<string | null>(null)
+
 const emit = defineEmits(['update:isOpen'])
 
 const isOpen = computed({
   get: () => props.isOpen,
-  set: (value: boolean) => emit('update:isOpen', value)
+  set: (value: boolean) => {
+    if (value == false) {
+      selectedJobID.value = null
+    }
+    
+    emit('update:isOpen', value)
+  }
 })
 
 const agentStore = useAgentsStore()
 agentStore.load()
 const getAgentName = (id: string) => agentStore.byId(id)?.name ?? 'Unknown'
 
-const selectedJobID = ref<string | null>(null)
 const selectedJob = computed<JobDTO | null>(() => {
   if (selectedJobID.value == null) {
     return null
