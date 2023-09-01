@@ -17,7 +17,7 @@ func main() {
 		return
 	}
 
-	configPath := flag.String("config", "/etc/phatcrack-agent/config.json", "Location of config file")
+	configPath := flag.String("config", "/opt/phatcrack-agent/config.json", "Location of config file")
 	flag.Parse()
 
 	conf := config.LoadConfig(*configPath)

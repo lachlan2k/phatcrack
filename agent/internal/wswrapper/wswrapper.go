@@ -2,6 +2,7 @@ package wswrapper
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,9 +16,10 @@ import (
 )
 
 type WSWrapper struct {
-	Endpoint           string
-	Headers            http.Header
-	MaximumDropoutTime time.Duration
+	DisableTLSVerification bool
+	Endpoint               string
+	Headers                http.Header
+	MaximumDropoutTime     time.Duration
 
 	writeChan chan interface{}
 	readChan  chan []byte
@@ -103,11 +105,17 @@ func (w *WSWrapper) Run(notifyFirstConn *sync.Cond) error {
 	lastValidConnectonTime := time.Now()
 	first := true
 
+	dialer := *websocket.DefaultDialer
+
+	if w.DisableTLSVerification {
+		dialer.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
 	for {
 		log.Printf("Dialing %s...", w.Endpoint)
 		w.lock.Lock()
 
-		conn, _, err := websocket.DefaultDialer.Dial(w.Endpoint, w.Headers)
+		conn, _, err := dialer.Dial(w.Endpoint, w.Headers)
 		if err != nil {
 			log.Printf("failed to dial ws endpoint: %v, %v", conn, err)
 

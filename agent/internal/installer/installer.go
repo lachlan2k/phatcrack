@@ -28,9 +28,10 @@ type InstallConfig struct {
 	AuthKeyFile string
 	ConfigPath  string
 
-	HashcatPath       string
-	ListfileDirectory string
-	APIEndpoint       string
+	HashcatPath            string
+	ListfileDirectory      string
+	APIEndpoint            string
+	DisableTLSVerification bool
 }
 
 //go:embed template.service
@@ -288,16 +289,17 @@ func checkConf(installConf InstallConfig) error {
 func RunInteractive() {
 	flagSet := flag.NewFlagSet("install", flag.ExitOnError)
 
-	useDefaultsP := flagSet.Bool("install-defaults", false, "Use basic defaults for intallation? (stores everything in /opt/phatcrack-agent)")
-	userP := flagSet.String("install-user", "", "Which user to run the agent as")
-	groupP := flagSet.String("install-group", "", "Which user group to run the agent as")
-	agentBinPathP := flagSet.String("install-agent-bin", "", "Path to agent (defaults to running executable)")
-	authKeyFileP := flagSet.String("install-auth-keyfile", "", "Path to file containing agent key")
-	authKeyP := flagSet.String("install-auth-key", "", "Path to file containing agent key")
-	configPathP := flagSet.String("install-config-path", "", "Path to config json file to install")
-	hashcatPathP := flagSet.String("install-hashcat-path", "", "Path to hashcat executable")
-	listfilePathP := flagSet.String("install-listfile-directory", "", "Path to directory to hold listfiles")
-	apiEndpointP := flagSet.String("install-api-endpoint", "", "API endpoint (format: https://phatcrack.lan/api/v1)")
+	useDefaultsP := flagSet.Bool("defaults", false, "Use basic defaults for intallation? (stores everything in /opt/phatcrack-agent)")
+	userP := flagSet.String("user", "", "Which user to run the agent as")
+	groupP := flagSet.String("group", "", "Which user group to run the agent as")
+	agentBinPathP := flagSet.String("agent-bin", "", "Path to agent (defaults to running executable)")
+	authKeyFileP := flagSet.String("auth-keyfile", "", "Path to file containing agent key")
+	authKeyP := flagSet.String("auth-key", "", "Path to file containing agent key")
+	configPathP := flagSet.String("config-path", "", "Path to config json file to install")
+	hashcatPathP := flagSet.String("hashcat-path", "", "Path to hashcat executable")
+	listfilePathP := flagSet.String("listfile-directory", "", "Path to directory to hold listfiles")
+	apiEndpointP := flagSet.String("api-endpoint", "", "API endpoint (format: https://phatcrack.lan/api/v1)")
+	disableTLSVerificationP := flagSet.Bool("disable-tls-verification", false, "Whether to disable TLS Verification")
 
 	flagSet.Parse(os.Args[2:])
 
@@ -312,9 +314,10 @@ func RunInteractive() {
 		AuthKeyFile: *authKeyFileP,
 		ConfigPath:  *configPathP,
 
-		HashcatPath:       *hashcatPathP,
-		ListfileDirectory: *listfilePathP,
-		APIEndpoint:       *apiEndpointP,
+		HashcatPath:            *hashcatPathP,
+		ListfileDirectory:      *listfilePathP,
+		APIEndpoint:            *apiEndpointP,
+		DisableTLSVerification: *disableTLSVerificationP,
 	}
 
 	if installConf.Defaults {

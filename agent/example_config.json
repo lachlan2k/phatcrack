@@ -1,7 +1,7 @@
 {
-    "auth_key_file": "/etc/phatcrack-agent/auth-key",
+    "auth_key_file": "/opt/phatcrack-agent/auth-key",
     "hashcat_binary": "/opt/hashcat/hashcat.bin",
-    "listfile_directory": "/opt/phatcrack/listfiles",
-    "api_endpoint": "http://127.0.0.1:3000/api/v1",
-    "additional_hashcat_args": ["-w3", "--loopback"]
+    "listfile_directory": "/opt/phatcrack-phatcrack/listfiles",
+    "api_endpoint": "http://phatcrack.lan/api/v1",
+    "additional_hashcat_args": ["-w3"]
 }
