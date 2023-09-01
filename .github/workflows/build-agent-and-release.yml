@@ -74,14 +74,15 @@ jobs:
 
   update-readme:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     steps:
       - id: get_version
         if: github.event_name != 'pull_request'
         uses: battila7/get-version-action@v2
 
       - uses: actions/checkout@v3
-        if: github.event_name != 'pull_request'
-        run: |
+      
+      - run: |
           sed -i 's@lachlan2k/phatcrack/releases/download/.*/@lachlan2k/phatcrack/releases/download/${{ steps.get_version.outputs.version }}/@' README.md
           git config user.name github-actions
           git config user.email github-actions@github.com
