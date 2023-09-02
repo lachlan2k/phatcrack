@@ -1,3 +1,7 @@
 #!/bin/bash
 
-go build -ldflags="-X github.com/lachlan2k/phatcrack/api/internal/version.version=$(git describe --tags)" -o phatcrack-api main.go
+VERSION_STR=$(git describe --tags)
+
+echo "Building version ${VERSION_STR}"
+
+go build -ldflags="-X github.com/lachlan2k/phatcrack/api/internal/version.version=${VERSION_STR}" -o phatcrack-api main.go
