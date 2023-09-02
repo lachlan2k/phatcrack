@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -33,6 +34,12 @@ func (h *Handler) downloadFile(fileID string) error {
 		return err
 	}
 
+	tr := &http.Transport{}
+	if h.conf.DisableTLSVerification {
+		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+	client := &http.Client{Transport: tr}
+
 	request, err := http.NewRequest("GET", fmt.Sprintf("%s/agent-handler/download-file/%s", h.conf.APIEndpoint, fileID), nil)
 	if err != nil {
 		return err
@@ -41,7 +48,7 @@ func (h *Handler) downloadFile(fileID string) error {
 	request.Header.Add("X-Agent-Key", h.conf.AuthKey)
 
 	log.Printf("Downloading file from %q", request.URL.String())
-	response, err := http.DefaultClient.Do(request)
+	response, err := client.Do(request)
 	if err != nil {
 		return err
 	}

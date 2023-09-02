@@ -66,11 +66,21 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 		return h.handleJobKill(msg)
 
 	case wstypes.DownloadFileRequestType:
-		go h.handleDownloadFileRequest(msg)
+		go func() {
+			err := h.handleDownloadFileRequest(msg)
+			if err != nil {
+				log.Printf("Error handling file download: %v", err)
+			}
+		}()
 		return nil
 
 	case wstypes.DeleteFileRequestType:
-		go h.handleDeleteFileRequest(msg)
+		go func() {
+			err := h.handleDeleteFileRequest(msg)
+			if err != nil {
+				log.Printf("Error handling file delete: %v", err)
+			}
+		}()
 		return nil
 
 	default:
