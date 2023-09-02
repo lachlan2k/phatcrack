@@ -73,7 +73,7 @@ wget https://phatcrack.lan/phatcrack-agent
 # Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download/v0.0.5/phatcrack-agent
 
 chmod +x ./phatcrack-agent
-./phatcrack-agent install -defaults -auth-key API_KEY_FROM_SERVER_HERE
+./phatcrack-agent install -defaults -api-endpoint https://phatcrack.lan/api/v1 -auth-key API_KEY_FROM_SERVER_HERE 
 
 systemctl enable phatcrack-agent
 systemctl start phatcrack-agent
