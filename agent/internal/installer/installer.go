@@ -94,13 +94,13 @@ func writeServiceFile(installConf InstallConfig) {
 func writeConfigFile(installConf InstallConfig) {
 	uid, gid := getUidAndGid(installConf)
 
-	marshalled, err := json.Marshal(config.Config{
+	marshalled, err := json.MarshalIndent(config.Config{
 		AuthKeyFile:       installConf.AuthKeyFile,
 		AuthKey:           "",
 		HashcatPath:       installConf.HashcatPath,
 		ListfileDirectory: installConf.ListfileDirectory,
 		APIEndpoint:       installConf.APIEndpoint,
-	})
+	}, "", "  ")
 	if err != nil {
 		log.Fatalf("Couldn't marshal config file: %v", err)
 	}
