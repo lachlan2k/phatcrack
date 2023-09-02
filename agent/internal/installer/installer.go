@@ -95,11 +95,12 @@ func writeConfigFile(installConf InstallConfig) {
 	uid, gid := getUidAndGid(installConf)
 
 	marshalled, err := json.MarshalIndent(config.Config{
-		AuthKeyFile:       installConf.AuthKeyFile,
-		AuthKey:           "",
-		HashcatPath:       installConf.HashcatPath,
-		ListfileDirectory: installConf.ListfileDirectory,
-		APIEndpoint:       installConf.APIEndpoint,
+		AuthKeyFile:            installConf.AuthKeyFile,
+		AuthKey:                "",
+		HashcatPath:            installConf.HashcatPath,
+		ListfileDirectory:      installConf.ListfileDirectory,
+		APIEndpoint:            installConf.APIEndpoint,
+		DisableTLSVerification: installConf.DisableTLSVerification,
 	}, "", "  ")
 	if err != nil {
 		log.Fatalf("Couldn't marshal config file: %v", err)
