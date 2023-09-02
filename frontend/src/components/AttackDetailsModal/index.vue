@@ -30,7 +30,7 @@ const isOpen = computed({
     if (value == false) {
       selectedJobID.value = null
     }
-    
+
     emit('update:isOpen', value)
   }
 })

@@ -64,6 +64,7 @@ export interface AgentFileDTO {
 }
 export interface AgentInfoDTO {
   status: string
+  version: string
   last_checkin?: number
   available_listfiles?: AgentFileDTO[]
   active_job_ids?: string[]

@@ -42,7 +42,8 @@ const { agents: allAgents } = storeToRefs(agentsStore)
           <table class="table w-full">
             <thead>
               <tr>
-                <th>Hostname</th>
+                <th>Name</th>
+                <th>Version</th>
                 <th>Devices</th>
                 <th>Status</th>
               </tr>
@@ -50,6 +51,7 @@ const { agents: allAgents } = storeToRefs(agentsStore)
             <tbody class="first-col-bold">
               <tr class="hover" v-for="agent in allAgents" :key="agent.id">
                 <td>{{ agent.name }}</td>
+                <td>{{ agent.agent_info.version }}</td>
                 <td>
                   <span v-for="device in agent.agent_devices" :key="device.device_id + device.device_name">
                     <font-awesome-icon icon="fa-solid fa-memory" v-if="device.device_type == 'GPU'" />
