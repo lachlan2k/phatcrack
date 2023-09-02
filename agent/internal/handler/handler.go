@@ -164,9 +164,10 @@ func Run(conf *config.Config) error {
 	}
 
 	conn := &wswrapper.WSWrapper{
-		Endpoint:           wsEndpoint,
-		Headers:            headers,
-		MaximumDropoutTime: time.Minute * 5,
+		Endpoint:               wsEndpoint,
+		Headers:                headers,
+		MaximumDropoutTime:     time.Minute * 5,
+		DisableTLSVerification: conf.DisableTLSVerification,
 	}
 
 	h := &Handler{
