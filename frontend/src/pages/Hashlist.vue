@@ -195,7 +195,7 @@ function openAttackModal(attackIndex: number) {
                 </thead>
                 <tbody>
                   <tr v-for="hash in currentHashes" :key="hash.normalized_hash">
-                    <td class="font-mono">{{ hash.input_hash }}</td>
+                    <td class="font-mono text-ellipsis overflow-hidden whitespace-nowrap" style="max-width: 500px;">{{ hash.input_hash }}</td>
                     <td class="font-mono">
                       <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
                     </td>
