@@ -10,10 +10,6 @@ import (
 func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if s.shouldSkip(c) {
-				return next(c)
-			}
-
 			user, sess := UserAndSessFromReq(c)
 			if user == nil {
 				return echo.ErrUnauthorized
@@ -51,13 +47,28 @@ func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
 	}
 }
 
+func EnforceAuthMiddleware(bypassPaths []string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			path := c.Request().URL.Path
+			for _, bypassPath := range bypassPaths {
+				if path == bypassPath {
+					return next(c)
+				}
+			}
+
+			if !AuthIsValid(c) {
+				return echo.NewHTTPError(http.StatusUnauthorized, "Login required")
+			}
+
+			return next(c)
+		}
+	}
+}
+
 func RoleRestrictedMiddleware(h SessionHandler, allowedRoles []string, disallowedRoles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			if h.shouldSkip(c) {
-				return next(c)
-			}
-
 			user, _ := UserAndSessFromReq(c)
 
 			if user == nil {

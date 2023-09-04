@@ -1,8 +1,10 @@
 package db
 
 import (
+	"errors"
 	"strings"
 
+	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/datatypes"
@@ -13,6 +15,7 @@ type User struct {
 	Username     string `gorm:"uniqueIndex"`
 	PasswordHash string
 	Roles        datatypes.JSONSlice[string]
+	APIKeyHash   string // Only for service accounts
 
 	MFAType string
 	MFAData datatypes.JSON
@@ -35,14 +38,6 @@ func (u *User) HasRole(roleToCheck string) bool {
 
 	return false
 }
-
-// func (u *User) Save() error {
-// 	return GetInstance().Save(u).Error
-// }
-
-// func (u *User) Delete() error {
-// 	return GetInstance().Delete(u).Error
-// }
 
 func NormalizeUsername(username string) string {
 	return strings.ToLower(strings.TrimSpace(username))
@@ -88,6 +83,43 @@ func RegisterUser(username, password string, roles []string) (*User, error) {
 	}
 
 	err = GetInstance().Create(user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+// callee is responsible for ensuring service account role is present
+func RegisterServiceAccount(username string, apiKey string, roles []string) (*User, error) {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(apiKey), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	keyHash := util.HashAPIKey(apiKey)
+
+	user := &User{
+		Username:     NormalizeUsername(username),
+		PasswordHash: string(passwordHash),
+		APIKeyHash:   keyHash,
+		Roles:        roles,
+	}
+
+	err = GetInstance().Create(user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func GetServiceAccountByAPIKey(key string) (*User, error) {
+	if key == "" {
+		return nil, errors.New("empty key provided")
+	}
+
+	hash := util.HashAPIKey(key)
+	user := &User{}
+	err := GetInstance().Where(&User{APIKeyHash: hash}).First(user).Error
 	if err != nil {
 		return nil, err
 	}

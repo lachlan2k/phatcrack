@@ -18,8 +18,6 @@ type SessionHandler interface {
 	UpdateSessionData(c echo.Context, updateFunc func(*SessionData) error) error
 
 	LogoutAllSessionsForUser(id string) error
-
-	shouldSkip(echo.Context) bool
 }
 
 type SessionData struct {
@@ -30,8 +28,14 @@ type SessionData struct {
 	PendingWebAuthnUser *webauthnUser
 }
 
+const sessionAuthIsValidContextKey = "sess-auth-valid"
 const sessionContextKey = "sess-data"
 const sessionUserContextKey = "sess-user"
+
+func AuthIsValid(c echo.Context) bool {
+	isValid, ok := c.Get(sessionAuthIsValidContextKey).(bool)
+	return ok && isValid
+}
 
 func SessionDataFromReq(c echo.Context) *SessionData {
 	data, ok := c.Get(sessionContextKey).(SessionData)

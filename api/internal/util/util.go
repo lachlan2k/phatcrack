@@ -78,6 +78,32 @@ func GenAgentKeyAndHash() (keyStr string, hashStr string, err error) {
 	return
 }
 
+// All just the same as the Agent Key stuff, but duplicating the code to keep it uncoupled
+func HashAPIKey(keyStr string) string {
+	hash := sha256.Sum256([]byte(keyStr))
+	return strings.ToLower(hex.EncodeToString(hash[:]))
+}
+
+func CheckAPIKey(keyStr string, hashStr string) bool {
+	return HashAPIKey(keyStr) == hashStr
+}
+
+const apiKeyLen = 32
+
+func GenAPIKeyAndHash() (keyStr string, hashStr string, err error) {
+	key := make([]byte, apiKeyLen)
+	_, err = rand.Read(key)
+	if err != nil {
+		err = fmt.Errorf("couldn't generate random api key: %w", err)
+		return
+	}
+
+	keyStr = strings.ToLower(hex.EncodeToString(key))
+	hashStr = HashAPIKey(keyStr)
+
+	return
+}
+
 func isValidUUID(id string) bool {
 	if id == "" {
 		return false

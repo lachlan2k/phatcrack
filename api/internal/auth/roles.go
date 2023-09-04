@@ -2,6 +2,7 @@ package auth
 
 const RoleAdmin = "admin"
 const RoleStandard = "standard"
+const RoleServiceAccount = "service_account"
 
 const RoleMFAEnrolled = "mfa_enrolled"
 const RoleMFAExempt = "mfa_exempt"

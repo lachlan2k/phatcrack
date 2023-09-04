@@ -5,6 +5,8 @@ import type {
   AdminConfigRequestDTO,
   AdminConfigResponseDTO,
   AdminGetAllUsersResponseDTO,
+  AdminServiceAccountCreateRequestDTO,
+  AdminServiceAccountCreateResponseDTO,
   AdminUserCreateRequestDTO,
   AdminUserCreateResponseDTO
 } from './types'
@@ -15,6 +17,12 @@ export function adminGetAllUsers(): Promise<AdminGetAllUsersResponseDTO> {
 
 export function adminCreateUser(newUserData: AdminUserCreateRequestDTO): Promise<AdminUserCreateResponseDTO> {
   return client.post('/api/v1/admin/user/create', newUserData).then((res) => res.data)
+}
+
+export function adminCreateServiceAccount(
+  newAccountData: AdminServiceAccountCreateRequestDTO
+): Promise<AdminServiceAccountCreateResponseDTO> {
+  return client.post('/api/v1/admin/user/create-service-account', newAccountData).then((res) => res.data)
 }
 
 export function adminDeleteUser(id: string): Promise<string> {

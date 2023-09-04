@@ -252,6 +252,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			sd.HasCompletedMFA = true
 			return nil
 		})
+		sessHandler.Rotate(c)
 		if err != nil {
 			return util.ServerError("Something went wrong with MFA completion", err)
 		}

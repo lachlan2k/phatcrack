@@ -22,6 +22,16 @@ export interface AdminUserCreateResponseDTO {
   id: string
   roles: string[]
 }
+export interface AdminServiceAccountCreateRequestDTO {
+  username: string
+  roles: string[]
+}
+export interface AdminServiceAccountCreateResponseDTO {
+  username: string
+  id: string
+  roles: string[]
+  api_key: string
+}
 export interface AdminIsSetupCompleteResponseDTO {
   is_complete: boolean
 }

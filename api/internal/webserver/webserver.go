@@ -1,9 +1,7 @@
 package webserver
 
 import (
-	"errors"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/go-playground/validator"
@@ -12,27 +10,12 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/controllers"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
-	log "github.com/sirupsen/logrus"
 )
 
 func makeSessionHandler() auth.SessionHandler {
-	jwtKey := []byte(os.Getenv("JWT_KEY"))
-
-	if len(jwtKey) > 0 && 1 == 0 {
-		return &auth.JWTSessionHandler{
-			Secret: jwtKey,
-			WhitelistPaths: []string{
-				"/api/v1/auth/login",
-			},
-			SessionLifetime: 10 * time.Minute,
-		}
-	}
-
 	return &auth.InMemorySessionHandler{
-		WhitelistPaths: []string{
-			"/api/v1/auth/login",
-		},
-		SessionLifetime: 10 * time.Minute,
+		SessionTimeout:     10 * time.Minute,
+		SessionMaxLifetime: 4 * time.Hour,
 	}
 }
 
@@ -43,75 +26,8 @@ func Listen(port string) error {
 	validator.Init()
 	e.Validator = validator
 
-	e.Use(middleware.RequestLoggerWithConfig(
-		middleware.RequestLoggerConfig{
-
-			LogError:         true,
-			LogLatency:       true,
-			LogRemoteIP:      true,
-			LogMethod:        true,
-			LogURI:           true,
-			LogUserAgent:     true,
-			LogStatus:        true,
-			LogContentLength: true,
-			LogResponseSize:  true,
-
-			LogValuesFunc: func(c echo.Context, values middleware.RequestLoggerValues) error {
-				fields := log.Fields{
-					"latency_ms":     values.Latency.Milliseconds(),
-					"remote_ip":      values.RemoteIP,
-					"method":         values.Method,
-					"URI":            values.URI,
-					"user_agent":     values.UserAgent,
-					"status":         values.Status,
-					"content_length": values.ContentLength,
-					"response_size":  values.ResponseSize,
-				}
-
-				user := auth.UserFromReq(c)
-				if user != nil {
-					fields["user_username"] = user.Username
-					fields["user_id"] = user.ID.String()
-				}
-
-				// 401 messagse are noisy if a user's status has timed out
-				if values.Error != nil && values.Status != 401 {
-					var wrapped util.WrappedServerError
-					if errors.As(values.Error, &wrapped) {
-						log.WithError(wrapped.Unwrap()).WithFields(fields).WithField("error_id", wrapped.ID()).Error("request error " + wrapped.ID())
-						return nil
-					}
-
-					log.WithError(values.Error).WithFields(fields).Error("request error")
-					return nil
-				}
-
-				if values.Status >= 500 && values.Status <= 599 {
-					log.WithFields(fields).Error("generic request error")
-					return nil
-				}
-
-				if values.Status == 400 || values.Status == 403 {
-					log.WithFields(fields).Warn("bad request")
-					return nil
-				}
-
-				log.WithFields(fields).Info("request")
-				return nil
-			},
-		},
-	))
+	e.Use(makeLoggerMiddleware())
 	e.Use(middleware.Recover())
-
-	// Slightly annoying, the auth middleware, by default, uses a 400 error when the auth is missing
-	// We want a 401
-	e.HTTPErrorHandler = func(err error, c echo.Context) {
-		if err == middleware.ErrJWTMissing {
-			c.Error(echo.NewHTTPError(http.StatusUnauthorized, "Login required"))
-			return
-		}
-		c.Echo().DefaultHTTPErrorHandler(err, c)
-	}
 
 	sessionHandler := makeSessionHandler()
 
@@ -120,7 +36,12 @@ func Listen(port string) error {
 	// Agent auth is done separately in the controller, so it can go before auth middleware
 	controllers.HookAgentHandlerEndpoints(api.Group("/agent-handler"))
 
+	api.Use(auth.CreateHeaderAuthMiddleware())
 	api.Use(sessionHandler.CreateMiddleware())
+
+	api.Use(auth.EnforceAuthMiddleware([]string{
+		"/api/v1/auth/login",
+	}))
 
 	api.GET("/ping", func(c echo.Context) error {
 		return c.String(http.StatusOK, "pong")
@@ -149,7 +70,6 @@ func Listen(port string) error {
 
 	adminAPI := api.Group("/admin")
 	adminAPI.Use(auth.AdminOnlyMiddleware(sessionHandler))
-
 	controllers.HookAdminEndpoints(adminAPI)
 
 	return e.Start(":" + port)

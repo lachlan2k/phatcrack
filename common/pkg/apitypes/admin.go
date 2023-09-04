@@ -22,6 +22,17 @@ type AdminUserCreateResponseDTO struct {
 	Roles    []string `json:"roles"`
 }
 
+type AdminServiceAccountCreateRequestDTO struct {
+	Username string   `json:"username" validate:"required,min=4,max=64,username"`
+	Roles    []string `json:"roles" validate:"required,userroles"`
+}
+type AdminServiceAccountCreateResponseDTO struct {
+	Username string   `json:"username"`
+	ID       string   `json:"id"`
+	Roles    []string `json:"roles"`
+	APIKey   string   `json:"api_key"`
+}
+
 type AdminIsSetupCompleteResponseDTO struct {
 	IsComplete bool `json:"is_complete"`
 }

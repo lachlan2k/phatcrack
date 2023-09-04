@@ -97,6 +97,7 @@ func HookAdminEndpoints(api *echo.Group) {
 	})
 
 	api.POST("/user/create", handleCreateUser)
+	api.POST("/user/create-service-account", handleCreateServiceAccount)
 	api.POST("/agent/create", handleAgentCreate)
 
 	api.DELETE("/user/:id", handleDeleteUser)
@@ -133,6 +134,41 @@ func handleCreateUser(c echo.Context) error {
 		ID:       newUser.ID.String(),
 		Username: newUser.Username,
 		Roles:    newUser.Roles,
+	})
+}
+
+func handleCreateServiceAccount(c echo.Context) error {
+	req, err := util.BindAndValidate[apitypes.AdminServiceAccountCreateRequestDTO](c)
+	if err != nil {
+		return err
+	}
+
+	rolesOk := auth.AreRolesAllowedOnRegistration(req.Roles)
+	if !rolesOk {
+		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
+	}
+
+	apiKey, _, err := util.GenAPIKeyAndHash()
+	if err != nil {
+		return util.ServerError("Couldn't create service account", err)
+	}
+
+	allRoles := append(req.Roles, auth.RoleMFAExempt, auth.RoleServiceAccount)
+
+	newUser, err := db.RegisterServiceAccount(req.Username, apiKey, allRoles)
+	if err != nil {
+		return util.ServerError("Couldn't create service account", err)
+	}
+
+	AuditLog(c, log.Fields{
+		"new_user": newUser.ToDTO(),
+	}, "New service account created")
+
+	return c.JSON(http.StatusCreated, apitypes.AdminServiceAccountCreateResponseDTO{
+		ID:       newUser.ID.String(),
+		Username: newUser.Username,
+		Roles:    newUser.Roles,
+		APIKey:   apiKey,
 	})
 }
 

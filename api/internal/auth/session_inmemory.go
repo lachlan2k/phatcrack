@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
@@ -13,14 +12,15 @@ import (
 )
 
 type inMemoryStoreEntry struct {
-	sess    SessionData
-	expires time.Time
+	sess        SessionData
+	timeoutTime time.Time
+	maxEndTime  time.Time
 }
 
 type InMemorySessionHandler struct {
-	CookieName      string
-	SessionLifetime time.Duration
-	WhitelistPaths  []string
+	CookieName         string
+	SessionTimeout     time.Duration
+	SessionMaxLifetime time.Duration
 
 	store     map[string]*inMemoryStoreEntry
 	storeLock sync.Mutex
@@ -36,16 +36,18 @@ func (s *InMemorySessionHandler) CreateMiddleware() echo.MiddlewareFunc {
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			// Another auth validator has already validated this request
+			if AuthIsValid(c) {
+				return next(c)
+			}
+
 			entry, err := s.getEntry(c)
 			if err != nil || entry == nil {
-				if s.shouldSkip(c) {
-					return next(c)
-				}
-
-				return echo.NewHTTPError(http.StatusUnauthorized, "Login required")
+				return next(c)
 			}
 
 			c.Set(sessionContextKey, entry.sess)
+			c.Set(sessionAuthIsValidContextKey, true)
 
 			return next(c)
 		}
@@ -61,14 +63,16 @@ func (s *InMemorySessionHandler) Start(c echo.Context, sess SessionData) error {
 		return err
 	}
 
-	exp := time.Now().Add(s.SessionLifetime)
+	timeout := time.Now().Add(s.SessionTimeout)
+	endTime := time.Now().Add(s.SessionMaxLifetime)
 
 	s.store[newCookie] = &inMemoryStoreEntry{
-		sess:    sess,
-		expires: exp,
+		sess:        sess,
+		timeoutTime: timeout,
+		maxEndTime:  endTime,
 	}
 
-	s.setCookie(c, newCookie, exp)
+	s.setCookie(c, newCookie, timeout)
 	return err
 }
 
@@ -91,8 +95,25 @@ func (s *InMemorySessionHandler) Refresh(c echo.Context) error {
 		return err
 	}
 
-	entry.expires = time.Now().Add(s.SessionLifetime)
-	s.setCookie(c, cookie, entry.expires)
+	// Require user to log in again
+	if time.Now().After(entry.maxEndTime) {
+		return nil
+	}
+
+	entry.timeoutTime = time.Now().Add(s.SessionTimeout)
+	if entry.timeoutTime.After(entry.maxEndTime) {
+		entry.timeoutTime = entry.maxEndTime
+	}
+
+	newCookie, err := s.genRandom()
+	if err != nil {
+		return err
+	}
+
+	s.store[newCookie] = entry
+	delete(s.store, cookie)
+
+	s.setCookie(c, newCookie, entry.timeoutTime)
 
 	return nil
 }
@@ -116,7 +137,7 @@ func (s *InMemorySessionHandler) Rotate(c echo.Context) error {
 	s.store[newCookie] = entry
 	delete(s.store, cookie)
 
-	s.setCookie(c, cookie, entry.expires)
+	s.setCookie(c, newCookie, entry.timeoutTime)
 
 	return nil
 }
@@ -174,7 +195,7 @@ func (s *InMemorySessionHandler) getEntry(c echo.Context) (*inMemoryStoreEntry, 
 		return nil, fmt.Errorf("%v is not a valid session", cookie)
 	}
 
-	if entry.expires.Before(time.Now()) {
+	if entry.timeoutTime.Before(time.Now()) {
 		return nil, fmt.Errorf("%v session expired", cookie)
 	}
 
@@ -198,20 +219,10 @@ func (s *InMemorySessionHandler) cleanup() {
 	defer s.storeLock.Unlock()
 
 	for sessId, entry := range s.store {
-		if entry.expires.Before(time.Now()) {
+		if time.Now().After(entry.timeoutTime) {
 			delete(s.store, sessId)
 		}
 	}
-}
-
-func (s *InMemorySessionHandler) shouldSkip(c echo.Context) bool {
-	path := c.Request().URL.Path
-	for _, bypassPath := range s.WhitelistPaths {
-		if strings.HasPrefix(path, bypassPath) {
-			return true
-		}
-	}
-	return false
 }
 
 func (s *InMemorySessionHandler) janitor() {
