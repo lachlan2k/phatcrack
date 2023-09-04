@@ -40,7 +40,7 @@ const intervalId = ref(0)
 
 async function intervalLoop() {
   await Promise.all([refreshAttack(), refreshHashlist()])
-  intervalId.value = setTimeout(intervalLoop, 3 * 1000)
+  intervalId.value = setTimeout(intervalLoop, 5 * 1000)
 }
 
 onMounted(() => {
@@ -245,27 +245,27 @@ function openAttackModal(attackIndex: number) {
                       <strong>{{ getAttackModeName(attack.hashcat_params.attack_mode) }}</strong>
                     </td>
                     <td v-if="attack.progress_string != ''">
-                      <div class="badge badge-neutral my-1 mr-1">{{ attack.progress_string }}</div>
+                      <div class="badge whitespace-nowrap badge-neutral my-1 mr-1">{{ attack.progress_string }}</div>
                     </td>
                     <td v-else-if="numJobs(attack)" style="min-width: 130px">
-                      <div class="badge badge-success my-1 mr-1" v-if="numJobsFinished(attack) > 0">
+                      <div class="badge whitespace-nowrap badge-success my-1 mr-1" v-if="numJobsFinished(attack) > 0">
                         {{ quantityStr(numJobsFinished(attack), 'job') }} finished
                       </div>
-                      <div class="badge badge-info my-1 mr-1" v-if="numJobsRunning(attack) > 0">
+                      <div class="badge whitespace-nowrap badge-info my-1 mr-1" v-if="numJobsRunning(attack) > 0">
                         {{ quantityStr(numJobsRunning(attack), 'job') }} running
                       </div>
-                      <div class="badge badge-secondary my-1 mr-1" v-if="numJobsQueued(attack) > 0">
+                      <div class="badge whitespace-nowrap badge-secondary my-1 mr-1" v-if="numJobsQueued(attack) > 0">
                         {{ quantityStr(numJobsQueued(attack), 'job') }} pending
                       </div>
-                      <div class="badge badge-warning my-1 mr-1" v-if="numJobsStopped(attack)">
+                      <div class="badge whitespace-nowrap badge-warning my-1 mr-1" v-if="numJobsStopped(attack)">
                         {{ quantityStr(numJobsStopped(attack), 'job') }} stopped
                       </div>
-                      <div class="badge badge-error my-1 mr-1" v-if="numJobsFailed(attack)">
+                      <div class="badge whitespace-nowrap badge-error my-1 mr-1" v-if="numJobsFailed(attack)">
                         {{ quantityStr(numJobsFailed(attack), 'job') }} failed
                       </div>
                     </td>
                     <td style="min-width: 130px" v-else>
-                      <div class="badge badge-ghost">No jobs</div>
+                      <div class="badge whitespace-nowrap badge-ghost">No jobs</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
                     <td v-if="attack.jobs.some((x) => x.runtime_summary.estimated_time_remaining > 0)">
