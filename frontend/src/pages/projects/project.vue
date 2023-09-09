@@ -47,8 +47,10 @@ async function onDeleteHashlist(id: string) {
 </script>
 
 <template>
-  <main class="w-full p-4">
-    <p v-if="isLoading">Loading</p>
+  <main class="w-full h-full p-4">
+    <div v-if="isLoading" class="w-full h-full flex justify-center">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
     <div v-else>
       <h1 class="text-4xl font-bold">{{ projectData?.name }}</h1>
       <div class="mt-6 flex flex-wrap gap-6">

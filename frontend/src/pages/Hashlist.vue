@@ -139,8 +139,10 @@ function openAttackModal(attackIndex: number) {
 <template>
   <AttackDetailsModal v-if="selectedAttack != null" :attack="selectedAttack" v-model:isOpen="isAttackModalOpen"></AttackDetailsModal>
 
-  <main class="w-full p-4">
-    <p v-if="isLoading">Loading</p>
+  <main class="w-full p-4 h-full">
+    <div v-if="isLoading" class="w-full h-full flex justify-center">
+      <span class="loading loading-spinner loading-lg"></span>
+    </div>
     <div v-else>
       <h1 class="text-4xl font-bold">{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
       <div class="flex flex-wrap gap-4">
