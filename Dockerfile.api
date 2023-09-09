@@ -29,12 +29,11 @@ COPY .git /app/.git/
 RUN bash build.sh
 
 # Runtime
-FROM redhat/ubi9-minimal AS runtime
+FROM redhat/ubi9-micro AS runtime
 
 WORKDIR /app
 COPY --from=builder /app/api/phatcrack-api .
 COPY --from=builder /opt/hashcat-6.2.6 /opt/hashcat/
-RUN microdnf update
 RUN chmod 777 /opt/hashcat/
 
 ENV HC_PATH=/opt/hashcat/hashcat.bin
