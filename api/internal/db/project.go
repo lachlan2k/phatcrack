@@ -316,6 +316,6 @@ func GetAttackProjID(attackId string) (string, error) {
 func SetAttackProgressString(attackId string, progressString string) error {
 	return GetInstance().
 		Table("attacks").
-		Update("progress_string", progressString).
-		Where("id = ?", attackId).Error
+		Where("id = ?", attackId).
+		Update("progress_string", progressString).Error
 }
