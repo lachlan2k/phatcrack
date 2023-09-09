@@ -64,7 +64,16 @@ const logLines = computed<string>(() => {
 
 <template>
   <Modal v-model:isOpen="isOpen">
-    <Overview :attack="attack" v-if="selectedJob == null" @selectJob="(jobId: string) => selectedJobID = jobId" @closed="() => { console.log('closing'); isOpen = false }" />
+    <Overview
+      :attack="attack"
+      v-if="selectedJob == null"
+      @selectJob="(jobId: string) => selectedJobID = jobId"
+      @closed="
+        () => {
+          isOpen = false
+        }
+      "
+    />
     <div v-else>
       <button class="btn btn-circle btn-ghost btn-sm absolute left-2 top-2 text-xl" @click="() => (selectedJobID = null)">&larr;</button>
       <h2 class="mb-2 text-center text-xl font-bold">

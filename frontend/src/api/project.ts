@@ -26,7 +26,7 @@ export function createProject(name: string, description: string): Promise<Projec
 }
 
 export function deleteProject(projId: string): Promise<string> {
-  return client.delete(`/api/v1/project/${projId}`).then(res => res.data)
+  return client.delete(`/api/v1/project/${projId}`).then((res) => res.data)
 }
 
 export function getAllProjects(): Promise<ProjectResponseMultipleDTO> {
@@ -46,7 +46,7 @@ export function createAttack(body: AttackCreateRequestDTO): Promise<AttackDTO> {
 }
 
 export function deleteAttack(attackId: string): Promise<string> {
-  return client.delete(`/api/v1/attack/${attackId}`).then(res => res.data)
+  return client.delete(`/api/v1/attack/${attackId}`).then((res) => res.data)
 }
 
 export function stopAttack(attackId: string): Promise<string> {
@@ -66,7 +66,7 @@ export function getHashlist(hashlistId: string): Promise<HashlistDTO> {
 }
 
 export function deleteHashlist(hashlistId: string): Promise<string> {
-  return client.delete(`/api/v1/hashlist/${hashlistId}`).then(res => res.data)
+  return client.delete(`/api/v1/hashlist/${hashlistId}`).then((res) => res.data)
 }
 
 export function getAttacksForHashlist(hashlistId: string): Promise<AttackMultipleDTO> {

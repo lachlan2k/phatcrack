@@ -206,7 +206,6 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
       has_usernames: false
     })
 
-    console.log('Created hashlist', hashlist)
     toast.success(`Created hashlist "${inputs.hashlistName}"!`)
 
     inputs.selectedHashlistId = hashlist.id

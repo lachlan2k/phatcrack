@@ -20,7 +20,6 @@ import { timeSince } from '@/util/units'
 
 import { computed } from 'vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
-import IconButton from '@/components/IconButton.vue'
 import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
 import { useToastError } from '@/composables/useToastError'
 import { useToast } from 'vue-toastification'
@@ -81,7 +80,6 @@ async function stop() {
 async function onDeleteAttack() {
   try {
     await deleteAttack(props.attack.id)
-    console.log('Emitting closed')
     emit('closed')
     toast.info('Attack deleted')
   } catch (e: any) {

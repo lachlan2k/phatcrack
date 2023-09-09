@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Modal from '@/components/Modal.vue'
 import IconButton from '@/components/IconButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 
@@ -22,7 +21,7 @@ async function onDeleteProject(id: string) {
   try {
     await deleteProject(id)
     toast.info('Deleted project')
-  } catch(e: any) {
+  } catch (e: any) {
     catcher(e)
   } finally {
     projectsStore.load()
@@ -51,10 +50,10 @@ async function onDeleteProject(id: string) {
                   <td class="cursor-pointer" @click="navigate">{{ project.name }}</td>
                   <td>{{ timeSince(project.time_created * 1000) }}</td>
                   <td>
-                      <ConfirmModal @on-confirm="() => onDeleteProject(project.id)">
-                        <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
-                      </ConfirmModal>
-                    </td>
+                    <ConfirmModal @on-confirm="() => onDeleteProject(project.id)">
+                      <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                    </ConfirmModal>
+                  </td>
                 </tr>
               </RouterLink>
             </tbody>

@@ -26,6 +26,7 @@ import type { AttackWithJobsDTO } from '@/api/types'
 import { getAttacksWithJobsForHashlist } from '@/api/project'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
 import AttackDetailsModal from '@/components/AttackDetailsModal/index.vue'
+import { useProjectsStore } from '@/stores/projects'
 
 const hashlistId = useRoute().params.id as string
 const { data: hashlistData, isLoading: isLoadingHashlist, silentlyRefresh: refreshHashlist } = useApi(() => getHashlist(hashlistId))
@@ -55,6 +56,30 @@ const resources = useResourcesStore()
 
 const { getHashTypeName, isHashTypesLoaded } = storeToRefs(resources)
 resources.loadHashTypes()
+
+const projectStore = useProjectsStore()
+projectStore.load()
+
+const project = computed(() => {
+  const id = hashlistData.value?.project_id
+  if (id == null) {
+    return null
+  }
+  return projectStore.byId(id)
+})
+
+const projectName = computed(() => {
+  return project.value?.name ?? ''
+})
+
+const projectUrl = computed(() => {
+  const proj = project.value
+  if (proj == null) {
+    return '#'
+  }
+
+  return `/project/${proj.id}`
+})
 
 const isLoading = computed(() => {
   return isLoadingHashlist.value || !isHashTypesLoaded.value || isLoadingAttacksData.value
@@ -139,14 +164,25 @@ function openAttackModal(attackIndex: number) {
 <template>
   <AttackDetailsModal v-if="selectedAttack != null" :attack="selectedAttack" v-model:isOpen="isAttackModalOpen"></AttackDetailsModal>
 
-  <main class="w-full p-4 h-full">
-    <div v-if="isLoading" class="w-full h-full flex justify-center">
+  <main class="h-full w-full p-4">
+    <div v-if="isLoading" class="flex h-full w-full justify-center">
       <span class="loading loading-spinner loading-lg"></span>
     </div>
     <div v-else>
       <h1 class="text-4xl font-bold">{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
+      <div class="breadcrumbs pl-1 text-sm">
+        <ul>
+          <li>
+            <RouterLink to="/dashboard"> Dashboard </RouterLink>
+          </li>
+          <li>
+            <RouterLink :to="projectUrl">Project {{ projectName }}</RouterLink>
+          </li>
+          <li>This hashlist</li>
+        </ul>
+      </div>
       <div class="flex flex-wrap gap-4">
-        <div class="mt-6 flex flex-wrap gap-6">
+        <div class="mt-3 flex flex-wrap gap-6">
           <div class="card bg-base-100 shadow-xl">
             <Modal v-model:isOpen="isHashlistEditorOpen">
               <HashlistEditor v-if="isHashlistEditorOpen" :hashlistId="hashlistData!.id" />
@@ -197,7 +233,9 @@ function openAttackModal(attackIndex: number) {
                 </thead>
                 <tbody>
                   <tr v-for="hash in currentHashes" :key="hash.normalized_hash">
-                    <td class="font-mono text-ellipsis overflow-hidden whitespace-nowrap" style="max-width: 500px;">{{ hash.input_hash }}</td>
+                    <td class="overflow-hidden text-ellipsis whitespace-nowrap font-mono" style="max-width: 500px">
+                      {{ hash.input_hash }}
+                    </td>
                     <td class="font-mono">
                       <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
                     </td>
@@ -216,7 +254,7 @@ function openAttackModal(attackIndex: number) {
             </div>
           </div>
         </div>
-        <div class="mt-6 flex flex-wrap gap-6">
+        <div class="mt-3 flex flex-wrap gap-6">
           <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
               <div class="flex flex-row justify-between">
@@ -246,27 +284,27 @@ function openAttackModal(attackIndex: number) {
                       <strong>{{ getAttackModeName(attack.hashcat_params.attack_mode) }}</strong>
                     </td>
                     <td v-if="attack.progress_string != ''">
-                      <div class="badge whitespace-nowrap badge-neutral my-1 mr-1">{{ attack.progress_string }}</div>
+                      <div class="badge badge-neutral my-1 mr-1 whitespace-nowrap">{{ attack.progress_string }}</div>
                     </td>
                     <td v-else-if="numJobs(attack)" style="min-width: 130px">
-                      <div class="badge whitespace-nowrap badge-success my-1 mr-1" v-if="numJobsFinished(attack) > 0">
+                      <div class="badge badge-success my-1 mr-1 whitespace-nowrap" v-if="numJobsFinished(attack) > 0">
                         {{ quantityStr(numJobsFinished(attack), 'job') }} finished
                       </div>
-                      <div class="badge whitespace-nowrap badge-info my-1 mr-1" v-if="numJobsRunning(attack) > 0">
+                      <div class="badge badge-info my-1 mr-1 whitespace-nowrap" v-if="numJobsRunning(attack) > 0">
                         {{ quantityStr(numJobsRunning(attack), 'job') }} running
                       </div>
-                      <div class="badge whitespace-nowrap badge-secondary my-1 mr-1" v-if="numJobsQueued(attack) > 0">
+                      <div class="badge badge-secondary my-1 mr-1 whitespace-nowrap" v-if="numJobsQueued(attack) > 0">
                         {{ quantityStr(numJobsQueued(attack), 'job') }} pending
                       </div>
-                      <div class="badge whitespace-nowrap badge-warning my-1 mr-1" v-if="numJobsStopped(attack)">
+                      <div class="badge badge-warning my-1 mr-1 whitespace-nowrap" v-if="numJobsStopped(attack)">
                         {{ quantityStr(numJobsStopped(attack), 'job') }} stopped
                       </div>
-                      <div class="badge whitespace-nowrap badge-error my-1 mr-1" v-if="numJobsFailed(attack)">
+                      <div class="badge badge-error my-1 mr-1 whitespace-nowrap" v-if="numJobsFailed(attack)">
                         {{ quantityStr(numJobsFailed(attack), 'job') }} failed
                       </div>
                     </td>
                     <td style="min-width: 130px" v-else>
-                      <div class="badge whitespace-nowrap badge-ghost">No jobs</div>
+                      <div class="badge badge-ghost whitespace-nowrap">No jobs</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
                     <td v-if="attack.jobs.some((x) => x.runtime_summary.estimated_time_remaining > 0)">

@@ -38,7 +38,7 @@ async function onDeleteHashlist(id: string) {
   try {
     await deleteHashlist(id)
     toast.info('Deleted hashlist')
-  } catch(e: any) {
+  } catch (e: any) {
     catcher(e)
   } finally {
     fetchHashlists()
@@ -47,13 +47,21 @@ async function onDeleteHashlist(id: string) {
 </script>
 
 <template>
-  <main class="w-full h-full p-4">
-    <div v-if="isLoading" class="w-full h-full flex justify-center">
+  <main class="h-full w-full p-4">
+    <div v-if="isLoading" class="flex h-full w-full justify-center">
       <span class="loading loading-spinner loading-lg"></span>
     </div>
     <div v-else>
       <h1 class="text-4xl font-bold">{{ projectData?.name }}</h1>
-      <div class="mt-6 flex flex-wrap gap-6">
+      <div class="breadcrumbs pl-1 text-sm">
+        <ul>
+          <li>
+            <RouterLink to="/dashboard"> Dashboard </RouterLink>
+          </li>
+          <li>This project</li>
+        </ul>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-6">
         <div class="card w-full bg-base-100 shadow-xl">
           <div class="card-body">
             <div class="flex flex-row justify-between">
