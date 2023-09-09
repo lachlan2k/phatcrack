@@ -225,7 +225,6 @@ function openAttackModal(attackIndex: number) {
                 <button class="btn btn-primary btn-sm" @click="() => (isAttackWizardOpen = true)">New Attack</button>
               </div>
               <table class="compact-table table w-full">
-                <!-- head -->
                 <thead>
                   <tr>
                     <th>Attack Mode</th>

@@ -64,7 +64,6 @@ async function onDeleteHashlist(id: string) {
               </Modal>
             </div>
             <table class="table w-full">
-              <!-- head -->
               <thead>
                 <tr>
                   <th>Name</th>

@@ -96,7 +96,6 @@ async function onDeleteAttack() {
   <div class="my-8"></div>
 
   <table class="compact-table table w-full" v-if="attack.jobs.length > 0">
-    <!-- head -->
     <thead>
       <tr>
         <th>Running Agent</th>
