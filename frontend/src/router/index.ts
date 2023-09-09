@@ -30,7 +30,6 @@ const router = createRouter({
       component: () => import('@/pages/Login.vue')
     },
     route('/agents', 'Agents', () => import('@/pages/Agents.vue')),
-    route('/jobs', 'All Running Jobs', () => import('@/pages/Attacks.vue')),
     route('/dashboard', 'Dashboard', () => import('@/pages/projects/index.vue')),
     route('/potfile', 'Potfile', () => import('@/pages/Potfile.vue')),
 
