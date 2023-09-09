@@ -177,8 +177,10 @@ async function onDeleteUser(id: string) {
       </div>
     </Modal>
     <h2 class="card-title">Users</h2>
-    <button class="btn btn-primary btn-sm" @click="() => (isServiceAccountCreateOpen = true)">Create Service Account</button>
-    <button class="btn btn-primary btn-sm" @click="() => (isUserCreateOpen = true)">Create User</button>
+    <div>
+      <button class="btn btn-primary btn-sm mr-1" @click="() => (isServiceAccountCreateOpen = true)">Create Service Account</button>
+      <button class="btn btn-primary btn-sm" @click="() => (isUserCreateOpen = true)">Create User</button>
+    </div>
   </div>
 
   <table class="table w-full">
