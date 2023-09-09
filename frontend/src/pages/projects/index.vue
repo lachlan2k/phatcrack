@@ -1,12 +1,33 @@
 <script setup lang="ts">
+import Modal from '@/components/Modal.vue'
+import IconButton from '@/components/IconButton.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
+
 import { timeSince } from '@/util/units'
 import { useProjectsStore } from '@/stores/projects'
 import { storeToRefs } from 'pinia'
+import { useToast } from 'vue-toastification'
+import { useToastError } from '@/composables/useToastError'
+import { deleteProject } from '@/api/project'
 
 const projectsStore = useProjectsStore()
 projectsStore.load()
 
 const { projects } = storeToRefs(projectsStore)
+
+const toast = useToast()
+const { catcher } = useToastError()
+
+async function onDeleteProject(id: string) {
+  try {
+    await deleteProject(id)
+    toast.info('Deleted project')
+  } catch(e: any) {
+    catcher(e)
+  } finally {
+    projectsStore.load()
+  }
+}
 </script>
 
 <template>
@@ -17,18 +38,23 @@ const { projects } = storeToRefs(projectsStore)
         <div class="card-body">
           <h2 class="card-title">My Projects & Projects Shared with Me</h2>
           <table class="table w-full">
-            <!-- head -->
             <thead>
               <tr>
                 <th>Name</th>
                 <th>Created</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody class="first-col-bold">
               <RouterLink custom v-slot="{ navigate }" v-for="project in projects" :key="project.id" :to="`/project/${project.id}`">
-                <tr class="hover cursor-pointer" @click="navigate">
-                  <td>{{ project.name }}</td>
+                <tr class="hover">
+                  <td class="cursor-pointer" @click="navigate">{{ project.name }}</td>
                   <td>{{ timeSince(project.time_created * 1000) }}</td>
+                  <td>
+                      <ConfirmModal @on-confirm="() => onDeleteProject(project.id)">
+                        <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                      </ConfirmModal>
+                    </td>
                 </tr>
               </RouterLink>
             </tbody>
