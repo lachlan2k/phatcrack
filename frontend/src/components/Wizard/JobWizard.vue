@@ -183,7 +183,7 @@ async function saveOrGetProject(): Promise<ProjectDTO> {
     toast.success(`Created project "${inputs.projectName}"!`)
     return proj
   } catch (err: any) {
-    toast.warning('Failed to create project' + err.message)
+    toast.warning('Failed to create project. ' + err.message)
     // Throw up so our caller knows an error happened
     throw err
   }
@@ -213,7 +213,7 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
 
     return hashlist
   } catch (err: any) {
-    toast.warning('Failed to create hashlist' + err.message)
+    toast.warning('Failed to create hashlist. ' + err.message)
     throw err
   }
 }
@@ -260,7 +260,7 @@ async function saveUptoAttack(): Promise<AttackDTO> {
     toast.success('Created attack!')
     return attack
   } catch (err: any) {
-    toast.warning('Failed to create attack' + err.message)
+    toast.warning('Failed to create attack. ' + err.message)
     throw err
   }
 }

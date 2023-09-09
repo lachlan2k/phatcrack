@@ -7,6 +7,7 @@ import {
   JobStopReasonFinished,
   JobStopReasonUserStopped,
   createAttack,
+  deleteAttack,
   startAttack,
   stopAttack
 } from '@/api/project'
@@ -18,6 +19,8 @@ import { timeBetween, timeDurationToReadable } from '@/util/units'
 import { timeSince } from '@/util/units'
 
 import { computed } from 'vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import IconButton from '@/components/IconButton.vue'
 import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
 import { useToastError } from '@/composables/useToastError'
 import { useToast } from 'vue-toastification'
@@ -28,6 +31,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'selectJob', jobId: string): void
+  (e: 'closed'): void
 }>()
 
 const agentStore = useAgentsStore()
@@ -69,6 +73,17 @@ async function stop() {
   try {
     await stopAttack(props.attack.id)
     toast.success('Requested jobs to be stopped...')
+  } catch (e: any) {
+    catcher(e)
+  }
+}
+
+async function onDeleteAttack() {
+  try {
+    await deleteAttack(props.attack.id)
+    console.log('Emitting closed')
+    emit('closed')
+    toast.info('Attack deleted')
   } catch (e: any) {
     catcher(e)
   }
@@ -139,7 +154,7 @@ async function stop() {
 
   <div class="mt-8 flex flex-row justify-center">
     <div class="join">
-      <button @click="() => start()" class="btn btn-success join-item btn-sm" v-if="attack.jobs.length == 0">
+      <button @click="() => start()" class="btn join-item btn-sm" v-if="attack.jobs.length == 0">
         <font-awesome-icon icon="fa-solid fa-play" />
         Start
       </button>
@@ -153,6 +168,13 @@ async function stop() {
         <font-awesome-icon icon="fa-solid fa-stop" />
         Stop
       </button>
+
+      <ConfirmModal @on-confirm="() => onDeleteAttack()" v-else>
+        <button class="btn join-item btn-sm">
+          <font-awesome-icon icon="fa-solid fa-trash" />
+          Delete
+        </button>
+      </ConfirmModal>
     </div>
   </div>
 </template>

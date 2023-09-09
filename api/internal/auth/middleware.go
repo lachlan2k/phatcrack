@@ -66,7 +66,7 @@ func EnforceAuthMiddleware(bypassPaths []string) echo.MiddlewareFunc {
 	}
 }
 
-func RoleRestrictedMiddleware(h SessionHandler, allowedRoles []string, disallowedRoles []string) echo.MiddlewareFunc {
+func RoleRestrictedMiddleware(allowedRoles []string, disallowedRoles []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			user, _ := UserAndSessFromReq(c)
@@ -97,5 +97,5 @@ func RoleRestrictedMiddleware(h SessionHandler, allowedRoles []string, disallowe
 }
 
 func AdminOnlyMiddleware(h SessionHandler) echo.MiddlewareFunc {
-	return RoleRestrictedMiddleware(h, []string{"admin"}, nil)
+	return RoleRestrictedMiddleware([]string{"admin"}, nil)
 }

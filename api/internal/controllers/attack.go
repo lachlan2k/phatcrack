@@ -30,6 +30,7 @@ func HookAttackEndpoints(api *echo.Group) {
 	api.POST("/create", handleAttackCreate)
 
 	api.DELETE("/:attack-id/stop", handleAttackStopAllJobs)
+	api.DELETE("/:attack-id", handleDeleteAttack)
 
 	api.GET("/:attack-id/jobs", handleAttackJobGetAll)
 }
@@ -76,6 +77,53 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 	return c.JSON(http.StatusOK, apitypes.AttackMultipleDTO{
 		Attacks: attackDTOs,
 	})
+}
+
+func handleDeleteAttack(c echo.Context) error {
+	attackId := c.Param("attack-id")
+	if !util.AreValidUUIDs(attackId) {
+		return echo.ErrBadRequest
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	attack, err := db.GetAttack(attackId)
+	if err != nil {
+		return util.ServerError("Failed to fetch attack", err)
+	}
+
+	projId, err := db.GetHashlistProjID(attack.HashlistID.String())
+	if err != nil {
+		return util.ServerError("Failed to fetch project id", err)
+	}
+
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	if err == db.ErrNotFound {
+		return echo.ErrForbidden
+	}
+	if err != nil {
+		return util.ServerError("Failed to fetch project", err)
+	}
+
+	if !accesscontrol.HasRightsToProject(user, proj) {
+		return echo.ErrForbidden
+	}
+
+	AuditLog(c, log.Fields{
+		"project_name": proj.Name,
+		"project_id":   proj.ID.String(),
+		"attack_id":    attackId,
+	}, "User deleted attack")
+
+	err = db.HardDelete(attack)
+	if err != nil {
+		return util.ServerError("Failed to delete attack", err)
+	}
+
+	return c.JSON(http.StatusOK, "ok")
 }
 
 func handleAttackStopAllJobs(c echo.Context) error {

@@ -14,7 +14,7 @@ import (
 
 func makeSessionHandler() auth.SessionHandler {
 	return &auth.InMemorySessionHandler{
-		SessionTimeout:     10 * time.Minute,
+		SessionTimeout:     15 * time.Minute,
 		SessionMaxLifetime: 4 * time.Hour,
 	}
 }
@@ -54,7 +54,6 @@ func Listen(port string) error {
 	api.Use(auth.EnforceMFAMiddleware(sessionHandler))
 
 	api.Use(auth.RoleRestrictedMiddleware(
-		sessionHandler,
 		[]string{auth.RoleAdmin, auth.RoleStandard},
 		[]string{auth.RoleRequiresPasswordChange}, // disallowed
 	))

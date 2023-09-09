@@ -21,6 +21,7 @@ func HookProjectEndpoints(api *echo.Group) {
 	api.GET("/all", handleProjectGetAll)
 	api.POST("/create", handleProjectCreate)
 	api.GET("/:id", handleProjectGet)
+	api.DELETE("/:id", handleProjectDelete)
 
 	api.GET("/:proj-id/hashlists", handleHashlistGetAllForProj)
 }
@@ -79,6 +80,47 @@ func handleProjectGet(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, proj.ToDTO())
+}
+
+func handleProjectDelete(c echo.Context) error {
+	projId := c.Param("id")
+	if !util.AreValidUUIDs(projId) {
+		return echo.ErrBadRequest
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	if err == db.ErrNotFound {
+		return echo.ErrForbidden
+	}
+	if err != nil {
+		return util.ServerError("Failed to fetch project", err)
+	}
+
+	// Only the owner of a project, or an admin, can delete a project
+	if !user.HasRole(auth.RoleAdmin) && proj.OwnerUserID != user.ID {
+		AuditLog(c, log.Fields{
+			"project_name": proj.Name,
+			"project_id":   proj.ID.String(),
+		}, "User tried to delete project, but they are not allowed")
+		return echo.ErrForbidden
+	}
+
+	err = db.HardDelete(proj)
+	if err != nil {
+		return util.ServerError("Failed to delete project", err)
+	}
+
+	AuditLog(c, log.Fields{
+		"project_name": proj.Name,
+		"project_id":   proj.ID.String(),
+	}, "User deleted project")
+
+	return c.JSON(http.StatusOK, "ok")
 }
 
 func handleProjectGetAll(c echo.Context) error {

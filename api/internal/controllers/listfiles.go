@@ -86,7 +86,7 @@ func handleListfileUpload(c echo.Context) error {
 	}
 
 	maxFileSize := config.Get().MaximumUploadedFileSize
-	if uploadedFile.Size > maxFileSize {
+	if !user.HasRole(auth.RoleAdmin) && uploadedFile.Size > maxFileSize {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Uploaded file too large (maximum %d bytes)", maxFileSize))
 	}
 

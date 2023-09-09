@@ -209,7 +209,7 @@ func handleDeleteUser(c echo.Context) error {
 		"user_to_delete": user.ToDTO(),
 	}, "Admin is deleting user")
 
-	err = db.Delete(user)
+	err = db.HardDelete(user)
 	if err != nil {
 		return util.ServerError("Failed to delete user", err)
 	}
@@ -232,7 +232,7 @@ func handleDeleteAgent(c echo.Context) error {
 		"agent_to_delete": agent.ToDTO(),
 	}, "Admin is deleting agent")
 
-	err = db.Delete(agent)
+	err = db.HardDelete(agent)
 	if err != nil {
 		return util.ServerError("Failed to delete agent", err)
 	}

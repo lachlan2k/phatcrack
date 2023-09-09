@@ -1,8 +1,11 @@
 package db
 
 import (
+	"log"
+
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
@@ -213,6 +216,91 @@ func GetAttack(attackId string) (*Attack, error) {
 		return nil, err
 	}
 	return &attack, nil
+}
+
+// Also deletes hashlists, attacks, jobs
+func DeleteProject(projectId string) error {
+	return GetInstance().Transaction(func(tx *gorm.DB) error {
+		// Jobs
+		err := tx.
+			Joins("join attacks on attacks.id = jobs.attack_id ").
+			Joins("join hashlists on hashlists.id = attacks.hashlist_id ").
+			Where("hashlists.project_id = ?", projectId).
+			Delete(&Job{}).Error
+		if err != nil {
+			return err
+		}
+
+		// Attacks
+		err = tx.
+			Joins("join hashlists on hashlists.id = attacks.hashlist_id").
+			Where("hashlists.project_id = ?", projectId).
+			Delete(&Attack{}).Error
+		if err != nil {
+			return err
+		}
+
+		// Hashlists
+		err = tx.Where("project_id = ?", projectId).Delete(&Hashlist{}).Error
+		if err != nil {
+			return err
+		}
+
+		// Project
+		return tx.Delete(&Project{}, projectId).Error
+	})
+}
+
+// Also deletes attacks, jobs
+func DeleteHashlist(hashlistId string) error {
+	return GetInstance().Transaction(func(tx *gorm.DB) error {
+		// Jobs
+		err := tx.
+			Joins("join attacks on attacks.id = jobs.attack_id").
+			Where("attacks.hashlist_id = ?", hashlistId).
+			Delete(&Job{}).Error
+		if err != nil {
+			return err
+		}
+
+		// Attacks
+		err = tx.Where("hashlist_id = ?", hashlistId).Delete(&Attack{}).Error
+		if err != nil {
+			return err
+		}
+
+		// Hashlist
+		return tx.Delete(&Hashlist{}, hashlistId).Error
+	})
+}
+
+// // Also deletes jobs
+func DeleteAttack(attackId string) error {
+	return GetInstance().Transaction(func(tx *gorm.DB) error {
+		// Jobs
+		err := tx.Where("attack_id = ?", attackId).Delete(&Job{}).Error
+		if err != nil {
+			return err
+		}
+
+		// Attack
+		return tx.Delete(&Attack{}, attackId).Error
+	})
+}
+
+func (p *Project) BeforeDelete(tx *gorm.DB) error {
+	log.Printf("Handling delete of project %q", p.ID.String())
+	return tx.Where("project_id = ?", p.ID).Delete(&Hashlist{}).Error
+}
+
+func (h *Hashlist) BeforeDelete(tx *gorm.DB) error {
+	log.Printf("Handling delete of hashlist %q", h.ID.String())
+	return tx.Where("hashlist_id = ?", h.ID).Delete(&Attack{}).Error
+}
+
+func (a *Attack) BeforeDelete(tx *gorm.DB) error {
+	log.Printf("Handling delete of attack %q, %q", a.ID.String(), a.HashlistID.String())
+	return tx.Where("attack_id = ?", a.ID).Delete(&Job{}).Error
 }
 
 func GetAllAttacksForHashlist(hashlistId string) ([]Attack, error) {

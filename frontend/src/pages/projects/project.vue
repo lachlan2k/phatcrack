@@ -1,20 +1,24 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
+import IconButton from '@/components/IconButton.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
 
 import { ref } from 'vue'
-import { getProject, getHashlistsForProject } from '@/api/project'
+import { getProject, getHashlistsForProject, deleteHashlist } from '@/api/project'
 import { useApi } from '@/composables/useApi'
 import { useResourcesStore } from '@/stores/resources'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { timeSince } from '@/util/units'
+import { useToast } from 'vue-toastification'
+import { useToastError } from '@/composables/useToastError'
 
 const projId = useRoute().params.id as string
 
 const { data: projectData, isLoading: isLoadingProject } = useApi(() => getProject(projId))
-const { data: hashlistData, isLoading: isLoadingHashlists } = useApi(() => getHashlistsForProject(projId))
+const { data: hashlistData, isLoading: isLoadingHashlists, fetchData: fetchHashlists } = useApi(() => getHashlistsForProject(projId))
 
 const isWizardOpen = ref(false)
 
@@ -26,6 +30,20 @@ resources.loadHashTypes()
 const isLoading = computed(() => {
   return isLoadingProject.value || isLoadingHashlists.value || !isHashTypesLoaded.value
 })
+
+const toast = useToast()
+const { catcher } = useToastError()
+
+async function onDeleteHashlist(id: string) {
+  try {
+    await deleteHashlist(id)
+    toast.info('Deleted hashlist')
+  } catch(e: any) {
+    catcher(e)
+  } finally {
+    fetchHashlists()
+  }
+}
 </script>
 
 <template>
@@ -52,6 +70,7 @@ const isLoading = computed(() => {
                   <th>Name</th>
                   <th>Hash Type</th>
                   <th>Created</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
@@ -63,10 +82,15 @@ const isLoading = computed(() => {
                   :key="hashlist.id"
                   :to="`/hashlist/${hashlist.id}`"
                 >
-                  <tr class="hover cursor-pointer" @click="navigate">
-                    <td>{{ hashlist.name }}</td>
+                  <tr class="hover">
+                    <td @click="navigate" class="cursor-pointer">{{ hashlist.name }}</td>
                     <td>{{ hashlist.hash_type }} - {{ getHashTypeName(hashlist.hash_type) }}</td>
                     <td>{{ timeSince(hashlist.time_created * 1000) }}</td>
+                    <td>
+                      <ConfirmModal @on-confirm="() => onDeleteHashlist(hashlist.id)">
+                        <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                      </ConfirmModal>
+                    </td>
                   </tr>
                 </RouterLink>
               </tbody>

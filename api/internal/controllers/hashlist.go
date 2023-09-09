@@ -22,6 +22,7 @@ func HookHashlistEndpoints(api *echo.Group) {
 
 	api.POST("/create", handleHashlistCreate)
 	api.GET("/:hashlist-id", handleHashlistGet)
+	api.DELETE("/:hashlist-id", handleHashlistDelete)
 	api.GET("/:hashlist-id/attacks", handleAttackGetAllForHashlist)
 	api.GET("/:hashlist-id/attacks-with-jobs", handleAttacksAndJobsForHashlist)
 }
@@ -81,13 +82,54 @@ func handleHashlistGet(c echo.Context) error {
 
 	allowed, err := accesscontrol.HasRightsToProjectID(user, hashlist.ProjectID.String())
 	if err != nil {
-		return err
+		return util.ServerError("Failed to check project", err)
 	}
 	if !allowed {
 		return echo.ErrForbidden
 	}
 
 	return c.JSON(http.StatusOK, hashlist.ToDTO(true))
+}
+
+func handleHashlistDelete(c echo.Context) error {
+	hashlistId := c.Param("hashlist-id")
+	if !util.AreValidUUIDs(hashlistId) {
+		return echo.ErrBadRequest
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	hashlist, err := db.GetHashlistWithHashes(hashlistId)
+	if err == db.ErrNotFound {
+		return echo.ErrNotFound
+	}
+	if err != nil {
+		return util.ServerError("Failed to load hashlist", err)
+	}
+
+	allowed, err := accesscontrol.HasRightsToProjectID(user, hashlist.ProjectID.String())
+	if err != nil {
+		return util.ServerError("Failed to check project", err)
+	}
+	if !allowed {
+		return echo.ErrForbidden
+	}
+
+	AuditLog(c, log.Fields{
+		"hashlist_id":   hashlist.ID.String(),
+		"hashlist_name": hashlist.Name,
+		"project_id":    hashlist.ProjectID.String(),
+	}, "User is deleting hashlist")
+
+	err = db.HardDelete(hashlist)
+	if err != nil {
+		return util.ServerError("Failed to delete project", err)
+	}
+
+	return c.JSON(http.StatusOK, "ok")
 }
 
 // TODO: this endpoint doesn't validate that parameters like the name are of a sane length/charset

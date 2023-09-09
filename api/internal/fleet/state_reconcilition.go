@@ -176,7 +176,7 @@ func stateReconciliation() error {
 
 			if !isWordlistInUse {
 				// Wordlist can now be safely deleted
-				db.Delete(&listfile)
+				db.HardDelete(&listfile)
 
 				if config.Get().AutomaticallySyncListfiles {
 					// Tell all agents to delete it

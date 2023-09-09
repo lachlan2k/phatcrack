@@ -3,11 +3,16 @@ package accesscontrol
 import (
 	"fmt"
 
+	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 )
 
 func HasRightsToProject(user *db.User, project *db.Project) bool {
 	if project.OwnerUserID == user.ID {
+		return true
+	}
+
+	if user.HasRole(auth.RoleAdmin) {
 		return true
 	}
 
@@ -21,6 +26,10 @@ func HasRightsToProject(user *db.User, project *db.Project) bool {
 }
 
 func HasRightsToProjectID(user *db.User, projId string) (bool, error) {
+	if user.HasRole(auth.RoleAdmin) {
+		return true, nil
+	}
+
 	proj, err := db.GetProjectForUser(projId, user.ID.String())
 	if proj == nil || err == db.ErrNotFound {
 		return false, nil

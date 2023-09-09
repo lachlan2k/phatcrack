@@ -25,7 +25,11 @@ type SimpleBaseModel struct {
 	ID uint `gorm:"primarykey"`
 }
 
-func Delete[T any](obj *T) error {
+func HardDelete[T any](obj *T) error {
+	return GetInstance().Unscoped().Delete(obj).Error
+}
+
+func SoftDelete[T any](obj *T) error {
 	return GetInstance().Delete(obj).Error
 }
 
