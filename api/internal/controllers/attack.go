@@ -421,7 +421,7 @@ func handleAttackStart(c echo.Context) error {
 	if err != nil {
 		for _, newJob := range newJobs {
 			// If the deletion fails, there's not much for us to do really
-			db.GetInstance().Delete(newJob)
+			db.HardDelete(newJob)
 		}
 	}
 

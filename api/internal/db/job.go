@@ -44,7 +44,7 @@ type Job struct {
 	TargetHashes pq.StringArray `gorm:"type:text[]"`
 	HashType     int
 
-	RuntimeData JobRuntimeData
+	RuntimeData JobRuntimeData `gorm:"constraint:OnDelete:CASCADE;"`
 
 	AssignedAgent   Agent      `gorm:"constraint:OnDelete:SET NULL;"`
 	AssignedAgentID *uuid.UUID `gorm:"type:uuid"`

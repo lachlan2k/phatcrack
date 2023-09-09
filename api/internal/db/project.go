@@ -1,8 +1,6 @@
 package db
 
 import (
-	"log"
-
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -286,21 +284,6 @@ func DeleteAttack(attackId string) error {
 		// Attack
 		return tx.Delete(&Attack{}, attackId).Error
 	})
-}
-
-func (p *Project) BeforeDelete(tx *gorm.DB) error {
-	log.Printf("Handling delete of project %q", p.ID.String())
-	return tx.Where("project_id = ?", p.ID).Delete(&Hashlist{}).Error
-}
-
-func (h *Hashlist) BeforeDelete(tx *gorm.DB) error {
-	log.Printf("Handling delete of hashlist %q", h.ID.String())
-	return tx.Where("hashlist_id = ?", h.ID).Delete(&Attack{}).Error
-}
-
-func (a *Attack) BeforeDelete(tx *gorm.DB) error {
-	log.Printf("Handling delete of attack %q, %q", a.ID.String(), a.HashlistID.String())
-	return tx.Where("attack_id = ?", a.ID).Delete(&Job{}).Error
 }
 
 func GetAllAttacksForHashlist(hashlistId string) ([]Attack, error) {
