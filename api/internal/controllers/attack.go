@@ -330,7 +330,7 @@ func handleAttackCreate(c echo.Context) error {
 		HashcatParams:  hashcatParams,
 		IsDistributed:  req.IsDistributed,
 		HashlistID:     uuid.MustParse(req.HashlistID),
-		ProgressString: "Created...",
+		ProgressString: "Created",
 	})
 	if err != nil {
 		return util.ServerError("Failed to create new attack", err)
