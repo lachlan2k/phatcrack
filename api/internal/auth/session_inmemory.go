@@ -183,8 +183,15 @@ func (s *InMemorySessionHandler) getCookie(c echo.Context) string {
 	return cookie.Value
 }
 
+const sessionInMemoryEntryKey = "sess-inmem-entry"
+
 // Unsafe: Caller must hold mutex
 func (s *InMemorySessionHandler) getEntry(c echo.Context) (*inMemoryStoreEntry, error) {
+	existingEntry, existingOk := c.Get(sessionInMemoryEntryKey).(*inMemoryStoreEntry)
+	if existingOk && existingEntry != nil {
+		return existingEntry, nil
+	}
+
 	cookie := s.getCookie(c)
 	if len(cookie) != 64 {
 		return nil, fmt.Errorf("%v is an invalid session length (expected 64 characters)", cookie)
@@ -198,6 +205,8 @@ func (s *InMemorySessionHandler) getEntry(c echo.Context) (*inMemoryStoreEntry, 
 	if entry.timeoutTime.Before(time.Now()) {
 		return nil, fmt.Errorf("%v session expired", cookie)
 	}
+
+	c.Set(sessionInMemoryEntryKey, entry)
 
 	return entry, nil
 }
