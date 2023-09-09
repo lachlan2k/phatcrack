@@ -11,7 +11,7 @@ import (
 )
 
 func CreateHeaderAuthMiddleware() echo.MiddlewareFunc {
-	headerRe := regexp.MustCompile(`(?i)\s*bearer\s+(.+)\s+`)
+	headerRe := regexp.MustCompile(`(?i)\s*bearer\s+(.+)\s*`)
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
@@ -22,7 +22,6 @@ func CreateHeaderAuthMiddleware() echo.MiddlewareFunc {
 
 			authHeader := c.Request().Header.Get("Authorization")
 			match := headerRe.FindStringSubmatch(authHeader)
-
 			if match == nil || len(match) < 2 {
 				return next(c)
 			}
