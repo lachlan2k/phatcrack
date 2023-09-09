@@ -14,7 +14,7 @@ import (
 
 func makeSessionHandler() auth.SessionHandler {
 	return &auth.InMemorySessionHandler{
-		SessionTimeout:     15 * time.Minute,
+		SessionTimeout:     30 * time.Minute,
 		SessionMaxLifetime: 4 * time.Hour,
 	}
 }
