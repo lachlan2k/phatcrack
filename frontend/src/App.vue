@@ -5,6 +5,9 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { useConfigStore } from './stores/config'
+import { useProjectsStore } from './stores/projects'
+import { useListfilesStore } from './stores/listfiles'
+import { useAgentsStore } from './stores/agents'
 
 const AUTH_REFRESH_RATE = 0.5 * 60 * 1000 // Every 5 minutes
 const authRefreshTimeout = ref(0)
@@ -12,6 +15,9 @@ const authRefreshTimeout = ref(0)
 const router = useRouter()
 const authStore = useAuthStore()
 const configStore = useConfigStore()
+const projectStore = useProjectsStore()
+const listfileStore = useListfilesStore()
+const agentsStore = useAgentsStore()
 
 const { hasCompletedAuth, hasTriedAuth, loggedInUser, isLoggedIn } = storeToRefs(authStore)
 
@@ -39,6 +45,9 @@ const toast = useToast()
 watch(hasCompletedAuth, (newHasCompletedAuth, prevHasCompletedAuth) => {
   if (newHasCompletedAuth && !prevHasCompletedAuth) {
     toast.success(`Welcome ${loggedInUser.value?.username}`)
+    listfileStore.load()
+    projectStore.load()
+    agentsStore.load()
   }
 })
 

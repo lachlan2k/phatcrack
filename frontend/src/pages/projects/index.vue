@@ -10,7 +10,7 @@ import { useToastError } from '@/composables/useToastError'
 import { deleteProject } from '@/api/project'
 
 const projectsStore = useProjectsStore()
-projectsStore.load()
+projectsStore.load(true)
 
 const { projects } = storeToRefs(projectsStore)
 
@@ -24,7 +24,7 @@ async function onDeleteProject(id: string) {
   } catch (e: any) {
     catcher(e)
   } finally {
-    projectsStore.load()
+    projectsStore.load(true)
   }
 }
 </script>

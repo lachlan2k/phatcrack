@@ -44,7 +44,7 @@ const emit = defineEmits<{
 
 const projectsStore = useProjectsStore()
 const { projects } = storeToRefs(projectsStore)
-projectsStore.load()
+projectsStore.load(true)
 
 const resourcesStore = useResourcesStore()
 const { hashTypes: allHashTypes } = storeToRefs(resourcesStore)

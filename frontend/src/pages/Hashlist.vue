@@ -58,7 +58,7 @@ const { getHashTypeName, isHashTypesLoaded } = storeToRefs(resources)
 resources.loadHashTypes()
 
 const projectStore = useProjectsStore()
-projectStore.load()
+projectStore.load(true)
 
 const project = computed(() => {
   const id = hashlistData.value?.project_id

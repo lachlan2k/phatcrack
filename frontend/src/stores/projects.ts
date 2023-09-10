@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 
 export type ProjectsState = {
   projects: ProjectDTO[]
+  isLoading: boolean
 }
 
 export const useProjectsStore = defineStore({
@@ -11,12 +12,23 @@ export const useProjectsStore = defineStore({
 
   state: () =>
     ({
-      projects: []
+      projects: [],
+      isLoading: false
     } as ProjectsState),
 
   actions: {
-    async load() {
-      this.projects = (await getAllProjects()).projects
+    async load(forceRefetch: boolean = false) {
+      if ((this.projects.length > 0 || this.isLoading) && !forceRefetch) {
+        return
+      }
+
+      try {
+        this.isLoading = true
+        this.projects = (await getAllProjects()).projects
+      } catch (e: any) {
+      } finally {
+        this.isLoading = false
+      }
     }
   },
 
