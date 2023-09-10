@@ -81,25 +81,25 @@ async function onSave() {
     <div class="form-control">
       <label class="label font-bold">
         <span class="label-text pr-3">Enable maintenance mode?</span>
-        <input type="checkbox" v-model="settings.is_maintenance_mode" class="toggle" />
+        <input type="checkbox" v-model="settings.is_maintenance_mode" class="checkbox checkbox-sm" />
       </label>
     </div>
     <div class="form-control">
       <label class="label font-bold">
         <span class="label-text pr-3">Require MFA?</span>
-        <input type="checkbox" v-model="settings.is_mfa_required" class="toggle" />
+        <input type="checkbox" v-model="settings.is_mfa_required" class="checkbox checkbox-sm" />
       </label>
     </div>
     <div>
       <label class="label font-bold">
         <span class="label-text pr-3">Require password change on first login?</span>
-        <input type="checkbox" v-model="settings.require_password_change_on_first_login" class="toggle" />
+        <input type="checkbox" v-model="settings.require_password_change_on_first_login" class="checkbox checkbox-sm" />
       </label>
     </div>
     <div class="form-control">
       <label class="label font-bold">
         <span class="label-text pr-3">Automatically sync files to agents?</span>
-        <input type="checkbox" v-model="settings.auto_sync_listfiles" class="toggle" />
+        <input type="checkbox" v-model="settings.auto_sync_listfiles" class="checkbox checkbox-sm" />
       </label>
     </div>
     <div class="form-control">
@@ -122,6 +122,6 @@ async function onSave() {
     </div>
   </div>
   <div class="card-actions justify-end">
-    <button class="btn btn-primary" @click="() => onSave()">Save</button>
+    <button class="btn btn-sm btn-primary" @click="() => onSave()">Save</button>
   </div>
 </template>

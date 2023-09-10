@@ -84,7 +84,7 @@ async function onDeleteAgent(id: string) {
   <div v-if="isLoading" class="flex h-56 h-full w-56 w-full justify-center self-center">
     <span class="loading loading-spinner loading-lg"></span>
   </div>
-  <table v-else class="table w-full">
+  <table v-else class="table table-sm w-full">
     <thead>
       <tr>
         <th>Name</th>
