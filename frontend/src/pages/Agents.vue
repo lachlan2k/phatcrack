@@ -108,7 +108,12 @@ async function toggleMaintenance(agent: AgentDTO) {
                 </td>
 
                 <td v-if="isAdmin">
-                  <input type="checkbox" class="toggle block m-auto toggle-sm" v-model="agent.is_maintenance_mode" @click="toggleMaintenance(agent)" />
+                  <input
+                    type="checkbox"
+                    class="toggle toggle-sm m-auto block"
+                    v-model="agent.is_maintenance_mode"
+                    @click="toggleMaintenance(agent)"
+                  />
                 </td>
                 <td v-else-if="agent.is_maintenance_mode">
                   <font-awesome-icon icon="fa-solid fa-warning" /><span class="ml-2">In maintenance</span>
