@@ -41,6 +41,7 @@ func HookAdminEndpoints(api *echo.Group) {
 
 		err = config.Update(func(newConf *config.RuntimeConfig) error {
 			newConf.IsMFARequired = req.IsMFARequired
+			newConf.IsMaintenanceMode = req.IsMaintenanceMode
 			newConf.AutomaticallySyncListfiles = req.AutomaticallySyncListfiles
 			newConf.RequirePasswordChangeOnFirstLogin = req.RequirePasswordChangeOnFirstLogin
 			newConf.SplitJobsPerAgent = req.SplitJobsPerAgent
@@ -55,29 +56,11 @@ func HookAdminEndpoints(api *echo.Group) {
 
 		AuditLog(c, nil, "Admin updated configuration to %v", req)
 
-		conf := config.Get()
-		return c.JSON(http.StatusOK, apitypes.AdminConfigResponseDTO{
-			IsSetupComplete:                   conf.IsSetupComplete,
-			IsMFARequired:                     conf.IsMFARequired,
-			AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
-			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
-			SplitJobsPerAgent:                 conf.SplitJobsPerAgent,
-			MaximumUploadedFileSize:           conf.MaximumUploadedFileSize,
-			MaximumUploadedFileLineScanSize:   conf.MaximumUploadedFileLineScanSize,
-		})
+		return c.JSON(http.StatusOK, config.Get().ToAdminDTO())
 	})
 
 	api.GET("/config", func(c echo.Context) error {
-		conf := config.Get()
-		return c.JSON(http.StatusOK, apitypes.AdminConfigResponseDTO{
-			IsSetupComplete:                   conf.IsSetupComplete,
-			IsMFARequired:                     conf.IsMFARequired,
-			AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
-			RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
-			SplitJobsPerAgent:                 conf.SplitJobsPerAgent,
-			MaximumUploadedFileSize:           conf.MaximumUploadedFileSize,
-			MaximumUploadedFileLineScanSize:   conf.MaximumUploadedFileLineScanSize,
-		})
+		return c.JSON(http.StatusOK, config.Get().ToAdminDTO())
 	})
 
 	api.GET("/user/all", func(c echo.Context) error {
@@ -99,6 +82,20 @@ func HookAdminEndpoints(api *echo.Group) {
 	api.POST("/user/create", handleCreateUser)
 	api.POST("/user/create-service-account", handleCreateServiceAccount)
 	api.POST("/agent/create", handleAgentCreate)
+	api.PUT("/agent/:id/set-maintenance-mode", func(c echo.Context) error {
+		id := c.Param("id")
+		req, err := util.BindAndValidate[apitypes.AdminAgentSetMaintanceRequestDTO](c)
+		if err != nil {
+			return err
+		}
+
+		err = db.UpdateAgentMaintenanceMode(id, req.IsMaintenanceMode)
+		if err != nil {
+			return util.ServerError("Failed to set agent's maintenance mode", err)
+		}
+
+		return c.JSON(http.StatusOK, "ok")
+	})
 
 	api.DELETE("/user/:id", handleDeleteUser)
 	api.DELETE("/agent/:id", handleDeleteAgent)

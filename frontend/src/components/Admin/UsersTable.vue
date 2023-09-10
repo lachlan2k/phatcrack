@@ -15,7 +15,7 @@ import { storeToRefs } from 'pinia'
 const isUserCreateOpen = ref(false)
 const isServiceAccountCreateOpen = ref(false)
 
-const { data: allUsers, fetchData: fetchUsers } = useApi(adminGetAllUsers)
+const { data: allUsers, fetchData: fetchUsers, isLoading } = useApi(adminGetAllUsers)
 
 const usersToPaginate = computed(() => allUsers.value?.users ?? [])
 
@@ -178,12 +178,15 @@ async function onDeleteUser(id: string) {
     </Modal>
     <h2 class="card-title">Users</h2>
     <div>
-      <button class="btn btn-primary btn-sm mr-1" @click="() => (isServiceAccountCreateOpen = true)">Create Service Account</button>
+      <button class="btn btn-primary btn-sm ml-8 mr-1" @click="() => (isServiceAccountCreateOpen = true)">Create Service Account</button>
       <button class="btn btn-primary btn-sm" @click="() => (isUserCreateOpen = true)">Create User</button>
     </div>
   </div>
 
-  <table class="table w-full">
+  <div v-if="isLoading" class="flex h-56 h-full w-56 w-full justify-center self-center">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+  <table v-else class="table w-full">
     <thead>
       <tr>
         <th>Username</th>

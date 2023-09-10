@@ -351,6 +351,10 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
+	if config.Get().IsMaintenanceMode {
+		return echo.NewHTTPError(http.StatusServiceUnavailable, "Phatcrack is in maintenance mode. Attacks cannot be scheduled.")
+	}
+
 	user := auth.UserFromReq(c)
 	if user == nil {
 		return echo.ErrForbidden
@@ -388,7 +392,7 @@ func handleAttackStart(c echo.Context) error {
 	if jobMultiplier <= 0 {
 		jobMultiplier = 1
 	}
-	numJobs := fleet.NumActiveAgents() * jobMultiplier
+	numJobs := fleet.NumSchedulableAgents() * jobMultiplier
 
 	newJobs, hashlist, err := attacksharder.MakeJobs(attack, numJobs)
 	if err == db.ErrNotFound {

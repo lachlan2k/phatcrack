@@ -4,11 +4,14 @@ import { reactive, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useApi } from '@/composables/useApi'
 import { adminGetConfig, adminSetConfig } from '@/api/admin'
+import { useConfigStore } from '@/stores/config'
 
-const { data: settingsData, fetchData: reloadSettings } = useApi(adminGetConfig)
+const configStore = useConfigStore()
+const { data: settingsData, silentlyRefresh: reloadSettings, isLoading } = useApi(adminGetConfig)
 
 const settings = reactive({
   is_mfa_required: false,
+  is_maintenance_mode: false,
   auto_sync_listfiles: false,
   require_password_change_on_first_login: false,
   split_jobs_per_agent: 1,
@@ -22,6 +25,7 @@ watch(settingsData, (newSettings) => {
   }
 
   settings.is_mfa_required = newSettings.is_mfa_required
+  settings.is_maintenance_mode = newSettings.is_maintenance_mode
   settings.auto_sync_listfiles = newSettings.auto_sync_listfiles
   settings.require_password_change_on_first_login = newSettings.require_password_change_on_first_login
   settings.split_jobs_per_agent = newSettings.split_jobs_per_agent
@@ -35,20 +39,24 @@ async function onSave() {
   try {
     const {
       is_mfa_required,
+      is_maintenance_mode,
       require_password_change_on_first_login,
       auto_sync_listfiles,
       split_jobs_per_agent,
       maximum_uploaded_file_size,
       maximum_uploaded_file_line_scan_size
     } = settings
+
     await adminSetConfig({
       is_mfa_required,
+      is_maintenance_mode,
       require_password_change_on_first_login,
       auto_sync_listfiles,
       split_jobs_per_agent,
       maximum_uploaded_file_size,
       maximum_uploaded_file_line_scan_size
     })
+    configStore.load()
     toast.success('Settings saved')
   } catch (e: any) {
     let errorString = 'Unknown Error'
@@ -66,7 +74,16 @@ async function onSave() {
 </script>
 
 <template>
-  <div>
+  <div v-if="isLoading" class="flex h-56 h-full w-56 w-full justify-center">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+  <div v-else>
+    <div class="form-control">
+      <label class="label font-bold">
+        <span class="label-text pr-3">Enable maintenance mode?</span>
+        <input type="checkbox" v-model="settings.is_maintenance_mode" class="toggle" />
+      </label>
+    </div>
     <div class="form-control">
       <label class="label font-bold">
         <span class="label-text pr-3">Require MFA?</span>

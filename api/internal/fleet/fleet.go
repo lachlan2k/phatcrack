@@ -70,20 +70,12 @@ func ScheduleJobs(jobIds []string) ([]string, error) {
 	return scheduleJobUnsafe(jobIds)
 }
 
-func NumActiveAgents() int {
-	agents, err := db.GetAllAgents()
+func NumSchedulableAgents() int {
+	agents, err := db.GetAllSchedulableAgents()
 	if err != nil {
 		return 0
 	}
-
-	count := 0
-	for _, a := range agents {
-		if a.AgentInfo.Data.Status == db.AgentStatusHealthy {
-			count++
-		}
-	}
-
-	return count
+	return len(agents)
 }
 
 // Jobs will be evenly spread across agents
@@ -102,26 +94,26 @@ func scheduleJobUnsafe(jobIds []string) ([]string, error) {
 		jobs = append(jobs, jobDb.ToDTO())
 	}
 
-	healthyAgents, err := db.GetAllHealthyAgents()
+	schedulableAgents, err := db.GetAllSchedulableAgents()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, agent := range healthyAgents {
+	for _, agent := range schedulableAgents {
 		_, ok := fleet[agent.ID.String()]
 		if !ok {
 			return nil, fmt.Errorf("agent %q was supposed to be healthy, but couldn't be found in the fleet", agent.ID.String())
 		}
 	}
 
-	if len(healthyAgents) == 0 {
+	if len(schedulableAgents) == 0 {
 		return nil, ErrNoAgentsOnline
 	}
 
 	agentsJobsScheduledTo := []string{}
 
 	for len(jobs) > 0 {
-		for _, agent := range healthyAgents {
+		for _, agent := range schedulableAgents {
 			if len(jobs) == 0 {
 				break
 			}

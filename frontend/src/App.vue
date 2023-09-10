@@ -4,21 +4,30 @@ import { useToast } from 'vue-toastification'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import { useConfigStore } from './stores/config'
 
 const AUTH_REFRESH_RATE = 0.5 * 60 * 1000 // Every 5 minutes
 const authRefreshTimeout = ref(0)
 
 const router = useRouter()
 const authStore = useAuthStore()
+const configStore = useConfigStore()
 
 const { hasCompletedAuth, hasTriedAuth, loggedInUser, isLoggedIn } = storeToRefs(authStore)
 
 onMounted(() => {
   authStore.refreshAuth()
+  configStore.load()
 
   authRefreshTimeout.value = setInterval(() => {
     authStore.refreshAuth()
+    configStore.load()
   }, AUTH_REFRESH_RATE)
+})
+
+router.beforeEach(() => {
+  authStore.refreshAuth()
+  configStore.load()
 })
 
 onBeforeUnmount(() => {

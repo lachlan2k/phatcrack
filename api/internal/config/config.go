@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
 var lock sync.Mutex
@@ -13,11 +14,33 @@ var lock sync.Mutex
 type RuntimeConfig struct {
 	IsSetupComplete                   bool  `json:"is_setup_complete"`
 	IsMFARequired                     bool  `json:"is_mfa_required"`
+	IsMaintenanceMode                 bool  `json:"is_maintenance_mode"`
 	AutomaticallySyncListfiles        bool  `json:"auto_sync_listfiles"`
 	SplitJobsPerAgent                 int   `json:"split_jobs_per_agent"`
 	RequirePasswordChangeOnFirstLogin bool  `json:"require_password_change_on_first_login"`
 	MaximumUploadedFileSize           int64 `json:"maximum_uploaded_file_size"`
 	MaximumUploadedFileLineScanSize   int64 `json:"maximum_uploaded_file_line_scan_size"`
+}
+
+func (conf RuntimeConfig) ToAdminDTO() apitypes.AdminConfigResponseDTO {
+	return apitypes.AdminConfigResponseDTO{
+		IsSetupComplete:                   conf.IsSetupComplete,
+		IsMFARequired:                     conf.IsMFARequired,
+		IsMaintenanceMode:                 conf.IsMaintenanceMode,
+		AutomaticallySyncListfiles:        conf.AutomaticallySyncListfiles,
+		RequirePasswordChangeOnFirstLogin: conf.RequirePasswordChangeOnFirstLogin,
+		SplitJobsPerAgent:                 conf.SplitJobsPerAgent,
+		MaximumUploadedFileSize:           conf.MaximumUploadedFileSize,
+		MaximumUploadedFileLineScanSize:   conf.MaximumUploadedFileLineScanSize,
+	}
+}
+
+func (conf RuntimeConfig) ToPublicDTO() apitypes.ConfigDTO {
+	return apitypes.ConfigDTO{
+		IsMaintenanceMode:               conf.IsMaintenanceMode,
+		MaximumUploadedFileSize:         conf.MaximumUploadedFileSize,
+		MaximumUploadedFileLineScanSize: conf.MaximumUploadedFileLineScanSize,
+	}
 }
 
 var runningConf RuntimeConfig
@@ -26,6 +49,7 @@ func MakeDefaultConfig() RuntimeConfig {
 	return RuntimeConfig{
 		IsSetupComplete:                   true,
 		IsMFARequired:                     false,
+		IsMaintenanceMode:                 false,
 		AutomaticallySyncListfiles:        true,
 		RequirePasswordChangeOnFirstLogin: true,
 		SplitJobsPerAgent:                 1,

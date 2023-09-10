@@ -19,10 +19,11 @@ const (
 
 type Agent struct {
 	UUIDBaseModel
-	Name         string
-	KeyHash      string
-	AgentInfo    datatypes.JSONType[AgentInfo]
-	AgentDevices datatypes.JSONType[AgentDeviceInfo]
+	Name              string
+	KeyHash           string
+	IsMaintenanceMode bool `gorm:"default:false; not null"`
+	AgentInfo         datatypes.JSONType[AgentInfo]
+	AgentDevices      datatypes.JSONType[AgentDeviceInfo]
 }
 
 type AgentFile struct {
@@ -68,10 +69,11 @@ func (a *AgentInfo) ToDTO() apitypes.AgentInfoDTO {
 
 func (a *Agent) ToDTO() apitypes.AgentDTO {
 	return apitypes.AgentDTO{
-		ID:           a.ID.String(),
-		Name:         a.Name,
-		AgentInfo:    a.AgentInfo.Data.ToDTO(),
-		AgentDevices: a.AgentDevices.Data.Devices,
+		ID:                a.ID.String(),
+		Name:              a.Name,
+		IsMaintenanceMode: a.IsMaintenanceMode,
+		AgentInfo:         a.AgentInfo.Data.ToDTO(),
+		AgentDevices:      a.AgentDevices.Data.Devices,
 	}
 }
 
@@ -107,6 +109,15 @@ func GetAllAgents() ([]Agent, error) {
 func GetAllHealthyAgents() ([]Agent, error) {
 	agents := []Agent{}
 	err := GetInstance().Find(&agents, "agent_info->>'status' = ?", AgentStatusHealthy).Error
+	if err != nil {
+		return nil, err
+	}
+	return agents, nil
+}
+
+func GetAllSchedulableAgents() ([]Agent, error) {
+	agents := []Agent{}
+	err := GetInstance().Find(&agents, "agent_info->>'status' = ? and is_maintenance_mode = false", AgentStatusHealthy).Error
 	if err != nil {
 		return nil, err
 	}
@@ -168,4 +179,8 @@ func UpdateAgentStatus(agentId string, status string) error {
 
 func UpdateAgentInfo(agentId string, info AgentInfo) error {
 	return GetInstance().Table("agents").Where("id", agentId).Update("agent_info", info).Error
+}
+
+func UpdateAgentMaintenanceMode(agentId string, isMaintenance bool) error {
+	return GetInstance().Table("agents").Where("id", agentId).Update("is_maintenance_mode", isMaintenance).Error
 }

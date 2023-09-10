@@ -105,15 +105,8 @@ func (s *InMemorySessionHandler) Refresh(c echo.Context) error {
 		entry.timeoutTime = entry.maxEndTime
 	}
 
-	newCookie, err := s.genRandom()
-	if err != nil {
-		return err
-	}
-
-	s.store[newCookie] = entry
-	delete(s.store, cookie)
-
-	s.setCookie(c, newCookie, entry.timeoutTime)
+	s.store[cookie] = entry
+	s.setCookie(c, cookie, entry.timeoutTime)
 
 	return nil
 }

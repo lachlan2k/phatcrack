@@ -39,6 +39,7 @@ export interface AdminConfigResponseDTO {
   split_jobs_per_agent: number
   is_setup_complete: boolean
   is_mfa_required: boolean
+  is_maintenance_mode: boolean
   auto_sync_listfiles: boolean
   require_password_change_on_first_login: boolean
   maximum_uploaded_file_size: number
@@ -47,6 +48,7 @@ export interface AdminConfigResponseDTO {
 export interface AdminConfigRequestDTO {
   split_jobs_per_agent: number
   is_mfa_required: boolean
+  is_maintenance_mode: boolean
   auto_sync_listfiles: boolean
   require_password_change_on_first_login: boolean
   maximum_uploaded_file_size: number
@@ -59,6 +61,9 @@ export interface UserDTO {
 }
 export interface AdminGetAllUsersResponseDTO {
   users: UserDTO[]
+}
+export interface AdminAgentSetMaintanceRequestDTO {
+  is_maintenance_mode: boolean
 }
 export interface HashcatStatusDevice {
   device_id: number
@@ -82,6 +87,7 @@ export interface AgentInfoDTO {
 export interface AgentDTO {
   id: string
   name: string
+  is_maintenance_mode: boolean
   agent_info: AgentInfoDTO
   agent_devices: HashcatStatusDevice[]
 }
@@ -283,6 +289,11 @@ export interface AuthWebAuthnStartChallengeResponseDTO {
 export interface AuthChangePasswordRequestDTO {
   old_password: string
   new_password: string
+}
+export interface ConfigDTO {
+  is_maintenance_mode: boolean
+  maximum_uploaded_file_size: number
+  maximum_uploaded_file_line_scan_size: number
 }
 export interface HashType {
   id: number

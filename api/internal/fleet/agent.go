@@ -165,14 +165,6 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 	return nil
 }
 
-func (a *AgentConnection) IsHealthy() bool {
-	agent, err := db.GetAgent(a.agentId)
-	if err != nil {
-		return false
-	}
-	return agent.AgentInfo.Data.Status == db.AgentStatusHealthy
-}
-
 func (a *AgentConnection) RequestFileDownload(fileIDs ...uuid.UUID) error {
 	fileIDStrs := make([]string, len(fileIDs))
 	for i, id := range fileIDs {

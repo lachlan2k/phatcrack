@@ -2,6 +2,11 @@
 import { storeToRefs } from 'pinia'
 import { useAgentsStore } from '@/stores/agents'
 import { formatDeviceName } from '@/util/formatDeviceName'
+import { adminAgentSetMaintenance } from '@/api/admin'
+import type { AgentDTO } from '@/api/types'
+import { useAuthStore } from '@/stores/auth'
+import { useToastError } from '@/composables/useToastError'
+import { useToast } from 'vue-toastification'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
 const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'
@@ -9,9 +14,27 @@ const AgentStatusUnhealthyAndDisconnected = 'AgentStatusUnhealthyAndDisconnected
 // const AgentStatusDead = 'AgentStatusDead'
 
 const agentsStore = useAgentsStore()
-
-agentsStore.load(true)
 const { agents: allAgents } = storeToRefs(agentsStore)
+agentsStore.load(true)
+
+const authStore = useAuthStore()
+const { isAdmin } = storeToRefs(authStore)
+
+const toast = useToast()
+const { catcher } = useToastError()
+
+async function toggleMaintenance(agent: AgentDTO) {
+  try {
+    await adminAgentSetMaintenance(agent.id, {
+      is_maintenance_mode: !agent.is_maintenance_mode
+    })
+    toast.info(`Set agent ${agent.name} maintenance to ${!agent.is_maintenance_mode}`)
+  } catch (e: any) {
+    catcher(e)
+  } finally {
+    agentsStore.load(true)
+  }
+}
 </script>
 
 <template>
@@ -46,6 +69,7 @@ const { agents: allAgents } = storeToRefs(agentsStore)
                 <th>Version</th>
                 <th>Devices</th>
                 <th>Status</th>
+                <th v-if="isAdmin || allAgents.some((agent) => agent.is_maintenance_mode)">Maintenance</th>
               </tr>
             </thead>
             <tbody class="first-col-bold">
@@ -62,16 +86,32 @@ const { agents: allAgents } = storeToRefs(agentsStore)
                 </td>
 
                 <td class="text-center">
-                  <div class="badge badge-accent badge-sm" v-if="agent.agent_info.status == AgentStatusHealthy" title="Healthy"></div>
                   <div
-                    class="badge badge-warning badge-sm"
+                    class="badge badge-warning badge-sm m-auto block"
+                    title="Marked for maintenance"
+                    v-if="agent.is_maintenance_mode"
+                  ></div>
+                  <div
+                    class="badge badge-accent badge-sm m-auto block"
+                    v-else-if="agent.agent_info.status == AgentStatusHealthy"
+                    title="Healthy"
+                  ></div>
+                  <div
+                    class="badge badge-warning badge-sm m-auto block"
                     title="Unhealthy"
                     v-else-if="
                       agent.agent_info.status == AgentStatusUnhealthyAndDisconnected ||
                       agent.agent_info.status == AgentStatusUnhealthyButConnected
                     "
                   ></div>
-                  <div class="badge badge-ghost badge-sm" title="Dead" v-else></div>
+                  <div class="badge badge-ghost badge-sm m-auto block" title="Dead" v-else></div>
+                </td>
+
+                <td v-if="isAdmin">
+                  <input type="checkbox" class="toggle toggle-sm" v-model="agent.is_maintenance_mode" @click="toggleMaintenance(agent)" />
+                </td>
+                <td v-else-if="agent.is_maintenance_mode">
+                  <font-awesome-icon icon="fa-solid fa-warning" /><span class="ml-2">In maintenance</span>
                 </td>
               </tr>
             </tbody>

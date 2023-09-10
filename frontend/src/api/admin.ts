@@ -2,6 +2,7 @@ import { client } from '.'
 import type {
   AdminAgentCreateRequestDTO,
   AdminAgentCreateResponseDTO,
+  AdminAgentSetMaintanceRequestDTO,
   AdminConfigRequestDTO,
   AdminConfigResponseDTO,
   AdminGetAllUsersResponseDTO,
@@ -35,6 +36,10 @@ export function adminDeleteAgent(id: string): Promise<string> {
 
 export function adminCreateAgent(newAgentData: AdminAgentCreateRequestDTO): Promise<AdminAgentCreateResponseDTO> {
   return client.post('/api/v1/admin/agent/create', newAgentData).then((res) => res.data)
+}
+
+export function adminAgentSetMaintenance(id: string, body: AdminAgentSetMaintanceRequestDTO): Promise<string> {
+  return client.put(`/api/v1/admin/agent/${id}/set-maintenance-mode`, body).then((res) => res.data)
 }
 
 export function adminGetConfig(): Promise<AdminConfigResponseDTO> {

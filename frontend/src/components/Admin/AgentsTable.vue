@@ -10,7 +10,7 @@ import { useToastError } from '@/composables/useToastError'
 import ConfirmModal from '../ConfirmModal.vue'
 
 const isAgentCreateOpen = ref(false)
-const { data: agents, fetchData: fetchAgents } = useApi(getAllAgents)
+const { data: agents, fetchData: fetchAgents, isLoading } = useApi(getAllAgents)
 
 const toast = useToast()
 const { catcher } = useToastError()
@@ -81,7 +81,10 @@ async function onDeleteAgent(id: string) {
     <button class="btn btn-primary btn-sm ml-12" @click="() => (isAgentCreateOpen = true)">Create Agent</button>
   </div>
 
-  <table class="table w-full">
+  <div v-if="isLoading" class="flex h-56 h-full w-56 w-full justify-center self-center">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+  <table v-else class="table w-full">
     <thead>
       <tr>
         <th>Name</th>

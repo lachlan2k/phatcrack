@@ -3,9 +3,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { logout as apiLogout } from '@/api/auth'
 import { storeToRefs } from 'pinia'
+import { useConfigStore } from '@/stores/config'
 
 const authStore = useAuthStore()
 const { loggedInUser, isAdmin } = storeToRefs(authStore)
+
+const configStore = useConfigStore()
+const { config } = storeToRefs(configStore)
+configStore.load()
 
 const router = useRouter()
 const route = useRoute()
@@ -13,7 +18,6 @@ const route = useRoute()
 const pageLinks = [
   { name: 'Project Dashboard', icon: 'fa-gauge', to: '/dashboard' },
   { name: 'Wordlists & Rules', icon: 'fa-file', to: '/listfiles' },
-  // { name: 'Potfile', icon: 'fa-trophy', to: '/potfile' },
   { name: 'Agents', icon: 'fa-robot', to: '/agents' }
 ]
 
@@ -35,7 +39,17 @@ async function logout() {
         <RouterLink to="/dashboard">
           <h2 class="btn btn-ghost w-full text-center text-3xl">Phatcrack</h2>
         </RouterLink>
-        <hr class="mb-8 mt-4 h-px border-0 bg-gray-200 dark:bg-gray-700" />
+        <div
+          v-if="config?.is_maintenance_mode"
+          class="tooltip-white-bg tooltip tooltip-warning tooltip-bottom w-full"
+          data-tip="Your administrator has put Phatcrack in maintenance. You can't start new attacks."
+        >
+          <button class="btn btn-warning btn-sm mb-1 mt-4 w-full py-1">
+            <font-awesome-icon icon="fa-solid fa-warning" />
+            Maintenance Mode
+          </button>
+        </div>
+        <hr class="mb-8 mt-4 h-px border-0 bg-gray-700" />
         <RouterLink to="/wizard">
           <a class="btn btn-neutral w-full gap-2 bg-slate-600">
             <span>
@@ -146,5 +160,10 @@ async function logout() {
 .menu li:hover a,
 .menu li a:active {
   color: inherit;
+}
+
+.tooltip-white-bg::before,
+.tooltip-white-bg::after {
+  --tooltip-color: white;
 }
 </style>
