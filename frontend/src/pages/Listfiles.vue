@@ -36,14 +36,14 @@ onBeforeUnmount(() => {
 })
 
 const authStore = useAuthStore()
-const { loggedInUser } = storeToRefs(authStore)
+const { loggedInUser, isAdmin } = storeToRefs(authStore)
 
 function canDelete(listfile: ListfileDTO) {
   if (listfile.pending_delete) {
     return false
   }
 
-  if (loggedInUser.value?.roles.includes('admin')) {
+  if (isAdmin) {
     return true
   }
   return listfile.created_by_user_id == loggedInUser.value?.id

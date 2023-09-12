@@ -93,7 +93,7 @@ async function onDeleteAgent(id: string) {
     </thead>
     <tbody>
       <tr class="hover" v-for="agent in agents?.agents" :key="agent.id">
-        <td>
+        <td class="w-full">
           <strong>{{ agent.name }}</strong>
         </td>
         <td class="text-center">

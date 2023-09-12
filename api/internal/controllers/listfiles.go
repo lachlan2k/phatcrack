@@ -86,6 +86,14 @@ func handleListfileUpload(c echo.Context) error {
 		return util.ServerError("Failed to get file for upload. Perhaps disk space is low?", err)
 	}
 
+	filename := c.FormValue("file-name")
+	if filename == "" {
+		filename = uploadedFile.Filename
+		if filename == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "No filename was given")
+		}
+	}
+
 	maxFileSize := config.Get().MaximumUploadedFileSize
 	if !user.HasRole(roles.RoleAdmin) && uploadedFile.Size > maxFileSize {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Uploaded file too large (maximum %d bytes)", maxFileSize))
@@ -128,13 +136,13 @@ func handleListfileUpload(c echo.Context) error {
 	AuditLog(c, log.Fields{
 		"listfile_size":      uploadedFile.Size,
 		"listfile_linecount": lineCount,
-		"listfile_filename":  uploadedFile.Filename,
+		"listfile_filename":  filename,
 		"listfile_type":      fileType,
 	}, "User uploaded a new %s", fileType)
 
 	// TODO rollback on later failures? We might run out of disk space on the io.Copy, etc
 	listfile, err := db.CreateListfile(&db.Listfile{
-		Name:            uploadedFile.Filename,
+		Name:            filename,
 		FileType:        fileType,
 		SizeInBytes:     uint64(uploadedFile.Size),
 		Lines:           uint64(lineCount),

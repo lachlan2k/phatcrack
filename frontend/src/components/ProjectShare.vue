@@ -115,7 +115,7 @@ async function onDeleteShare(user: UserMinimalDTO) {
           <tr v-for="(user, i) in tableRows" :key="user.id + i">
             <td class="w-full">{{ user?.username }}</td>
             <td class="text-center">
-              <IconButton icon="fa-solid fa-trash" color="error" tooltip="Remove" @click="() => onDeleteShare(user)" />
+              <IconButton icon="fa-solid fa-xmark" color="error" tooltip="Remove" @click="() => onDeleteShare(user)" />
             </td>
           </tr>
         </tbody>

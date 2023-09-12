@@ -6,11 +6,18 @@ import { bytesToReadable } from '@/util/units'
 import { uploadListfile } from '@/api/listfiles'
 import { useListfilesStore } from '@/stores/listfiles'
 import type { AxiosProgressEvent } from 'axios'
+import { useConfigStore } from '@/stores/config'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
 
 type FileType = 'Wordlist' | 'Rulefile'
 
-const MaxSizeInBytes = 10 * 1000 ** 3 // 10GB
-const MaxSizeForAutoLineCount = 500 * 1000 ** 2 // 500MB
+const configStore = useConfigStore()
+const { config } = storeToRefs(configStore)
+configStore.load()
+
+const authStore = useAuthStore()
+const { isAdmin } = storeToRefs(authStore)
 
 const props = defineProps<{
   fileType: FileType | null
@@ -27,12 +34,21 @@ const isLoading = ref(false)
 const progress = ref<AxiosProgressEvent | null>(null)
 
 const validationError = computed(() => {
+  const conf = config.value
+  if (conf == null) {
+    return 'Required config failed to load'
+  }
+
   if (fileToUpload.value == null) {
     return 'Please select a file'
   }
 
-  if (fileToUpload.value.size > MaxSizeForAutoLineCount && lineCount.value == 0) {
+  if (fileToUpload.value.size > conf.maximum_uploaded_file_line_scan_size && lineCount.value == 0) {
     return 'Please set the line count'
+  }
+
+  if (fileToUpload.value.size > conf.maximum_uploaded_file_size && !isAdmin) {
+    return 'File is too large'
   }
 
   return null
@@ -43,7 +59,7 @@ const requiresLineCountSpecified = computed(() => {
     return false
   }
 
-  return fileToUpload.value.size > MaxSizeForAutoLineCount
+  return fileToUpload.value.size > (config.value?.maximum_uploaded_file_line_scan_size ?? 0)
 })
 
 watch(requiresLineCountSpecified, (doesRequire) => {
@@ -86,6 +102,7 @@ async function onSubmit(event: Event) {
 
   const formData = new FormData()
 
+  formData.append('file-name', fileName.value)
   formData.append('file-type', props.fileType ?? fileType.value)
   formData.append('file-line-count', lineCount.value.toString())
   formData.append('file', fileToUpload.value)
@@ -136,7 +153,7 @@ async function onSubmit(event: Event) {
     </label>
     <input type="number" class="input input-bordered" v-model="lineCount" />
     <label class="label" v-if="lineCount == 0">
-      <span class="label-text text-error">Files larger {{ bytesToReadable(MaxSizeForAutoLineCount) }} require a line count</span>
+      <span class="label-text text-error">Files larger {{ bytesToReadable(config?.maximum_uploaded_file_line_scan_size ?? 0) }} require a line count</span>
     </label>
   </div>
 
@@ -152,7 +169,7 @@ async function onSubmit(event: Event) {
 
   <div class="form-control mt-1">
     <label class="label font-bold">
-      <span class="label-text">Pick a file (max {{ bytesToReadable(MaxSizeInBytes) }})</span>
+      <span class="label-text">Pick a file (max {{ bytesToReadable(config?.maximum_uploaded_file_size ?? 0) }})</span>
     </label>
     <input type="file" ref="fileInputEl" @change="onFileSelect" class="file-input file-input-bordered file-input-ghost" name="file" />
   </div>

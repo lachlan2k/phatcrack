@@ -25,7 +25,7 @@ const router = useRouter()
 const usersStore = useUsersStore()
 
 const authStore = useAuthStore()
-const { loggedInUser } = storeToRefs(authStore)
+const { loggedInUser, isAdmin } = storeToRefs(authStore)
 
 const projectsStore = useProjectsStore()
 
@@ -76,7 +76,7 @@ const hasOwnereshipRights = computed(() => {
     return false
   }
 
-  return user.roles.includes('admin') || user.id == projectData.value?.owner_user_id
+  return isAdmin || user.id == projectData.value?.owner_user_id
 })
 </script>
 
@@ -147,9 +147,9 @@ const hasOwnereshipRights = computed(() => {
                 >
                   <tr class="hover">
                     <td @click="navigate" class="cursor-pointer">{{ hashlist.name }}</td>
-                    <td>{{ hashlist.hash_type }} - {{ getHashTypeName(hashlist.hash_type) }}</td>
-                    <td>{{ timeSince(hashlist.time_created * 1000) }}</td>
-                    <td>
+                    <td @click="navigate" class="cursor-pointer">{{ hashlist.hash_type }} - {{ getHashTypeName(hashlist.hash_type) }}</td>
+                    <td @click="navigate" class="cursor-pointer">{{ timeSince(hashlist.time_created * 1000) }}</td>
+                    <td class="w-0 text-center">
                       <ConfirmModal @on-confirm="() => onDeleteHashlist(hashlist.id)">
                         <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                       </ConfirmModal>

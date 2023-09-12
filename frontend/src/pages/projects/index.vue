@@ -61,8 +61,8 @@ async function onDeleteProject(id: string) {
                       {{ usersStore.byId(project.owner_user_id)?.username ?? 'Unknown user' }}
                     </span>
                   </td>
-                  <td>{{ timeSince(project.time_created * 1000) }}</td>
-                  <td>
+                  <td class="cursor-pointer" @click="navigate">{{ timeSince(project.time_created * 1000) }}</td>
+                  <td class="w-0 text-center">
                     <ConfirmModal @on-confirm="() => onDeleteProject(project.id)">
                       <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                     </ConfirmModal>
