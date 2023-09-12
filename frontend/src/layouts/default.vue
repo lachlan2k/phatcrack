@@ -46,7 +46,7 @@ async function logout() {
       <aside class="flex h-full w-72 flex-col p-4">
         <RouterLink to="/dashboard">
           <h2 class="btn btn-ghost w-full text-center text-3xl">Phatcrack</h2>
-          <div class="w-full text-center" v-if="version != ''"><small class="font-mono text-center">{{ version }}</small></div>
+          <div class="w-full text-center" v-if="version != ''"><small class="font-mono text-xs text-center">{{ version }}</small></div>
 
         </RouterLink>
         <div
