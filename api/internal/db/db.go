@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lib/pq"
 	"gorm.io/datatypes"
 	"gorm.io/driver/postgres"
@@ -60,7 +61,7 @@ func seed() error {
 	}
 
 	if userCount == 0 {
-		_, err := RegisterUser("admin", "changeme", []string{"admin"})
+		_, err := RegisterUser("admin", "changeme", []string{roles.RoleAdmin, roles.RoleRequiresPasswordChange})
 		if err != nil {
 			return err
 		}
