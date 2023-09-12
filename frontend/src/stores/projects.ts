@@ -25,7 +25,6 @@ export const useProjectsStore = defineStore({
       try {
         this.isLoading = true
         this.projects = (await getAllProjects()).projects
-      } catch (e: any) {
       } finally {
         this.isLoading = false
       }

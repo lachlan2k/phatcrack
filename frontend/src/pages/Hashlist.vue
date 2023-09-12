@@ -224,7 +224,7 @@ function openAttackModal(attackIndex: number) {
                 </label>
               </div>
 
-              <table class="compact-table compact-table hashlist-table table table-sm w-full">
+              <table class="compact-table hashlist-table table table-sm w-full">
                 <thead>
                   <tr>
                     <th>Original Hash</th>

@@ -52,7 +52,7 @@ func handleAttackGetAllForHashlist(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -100,7 +100,7 @@ func handleDeleteAttack(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -142,7 +142,7 @@ func handleAttackStopAllJobs(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -181,7 +181,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -219,13 +219,12 @@ func handleAttackGet(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	// TODO: this could be collapsed into less queries too
 	projId, err := db.GetAttackProjID(attackId)
 	if err != nil {
 		return util.ServerError("Failed to fetch project id for attack", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -265,7 +264,7 @@ func handleAttackCreate(c echo.Context) error {
 		return util.ServerError("Failed to fetch hahlist for attack", err)
 	}
 
-	proj, err := db.GetProjectForUser(hashlist.ProjectID.String(), user.ID.String())
+	proj, err := db.GetProjectForUser(hashlist.ProjectID.String(), user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -365,7 +364,7 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for attack", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}

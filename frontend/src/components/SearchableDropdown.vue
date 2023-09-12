@@ -78,6 +78,7 @@ function unfocus() {
   max-height: 400px;
   overflow-y: scroll;
   overflow-x: hidden;
+  z-index: 9999;
 }
 
 .dropdown-content-option {

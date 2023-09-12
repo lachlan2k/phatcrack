@@ -11,6 +11,7 @@ import (
 	"github.com/NHAS/webauthn/webauthn"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 )
 
 type webauthnUser struct {
@@ -68,7 +69,7 @@ func MFAWebAuthnBeginRegister(c echo.Context, sessHandler SessionHandler) (marsh
 		return
 	}
 
-	if user.HasRole(RoleMFAEnrolled) {
+	if user.HasRole(roles.RoleMFAEnrolled) {
 		userPresentableErr = errors.New("user already enrolled in MFA")
 		return
 	}
@@ -123,7 +124,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 		return
 	}
 
-	if user.HasRole(RoleMFAEnrolled) {
+	if user.HasRole(roles.RoleMFAEnrolled) {
 		userPresentableErr = errors.New("user already enrolled in MFA")
 		return
 	}
@@ -159,7 +160,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 
 	user.MFAType = MFATypeWebAuthn
 	user.MFAData = marshalledBytes
-	user.Roles = append(user.Roles, RoleMFAEnrolled)
+	user.Roles = append(user.Roles, roles.RoleMFAEnrolled)
 
 	err = db.GetInstance().Save(user).Error
 	if err != nil {
@@ -177,7 +178,7 @@ func MFAWebAuthnBeginLogin(c echo.Context, sessHandler SessionHandler) (marshall
 		return
 	}
 
-	if !user.HasRole(RoleMFAEnrolled) {
+	if !user.HasRole(roles.RoleMFAEnrolled) {
 		userPresentableErr = fmt.Errorf("user is not enrolled in MFA")
 		return
 	}

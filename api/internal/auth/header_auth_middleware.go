@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	log "github.com/sirupsen/logrus"
 )
@@ -34,7 +35,7 @@ func CreateHeaderAuthMiddleware() echo.MiddlewareFunc {
 			if err != nil {
 				return util.ServerError("Failed to check API key", err)
 			}
-			if !slices.Contains(user.Roles, RoleServiceAccount) {
+			if !slices.Contains(user.Roles, roles.RoleServiceAccount) {
 				log.WithField("user_dto", user.ToDTO()).Warn("Request sucessfully authorized by bearer token, but account isn't a service account")
 				return echo.ErrUnauthorized
 			}

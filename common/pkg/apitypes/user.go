@@ -6,6 +6,15 @@ type UserDTO struct {
 	Roles    []string `json:"roles"`
 }
 
+type UserMinimalDTO struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+}
+
+type UsersGetAllResponseDTO struct {
+	Users []UserMinimalDTO `json:"users"`
+}
+
 const UserRoleAdmin = "admin"
 const UserRoleStandard = "standard"
 const UserRoleServiceAccount = "service_account"

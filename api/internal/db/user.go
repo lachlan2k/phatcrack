@@ -29,6 +29,13 @@ func (u *User) ToDTO() apitypes.UserDTO {
 	}
 }
 
+func (u *User) ToMinimalDTO() apitypes.UserMinimalDTO {
+	return apitypes.UserMinimalDTO{
+		ID:       u.ID.String(),
+		Username: u.Username,
+	}
+}
+
 func (u *User) HasRole(roleToCheck string) bool {
 	for _, r := range u.Roles {
 		if r == roleToCheck {

@@ -35,7 +35,7 @@ func handleAttackJobGet(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -77,7 +77,7 @@ func handleAttacksAndJobsForHashlist(c echo.Context) error {
 		return util.ServerError("Failed to fetch project id for hashlist", err)
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}

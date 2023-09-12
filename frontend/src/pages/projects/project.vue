@@ -1,25 +1,38 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
+import ProjectShare from '@/components/ProjectShare.vue'
 import IconButton from '@/components/IconButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
 
 import { ref } from 'vue'
-import { getProject, getHashlistsForProject, deleteHashlist } from '@/api/project'
+import { getProject, getHashlistsForProject, deleteHashlist, deleteProject } from '@/api/project'
 import { useApi } from '@/composables/useApi'
 import { useResourcesStore } from '@/stores/resources'
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { timeSince } from '@/util/units'
 import { useToast } from 'vue-toastification'
 import { useToastError } from '@/composables/useToastError'
+import { useProjectsStore } from '@/stores/projects'
+import { useAuthStore } from '@/stores/auth'
+import { useUsersStore } from '@/stores/users'
 
 const projId = useRoute().params.id as string
+
+const router = useRouter()
+const usersStore = useUsersStore()
+
+const authStore = useAuthStore()
+const { loggedInUser } = storeToRefs(authStore)
+
+const projectsStore = useProjectsStore()
 
 const { data: projectData, isLoading: isLoadingProject } = useApi(() => getProject(projId))
 const { data: hashlistData, isLoading: isLoadingHashlists, fetchData: fetchHashlists } = useApi(() => getHashlistsForProject(projId))
 
+const isShareModalOpen = ref(false)
 const isWizardOpen = ref(false)
 
 const resources = useResourcesStore()
@@ -44,6 +57,27 @@ async function onDeleteHashlist(id: string) {
     fetchHashlists()
   }
 }
+
+async function onDeleteProject(id: string) {
+  try {
+    await deleteProject(id)
+    toast.info('Deleted project')
+    router.push('/dashboard')
+  } catch (e: any) {
+    catcher(e)
+  } finally {
+    projectsStore.load(true)
+  }
+}
+
+const hasOwnereshipRights = computed(() => {
+  const user = loggedInUser.value
+  if (user == null) {
+    return false
+  }
+
+  return user.roles.includes('admin') || user.id == projectData.value?.owner_user_id
+})
 </script>
 
 <template>
@@ -52,7 +86,27 @@ async function onDeleteHashlist(id: string) {
       <span class="loading loading-spinner loading-lg"></span>
     </div>
     <div v-else>
-      <h1 class="text-4xl font-bold">{{ projectData?.name }}</h1>
+      <Modal v-model:isOpen="isShareModalOpen" v-if="hasOwnereshipRights">
+        <ProjectShare :projectId="projId" />
+      </Modal>
+
+      <div class="flex justify-between">
+        <div>
+          <h1 class="inline text-4xl font-bold">{{ projectData?.name }}</h1>
+          <span class="ml-2 text-xs font-normal text-slate-500" v-if="projectData != null && projectData.owner_user_id != loggedInUser?.id">
+            <font-awesome-icon icon="fa-solid fa-link" /> Shared by
+            {{ usersStore.byId(projectData?.owner_user_id)?.username ?? 'Unknown user' }}
+          </span>
+        </div>
+        <div class="flex items-center">
+          <button v-if="hasOwnereshipRights" class="btn btn-ghost btn-sm" @click="() => (isShareModalOpen = true)">
+            <font-awesome-icon icon="fa-solid fa-link" />Share with others
+          </button>
+          <ConfirmModal v-if="hasOwnereshipRights" @on-confirm="() => onDeleteProject(projId)"
+            ><button class="btn btn-ghost btn-sm"><font-awesome-icon icon="fa-solid fa-trash" />Delete</button></ConfirmModal
+          >
+        </div>
+      </div>
       <div class="breadcrumbs pl-1 text-sm">
         <ul>
           <li>

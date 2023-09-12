@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v4"
@@ -22,6 +23,10 @@ func HookProjectEndpoints(api *echo.Group) {
 	api.POST("/create", handleProjectCreate)
 	api.GET("/:id", handleProjectGet)
 	api.DELETE("/:id", handleProjectDelete)
+
+	api.GET("/:id/shares", handleProjectGetShares)
+	api.POST("/:id/shares", handleProjectAddShare)
+	api.DELETE("/:proj-id/shares/:user-id", handleProjectDeleteShare)
 
 	api.GET("/:proj-id/hashlists", handleHashlistGetAllForProj)
 }
@@ -65,7 +70,7 @@ func handleProjectGet(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -93,7 +98,7 @@ func handleProjectDelete(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	proj, err := db.GetProjectForUser(projId, user.ID.String())
+	proj, err := db.GetProjectForUser(projId, user)
 	if err == db.ErrNotFound {
 		return echo.ErrForbidden
 	}
@@ -102,7 +107,7 @@ func handleProjectDelete(c echo.Context) error {
 	}
 
 	// Only the owner of a project, or an admin, can delete a project
-	if !user.HasRole(auth.RoleAdmin) && proj.OwnerUserID != user.ID {
+	if !accesscontrol.HasOwnershipRightsToProject(user, proj) {
 		AuditLog(c, log.Fields{
 			"project_name": proj.Name,
 			"project_id":   proj.ID.String(),
@@ -129,7 +134,7 @@ func handleProjectGetAll(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	projects, err := db.GetAllProjectsForUser(user.ID.String())
+	projects, err := db.GetAllProjectsForUser(user)
 	var res apitypes.ProjectResponseMultipleDTO
 
 	if err == db.ErrNotFound {
@@ -152,4 +157,128 @@ func handleProjectGetAll(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func handleProjectGetShares(c echo.Context) error {
+	projId := c.Param("id")
+	if !util.AreValidUUIDs(projId) {
+		return echo.ErrBadRequest
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	proj, err := db.GetProjectForUser(projId, user)
+	if err == db.ErrNotFound {
+		return echo.ErrForbidden
+	}
+	if err != nil {
+		return util.ServerError("Failed to fetch project", err)
+	}
+
+	if !accesscontrol.HasOwnershipRightsToProject(user, proj) {
+		AuditLog(c, log.Fields{
+			"project_name": proj.Name,
+			"project_id":   proj.ID.String(),
+		}, "User tried to list project shares, but they are not allowed")
+		return echo.ErrForbidden
+	}
+
+	shares, err := db.GetProjectShares(proj.ID.String())
+	if err != nil {
+		return util.ServerError("Failed to fetch project shares", err)
+	}
+
+	return c.JSON(http.StatusOK, shares.ToDTO())
+}
+
+func handleProjectAddShare(c echo.Context) error {
+	projId := c.Param("id")
+	if !util.AreValidUUIDs(projId) {
+		return echo.ErrBadRequest
+	}
+
+	req, err := util.BindAndValidate[apitypes.ProjectAddShareRequestDTO](c)
+	if err != nil {
+		return err
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	proj, err := db.GetProjectForUser(projId, user)
+	if err == db.ErrNotFound {
+		return echo.ErrForbidden
+	}
+	if err != nil {
+		return util.ServerError("Failed to fetch project", err)
+	}
+
+	if !accesscontrol.HasOwnershipRightsToProject(user, proj) {
+		AuditLog(c, log.Fields{
+			"project_name": proj.Name,
+			"project_id":   proj.ID.String(),
+		}, "User tried to share a project with someone, but they are not allowed")
+		return echo.ErrForbidden
+	}
+
+	_, err = db.CreateProjectShare(&db.ProjectShare{
+		ProjectID: proj.ID,
+		UserID:    uuid.MustParse(req.UserID),
+	})
+	if err != nil {
+		return util.ServerError("Failed to create project share", err)
+	}
+
+	shares, err := db.GetProjectShares(proj.ID.String())
+	if err != nil {
+		return util.ServerError("Failed to fetch project shares", err)
+	}
+
+	return c.JSON(http.StatusOK, shares.ToDTO())
+}
+
+func handleProjectDeleteShare(c echo.Context) error {
+	projId := c.Param("proj-id")
+	userToRemoveId := c.Param("user-id")
+	if !util.AreValidUUIDs(projId, userToRemoveId) {
+		return echo.ErrBadRequest
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	proj, err := db.GetProjectForUser(projId, user)
+	if err == db.ErrNotFound {
+		return echo.ErrForbidden
+	}
+	if err != nil {
+		return util.ServerError("Failed to fetch project", err)
+	}
+
+	if !accesscontrol.HasOwnershipRightsToProject(user, proj) {
+		AuditLog(c, log.Fields{
+			"project_name": proj.Name,
+			"project_id":   proj.ID.String(),
+		}, "User tried to delete a project share, but they are not allowed")
+		return echo.ErrForbidden
+	}
+
+	err = db.DeleteProjectShare(projId, userToRemoveId)
+	if err != nil {
+		return util.ServerError("Failed to remove projetc share", err)
+	}
+
+	shares, err := db.GetProjectShares(proj.ID.String())
+	if err != nil {
+		return util.ServerError("Failed to fetch project shares", err)
+	}
+
+	return c.JSON(http.StatusOK, shares.ToDTO())
 }

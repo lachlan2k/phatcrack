@@ -9,6 +9,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/api/internal/version"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
@@ -107,13 +108,13 @@ func handleCreateUser(c echo.Context) error {
 		return err
 	}
 
-	rolesOk := auth.AreRolesAllowedOnRegistration(req.Roles)
+	rolesOk := roles.AreRolesAllowedOnRegistration(req.Roles)
 	if !rolesOk {
 		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
 	}
 
 	if config.Get().RequirePasswordChangeOnFirstLogin {
-		req.Roles = append(req.Roles, auth.RoleRequiresPasswordChange)
+		req.Roles = append(req.Roles, roles.RoleRequiresPasswordChange)
 	}
 
 	// TODO: pro-active handling of duplicate username
@@ -140,7 +141,7 @@ func handleCreateServiceAccount(c echo.Context) error {
 		return err
 	}
 
-	rolesOk := auth.AreRolesAllowedOnRegistration(req.Roles)
+	rolesOk := roles.AreRolesAllowedOnRegistration(req.Roles)
 	if !rolesOk {
 		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
 	}
@@ -150,7 +151,7 @@ func handleCreateServiceAccount(c echo.Context) error {
 		return util.ServerError("Couldn't create service account", err)
 	}
 
-	allRoles := append(req.Roles, auth.RoleMFAExempt, auth.RoleServiceAccount)
+	allRoles := append(req.Roles, roles.RoleMFAExempt, roles.RoleServiceAccount)
 
 	newUser, err := db.RegisterServiceAccount(req.Username, apiKey, allRoles)
 	if err != nil {

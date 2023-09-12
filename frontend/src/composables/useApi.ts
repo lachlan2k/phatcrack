@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 import { reactive, toRefs, type UnwrapRef } from 'vue'
+import { useToastError } from './useToastError'
 
 interface UseAPIState<DTOType> {
   isLoading: boolean
@@ -10,9 +11,12 @@ interface UseAPIState<DTOType> {
 
 interface UseAPIOptions {
   immediate: boolean
+  toastOnError: boolean
 }
 
-export function useApi<DTOType>(apiFunc: () => Promise<DTOType>, options: UseAPIOptions = { immediate: true }) {
+const { catcher } = useToastError()
+
+export function useApi<DTOType>(apiFunc: () => Promise<DTOType>, options: UseAPIOptions = { immediate: true, toastOnError: true }) {
   const state = reactive<UseAPIState<DTOType>>({
     isLoading: options.immediate,
     data: null,
@@ -30,6 +34,10 @@ export function useApi<DTOType>(apiFunc: () => Promise<DTOType>, options: UseAPI
       state.data = response as UnwrapRef<DTOType>
     } catch (err: any) {
       if (axios.isAxiosError(err)) {
+        if (options.toastOnError) {
+          catcher(err)
+        }
+
         switch (err.response?.status) {
           case 401:
             // We have possibly been logged out, inform our auth store

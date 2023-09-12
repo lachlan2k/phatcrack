@@ -5,7 +5,9 @@ import type {
   AttackStartResponseDTO,
   AttackWithJobsMultipleDTO,
   HashlistDTO,
-  HashlistResponseMultipleDTO
+  HashlistResponseMultipleDTO,
+  ProjectAddShareRequestDTO,
+  ProjectSharesDTO
 } from './types'
 import type { AttackCreateRequestDTO } from './types'
 import type {
@@ -35,6 +37,18 @@ export function getAllProjects(): Promise<ProjectResponseMultipleDTO> {
 
 export function getProject(projId: string): Promise<ProjectDTO> {
   return client.get(`/api/v1/project/${projId}`).then((res) => res.data)
+}
+
+export function getProjectShares(projId: string): Promise<ProjectSharesDTO> {
+  return client.get(`/api/v1/project/${projId}/shares`).then((res) => res.data)
+}
+
+export function addProjectShare(projId: string, body: ProjectAddShareRequestDTO): Promise<ProjectSharesDTO> {
+  return client.post(`/api/v1/project/${projId}/shares`, body).then((res) => res.data)
+}
+
+export function deleteProjectShare(projId: string, userId: string): Promise<ProjectSharesDTO> {
+  return client.delete(`/api/v1/project/${projId}/shares/${userId}`).then((res) => res.data)
 }
 
 export function createHashlist(body: HashlistCreateRequestDTO): Promise<HashlistCreateResponseDTO> {

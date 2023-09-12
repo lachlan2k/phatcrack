@@ -8,6 +8,7 @@ import { useConfigStore } from './stores/config'
 import { useProjectsStore } from './stores/projects'
 import { useListfilesStore } from './stores/listfiles'
 import { useAgentsStore } from './stores/agents'
+import { useUsersStore } from './stores/users'
 
 const AUTH_REFRESH_RATE = 0.5 * 60 * 1000 // Every 5 minutes
 const authRefreshTimeout = ref(0)
@@ -18,6 +19,7 @@ const configStore = useConfigStore()
 const projectStore = useProjectsStore()
 const listfileStore = useListfilesStore()
 const agentsStore = useAgentsStore()
+const usersStore = useUsersStore()
 
 const { hasCompletedAuth, hasTriedAuth, loggedInUser, isLoggedIn } = storeToRefs(authStore)
 
@@ -45,9 +47,10 @@ const toast = useToast()
 watch(hasCompletedAuth, (newHasCompletedAuth, prevHasCompletedAuth) => {
   if (newHasCompletedAuth && !prevHasCompletedAuth) {
     toast.success(`Welcome ${loggedInUser.value?.username}`)
-    listfileStore.load()
-    projectStore.load()
-    agentsStore.load()
+    listfileStore.load(true)
+    projectStore.load(true)
+    agentsStore.load(true)
+    usersStore.load(true)
   }
 })
 

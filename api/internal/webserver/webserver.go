@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/controllers"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 )
 
@@ -54,8 +55,8 @@ func Listen(port string) error {
 	api.Use(auth.EnforceMFAMiddleware(sessionHandler))
 
 	api.Use(auth.RoleRestrictedMiddleware(
-		[]string{auth.RoleAdmin, auth.RoleStandard},
-		[]string{auth.RoleRequiresPasswordChange}, // disallowed
+		[]string{roles.RoleAdmin, roles.RoleStandard},
+		[]string{roles.RoleRequiresPasswordChange}, // disallowed
 	))
 
 	controllers.HookHashcatEndpoints(api.Group("/hashcat"))
@@ -67,6 +68,7 @@ func Listen(port string) error {
 	controllers.HookJobEndpoints(api.Group("/job"))
 	controllers.HookAccountEndpoints(api.Group("/account"))
 	controllers.HookConfigEndpoints(api.Group("/config"))
+	controllers.HookUserEndpoints(api.Group("/user"))
 
 	adminAPI := api.Group("/admin")
 	adminAPI.Use(auth.AdminOnlyMiddleware(sessionHandler))

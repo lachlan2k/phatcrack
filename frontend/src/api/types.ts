@@ -422,3 +422,17 @@ export interface ProjectDTO {
 export interface ProjectResponseMultipleDTO {
   projects: ProjectDTO[]
 }
+export interface ProjectAddShareRequestDTO {
+  user_id: string
+}
+export interface ProjectSharesDTO {
+  user_ids: string[]
+}
+
+export interface UserMinimalDTO {
+  id: string
+  username: string
+}
+export interface UsersGetAllResponseDTO {
+  users: UserMinimalDTO[]
+}

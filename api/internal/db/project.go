@@ -5,6 +5,7 @@ import (
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 )
@@ -43,6 +44,35 @@ type ProjectShare struct {
 
 	UserID uuid.UUID `gorm:"type:uuid"`
 	User   *User     `gorm:"constraint:OnDelete:CASCADE;"`
+}
+
+func CreateProjectShare(share *ProjectShare) (*ProjectShare, error) {
+	return share, GetInstance().Create(share).Error
+}
+
+func DeleteProjectShare(projId string, userId string) error {
+	return GetInstance().Delete(&ProjectShare{}, "project_id = ? and user_id = ?", projId, userId).Error
+}
+
+type ProjectShares []ProjectShare
+
+func (shares ProjectShares) ToDTO() apitypes.ProjectSharesDTO {
+	userIDs := []string{}
+	for _, share := range shares {
+		userIDs = append(userIDs, share.UserID.String())
+	}
+	return apitypes.ProjectSharesDTO{
+		UserIDs: userIDs,
+	}
+}
+
+func GetProjectShares(projId string) (ProjectShares, error) {
+	shares := []ProjectShare{}
+	err := GetInstance().Where("project_id = ?", projId).Find(&shares).Error
+	if err != nil {
+		return nil, err
+	}
+	return shares, nil
 }
 
 type Hashlist struct {
@@ -124,19 +154,27 @@ func (a *Attack) ToDTO() apitypes.AttackDTO {
 	}
 }
 
-func GetProjectForUser(projId, userId string) (*Project, error) {
-	proj := new(Project)
+func GetProject(projId string) (*Project, error) {
+	proj := &Project{}
+	err := GetInstance().First(&proj, "id = ?", projId).Error
+	if err != nil {
+		return nil, err
+	}
+	return proj, nil
+}
 
-	accessControlQuery := GetInstance().
-		Where("owner_user_id = ?", userId).
-		Or("project_shares.user_id = ?", userId)
+func GetProjectForUser(projId string, user *User) (*Project, error) {
+	proj := &Project{}
+	if user.HasRole(roles.RoleAdmin) {
+		return GetProject(projId)
+	}
 
 	err := GetInstance().
 		Preload("ProjectShare").
 		Select("distinct on (projects.id) projects.*").
 		Joins("left join project_shares on project_shares.project_id = projects.id").
 		Where("projects.id = ?", projId).
-		Where(accessControlQuery).First(proj).Error
+		Where("owner_user_id = ? or project_shares.user_id = ?", user.ID, user.ID).First(proj).Error
 
 	if err != nil {
 		return nil, err
@@ -144,19 +182,30 @@ func GetProjectForUser(projId, userId string) (*Project, error) {
 	return proj, err
 }
 
-func GetAllProjectsForUser(userId string) ([]Project, error) {
+func GetAllProjects() ([]Project, error) {
+	projs := []Project{}
+	err := GetInstance().Order("created_at DESC").Find(&projs).Error
+	if err != nil {
+		return nil, err
+	}
+	return projs, nil
+}
+
+func GetAllProjectsForUser(user *User) ([]Project, error) {
+	if user.HasRole(roles.RoleAdmin) {
+		return GetAllProjects()
+	}
 	projs := []Project{}
 
 	subquery := GetInstance().
 		Table("projects").
-		Preload("ProjectShare").
 		Select("distinct on (projects.id) projects.*").
 		Joins("left join project_shares on project_shares.project_id = projects.id").
-		Where("owner_user_id = ?", userId).
-		Or("project_shares.user_id = ?", userId)
+		Where("owner_user_id = ? or project_shares.user_id = ?", user.ID, user.ID)
 
 	err := GetInstance().
 		Table("(?) as p", subquery).
+		Preload("ProjectShare").
 		Order("p.created_at DESC").
 		Find(&projs).Error
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 )
 
 func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
@@ -17,12 +18,12 @@ func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
 
 			userIsEnrolled := false
 			for _, userRole := range user.Roles {
-				if userRole == RoleMFAEnrolled {
+				if userRole == roles.RoleMFAEnrolled {
 					userIsEnrolled = true
 				}
 
 				// Early exit if they're exempt
-				if userRole == RoleMFAExempt {
+				if userRole == roles.RoleMFAExempt {
 					return next(c)
 				}
 			}

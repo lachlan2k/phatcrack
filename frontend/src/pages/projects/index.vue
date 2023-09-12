@@ -8,9 +8,16 @@ import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
 import { useToastError } from '@/composables/useToastError'
 import { deleteProject } from '@/api/project'
+import { useUsersStore } from '@/stores/users'
+import { useAuthStore } from '@/stores/auth'
 
 const projectsStore = useProjectsStore()
 projectsStore.load(true)
+
+const authStore = useAuthStore()
+const { loggedInUser } = storeToRefs(authStore)
+
+const usersStore = useUsersStore()
 
 const { projects } = storeToRefs(projectsStore)
 
@@ -47,7 +54,13 @@ async function onDeleteProject(id: string) {
             <tbody class="first-col-bold">
               <RouterLink custom v-slot="{ navigate }" v-for="project in projects" :key="project.id" :to="`/project/${project.id}`">
                 <tr class="hover">
-                  <td class="cursor-pointer" @click="navigate">{{ project.name }}</td>
+                  <td class="cursor-pointer" @click="navigate">
+                    {{ project.name }}
+                    <span class="ml-1 text-xs font-normal text-slate-500" v-if="project.owner_user_id != loggedInUser?.id">
+                      <font-awesome-icon icon="fa-solid fa-link" /> Shared by
+                      {{ usersStore.byId(project.owner_user_id)?.username ?? 'Unknown user' }}
+                    </span>
+                  </td>
                   <td>{{ timeSince(project.time_created * 1000) }}</td>
                   <td>
                     <ConfirmModal @on-confirm="() => onDeleteProject(project.id)">

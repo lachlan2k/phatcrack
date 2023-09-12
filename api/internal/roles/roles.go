@@ -1,4 +1,4 @@
-package auth
+package roles
 
 const RoleAdmin = "admin"
 const RoleStandard = "standard"

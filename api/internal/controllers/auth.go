@@ -10,6 +10,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"golang.org/x/crypto/bcrypt"
@@ -44,9 +45,9 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 				Username: user.Username,
 				Roles:    user.Roles,
 			},
-			IsAwaitingMFA:          user.HasRole(auth.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
-			RequiresPasswordChange: user.HasRole(auth.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  !user.HasRole(auth.RoleMFAEnrolled) && config.Get().IsMFARequired,
+			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
+			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
+			RequiresMFAEnrollment:  !user.HasRole(roles.RoleMFAEnrolled) && config.Get().IsMFARequired,
 		})
 	})
 
@@ -62,7 +63,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return echo.ErrForbidden
 		}
 
-		if !user.HasRole(auth.RoleRequiresPasswordChange) {
+		if !user.HasRole(roles.RoleRequiresPasswordChange) {
 			return echo.NewHTTPError(http.StatusBadRequest, "This endpoint is only available to users who are required to change their password")
 		}
 
@@ -85,7 +86,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 		user.PasswordHash = string(newPasswordHash)
 
 		for i, role := range user.Roles {
-			if role == auth.RoleRequiresPasswordChange {
+			if role == roles.RoleRequiresPasswordChange {
 				user.Roles = append(user.Roles[:i], user.Roles[i+1:]...)
 				break
 			}
@@ -111,7 +112,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return c.JSON(http.StatusOK, false)
 		}
 
-		if user.HasRole(auth.RoleMFAEnrolled) || config.Get().IsMFARequired {
+		if user.HasRole(roles.RoleMFAEnrolled) || config.Get().IsMFARequired {
 			return c.JSON(http.StatusOK, true)
 		}
 
@@ -280,9 +281,9 @@ func handleRefresh(sessHandler auth.SessionHandler) echo.HandlerFunc {
 				Username: user.Username,
 				Roles:    user.Roles,
 			},
-			IsAwaitingMFA:          user.HasRole(auth.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
-			RequiresPasswordChange: user.HasRole(auth.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  !user.HasRole(auth.RoleMFAEnrolled) && config.Get().IsMFARequired,
+			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
+			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
+			RequiresMFAEnrollment:  !user.HasRole(roles.RoleMFAEnrolled) && config.Get().IsMFARequired,
 		})
 	}
 }
@@ -326,9 +327,9 @@ func handleLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 				Username: user.Username,
 				Roles:    user.Roles,
 			},
-			IsAwaitingMFA:          user.HasRole(auth.RoleMFAEnrolled),
-			RequiresPasswordChange: user.HasRole(auth.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  !user.HasRole(auth.RoleMFAEnrolled) && config.Get().IsMFARequired,
+			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled),
+			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
+			RequiresMFAEnrollment:  !user.HasRole(roles.RoleMFAEnrolled) && config.Get().IsMFARequired,
 		}
 
 		logMessage := "Session started"

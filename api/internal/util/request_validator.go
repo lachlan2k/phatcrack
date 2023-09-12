@@ -51,7 +51,7 @@ func (v *RequestValidator) Init() {
 		return true
 	})
 
-	standardNameRegex := regexp.MustCompile(`^[\w \-\.]+$`)
+	standardNameRegex := regexp.MustCompile(`^[\w \-\.']+$`)
 
 	v.Validator.RegisterValidation("standardname", func(fl validator.FieldLevel) bool {
 		name, ok := fl.Field().Interface().(string)

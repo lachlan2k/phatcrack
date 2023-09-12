@@ -16,6 +16,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
@@ -56,7 +57,7 @@ func handleListfileDelete(c echo.Context) error {
 		return util.ServerError("Failed to get listfile prior to deletion", err)
 	}
 
-	isAllowed := user.HasRole(auth.RoleAdmin) || listfile.CreatedByUserID == user.ID
+	isAllowed := user.HasRole(roles.RoleAdmin) || listfile.CreatedByUserID == user.ID
 	if !isAllowed {
 		return echo.ErrForbidden
 	}
@@ -86,7 +87,7 @@ func handleListfileUpload(c echo.Context) error {
 	}
 
 	maxFileSize := config.Get().MaximumUploadedFileSize
-	if !user.HasRole(auth.RoleAdmin) && uploadedFile.Size > maxFileSize {
+	if !user.HasRole(roles.RoleAdmin) && uploadedFile.Size > maxFileSize {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Uploaded file too large (maximum %d bytes)", maxFileSize))
 	}
 
