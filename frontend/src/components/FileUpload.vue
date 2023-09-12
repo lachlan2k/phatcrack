@@ -153,7 +153,9 @@ async function onSubmit(event: Event) {
     </label>
     <input type="number" class="input input-bordered" v-model="lineCount" />
     <label class="label" v-if="lineCount == 0">
-      <span class="label-text text-error">Files larger {{ bytesToReadable(config?.maximum_uploaded_file_line_scan_size ?? 0) }} require a line count</span>
+      <span class="label-text text-error"
+        >Files larger {{ bytesToReadable(config?.maximum_uploaded_file_line_scan_size ?? 0) }} require a line count</span
+      >
     </label>
   </div>
 

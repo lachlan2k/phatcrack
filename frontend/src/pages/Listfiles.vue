@@ -100,7 +100,9 @@ async function onDeleteListfile(listfile: ListfileDTO) {
                 <td>
                   <strong>{{ wordlist.name }}</strong>
                   <span class="pl-2 text-sm text-gray-500" v-if="wordlist.pending_delete">
-                    <font-awesome-icon icon="fa-solid fa-skull-crossbones" />
+                    <div class="tooltip" data-tip="Marked for death">
+                      <font-awesome-icon icon="fa-solid fa-skull-crossbones" title="" />
+                    </div>
                   </span>
                 </td>
 
@@ -150,7 +152,9 @@ async function onDeleteListfile(listfile: ListfileDTO) {
                 <td>
                   <strong>{{ rulefile.name }}</strong>
                   <span class="pl-2 text-sm text-gray-500" v-if="rulefile.pending_delete">
-                    <font-awesome-icon icon="fa-solid fa-skull-crossbones" />
+                    <div class="tooltip" data-tip="Marked for death">
+                      <font-awesome-icon icon="fa-solid fa-skull-crossbones" />
+                    </div>
                   </span>
                 </td>
                 <td>{{ bytesToReadable(rulefile.size_in_bytes) }}</td>

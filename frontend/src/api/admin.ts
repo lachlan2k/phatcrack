@@ -51,5 +51,5 @@ export function adminSetConfig(newConfig: AdminConfigRequestDTO): Promise<AdminC
 }
 
 export function adminGetVersion(): Promise<string> {
-  return client.get('/api/v1/admin/version').then(res => res.data)
+  return client.get('/api/v1/admin/version').then((res) => res.data)
 }
