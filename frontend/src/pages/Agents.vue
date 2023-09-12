@@ -75,7 +75,7 @@ async function toggleMaintenance(agent: AgentDTO) {
             <tbody class="first-col-bold">
               <tr class="hover" v-for="agent in allAgents" :key="agent.id">
                 <td>{{ agent.name }}</td>
-                <td>{{ agent.agent_info.version }}</td>
+                <td class="font-mono">{{ agent.agent_info.version }}</td>
                 <td>
                   <span v-for="device in agent.agent_devices" :key="device.device_id + device.device_name">
                     <font-awesome-icon icon="fa-solid fa-memory" v-if="device.device_type == 'GPU'" />

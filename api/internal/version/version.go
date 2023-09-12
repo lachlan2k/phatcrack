@@ -1,6 +1,6 @@
 package version
 
-var version string = "Unknown"
+var version string = "vx.x.x-unknown"
 
 func Version() string {
 	return version

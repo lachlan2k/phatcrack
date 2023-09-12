@@ -4,6 +4,8 @@ import { useAuthStore } from '@/stores/auth'
 import { logout as apiLogout } from '@/api/auth'
 import { storeToRefs } from 'pinia'
 import { useConfigStore } from '@/stores/config'
+import { onMounted, ref } from 'vue'
+import { adminGetVersion } from '@/api/admin'
 
 const authStore = useAuthStore()
 const { loggedInUser, isAdmin } = storeToRefs(authStore)
@@ -20,6 +22,12 @@ const pageLinks = [
   { name: 'Wordlists & Rules', icon: 'fa-file', to: '/listfiles' },
   { name: 'Agents', icon: 'fa-robot', to: '/agents' }
 ]
+
+const version = ref('')
+
+onMounted(async () => {
+  version.value = await adminGetVersion()
+})
 
 async function logout() {
   await apiLogout()
@@ -38,6 +46,8 @@ async function logout() {
       <aside class="flex h-full w-72 flex-col p-4">
         <RouterLink to="/dashboard">
           <h2 class="btn btn-ghost w-full text-center text-3xl">Phatcrack</h2>
+          <div class="w-full text-center" v-if="version != ''"><small class="font-mono text-center">{{ version }}</small></div>
+
         </RouterLink>
         <div
           v-if="config?.is_maintenance_mode"

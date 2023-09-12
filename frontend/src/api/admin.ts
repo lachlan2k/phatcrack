@@ -49,3 +49,7 @@ export function adminGetConfig(): Promise<AdminConfigResponseDTO> {
 export function adminSetConfig(newConfig: AdminConfigRequestDTO): Promise<AdminConfigRequestDTO> {
   return client.put('/api/v1/admin/config', newConfig).then((res) => res.data)
 }
+
+export function adminGetVersion(): Promise<string> {
+  return client.get('/api/v1/admin/version').then(res => res.data)
+}
