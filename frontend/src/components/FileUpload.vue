@@ -169,7 +169,8 @@ async function onSubmit(event: Event) {
 
   <div class="form-control mt-1">
     <label class="label font-bold">
-      <span class="label-text">Pick a file (max {{ bytesToReadable(config?.maximum_uploaded_file_size ?? 0) }})</span>
+      <span class="label-text" v-if="isAdmin">Pick a file</span>
+      <span class="label-text" v-else>Pick a file (max {{ bytesToReadable(config?.maximum_uploaded_file_size ?? 0) }})</span>
     </label>
     <input type="file" ref="fileInputEl" @change="onFileSelect" class="file-input file-input-bordered file-input-ghost" name="file" />
   </div>
