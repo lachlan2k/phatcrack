@@ -165,7 +165,7 @@ func apiEndpointToWSEndpoint(apiEndpoint string) (string, error) {
 
 func Run(conf *config.Config) error {
 	headers := http.Header{
-		"X-Agent-Key": []string{conf.AuthKey},
+		"Authorization": []string{conf.AuthKey},
 	}
 
 	wsEndpoint, err := apiEndpointToWSEndpoint(conf.APIEndpoint)

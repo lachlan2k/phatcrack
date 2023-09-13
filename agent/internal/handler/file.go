@@ -45,7 +45,7 @@ func (h *Handler) downloadFile(fileID string) error {
 		return err
 	}
 
-	request.Header.Add("X-Agent-Key", h.conf.AuthKey)
+	request.Header.Add("Authorization", h.conf.AuthKey)
 
 	log.Printf("Downloading file from %q", request.URL.String())
 	response, err := client.Do(request)

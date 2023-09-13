@@ -31,7 +31,7 @@ func handleAgentDownloadFile(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	authKey := c.Request().Header.Get("X-Agent-Key")
+	authKey := c.Request().Header.Get("Authorization")
 	if len(authKey) == 0 {
 		return echo.ErrUnauthorized
 	}
@@ -59,7 +59,7 @@ func handleAgentDownloadFile(c echo.Context) error {
 }
 
 func handleAgentWs(c echo.Context) error {
-	authKey := c.Request().Header.Get("X-Agent-Key")
+	authKey := c.Request().Header.Get("Authorization")
 	if len(authKey) == 0 {
 		return echo.ErrUnauthorized
 	}
