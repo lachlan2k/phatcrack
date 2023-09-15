@@ -7,7 +7,8 @@ import type {
   HashlistDTO,
   HashlistResponseMultipleDTO,
   ProjectAddShareRequestDTO,
-  ProjectSharesDTO
+  ProjectSharesDTO,
+  RunningJobsForUserResponseDTO
 } from './types'
 import type { AttackCreateRequestDTO } from './types'
 import type {
@@ -91,6 +92,10 @@ export function getAttacksWithJobsForHashlist(hashlistId: string, includeRuntime
   return client
     .get(`/api/v1/hashlist/${hashlistId}/attacks-with-jobs` + (includeRuntimeData ? '?includeRuntimeData' : ''))
     .then((res) => res.data)
+}
+
+export function getRunningJobs(): Promise<RunningJobsForUserResponseDTO> {
+  return client.get('/api/v1/job/all-running').then((res) => res.data)
 }
 
 export const JobStatusCreated = 'JobStatus-Created'

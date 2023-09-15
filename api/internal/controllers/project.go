@@ -10,6 +10,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
+	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
@@ -115,9 +116,18 @@ func handleProjectDelete(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
+	jobsToStop, err := db.GetJobsForProject(projId)
+	if err != nil {
+		return util.ServerError("Failed to get jobs to stop", err)
+	}
+
 	err = db.HardDelete(proj)
 	if err != nil {
 		return util.ServerError("Failed to delete project", err)
+	}
+
+	for _, job := range jobsToStop {
+		fleet.StopJob(job, db.JobStopReasonUserStopped)
 	}
 
 	AuditLog(c, log.Fields{

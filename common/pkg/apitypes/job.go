@@ -78,3 +78,14 @@ type JobSimpleDTO struct {
 type JobMultipleDTO struct {
 	Jobs []JobSimpleDTO `json:"jobs"`
 }
+
+type RunningJobForUserDTO struct {
+	ProjectID  string `json:"project_id"`
+	HashlistID string `json:"hashlist_id"`
+	AttackID   string `json:"attack_id"`
+	JobID      string `json:"job_id"`
+}
+
+type RunningJobsForUserResponseDTO struct {
+	Jobs []RunningJobForUserDTO `json:"jobs"`
+}

@@ -389,6 +389,15 @@ export interface JobSimpleDTO {
 export interface JobMultipleDTO {
   jobs: JobSimpleDTO[]
 }
+export interface RunningJobForUserDTO {
+  project_id: string
+  hashlist_id: string
+  attack_id: string
+  job_id: string
+}
+export interface RunningJobsForUserResponseDTO {
+  jobs: RunningJobForUserDTO[]
+}
 export interface ListfileDTO {
   id: string
   file_type: string

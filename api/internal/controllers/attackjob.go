@@ -16,6 +16,21 @@ func HookJobEndpoints(api *echo.Group) {
 		return c.String(http.StatusOK, "pong jobs")
 	})
 
+	api.GET("/all-running", func(c echo.Context) error {
+		user := auth.UserFromReq(c)
+		if user == nil {
+			return echo.ErrForbidden
+		}
+
+		jobs, err := db.GetAllRunningJobsForUser(user)
+		if err != nil {
+			return util.ServerError("Failed to load jobs", err)
+		}
+
+		return c.JSON(http.StatusOK, apitypes.RunningJobsForUserResponseDTO{
+			Jobs: jobs.ToDTO(),
+		})
+	})
 	api.GET("/:job-id", handleAttackJobGet)
 }
 

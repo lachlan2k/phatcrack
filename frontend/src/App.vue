@@ -9,9 +9,11 @@ import { useProjectsStore } from './stores/projects'
 import { useListfilesStore } from './stores/listfiles'
 import { useAgentsStore } from './stores/agents'
 import { useUsersStore } from './stores/users'
+import { useRunningJobsStore } from './stores/runningJobs'
 
 const AUTH_REFRESH_RATE = 0.5 * 60 * 1000 // Every 5 minutes
-const authRefreshTimeout = ref(0)
+const authRefreshInterval = ref(0)
+const runningJobsInterval = ref(0)
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -20,6 +22,7 @@ const projectStore = useProjectsStore()
 const listfileStore = useListfilesStore()
 const agentsStore = useAgentsStore()
 const usersStore = useUsersStore()
+const runningJobsStore = useRunningJobsStore()
 
 const { hasCompletedAuth, hasTriedAuth, loggedInUser, isLoggedIn } = storeToRefs(authStore)
 
@@ -27,10 +30,14 @@ onMounted(() => {
   authStore.refreshAuth()
   configStore.load()
 
-  authRefreshTimeout.value = setInterval(() => {
+  authRefreshInterval.value = setInterval(() => {
     authStore.refreshAuth()
     configStore.load()
   }, AUTH_REFRESH_RATE)
+
+  runningJobsInterval.value = setInterval(() => {
+    runningJobsStore.load()
+  }, 15 * 1000)
 })
 
 router.beforeEach(() => {
@@ -39,7 +46,8 @@ router.beforeEach(() => {
 })
 
 onBeforeUnmount(() => {
-  clearInterval(authRefreshTimeout.value)
+  clearInterval(authRefreshInterval.value)
+  clearInterval(runningJobsInterval.value)
 })
 
 const toast = useToast()
@@ -51,6 +59,7 @@ watch(hasCompletedAuth, (newHasCompletedAuth, prevHasCompletedAuth) => {
     projectStore.load(true)
     agentsStore.load(true)
     usersStore.load(true)
+    runningJobsStore.load()
   }
 })
 

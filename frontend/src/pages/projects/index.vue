@@ -10,9 +10,12 @@ import { useToastError } from '@/composables/useToastError'
 import { deleteProject } from '@/api/project'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
+import { useRunningJobsStore } from '@/stores/runningJobs'
 
 const projectsStore = useProjectsStore()
 projectsStore.load(true)
+
+const runningJobsStore = useRunningJobsStore()
 
 const authStore = useAuthStore()
 const { loggedInUser } = storeToRefs(authStore)
@@ -33,6 +36,13 @@ async function onDeleteProject(id: string) {
   } finally {
     projectsStore.load(true)
   }
+}
+
+const quantityStr = (num: number, str: string) => {
+  if (num == 1) {
+    return `${num} ${str}`
+  }
+  return `${num} ${str}s`
 }
 </script>
 
@@ -56,6 +66,12 @@ async function onDeleteProject(id: string) {
                 <tr class="hover">
                   <td class="cursor-pointer" @click="navigate">
                     {{ project.name }}
+                    <div
+                      class="badge badge-info float-right whitespace-nowrap font-normal"
+                      v-if="runningJobsStore.forProject(project.id).length > 0"
+                    >
+                      {{ quantityStr(runningJobsStore.forProject(project.id).length, 'job') }} running
+                    </div>
                     <span class="ml-1 text-xs font-normal text-slate-500" v-if="project.owner_user_id != loggedInUser?.id">
                       <font-awesome-icon icon="fa-solid fa-link" /> Shared by
                       {{ usersStore.byId(project.owner_user_id)?.username ?? 'Unknown user' }}

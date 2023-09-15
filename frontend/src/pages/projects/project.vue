@@ -18,11 +18,14 @@ import { useToastError } from '@/composables/useToastError'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
+import { useRunningJobsStore } from '@/stores/runningJobs'
 
 const projId = useRoute().params.id as string
 
 const router = useRouter()
 const usersStore = useUsersStore()
+
+const runningJobsStore = useRunningJobsStore()
 
 const authStore = useAuthStore()
 const { loggedInUser, isAdmin } = storeToRefs(authStore)
@@ -78,6 +81,13 @@ const hasOwnereshipRights = computed(() => {
 
   return isAdmin || user.id == projectData.value?.owner_user_id
 })
+
+const quantityStr = (num: number, str: string) => {
+  if (num == 1) {
+    return `${num} ${str}`
+  }
+  return `${num} ${str}s`
+}
 </script>
 
 <template>
@@ -146,7 +156,15 @@ const hasOwnereshipRights = computed(() => {
                   :to="`/hashlist/${hashlist.id}`"
                 >
                   <tr class="hover">
-                    <td @click="navigate" class="cursor-pointer">{{ hashlist.name }}</td>
+                    <td @click="navigate" class="cursor-pointer">
+                      {{ hashlist.name }}
+                      <div
+                        class="badge badge-info float-right whitespace-nowrap font-normal"
+                        v-if="runningJobsStore.forHashlist(hashlist.id).length > 0"
+                      >
+                        {{ quantityStr(runningJobsStore.forHashlist(hashlist.id).length, 'job') }} running
+                      </div>
+                    </td>
                     <td @click="navigate" class="cursor-pointer">{{ hashlist.hash_type }} - {{ getHashTypeName(hashlist.hash_type) }}</td>
                     <td @click="navigate" class="cursor-pointer">{{ timeSince(hashlist.time_created * 1000) }}</td>
                     <td class="w-0 text-center">

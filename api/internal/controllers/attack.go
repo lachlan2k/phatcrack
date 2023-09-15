@@ -118,9 +118,18 @@ func handleDeleteAttack(c echo.Context) error {
 		"attack_id":    attackId,
 	}, "User deleted attack")
 
+	jobsToStop, err := db.GetJobsForAttack(attackId, false)
+	if err != nil {
+		return util.ServerError("Failed to get jobs to stop", err)
+	}
+
 	err = db.HardDelete(attack)
 	if err != nil {
 		return util.ServerError("Failed to delete attack", err)
+	}
+
+	for _, job := range jobsToStop {
+		fleet.StopJob(job, db.JobStopReasonUserStopped)
 	}
 
 	return c.JSON(http.StatusOK, "ok")

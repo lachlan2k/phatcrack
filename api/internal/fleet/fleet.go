@@ -136,6 +136,9 @@ func scheduleJobUnsafe(jobIds []string) ([]string, error) {
 }
 
 func StopJob(job db.Job, reason string) {
+	fleetLock.Lock()
+	defer fleetLock.Unlock()
+
 	tellAgentToKillJob(job.AssignedAgentID, &job.ID, reason)
 }
 

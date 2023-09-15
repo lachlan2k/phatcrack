@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"github.com/lib/pq"
@@ -244,6 +245,57 @@ func GetAllIncompleteJobs(includeRuntimeData bool) ([]Job, error) {
 	return jobs, err
 }
 
+type RunningJobForUser struct {
+	ProjectID  uuid.UUID
+	HashlistID uuid.UUID
+	AttackID   uuid.UUID
+	JobID      uuid.UUID
+}
+
+func (j *RunningJobForUser) ToDTO() apitypes.RunningJobForUserDTO {
+	return apitypes.RunningJobForUserDTO{
+		ProjectID:  j.ProjectID.String(),
+		HashlistID: j.HashlistID.String(),
+		AttackID:   j.AttackID.String(),
+		JobID:      j.JobID.String(),
+	}
+}
+
+type RunningJobsForUser []RunningJobForUser
+
+func (jobs RunningJobsForUser) ToDTO() []apitypes.RunningJobForUserDTO {
+	out := make([]apitypes.RunningJobForUserDTO, len(jobs))
+	for i, job := range jobs {
+		out[i] = job.ToDTO()
+	}
+	return out
+}
+
+func GetAllRunningJobsForUser(user *User) (RunningJobsForUser, error) {
+	jobs := []RunningJobForUser{}
+	query := GetInstance().
+		Table("job_runtime_data").
+		Select("projects.id as project_id, hashlists.id as hashlist_id, attacks.id as attack_id, jobs.id as job_id").
+		Joins("join jobs on jobs.id = job_runtime_data.job_id").
+		Joins("join attacks on attacks.id = jobs.attack_id").
+		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
+		Joins("join projects on projects.id = hashlists.project_id")
+
+	if user.HasRole(roles.RoleAdmin) {
+		query = query.Where("job_runtime_data.status = ?", JobStatusStarted)
+	} else {
+		query = query.
+			Joins("left join project_shares on project_shares.project_id = projects.id").
+			Where("job_runtime_data.status = ? and (owner_user_id = ? or project_shares.user_id = ?)", JobStatusStarted, user.ID, user.ID)
+	}
+
+	err := query.Find(&jobs).Error
+	if err != nil {
+		return nil, err
+	}
+	return jobs, err
+}
+
 func GetJobProjID(jobId string) (string, error) {
 	var result struct {
 		ProjectID uuid.UUID
@@ -271,6 +323,35 @@ func CreateJob(job *Job) (*Job, error) {
 	}
 
 	return job, GetInstance().Create(job).Error
+}
+
+func GetJobsForHashlist(hashlistId string) ([]Job, error) {
+	result := []Job{}
+
+	err := GetInstance().
+		Joins("join attacks on attacks.id = jobs.attack_id").
+		Where("attacks.hashlists_id = ?", hashlistId).
+		Find(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func GetJobsForProject(projectId string) ([]Job, error) {
+	result := []Job{}
+
+	err := GetInstance().
+		Joins("join attacks on attacks.id = jobs.attack_id").
+		Joins("join hashlists on hashlists.id = attack.hashlist_id").
+		Where("hashlists.project_id = ?", projectId).
+		Find(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func CreateJobTx(job *Job, tx *gorm.DB) (*Job, error) {
