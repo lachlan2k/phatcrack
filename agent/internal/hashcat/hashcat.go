@@ -272,7 +272,7 @@ func (sess *HashcatSession) Start() error {
 
 			// Everything in the middle
 			hashParts := values[1 : len(values)-2]
-			hash := strings.Join(hashParts, "")
+			hash := strings.Join(hashParts, ":")
 
 			timestampI, err := strconv.ParseInt(timestamp, 10, 64)
 			if err != nil {
