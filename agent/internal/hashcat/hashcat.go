@@ -260,13 +260,19 @@ func (sess *HashcatSession) Start() error {
 		for tLine := range tailer.Lines {
 			line := tLine.Text
 			values := strings.Split(line, ":")
-			if len(values) != 3 {
+			if len(values) < 3 {
 				log.Printf("unexpected line contents: %q", line)
 				continue
 			}
+
+			// First
 			timestamp := values[0]
-			hash := values[1]
-			plainHex := values[2]
+			// Last
+			plainHex := values[len(values)-1]
+
+			// Everything in the middle
+			hashParts := values[1 : len(values)-2]
+			hash := strings.Join(hashParts, "")
 
 			timestampI, err := strconv.ParseInt(timestamp, 10, 64)
 			if err != nil {
