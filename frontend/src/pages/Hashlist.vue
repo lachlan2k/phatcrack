@@ -169,7 +169,7 @@ function openAttackModal(attackIndex: number) {
       <span class="loading loading-spinner loading-lg"></span>
     </div>
     <div v-else>
-      <h1 class="text-4xl font-bold">{{ hashlistData?.name }} {{ hashTypeStr }}</h1>
+      <h1 class="text-4xl font-bold">{{ hashlistData?.name }} - {{ hashTypeStr }}</h1>
       <div class="breadcrumbs pl-1 text-sm">
         <ul>
           <li>
