@@ -71,6 +71,14 @@ func (params HashcatParams) Validate() error {
 	return nil
 }
 
+type uintIf interface {
+	uint | uint8 | uint16 | uint32 | uint64
+}
+
+func fmtUint[T uintIf](x T) string {
+	return strconv.FormatUint(uint64(x), 10)
+}
+
 func (params HashcatParams) maskArgs() ([]string, error) {
 	maxCharsets := 4
 	if params.MaskShardedCharset != "" {
@@ -96,11 +104,11 @@ func (params HashcatParams) maskArgs() ([]string, error) {
 		args = append(args, "--increment")
 
 		if params.MaskIncrementMin > 0 {
-			args = append(args, "--increment-min", strconv.Itoa(int(params.MaskIncrementMin)))
+			args = append(args, "--increment-min", fmtUint(params.MaskIncrementMin))
 		}
 
 		if params.MaskIncrementMax > 0 {
-			args = append(args, "--increment-max", strconv.Itoa(int(params.MaskIncrementMax)))
+			args = append(args, "--increment-max", fmtUint(params.MaskIncrementMax))
 		}
 	}
 
@@ -122,8 +130,8 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 		"--status-json",
 		"--status-timer", "3",
 		"--potfile-disable",
-		"-a", strconv.Itoa(int(params.AttackMode)),
-		"-m", strconv.Itoa(int(params.HashType)),
+		"-a", fmtUint(params.AttackMode),
+		"-m", fmtUint(params.HashType),
 	)
 
 	args = append(args, params.AdditionalArgs...)

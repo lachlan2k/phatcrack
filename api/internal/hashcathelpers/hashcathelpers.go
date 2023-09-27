@@ -101,7 +101,11 @@ func CalculateKeyspace(params hashcattypes.HashcatParams) (int64, error) {
 		return 0, fmt.Errorf("keyspace calculation not implemented for attack mode %d", params.AttackMode)
 	}
 
-	args := []string{"--keyspace", "-m", strconv.Itoa(int(params.AttackMode))}
+	args := []string{
+		"--keyspace",
+		"-a", strconv.FormatUint(uint64(params.AttackMode), 10),
+		"-m", strconv.FormatUint(uint64(params.HashType), 10),
+	}
 	for _, rule := range rulefilePaths {
 		args = append(args, "-r", rule)
 	}
