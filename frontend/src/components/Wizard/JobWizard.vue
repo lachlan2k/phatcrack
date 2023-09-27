@@ -82,7 +82,6 @@ const stepsToDisplay = steps.slice(props.firstStep)
  */
 const inputs = reactive({
   projectName: '',
-  projectDesc: '',
   selectedProjectId: props.existingProjectId ?? '',
 
   hashlistName: '',
@@ -132,7 +131,6 @@ watch(
   (newSelectedProj) => {
     if (newSelectedProj != '') {
       inputs.projectName = ''
-      inputs.projectDesc = ''
     }
   }
 )
@@ -176,7 +174,7 @@ async function saveOrGetProject(): Promise<ProjectDTO> {
       return proj
     }
 
-    const proj = await createProject(inputs.projectName, inputs.projectDesc)
+    const proj = await createProject(inputs.projectName, '')
 
     inputs.selectedProjectId = proj.id
 
@@ -323,15 +321,7 @@ async function saveAndStartAttack() {
               <span class="label-text">New Project Name</span>
             </label>
             <input v-model="inputs.projectName" type="text" placeholder="12345 Example Corp" class="input input-bordered w-full max-w-xs" />
-            <label class="label mt-4 font-bold">
-              <span class="label-text">New Project Description (optional)</span>
-            </label>
-            <input
-              v-model="inputs.projectDesc"
-              type="text"
-              placeholder="Internal Network Pentest"
-              class="input input-bordered w-full max-w-xs"
-            />
+
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
                 <button class="link" @click="saveOrGetProject" v-if="inputs.projectName != ''">Create empty project and finish</button>
@@ -487,10 +477,6 @@ async function saveAndStartAttack() {
                 <tr>
                   <td>Project Name</td>
                   <td>{{ inputs.projectName }}</td>
-                </tr>
-                <tr>
-                  <td>Project Description</td>
-                  <td>{{ inputs.projectDesc }}</td>
                 </tr>
               </div>
               <div v-if="props.firstStep <= 1">
