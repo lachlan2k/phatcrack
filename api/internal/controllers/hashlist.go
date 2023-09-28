@@ -198,7 +198,17 @@ func handleHashlistCreate(c echo.Context) error {
 		"project_id":    req.ProjectID,
 	}, "User created a new hashlist")
 
+	numFromPotfile, err := db.PopulateHashlistFromPotfile(newHashlist.ID.String())
+	if err != nil {
+		log.WithFields(log.Fields{
+			"hashlist_name": newHashlist.Name,
+			"hashlist_id":   newHashlist.ID.String(),
+			"project_id":    req.ProjectID,
+		}).WithError(err).Warn("Failed to populated hashlist from potfile")
+	}
+
 	return c.JSON(http.StatusCreated, apitypes.HashlistCreateResponseDTO{
-		ID: newHashlist.ID.String(),
+		ID:                      newHashlist.ID.String(),
+		NumPopulatedFromPotfile: numFromPotfile,
 	})
 }

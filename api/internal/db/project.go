@@ -112,6 +112,20 @@ func CreateHashlist(hashlist *Hashlist) (*Hashlist, error) {
 	return hashlist, GetInstance().Create(hashlist).Error
 }
 
+func PopulateHashlistFromPotfile(hashlistId string) (int64, error) {
+	res := GetInstance().Exec(
+		`UPDATE hashlist_hashes
+		SET plaintext_hex = potfile_entries.plaintext_hex, is_cracked = true
+		FROM potfile_entries, hashlists 
+		WHERE hashlist_hashes.hashlist_id = ?
+		AND potfile_entries.hash = hashlist_hashes.normalized_hash 
+		AND potfile_entries.hash_type = hashlists.hash_type
+		AND hashlist_hashes.is_cracked = false`,
+		hashlistId,
+	)
+	return res.RowsAffected, res.Error
+}
+
 type HashlistHash struct {
 	SimpleBaseModel
 	HashlistID     uuid.UUID `gorm:"type:uuid"`

@@ -1,3 +1,9 @@
+export const AttackModeDictionary = 0
+export const AttackModeCombinator = 1
+export const AttackModeMask       = 3
+export const AttackModeHybridDM   = 6
+export const AttackModeHybridMD   = 7
+
 export const attackModes = [
   { name: 'Wordlist', value: 0 },
   { name: 'Combinator', value: 1 },

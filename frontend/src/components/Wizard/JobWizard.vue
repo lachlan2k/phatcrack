@@ -14,7 +14,14 @@ import { useApi } from '@/composables/useApi'
 import { getAllRulefiles, getAllWordlists } from '@/api/listfiles'
 import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
 import { useToast } from 'vue-toastification'
-import { attackModes } from '@/util/hashcat'
+import {
+  AttackModeCombinator,
+  AttackModeDictionary,
+  AttackModeHybridDM,
+  AttackModeHybridMD,
+  AttackModeMask,
+  attackModes
+} from '@/util/hashcat'
 import { useResourcesStore } from '@/stores/resources'
 
 /*
@@ -93,6 +100,7 @@ const inputs = reactive({
   selectedWordlists: [] as string[],
   selectedRulefiles: [] as string[],
   mask: '',
+  maskIncrement: true,
   optimizedKernels: false,
   slowCandidates: false,
   enableLoopback: true,
@@ -216,21 +224,19 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
 }
 
 function makeHashcatParams(): HashcatParams {
-  return {
+  const baseParams: HashcatParams = {
     attack_mode: inputs.attackMode,
     hash_type: Number(inputs.hashType),
 
-    // TODO mask inputs
-    // Also TODO: how does combinator work?
-    mask: inputs.mask,
-    mask_increment: true,
+    mask: '',
+    mask_increment: false,
     mask_increment_min: 0,
     mask_increment_max: 0,
     mask_custom_charsets: [],
     mask_sharded_charset: '',
 
-    wordlist_filenames: inputs.selectedWordlists,
-    rules_filenames: inputs.selectedRulefiles,
+    wordlist_filenames: [],
+    rules_filenames: [],
 
     optimized_kernels: inputs.optimizedKernels,
     slow_candidates: inputs.slowCandidates,
@@ -238,6 +244,40 @@ function makeHashcatParams(): HashcatParams {
     additional_args: [],
     skip: 0,
     limit: 0
+  }
+
+  switch (inputs.attackMode) {
+    case AttackModeDictionary:
+      return {
+        ...baseParams,
+        wordlist_filenames: inputs.selectedWordlists.slice(0, 1),
+        rules_filenames: inputs.selectedRulefiles
+      }
+
+    case AttackModeCombinator:
+      return {
+        ...baseParams,
+        wordlist_filenames: inputs.selectedWordlists
+      }
+
+    case AttackModeMask:
+      return {
+        ...baseParams,
+        mask: inputs.mask,
+        mask_increment: inputs.maskIncrement
+      }
+
+    case AttackModeHybridDM:
+    case AttackModeHybridMD:
+      return {
+        ...baseParams,
+        mask: inputs.mask,
+        mask_increment: inputs.maskIncrement,
+        wordlist_filenames: inputs.selectedWordlists.slice(0, 1)
+      }
+
+    default:
+      return baseParams
   }
 }
 
@@ -409,6 +449,10 @@ async function saveAndStartAttack() {
           <!-- Brute-force/Mask -->
           <div v-if="inputs.attackMode === 3">
             <MaskInput v-model="inputs.mask" />
+            <label class="label cursor-pointer justify-start">
+              <input type="checkbox" v-model="inputs.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
+              <span><span class="label-text ml-4 font-bold">Mask increment?</span></span>
+            </label>
           </div>
 
           <!-- Wordlist + Mask -->
@@ -421,6 +465,10 @@ async function saveAndStartAttack() {
             />
             <hr class="my-4" />
             <MaskInput v-model="inputs.mask" />
+            <label class="label cursor-pointer justify-start">
+              <input type="checkbox" v-model="inputs.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
+              <span><span class="label-text ml-4 font-bold">Mask increment?</span></span>
+            </label>
           </div>
 
           <!-- Mask + Wordlist -->
@@ -433,12 +481,16 @@ async function saveAndStartAttack() {
               v-model="inputs.selectedWordlists"
               :limit="1"
             />
+            <label class="label cursor-pointer justify-start">
+              <input type="checkbox" v-model="inputs.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
+              <span><span class="label-text ml-4 font-bold">Mask increment?</span></span>
+            </label>
           </div>
 
           <hr class="my-4" />
 
           <label class="label font-bold">Additional Options</label>
-          <div class="pl-3">
+          <div>
             <label class="label cursor-pointer justify-start">
               <input type="checkbox" v-model="inputs.isDistributed" class="checkbox-primary checkbox checkbox-xs" />
               <span><span class="label-text ml-4 font-bold">Distribute attack?</span></span>
@@ -471,31 +523,56 @@ async function saveAndStartAttack() {
 
         <!-- Review/start -->
         <template v-if="inputs.activeStep == StepIndex.Review">
-          <table class="first-col-bold table w-full">
-            <tbody>
-              <div v-if="props.firstStep == 0">
+          <div v-if="props.firstStep == 0">
+            <!-- <p>Project</p> -->
+            <h3 class="text-center text-lg">Project Settings</h3>
+            <table class="compact-table table w-full">
+              <thead>
                 <tr>
-                  <td>Project Name</td>
+                  <th>Option</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="inputs.selectedProjectId != ''">
+                  <td><strong>Existing Project</strong></td>
+                  <td>{{ projectsStore.byId(inputs.selectedProjectId)?.name ?? 'Unknown' }}</td>
+                </tr>
+                <tr v-else>
+                  <td><strong>Project Name</strong></td>
                   <td>{{ inputs.projectName }}</td>
                 </tr>
-              </div>
-              <div v-if="props.firstStep <= 1">
+              </tbody>
+            </table>
+          </div>
+
+          <div v-if="props.firstStep <= 1" class="mt-8">
+            <h3 class="text-center text-lg">Hashlist Settings</h3>
+            <table class="compact-table table w-full">
+              <thead>
                 <tr>
-                  <td>Hashlist Name</td>
+                  <th>Option</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Hashlist Name</strong></td>
                   <td>{{ inputs.hashlistName }}</td>
                 </tr>
                 <tr>
-                  <td>Hashlist Type</td>
+                  <td><strong>Hashlist Type</strong></td>
                   <td>{{ selectedHashType?.id }} - {{ selectedHashType?.name }}</td>
                 </tr>
                 <tr>
-                  <td>Number of Hashes</td>
+                  <td><strong>Number of Hashes</strong></td>
                   <td>{{ hashesArr.length }}</td>
                 </tr>
-              </div>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
 
+          <h3 class="text-center text-lg">Attack Settings</h3>
           <AttackConfigDetails :hashcatParams="computedHashcatParams" :is-distributed="inputs.isDistributed"></AttackConfigDetails>
 
           <div class="mt-8 flex justify-between">
