@@ -279,7 +279,7 @@ func (sess *HashcatSession) Start() error {
 			plainHex := values[len(values)-1]
 
 			// Everything in the middle
-			hashParts := values[1 : len(values)-2]
+			hashParts := values[1 : len(values)-1]
 			hash := strings.Join(hashParts, ":")
 
 			timestampI, err := strconv.ParseInt(timestamp, 10, 64)
