@@ -263,7 +263,7 @@ func GetHashlistProjID(hashlistId string) (string, error) {
 
 func GetAllHashlistsForProject(projId string) ([]Hashlist, error) {
 	hashlists := []Hashlist{}
-	err := GetInstance().Find(&hashlists, "project_id = ?", projId).Error
+	err := GetInstance().Order("created_at DESC").Find(&hashlists, "project_id = ?", projId).Error
 	if err != nil {
 		return nil, err
 	}
@@ -351,7 +351,7 @@ func DeleteAttack(attackId string) error {
 
 func GetAllAttacksForHashlist(hashlistId string) ([]Attack, error) {
 	attacks := []Attack{}
-	err := GetInstance().Find(&attacks, "hashlist_id = ?", hashlistId).Error
+	err := GetInstance().Order("created_at DESC").Find(&attacks, "hashlist_id = ?", hashlistId).Error
 	if err != nil {
 		return nil, err
 	}
