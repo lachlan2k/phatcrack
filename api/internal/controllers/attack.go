@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -394,7 +395,6 @@ func handleAttackStart(c echo.Context) error {
 	}
 
 	db.SetAttackProgressString(attackId, "Distributing work...")
-	defer db.SetAttackProgressString(attackId, "")
 
 	jobMultiplier := config.Get().SplitJobsPerAgent
 	if jobMultiplier <= 0 {
@@ -402,57 +402,98 @@ func handleAttackStart(c echo.Context) error {
 	}
 	numJobs := fleet.NumSchedulableAgents() * jobMultiplier
 
-	newJobs, hashlist, err := attacksharder.MakeJobs(attack, numJobs)
-	if err == db.ErrNotFound {
-		return echo.ErrNotFound
-	}
-	if err != nil {
-		return util.ServerError("Something went wrong getting creating attack job", err)
-	}
+	errChan := make(chan error, 1)
+	successChan := make(chan apitypes.AttackStartResponseDTO, 1)
 
-	if err != nil {
-		return util.ServerError("Couldn't create attack job", err)
-	}
-
-	AuditLog(c, log.Fields{
-		"attack_id":     attack.ID,
-		"project_id":    projId,
-		"project_name":  proj.Name,
-		"hashlist_id":   attack.HashlistID,
-		"hashlist_name": hashlist.Name,
-	}, "User has started attack")
-
-	db.SetAttackProgressString(attackId, "Scheduling jobs...")
-
-	jobIDs := []string{}
-	for _, job := range newJobs {
-		jobIDs = append(jobIDs, job.ID.String())
-	}
-	_, err = fleet.ScheduleJobs(jobIDs)
-
-	if err != nil {
-		for _, newJob := range newJobs {
-			// If the deletion fails, there's not much for us to do really
-			db.HardDelete(newJob)
+	go func() {
+		defer db.SetAttackProgressString(attackId, "")
+		newJobs, hashlist, err := attacksharder.MakeJobs(attack, numJobs)
+		if err == db.ErrNotFound {
+			errChan <- echo.ErrNotFound
+			return
 		}
-	}
+		if err != nil {
+			errChan <- util.ServerError("Something went wrong getting creating attack job", err)
+			return
+		}
 
-	switch err {
-	case nil:
-		return c.JSON(http.StatusOK, apitypes.AttackStartResponseDTO{
-			JobIDs: jobIDs,
+		if err != nil {
+			errChan <- util.ServerError("Couldn't create attack job", err)
+			return
+		}
+
+		AuditLog(c, log.Fields{
+			"attack_id":     attack.ID,
+			"project_id":    projId,
+			"project_name":  proj.Name,
+			"hashlist_id":   attack.HashlistID,
+			"hashlist_name": hashlist.Name,
+		}, "User has started attack")
+
+		db.SetAttackProgressString(attackId, "Scheduling jobs...")
+
+		jobIDs := []string{}
+		for _, job := range newJobs {
+			jobIDs = append(jobIDs, job.ID.String())
+		}
+		_, err = fleet.ScheduleJobs(jobIDs)
+
+		if err != nil {
+			for _, newJob := range newJobs {
+				// If the deletion fails, there's not much for us to do really
+				db.HardDelete(newJob)
+			}
+		}
+
+		handleErr := func(err error) {
+			log.WithFields(log.Fields{
+				"attack_id":     attack.ID,
+				"project_id":    projId,
+				"project_name":  proj.Name,
+				"hashlist_id":   attack.HashlistID,
+				"hashlist_name": hashlist.Name,
+			}).WithError(err).Error("Failed to start attack")
+			errChan <- err
+		}
+
+		time.Sleep(time.Second)
+
+		switch err {
+		case nil:
+			handleErr(echo.NewHTTPError(http.StatusNotFound, "Job doesn't exist"))
+			// successChan <- apitypes.AttackStartResponseDTO{
+			// 	JobIDs:          jobIDs,
+			// 	StillProcessing: false,
+			// }
+
+		case fleet.ErrJobDoesntExist:
+			handleErr(echo.NewHTTPError(http.StatusNotFound, "Job doesn't exist"))
+
+		case fleet.ErrJobAlreadyScheduled:
+			handleErr(echo.NewHTTPError(http.StatusBadRequest, "Job already scheduled"))
+
+		case fleet.ErrNoAgentsOnline:
+			handleErr(echo.NewHTTPError(http.StatusServiceUnavailable, "No agents are online"))
+
+		default:
+			handleErr(util.ServerError("Unexpected error occured when scheduling job", err))
+		}
+
+		close(errChan)
+		close(successChan)
+	}()
+
+	select {
+	case e := <-errChan:
+		return e
+
+	case res := <-successChan:
+		return c.JSON(http.StatusOK, res)
+
+	case <-time.After(time.Second):
+		return c.JSON(http.StatusAccepted, apitypes.AttackStartResponseDTO{
+			JobIDs:          []string{},
+			StillProcessing: true,
 		})
-
-	case fleet.ErrJobDoesntExist:
-		return echo.NewHTTPError(http.StatusNotFound, "Job doesn't exist")
-
-	case fleet.ErrJobAlreadyScheduled:
-		return echo.NewHTTPError(http.StatusBadRequest, "Job already scheduled")
-
-	case fleet.ErrNoAgentsOnline:
-		return echo.NewHTTPError(http.StatusServiceUnavailable, "No agents are online")
-
-	default:
-		return util.ServerError("Unexpected error occured when scheduling job", err)
 	}
 }

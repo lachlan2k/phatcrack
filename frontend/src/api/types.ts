@@ -207,6 +207,7 @@ export interface AttackCreateRequestDTO {
 }
 export interface AttackStartResponseDTO {
   new_job_id: string[]
+  still_processing: boolean
 }
 export interface AuthLoginRequestDTO {
   username: string
@@ -346,6 +347,7 @@ export interface HashlistCreateRequestDTO {
 }
 export interface HashlistCreateResponseDTO {
   id: string
+  num_populated_from_potfile: number
 }
 export interface HashlistHashDTO {
   input_hash: string

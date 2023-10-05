@@ -30,5 +30,6 @@ type AttackCreateRequestDTO struct {
 }
 
 type AttackStartResponseDTO struct {
-	JobIDs []string `json:"new_job_id"`
+	JobIDs          []string `json:"new_job_ids"`
+	StillProcessing bool     `json:"still_processing"`
 }
