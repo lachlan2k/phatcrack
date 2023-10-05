@@ -201,7 +201,10 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
   try {
     if (inputs.selectedHashlistId) {
       const hashlist = await getHashlist(inputs.selectedHashlistId)
-      return hashlist
+      return {
+        id: hashlist.id,
+        num_populated_from_potfile: 0
+      }
     }
 
     const hashlist = await createHashlist({

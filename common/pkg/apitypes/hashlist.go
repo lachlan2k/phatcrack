@@ -10,7 +10,7 @@ type HashlistCreateRequestDTO struct {
 
 type HashlistCreateResponseDTO struct {
 	ID                      string `json:"id"`
-	NumPopulatedFromPotfile int64  `from:"num_populated_from_potfile"`
+	NumPopulatedFromPotfile int64  `json:"num_populated_from_potfile"`
 }
 
 type HashlistHashDTO struct {
