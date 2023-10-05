@@ -460,11 +460,10 @@ func handleAttackStart(c echo.Context) error {
 
 		switch err {
 		case nil:
-			handleErr(echo.NewHTTPError(http.StatusNotFound, "Job doesn't exist"))
-			// successChan <- apitypes.AttackStartResponseDTO{
-			// 	JobIDs:          jobIDs,
-			// 	StillProcessing: false,
-			// }
+			successChan <- apitypes.AttackStartResponseDTO{
+				JobIDs:          jobIDs,
+				StillProcessing: false,
+			}
 
 		case fleet.ErrJobDoesntExist:
 			handleErr(echo.NewHTTPError(http.StatusNotFound, "Job doesn't exist"))
