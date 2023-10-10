@@ -405,6 +405,13 @@ func handleAttackStart(c echo.Context) error {
 	errChan := make(chan error, 1)
 	successChan := make(chan apitypes.AttackStartResponseDTO, 1)
 
+	AuditLog(c, log.Fields{
+		"attack_id":    attack.ID,
+		"project_id":   projId,
+		"project_name": proj.Name,
+		"hashlist_id":  attack.HashlistID,
+	}, "User has started attack")
+
 	go func() {
 		defer db.SetAttackProgressString(attackId, "")
 		newJobs, hashlist, err := attacksharder.MakeJobs(attack, numJobs)
@@ -421,14 +428,6 @@ func handleAttackStart(c echo.Context) error {
 			errChan <- util.ServerError("Couldn't create attack job", err)
 			return
 		}
-
-		AuditLog(c, log.Fields{
-			"attack_id":     attack.ID,
-			"project_id":    projId,
-			"project_name":  proj.Name,
-			"hashlist_id":   attack.HashlistID,
-			"hashlist_name": hashlist.Name,
-		}, "User has started attack")
 
 		db.SetAttackProgressString(attackId, "Scheduling jobs...")
 
@@ -455,8 +454,6 @@ func handleAttackStart(c echo.Context) error {
 			}).WithError(err).Error("Failed to start attack")
 			errChan <- err
 		}
-
-		time.Sleep(time.Second)
 
 		switch err {
 		case nil:
