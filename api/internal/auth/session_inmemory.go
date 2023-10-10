@@ -41,6 +41,9 @@ func (s *InMemorySessionHandler) CreateMiddleware() echo.MiddlewareFunc {
 				return next(c)
 			}
 
+			s.storeLock.Lock()
+			defer s.storeLock.Unlock()
+
 			entry, err := s.getEntry(c)
 			if err != nil || entry == nil {
 				return next(c)
