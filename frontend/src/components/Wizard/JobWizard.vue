@@ -209,8 +209,6 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
       }
     }
 
-    console.log('hash arr value', hashesArr.value)
-
     const hashlist = await createHashlist({
       project_id: proj.id,
       name: inputs.hashlistName,
