@@ -344,7 +344,7 @@ func GetJobsForProject(projectId string) ([]Job, error) {
 
 	err := GetInstance().
 		Joins("join attacks on attacks.id = jobs.attack_id").
-		Joins("join hashlists on hashlists.id = attack.hashlist_id").
+		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
 		Where("hashlists.project_id = ?", projectId).
 		Find(&result).Error
 
