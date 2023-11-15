@@ -23,6 +23,7 @@ import {
   attackModes
 } from '@/util/hashcat'
 import { useResourcesStore } from '@/stores/resources'
+import { useToastError } from '@/composables/useToastError'
 
 /*
  * Props
@@ -144,7 +145,7 @@ watch(
 )
 
 const hashesArr = computed(() => {
-  return inputs.hashes.split(/\s+/).filter((x) => !!x)
+  return inputs.hashes.trim().split(/\n+/).filter((x) => !!x).map(x => x.trim())
 })
 
 const selectedHashType = computed(() => allHashTypes.value.find((x) => x.id.toString() === inputs.hashType))
@@ -171,6 +172,7 @@ const hashlistStepValidationError = computed(() => {
 })
 
 const toast = useToast()
+const { catcher } = useToastError()
 
 /*
  * API Helpers
@@ -189,7 +191,7 @@ async function saveOrGetProject(): Promise<ProjectDTO> {
     toast.success(`Created project "${inputs.projectName}"!`)
     return proj
   } catch (err: any) {
-    toast.warning('Failed to create project. ' + err.message)
+    catcher(err, 'Failed to create project. ')
     // Throw up so our caller knows an error happened
     throw err
   }
@@ -207,6 +209,8 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
       }
     }
 
+    console.log('hash arr value', hashesArr.value)
+
     const hashlist = await createHashlist({
       project_id: proj.id,
       name: inputs.hashlistName,
@@ -221,7 +225,7 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
 
     return hashlist
   } catch (err: any) {
-    toast.warning('Failed to create hashlist. ' + err.message)
+    catcher(err, 'Failed to create hashlist. ')
     throw err
   }
 }
@@ -300,7 +304,7 @@ async function saveUptoAttack(): Promise<AttackDTO> {
     toast.success('Created attack!')
     return attack
   } catch (err: any) {
-    toast.warning('Failed to create attack. ' + err.message)
+    catcher(err, 'Failed to create attack. ')
     throw err
   }
 }
@@ -315,15 +319,8 @@ async function saveAndStartAttack() {
       attackId: attack.id
     })
     toast.success('Started attack!')
-  } catch (e: any) {
-    let errorString = 'Unknown Error'
-    if (e instanceof AxiosError) {
-      errorString = e.response?.data?.message
-    } else if (e instanceof Error) {
-      errorString = e.message
-    }
-
-    toast.warning('Failed to start: ' + errorString)
+  } catch (err: any) {
+    catcher(err, 'Failed to start attack. ')
   }
 }
 </script>
