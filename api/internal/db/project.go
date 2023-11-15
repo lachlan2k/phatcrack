@@ -109,7 +109,23 @@ func (h *Hashlist) ToDTO(withHashes bool) apitypes.HashlistDTO {
 }
 
 func CreateHashlist(hashlist *Hashlist) (*Hashlist, error) {
-	return hashlist, GetInstance().Create(hashlist).Error
+	err := GetInstance().Transaction(func(tx *gorm.DB) error {
+		hashes := hashlist.Hashes
+		hashlist.Hashes = []HashlistHash{}
+
+		err := tx.Create(hashlist).Error
+		if err != nil {
+			return err
+		}
+
+		for i := range hashes {
+			hashes[i].HashlistID = hashlist.ID
+		}
+
+		return tx.CreateInBatches(hashes, 1000).Error
+	})
+
+	return hashlist, err
 }
 
 func PopulateHashlistFromPotfile(hashlistId string) (int64, error) {
