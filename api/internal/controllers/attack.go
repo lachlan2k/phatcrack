@@ -413,19 +413,41 @@ func handleAttackStart(c echo.Context) error {
 	}, "User has started attack")
 
 	go func() {
-		defer db.SetAttackProgressString(attackId, "")
-		newJobs, hashlist, err := attacksharder.MakeJobs(attack, numJobs)
-		if err == db.ErrNotFound {
-			errChan <- echo.ErrNotFound
-			return
+		finalProgressString := "" // blank == success
+		defer db.SetAttackProgressString(attackId, finalProgressString)
+
+		newJobs, _, err := attacksharder.MakeJobs(attack, numJobs)
+
+		handleErr := func(err error) {
+			errId := uuid.NewString()
+			finalProgressString = "Error #" + errId
+			log.WithFields(log.Fields{
+				"attack_id":    attack.ID,
+				"project_id":   projId,
+				"project_name": proj.Name,
+				"hashlist_id":  attack.HashlistID,
+				"error_id":     errId,
+			}).WithError(err).Error("Failed to start attack")
+			errChan <- err
 		}
-		if err != nil {
-			errChan <- util.ServerError("Something went wrong getting creating attack job", err)
+
+		if err == db.ErrNotFound {
+			errId := uuid.NewString()
+			finalProgressString = "Error #" + errId
+			log.WithFields(log.Fields{
+				"attack_id":    attack.ID,
+				"project_id":   projId,
+				"project_name": proj.Name,
+				"hashlist_id":  attack.HashlistID,
+				"error_id":     errId,
+			}).WithError(err).Error("Failed to start attack because it was not found")
+
+			errChan <- echo.ErrNotFound
 			return
 		}
 
 		if err != nil {
-			errChan <- util.ServerError("Couldn't create attack job", err)
+			handleErr(util.ServerError("Something went wrong creating attack job", err))
 			return
 		}
 
@@ -442,17 +464,6 @@ func handleAttackStart(c echo.Context) error {
 				// If the deletion fails, there's not much for us to do really
 				db.HardDelete(newJob)
 			}
-		}
-
-		handleErr := func(err error) {
-			log.WithFields(log.Fields{
-				"attack_id":     attack.ID,
-				"project_id":    projId,
-				"project_name":  proj.Name,
-				"hashlist_id":   attack.HashlistID,
-				"hashlist_name": hashlist.Name,
-			}).WithError(err).Error("Failed to start attack")
-			errChan <- err
 		}
 
 		switch err {
