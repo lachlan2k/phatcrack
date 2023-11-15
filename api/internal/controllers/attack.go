@@ -414,7 +414,10 @@ func handleAttackStart(c echo.Context) error {
 
 	go func() {
 		finalProgressString := "" // blank == success
-		defer db.SetAttackProgressString(attackId, finalProgressString)
+		defer func() {
+			// putting it in a func allows it to capture progress string properly
+			db.SetAttackProgressString(attackId, finalProgressString)
+		}()
 
 		newJobs, _, err := attacksharder.MakeJobs(attack, numJobs)
 
@@ -497,7 +500,7 @@ func handleAttackStart(c echo.Context) error {
 	case res := <-successChan:
 		return c.JSON(http.StatusOK, res)
 
-	case <-time.After(time.Second):
+	case <-time.After(3 * time.Second):
 		return c.JSON(http.StatusAccepted, apitypes.AttackStartResponseDTO{
 			JobIDs:          []string{},
 			StillProcessing: true,
