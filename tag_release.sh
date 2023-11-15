@@ -4,7 +4,7 @@ RELEASE_VERSION=$1
 
 sed -i "s@lachlan2k/phatcrack/releases/download/.*/@lachlan2k/phatcrack/releases/download/${RELEASE_VERSION}/@" README.md
 
-git commit -am "chore: Version ${RELEASE_VERSION}"
+git commit --allow-empty -am "chore: Version ${RELEASE_VERSION}"
 
 git push
 git tag ${RELEASE_VERSION}
