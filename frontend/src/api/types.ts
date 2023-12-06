@@ -15,12 +15,14 @@ export interface AdminAgentCreateResponseDTO {
 export interface AdminUserCreateRequestDTO {
   username: string
   password: string
+  gen_password: boolean
   roles: string[]
 }
 export interface AdminUserCreateResponseDTO {
   username: string
   id: string
   roles: string[]
+  generated_password: string
 }
 export interface AdminServiceAccountCreateRequestDTO {
   username: string

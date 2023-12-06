@@ -6,7 +6,7 @@ import PaginationControls from '@/components/PaginationControls.vue'
 import { adminCreateServiceAccount, adminCreateUser, adminDeleteUser, adminGetAllUsers } from '@/api/admin'
 import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { usePagination } from '@/composables/usePagination'
 import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
@@ -30,8 +30,15 @@ const {
 const possibleRoles = ['admin', 'standard']
 
 const newUserUsername = ref('')
+const newUserGenPassword = ref(false)
 const newUserPassword = ref('')
 const newUserRole = ref('standard')
+
+watch(newUserGenPassword, (newVal) => {
+  if (newVal === true) {
+    newUserPassword.value = ''
+  }
+})
 
 const serviceAccountValidationError = computed(() => {
   if (newUserUsername.value.length < 3) {
@@ -45,7 +52,7 @@ const newUserValidationError = computed(() => {
     return 'Username too short'
   }
 
-  if (newUserPassword.value.length < 16) {
+  if (!newUserGenPassword.value && newUserPassword.value.length < 16) {
     return 'Password too short'
   }
 
@@ -57,13 +64,20 @@ const { catcher } = useToastError()
 
 async function onCreateUser() {
   try {
+    const genPassword = newUserGenPassword.value
+
     const res = await adminCreateUser({
       username: newUserUsername.value,
+      gen_password: genPassword,
       password: newUserPassword.value,
       roles: [newUserRole.value]
     })
 
     toast.success('Created new user: ' + res.username)
+
+    if (genPassword) {
+      alert('Generated password: ' + res.generated_password)
+    }
   } catch (e: any) {
     catcher(e)
   } finally {
@@ -126,8 +140,11 @@ async function onDeleteUser(id: string) {
       <div class="form-control">
         <label class="label font-bold">
           <span class="label-text">Password</span>
+          <span @click="() => newUserGenPassword = !newUserGenPassword" class="cursor-pointer tooltip">
+            <font-awesome-icon icon="fa-solid fa-dice" />
+          </span>
         </label>
-        <input v-model="newUserPassword" type="password" placeholder="hunter2" class="input input-bordered w-full max-w-xs" />
+        <input v-model="newUserPassword" type="password" :placeholder="newUserGenPassword ? 'Randomly generated' : 'hunter2'" class="input input-bordered w-full max-w-xs" :disabled="newUserGenPassword" />
       </div>
 
       <div class="form-control">

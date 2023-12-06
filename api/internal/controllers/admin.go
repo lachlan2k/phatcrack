@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"encoding/hex"
 	"net/http"
+
+	"crypto/rand"
 
 	log "github.com/sirupsen/logrus"
 
@@ -108,6 +111,24 @@ func handleCreateUser(c echo.Context) error {
 		return err
 	}
 
+	password := req.Password
+	generatedPassword := ""
+
+	if req.GenPassword {
+		genBuff := make([]byte, 16)
+		_, err := rand.Read(genBuff)
+		if err != nil {
+			return util.ServerError("Couldn't create user", err)
+		}
+
+		generatedPassword = hex.EncodeToString(genBuff)
+		password = generatedPassword
+	} else {
+		if pwordOk, pwordFb := util.ValidatePasswordStrength(password); !pwordOk {
+			return echo.NewHTTPError(http.StatusBadRequest, "Password did not meet strength requirements: "+pwordFb)
+		}
+	}
+
 	rolesOk := roles.AreRolesAllowedOnRegistration(req.Roles)
 	if !rolesOk {
 		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
@@ -119,7 +140,7 @@ func handleCreateUser(c echo.Context) error {
 
 	// TODO: pro-active handling of duplicate username
 	// could also check to see what happens when the constraint fails
-	newUser, err := db.RegisterUser(req.Username, req.Password, req.Roles)
+	newUser, err := db.RegisterUser(req.Username, password, req.Roles)
 	if err != nil {
 		return util.ServerError("Couldn't create user", err)
 	}
@@ -129,9 +150,10 @@ func handleCreateUser(c echo.Context) error {
 	}, "New user created")
 
 	return c.JSON(http.StatusCreated, apitypes.AdminUserCreateResponseDTO{
-		ID:       newUser.ID.String(),
-		Username: newUser.Username,
-		Roles:    newUser.Roles,
+		ID:                newUser.ID.String(),
+		Username:          newUser.Username,
+		Roles:             newUser.Roles,
+		GeneratedPassword: generatedPassword,
 	})
 }
 
