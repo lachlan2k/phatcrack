@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/hex"
 	"net/http"
+	"strings"
 
 	"crypto/rand"
 
@@ -138,10 +139,12 @@ func handleCreateUser(c echo.Context) error {
 		req.Roles = append(req.Roles, roles.RoleRequiresPasswordChange)
 	}
 
-	// TODO: pro-active handling of duplicate username
-	// could also check to see what happens when the constraint fails
 	newUser, err := db.RegisterUser(req.Username, password, req.Roles)
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			return echo.NewHTTPError(http.StatusConflict, "A user with that username already exists")
+		}
+
 		return util.ServerError("Couldn't create user", err)
 	}
 

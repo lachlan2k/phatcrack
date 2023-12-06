@@ -73,10 +73,15 @@ async function onCreateUser() {
       roles: [newUserRole.value]
     })
 
-    toast.success('Created new user: ' + res.username)
-
     if (genPassword) {
-      alert('Generated password: ' + res.generated_password)
+      toast.info(`Created new user ${res.username}.\n\n Generated Password (note this down, won't be displayed again):\n${res.generated_password}`, {
+        // force user to dismiss this
+        timeout: false,
+        closeOnClick: false,
+        draggable: false
+      })
+    } else {
+      toast.success('Created new user: ' + res.username)
     }
   } catch (e: any) {
     catcher(e)
