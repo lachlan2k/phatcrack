@@ -119,6 +119,11 @@ export interface AttackDTO {
   is_distributed: boolean
   progress_string: string
 }
+export interface AttackIDTreeDTO {
+  project_id: string
+  hashlist_id: string
+  attack_id: string
+}
 export interface JobRuntimeSummaryDTO {
   hashrate: number
   estimated_time_remaining: number
@@ -200,13 +205,16 @@ export interface AttackWithJobsMultipleDTO {
 export interface AttackMultipleDTO {
   attacks: AttackDTO[]
 }
+export interface AttackIDTreeMultipleDTO {
+  attacks: AttackIDTreeDTO[]
+}
 export interface AttackCreateRequestDTO {
   hashlist_id: string
   hashcat_params: HashcatParams
   is_distributed: boolean
 }
 export interface AttackStartResponseDTO {
-  new_job_id: string[]
+  new_job_ids: string[]
   still_processing: boolean
 }
 export interface AuthLoginRequestDTO {

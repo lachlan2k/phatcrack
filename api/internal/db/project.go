@@ -392,6 +392,43 @@ func GetAttackProjID(attackId string) (string, error) {
 	return result.ProjectID.String(), nil
 }
 
+type AttackIDTree struct {
+	ProjectID  string
+	HashlistID string
+	AttackID   string
+}
+
+func (a *AttackIDTree) ToDTO() apitypes.AttackIDTreeDTO {
+	return apitypes.AttackIDTreeDTO{
+		ProjectID:  a.ProjectID,
+		HashlistID: a.HashlistID,
+		AttackID:   a.AttackID,
+	}
+}
+
+func GetAllAttacksWithProgressStringsForUser(user *User) ([]AttackIDTree, error) {
+	attacks := []AttackIDTree{}
+
+	query := GetInstance().
+		Select("projects.id as project_id, hashlists.id as hashlist_id, attacks.id as attack_id").
+		Table("attacks").
+		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
+		Joins("join projects on projects.id = hashlists.project_id").
+		Joins("left join project_shares on project_shares.project_id = projects.id").
+		Where("starts_with(progress_string, 'Processing')")
+
+	if !user.HasRole(roles.RoleAdmin) {
+		query = query.Where("owner_user_id = ? or project_shares.user_id = ?", user.ID, user.ID)
+	}
+
+	err := query.Find(&attacks).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return attacks, err
+}
+
 func SetAttackProgressString(attackId string, progressString string) error {
 	return GetInstance().
 		Table("attacks").

@@ -27,6 +27,7 @@ func HookAttackEndpoints(api *echo.Group) {
 	})
 
 	api.GET("/:attack-id", handleAttackGet)
+	api.GET("/all-initialising", handleAttacksGetInitialising)
 	api.PUT("/:attack-id/start", handleAttackStart)
 	api.POST("/create", handleAttackCreate)
 
@@ -34,6 +35,27 @@ func HookAttackEndpoints(api *echo.Group) {
 	api.DELETE("/:attack-id", handleDeleteAttack)
 
 	api.GET("/:attack-id/jobs", handleAttackJobGetAll)
+}
+
+func handleAttacksGetInitialising(c echo.Context) error {
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	attacks, err := db.GetAllAttacksWithProgressStringsForUser(user)
+	if err != nil {
+		return util.ServerError("Failed to get list of initialising attacks", err)
+	}
+
+	attackDTOs := make([]apitypes.AttackIDTreeDTO, len(attacks))
+	for i, attack := range attacks {
+		attackDTOs[i] = attack.ToDTO()
+	}
+
+	return c.JSON(http.StatusOK, apitypes.AttackIDTreeMultipleDTO{
+		Attacks: attackDTOs,
+	})
 }
 
 func handleAttackGetAllForHashlist(c echo.Context) error {
@@ -394,7 +416,7 @@ func handleAttackStart(c echo.Context) error {
 		return util.ServerError("Something went wrong getting attack to start", err)
 	}
 
-	db.SetAttackProgressString(attackId, "Distributing work...")
+	db.SetAttackProgressString(attackId, "Processing (this can take a while)..")
 
 	jobMultiplier := config.Get().SplitJobsPerAgent
 	if jobMultiplier <= 0 {
@@ -430,7 +452,7 @@ func handleAttackStart(c echo.Context) error {
 				"project_name": proj.Name,
 				"hashlist_id":  attack.HashlistID,
 				"error_id":     errId,
-			}).WithError(err).Error("Failed to start attack")
+			}).WithError(err).Warn("Failed to start attack")
 			errChan <- err
 		}
 

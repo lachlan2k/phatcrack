@@ -1,6 +1,7 @@
 import { client } from '.'
 import type {
   AttackDTO,
+  AttackIDTreeMultipleDTO,
   AttackMultipleDTO,
   AttackStartResponseDTO,
   AttackWithJobsMultipleDTO,
@@ -92,6 +93,10 @@ export function getAttacksWithJobsForHashlist(hashlistId: string, includeRuntime
   return client
     .get(`/api/v1/hashlist/${hashlistId}/attacks-with-jobs` + (includeRuntimeData ? '?includeRuntimeData' : ''))
     .then((res) => res.data)
+}
+
+export function getAttacksInitialising(): Promise<AttackIDTreeMultipleDTO> {
+  return client.get('/api/v1/attack/all-initialising').then((res) => res.data)
 }
 
 export function getRunningJobs(): Promise<RunningJobsForUserResponseDTO> {

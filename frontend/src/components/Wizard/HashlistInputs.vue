@@ -34,7 +34,11 @@ const hashType = computed({
 })
 
 const hashesArr = computed(() => {
-  return hashes.value.trim().split(/\n+/).filter((x) => !!x).map(x => x.trim())
+  return hashes.value
+    .trim()
+    .split(/\n+/)
+    .filter((x) => !!x)
+    .map((x) => x.trim())
 })
 
 const { detectButtonClass, detectButtonClick, detectButtonText, suggestedHashTypes, isLoadingSuggestions } = useWizardHashDetect(hashesArr)

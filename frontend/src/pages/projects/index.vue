@@ -10,12 +10,12 @@ import { useToastError } from '@/composables/useToastError'
 import { deleteProject } from '@/api/project'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
-import { useRunningJobsStore } from '@/stores/runningJobs'
+import { useActiveAttacksStore } from '@/stores/activeAttacks'
 
 const projectsStore = useProjectsStore()
 projectsStore.load(true)
 
-const runningJobsStore = useRunningJobsStore()
+const activeAttacksStore = useActiveAttacksStore()
 
 const authStore = useAuthStore()
 const { loggedInUser } = storeToRefs(authStore)
@@ -67,10 +67,16 @@ const quantityStr = (num: number, str: string) => {
                   <td class="cursor-pointer" @click="navigate">
                     {{ project.name }}
                     <div
-                      class="badge badge-info float-right whitespace-nowrap font-normal"
-                      v-if="runningJobsStore.forProject(project.id).length > 0"
+                      class="badge badge-neutral float-right my-1 mr-1 whitespace-nowrap font-normal"
+                      v-if="activeAttacksStore.initialisingAttacksForProject(project.id).length > 0"
                     >
-                      {{ quantityStr(runningJobsStore.forProject(project.id).length, 'job') }} running
+                      {{ quantityStr(activeAttacksStore.initialisingAttacksForProject(project.id).length, 'attack') }} processing
+                    </div>
+                    <div
+                      class="badge badge-info float-right my-1 mr-1 whitespace-nowrap font-normal"
+                      v-if="activeAttacksStore.jobsForProject(project.id).length > 0"
+                    >
+                      {{ quantityStr(activeAttacksStore.jobsForProject(project.id).length, 'job') }} running
                     </div>
                     <span class="ml-1 text-xs font-normal text-slate-500" v-if="project.owner_user_id != loggedInUser?.id">
                       <font-awesome-icon icon="fa-solid fa-link" /> Shared by

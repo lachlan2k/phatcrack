@@ -10,6 +10,12 @@ type AttackDTO struct {
 	ProgressString string                     `json:"progress_string"`
 }
 
+type AttackIDTreeDTO struct {
+	ProjectID  string `json:"project_id"`
+	HashlistID string `json:"hashlist_id"`
+	AttackID   string `json:"attack_id"`
+}
+
 type AttackWithJobsDTO struct {
 	AttackDTO
 	Jobs []JobDTO `json:"jobs"`
@@ -21,6 +27,10 @@ type AttackWithJobsMultipleDTO struct {
 
 type AttackMultipleDTO struct {
 	Attacks []AttackDTO `json:"attacks"`
+}
+
+type AttackIDTreeMultipleDTO struct {
+	Attacks []AttackIDTreeDTO `json:"attacks"`
 }
 
 type AttackCreateRequestDTO struct {

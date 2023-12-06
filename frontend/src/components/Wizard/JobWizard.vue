@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { AxiosError } from 'axios'
 import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
 import HashlistInputs from './HashlistInputs.vue'
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
@@ -145,7 +144,11 @@ watch(
 )
 
 const hashesArr = computed(() => {
-  return inputs.hashes.trim().split(/\n+/).filter((x) => !!x).map(x => x.trim())
+  return inputs.hashes
+    .trim()
+    .split(/\n+/)
+    .filter((x) => !!x)
+    .map((x) => x.trim())
 })
 
 const selectedHashType = computed(() => allHashTypes.value.find((x) => x.id.toString() === inputs.hashType))
