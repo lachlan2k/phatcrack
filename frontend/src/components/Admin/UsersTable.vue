@@ -74,7 +74,7 @@ async function onCreateUser() {
     })
 
     if (genPassword) {
-      toast.info(`Created new user ${res.username}.\n\n Generated Password (note this down, won't be displayed again):\n${res.generated_password}`, {
+      toast.info(`Created new user ${res.username}.\n\nGenerated Password (note this down, won't be displayed again):\n${res.generated_password}`, {
         // force user to dismiss this
         timeout: false,
         closeOnClick: false,
