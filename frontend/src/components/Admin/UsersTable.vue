@@ -74,12 +74,15 @@ async function onCreateUser() {
     })
 
     if (genPassword) {
-      toast.info(`Created new user ${res.username}.\n\nGenerated Password (note this down, won't be displayed again):\n${res.generated_password}`, {
-        // force user to dismiss this
-        timeout: false,
-        closeOnClick: false,
-        draggable: false
-      })
+      toast.info(
+        `Created new user ${res.username}.\n\nGenerated Password (note this down, won't be displayed again):\n${res.generated_password}`,
+        {
+          // force user to dismiss this
+          timeout: false,
+          closeOnClick: false,
+          draggable: false
+        }
+      )
     } else {
       toast.success('Created new user: ' + res.username)
     }
@@ -145,11 +148,17 @@ async function onDeleteUser(id: string) {
       <div class="form-control">
         <label class="label font-bold">
           <span class="label-text">Password</span>
-          <span @click="() => newUserGenPassword = !newUserGenPassword" class="cursor-pointer tooltip">
+          <span @click="() => (newUserGenPassword = !newUserGenPassword)" class="tooltip cursor-pointer">
             <font-awesome-icon icon="fa-solid fa-dice" />
           </span>
         </label>
-        <input v-model="newUserPassword" type="password" :placeholder="newUserGenPassword ? 'Randomly generated' : 'hunter2'" class="input input-bordered w-full max-w-xs" :disabled="newUserGenPassword" />
+        <input
+          v-model="newUserPassword"
+          type="password"
+          :placeholder="newUserGenPassword ? 'Randomly generated' : 'hunter2'"
+          class="input input-bordered w-full max-w-xs"
+          :disabled="newUserGenPassword"
+        />
       </div>
 
       <div class="form-control">

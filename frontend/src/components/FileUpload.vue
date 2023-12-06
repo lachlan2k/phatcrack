@@ -9,6 +9,7 @@ import type { AxiosProgressEvent } from 'axios'
 import { useConfigStore } from '@/stores/config'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
+import { useToastError } from '@/composables/useToastError'
 
 type FileType = 'Wordlist' | 'Rulefile'
 
@@ -91,6 +92,7 @@ async function onFileSelect(event: Event) {
 }
 
 const toast = useToast()
+const { catcher } = useToastError()
 
 const listfilesStore = useListfilesStore()
 
@@ -122,11 +124,7 @@ async function onSubmit(event: Event) {
       fileInputEl.value.value = ''
     }
   } catch (e) {
-    if (e instanceof Error) {
-      toast.error('Failed to upload file: ' + e.message)
-    } else {
-      toast.error('Failed to upload file')
-    }
+    catcher(e)
   } finally {
     isLoading.value = false
   }

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { AxiosError } from 'axios'
 import { reactive, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useApi } from '@/composables/useApi'
 import { adminGetConfig, adminSetConfig } from '@/api/admin'
 import { useConfigStore } from '@/stores/config'
+import { useToastError } from '@/composables/useToastError'
 
 const configStore = useConfigStore()
 const { data: settingsData, silentlyRefresh: reloadSettings, isLoading } = useApi(adminGetConfig)
@@ -34,6 +34,7 @@ watch(settingsData, (newSettings) => {
 })
 
 const toast = useToast()
+const { catcher } = useToastError()
 
 async function onSave() {
   try {
@@ -59,14 +60,7 @@ async function onSave() {
     configStore.load()
     toast.success('Settings saved')
   } catch (e: any) {
-    let errorString = 'Unknown Error'
-    if (e instanceof AxiosError) {
-      errorString = e.response?.data?.message
-    } else if (e instanceof Error) {
-      errorString = e.message
-    }
-
-    toast.error('Failed to save settings: ' + errorString)
+    catcher(e)
   } finally {
     reloadSettings()
   }

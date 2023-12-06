@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { AxiosError } from 'axios'
 import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { finishMFAChallenge, startMFAEnrollment, startMFAChallenge, finishMFAEnrollment, changeTemporaryPassword } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import { useToastError } from '@/composables/useToastError'
 
 const toast = useToast()
 const authStore = useAuthStore()
@@ -64,6 +64,7 @@ async function doLogin(event: Event) {
   authStore.login(username.value, password.value)
 }
 
+const { catcher } = useToastError()
 const isPasswordChangeLoading = ref(false)
 
 async function doPasswordChange(event: Event) {
@@ -85,14 +86,7 @@ async function doPasswordChange(event: Event) {
 
     authStore.refreshAuth()
   } catch (e: any) {
-    let errorString = 'Unknown Error'
-    if (e instanceof AxiosError) {
-      errorString = e.response?.data?.message
-    } else if (e instanceof Error) {
-      errorString = e.message
-    }
-
-    toast.error('Failed to change temporary password: ' + errorString)
+    catcher(e, 'Failed to change temporary password. ')
   } finally {
     isPasswordChangeLoading.value = false
   }
