@@ -178,7 +178,7 @@ func (a *Attack) ToDTO() apitypes.AttackDTO {
 	return apitypes.AttackDTO{
 		ID:             a.ID.String(),
 		HashlistID:     a.HashlistID.String(),
-		HashcatParams:  a.HashcatParams.Data,
+		HashcatParams:  a.HashcatParams.Data(),
 		IsDistributed:  a.IsDistributed,
 		ProgressString: a.ProgressString,
 	}

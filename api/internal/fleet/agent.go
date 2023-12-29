@@ -31,7 +31,7 @@ func (a *AgentConnection) MarkDisconnected() {
 		return
 	}
 
-	newInfo := agent.AgentInfo.Data
+	newInfo := agent.AgentInfo.Data()
 	newInfo.Status = db.AgentStatusUnhealthyAndDisconnected
 	newInfo.TimeOfLastDisconnect = time.Now()
 
@@ -194,7 +194,7 @@ func (a *AgentConnection) Handle() error {
 		return err
 	}
 
-	newInfo := agentInfo.AgentInfo.Data
+	newInfo := agentInfo.AgentInfo.Data()
 	newInfo.Status = db.AgentStatusUnhealthyButConnected
 	newInfo.TimeOfLastConnect = time.Now()
 

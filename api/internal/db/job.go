@@ -81,12 +81,12 @@ type JobRuntimeOutputLine struct {
 	Line   string
 }
 
-func (j *Job) ToDTO() apitypes.JobDTO {
+func (j Job) ToDTO() apitypes.JobDTO {
 	dto := apitypes.JobDTO{
 		ID:              j.ID.String(),
 		HashlistVersion: j.HashlistVersion,
 		AttackID:        j.AttackID.String(),
-		HashcatParams:   j.HashcatParams.Data,
+		HashcatParams:   j.HashcatParams.Data(),
 		TargetHashes:    j.TargetHashes,
 		HashType:        j.HashType,
 		RuntimeData:     j.RuntimeData.ToDTO(),
@@ -102,20 +102,20 @@ func (j *Job) ToDTO() apitypes.JobDTO {
 	return dto
 }
 
-func (r *JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
+func (r JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
 	// TODO
 	outlines := make([]apitypes.JobRuntimeOutputLineDTO, len(r.OutputLines.Data))
 	cracked := make([]apitypes.JobCrackedHashDTO, len(r.CrackedHashes.Data))
 
 	for i, line := range r.OutputLines.Data {
 		outlines[i] = apitypes.JobRuntimeOutputLineDTO{
-			Stream: line.Data.Stream,
-			Line:   line.Data.Line,
+			Stream: line.Data().Stream,
+			Line:   line.Data().Line,
 		}
 	}
 
 	for i, hash := range r.CrackedHashes.Data {
-		cracked[i] = hash.Data.ToDTO()
+		cracked[i] = hash.Data().ToDTO()
 	}
 
 	return apitypes.JobRuntimeDataDTO{
@@ -187,7 +187,7 @@ type JobCrackedHash struct {
 	PlaintextHex string
 }
 
-func (h *JobCrackedHash) ToDTO() apitypes.JobCrackedHashDTO {
+func (h JobCrackedHash) ToDTO() apitypes.JobCrackedHashDTO {
 	return apitypes.JobCrackedHashDTO{
 		Hash:         h.Hash,
 		PlaintextHex: h.PlaintextHex,

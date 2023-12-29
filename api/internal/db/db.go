@@ -136,7 +136,7 @@ func (a pgJSONBArray[T]) Value() (driver.Value, error) {
 func (a *pgJSONBArray[T]) Unwrap() []T {
 	arr := make([]T, len(a.Data))
 	for i, el := range a.Data {
-		arr[i] = el.Data
+		arr[i] = el.Data()
 	}
 
 	return arr

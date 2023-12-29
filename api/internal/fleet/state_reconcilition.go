@@ -7,6 +7,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"gorm.io/datatypes"
 
 	"github.com/google/uuid"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
@@ -65,8 +66,8 @@ func stateReconciliation() error {
 	jobsOk := make(map[string]uuid.UUID, 0)
 
 	for _, agent := range allAgents {
-		info := agent.AgentInfo.Data
-		activeJobs := agent.AgentInfo.Data.ActiveJobIDs
+		info := agent.AgentInfo.Data()
+		activeJobs := agent.AgentInfo.Data().ActiveJobIDs
 		needsSave := false
 
 		agentMap[agent.ID.String()] = agent
@@ -153,7 +154,7 @@ func stateReconciliation() error {
 			}
 		}
 
-		agent.AgentInfo.Data = newInfo
+		agent.AgentInfo = datatypes.NewJSONType(newInfo)
 	}
 
 	// Make sure listfiles are available on all healthy agents
@@ -166,10 +167,10 @@ func stateReconciliation() error {
 				}
 
 				return slices.ContainsFunc(
-					job.HashcatParams.Data.RulesFilenames,
+					job.HashcatParams.Data().RulesFilenames,
 					predicate,
 				) || slices.ContainsFunc(
-					job.HashcatParams.Data.WordlistFilenames,
+					job.HashcatParams.Data().WordlistFilenames,
 					predicate,
 				)
 			})
@@ -193,7 +194,7 @@ func stateReconciliation() error {
 		numPresent := 0
 
 		for _, agent := range agentMap {
-			if agent.AgentInfo.Data.Status != db.AgentStatusHealthy {
+			if agent.AgentInfo.Data().Status != db.AgentStatusHealthy {
 				continue
 			}
 
@@ -201,7 +202,7 @@ func stateReconciliation() error {
 			// (in all seriousness yes this is really gross but i dont quite care enough)
 			// (should refactor listfile to a map but meh)
 			found := false
-			for _, availableListfile := range agent.AgentInfo.Data.AvailableListfiles {
+			for _, availableListfile := range agent.AgentInfo.Data().AvailableListfiles {
 				if availableListfile.Name == listfile.ID.String() && availableListfile.Size == int64(listfile.SizeInBytes) {
 					found = true
 					break
@@ -306,7 +307,7 @@ func stateReconciliation() error {
 				continue
 			}
 
-			if job.RuntimeData.StartRequestTime.Add(30 * time.Second).After(agentThatShouldBeRunningJob.AgentInfo.Data.TimeOfLastHeartbeat) {
+			if job.RuntimeData.StartRequestTime.Add(30 * time.Second).After(agentThatShouldBeRunningJob.AgentInfo.Data().TimeOfLastHeartbeat) {
 				// The job was started after the last heartbeat (plus some wiggle room)
 				// So we can't know whether or not its in the list of running jobs
 				continue
@@ -325,8 +326,8 @@ func stateReconciliation() error {
 				log.
 					WithField("job_id", jobId).
 					WithField("agent_id", agentThatShouldBeRunningJob.ID.String()).
-					WithField("agent_running_jobs", agentThatShouldBeRunningJob.AgentInfo.Data.ActiveJobIDs).
-					WithField("agent_time_of_list_heartbeat", agentThatShouldBeRunningJob.AgentInfo.Data.TimeOfLastHeartbeat).
+					WithField("agent_running_jobs", agentThatShouldBeRunningJob.AgentInfo.Data().ActiveJobIDs).
+					WithField("agent_time_of_list_heartbeat", agentThatShouldBeRunningJob.AgentInfo.Data().TimeOfLastHeartbeat).
 					Warn("Job disappeared from list of running jobs")
 
 				tellAgentToKillJob(&agentRunningJob, &job.ID, db.JobStopReasonFailed)
@@ -413,7 +414,7 @@ func Setup() error {
 
 	// this is a bit manual and could be achieved in one UPDATE query, but I think this is fine for now
 	for _, agent := range agents {
-		if agent.AgentInfo.Data.Status == db.AgentStatusDead {
+		if agent.AgentInfo.Data().Status == db.AgentStatusDead {
 			continue
 		}
 		err = db.UpdateAgentStatus(agent.ID.String(), db.AgentStatusUnhealthyAndDisconnected)

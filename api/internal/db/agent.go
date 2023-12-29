@@ -45,14 +45,14 @@ type AgentInfo struct {
 	ActiveJobIDs         []string    `json:"active_job_ids,omitempty"`
 }
 
-func (a *AgentFile) ToDTO() apitypes.AgentFileDTO {
+func (a AgentFile) ToDTO() apitypes.AgentFileDTO {
 	return apitypes.AgentFileDTO{
 		Name: a.Name,
 		Size: a.Size,
 	}
 }
 
-func (a *AgentInfo) ToDTO() apitypes.AgentInfoDTO {
+func (a AgentInfo) ToDTO() apitypes.AgentInfoDTO {
 	listfileDTOs := make([]apitypes.AgentFileDTO, len(a.AvailableListfiles))
 	for i, f := range a.AvailableListfiles {
 		listfileDTOs[i] = f.ToDTO()
@@ -67,13 +67,13 @@ func (a *AgentInfo) ToDTO() apitypes.AgentInfoDTO {
 	}
 }
 
-func (a *Agent) ToDTO() apitypes.AgentDTO {
+func (a Agent) ToDTO() apitypes.AgentDTO {
 	return apitypes.AgentDTO{
 		ID:                a.ID.String(),
 		Name:              a.Name,
 		IsMaintenanceMode: a.IsMaintenanceMode,
-		AgentInfo:         a.AgentInfo.Data.ToDTO(),
-		AgentDevices:      a.AgentDevices.Data.Devices,
+		AgentInfo:         a.AgentInfo.Data().ToDTO(),
+		AgentDevices:      a.AgentDevices.Data().Devices,
 	}
 }
 

@@ -95,7 +95,7 @@ func createSingleJobfromAttack(attack *db.Attack) (*db.Job, *db.Hashlist, error)
 }
 
 func shardMaskAttack(attack *db.Attack, numJobs int) ([]*db.Job, *db.Hashlist, error) {
-	params := attack.HashcatParams.Data
+	params := attack.HashcatParams.Data()
 	if len(params.MaskCustomCharsets) >= 4 {
 		return nil, nil, fmt.Errorf("received %d custom character sets, maximum is 3", len(params.MaskCustomCharsets))
 	}
@@ -148,7 +148,7 @@ func shardMaskAttack(attack *db.Attack, numJobs int) ([]*db.Job, *db.Hashlist, e
 }
 
 func shardAttackByKeyspace(attack *db.Attack, numJobs int) ([]*db.Job, *db.Hashlist, error) {
-	params := attack.HashcatParams.Data
+	params := attack.HashcatParams.Data()
 	hashlist, err := db.GetHashlistWithHashes(attack.HashlistID.String())
 	if err != nil {
 		return nil, nil, err
@@ -212,7 +212,7 @@ func MakeJobs(attack *db.Attack, maxNumJobs int) ([]*db.Job, *db.Hashlist, error
 		return jobs, h, err
 	}
 
-	switch attack.HashcatParams.Data.AttackMode {
+	switch attack.HashcatParams.Data().AttackMode {
 	case hashcattypes.AttackModeDictionary, hashcattypes.AttackModeCombinator:
 		return shardAttackByKeyspace(attack, maxNumJobs)
 
@@ -220,6 +220,6 @@ func MakeJobs(attack *db.Attack, maxNumJobs int) ([]*db.Job, *db.Hashlist, error
 		return shardMaskAttack(attack, maxNumJobs)
 
 	default:
-		return nil, nil, fmt.Errorf("unrecognized attack mode: %d", attack.HashcatParams.Data.AttackMode)
+		return nil, nil, fmt.Errorf("unrecognized attack mode: %d", attack.HashcatParams.Data().AttackMode)
 	}
 }

@@ -17,7 +17,6 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
-	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 	"gorm.io/datatypes"
 )
 
@@ -353,9 +352,7 @@ func handleAttackCreate(c echo.Context) error {
 	// Enforce correct hashtype
 	req.HashcatParams.HashType = uint(hashlist.HashType)
 
-	hashcatParams := datatypes.JSONType[hashcattypes.HashcatParams]{
-		Data: req.HashcatParams,
-	}
+	hashcatParams := datatypes.NewJSONType(req.HashcatParams)
 
 	attack, err := db.CreateAttack(&db.Attack{
 		HashcatParams:  hashcatParams,
