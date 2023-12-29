@@ -36,7 +36,9 @@ onMounted(() => {
   }, AUTH_REFRESH_RATE)
 
   activeAttacksRefreshInterval.value = setInterval(() => {
-    activeAttacksStore.load()
+    if (isLoggedIn.value) {
+      activeAttacksStore.load()
+    }
   }, 15 * 1000)
 })
 
