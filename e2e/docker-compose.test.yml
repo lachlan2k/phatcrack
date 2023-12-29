@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  webserver:
+    build:
+      context: ../
+      dockerfile: Dockerfile.frontend
+    restart: unless-stopped
+    environment:
+      - TLS_OPTS=tls internal
+      - HOST_NAME=localhost
+    ports:
+      - 8443:443
+      - 8888:80
+
+  api:
+    build:
+      context: ../
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - PORT=3000
+      - DB_DSN=host=db user=phatcrack password=phatcrack dbname=phatcrack
+      - FILEREPO_PATH=/tmp
+      - E2E_TEST_ENABLE_FIXTURES=true
+      - E2E_TEST_FIXTURE_KEY=authKeyForE2E
+      - BASE_URL=https://localhost:8443
+
+  db:
+    image: postgres:15
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phatcrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=phatcrack
+      - POSTGRES_PASSWORD=phatcrack

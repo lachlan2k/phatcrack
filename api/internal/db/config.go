@@ -64,6 +64,10 @@ func SetConfig[ConfigT interface{}](newConf ConfigT) error {
 
 	var configRow Config
 	err = GetInstance().First(&configRow).Error
+	if err == ErrNotFound {
+		return SeedConfig[ConfigT](newConf)
+	}
+
 	if err != nil {
 		return err
 	}

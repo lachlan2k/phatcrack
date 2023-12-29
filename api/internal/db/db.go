@@ -97,6 +97,27 @@ func runMigrations() {
 	instance.AutoMigrate(&Config{})
 }
 
+func WipeEverything() error {
+	instance := GetInstance()
+
+	toDelete := []interface{}{&Agent{}, &Job{}, &JobRuntimeData{}, &Listfile{}, &PotfileEntry{}, &Project{}, &ProjectShare{}, &Hashlist{}, &HashlistHash{}, &Attack{}, &User{}, &Config{}}
+
+	return instance.Transaction(func(tx *gorm.DB) error {
+		for _, d := range toDelete {
+			err := tx.Unscoped().Where("1 = 1").Delete(d).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		return tx.Create(&User{
+			Username:     "admin",
+			Roles:        []string{roles.RoleAdmin, roles.RoleRequiresPasswordChange},
+			PasswordHash: "$2a$10$6bms9eKxGvegFOd7XTA.XORrgn/ulqvWAVTcUGnXjVmvrR2O9/ViK",
+		}).Error
+	})
+}
+
 type pgJSONBArray[T interface{}] struct {
 	arr  pq.GenericArray
 	Data []datatypes.JSONType[T]

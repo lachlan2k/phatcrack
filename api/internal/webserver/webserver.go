@@ -2,6 +2,8 @@ package webserver
 
 import (
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator"
@@ -11,6 +13,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/controllers"
 	"github.com/lachlan2k/phatcrack/api/internal/roles"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
+	"github.com/sirupsen/logrus"
 )
 
 func makeSessionHandler() auth.SessionHandler {
@@ -37,16 +40,21 @@ func Listen(port string) error {
 	// Agent auth is done separately in the controller, so it can go before auth middleware
 	controllers.HookAgentHandlerEndpoints(api.Group("/agent-handler"))
 
+	api.GET("/ping", func(c echo.Context) error {
+		return c.String(http.StatusOK, "pong")
+	})
+
+	if strings.TrimSpace(os.Getenv("E2E_TEST_ENABLE_FIXTURES")) != "" && len(strings.TrimSpace(os.Getenv("E2E_TEST_FIXTURE_KEY"))) > 1 {
+		logrus.Info("Testing fixtures are enabled -- do not run this in production")
+		controllers.HookE2EEndpoints(api.Group("/e2e"), strings.TrimSpace(os.Getenv("E2E_TEST_FIXTURE_KEY")))
+	}
+
 	api.Use(auth.CreateHeaderAuthMiddleware())
 	api.Use(sessionHandler.CreateMiddleware())
 
 	api.Use(auth.EnforceAuthMiddleware([]string{
 		"/api/v1/auth/login",
 	}))
-
-	api.GET("/ping", func(c echo.Context) error {
-		return c.String(http.StatusOK, "pong")
-	})
 
 	// If a user has "requires_password_change" etc they need to be able to do that
 	// Don't worry, the sessionhandler middleware is already enforcing auth
