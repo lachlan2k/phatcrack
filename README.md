@@ -1,16 +1,20 @@
 # Phatcrack
 
-Distributed hash cracking for chonkers. Phatcrack is a frontend for Hashcat that provides:
-* Modern web-interface, supporting most common Hashcat attacks
-* Multi-user and project access control
-* Work distribution across multiple workers
+Phatcrack is a modern solution for distributed hash cracking, designed for hackers and other information security professionals.
+
+Key features include:
+* Built on [Hashcat](https://hashcat.net), supporting most common Hashcat attacks and almost all hash types.
+* Excellent UX for manging projects, configuring attack settings, and viewing results.
+* Distributes attacks, allowing both dictionary-based and mask-based attacks to be split across multiple workers.
+* Automatically synchronises wordlists & rulefiles to all workers. Low-privileged users can be granted permission to upload wordlists & rulefiles.
+* Modern web-interface, with multi-user support and project-based access control.
 
 ![image](https://github.com/lachlan2k/phatcrack/assets/4683714/b10df9ec-ed5a-4678-9442-89003636bbce)
 
 ### Deployment
 
 #### Server
-Docker is the only supported deployment method for the server. 
+Docker is the only supported deployment method for the server. The following instructions assume you already have [Docker installed on your server](https://docs.docker.com/engine/install/), and are logged in as root (`sudo su`).
 
 ```sh
 # Ideally the container processes should be run rootless, so we'll create an unprivileged user.
@@ -21,6 +25,7 @@ cd /opt/phatcrack-server
 
 wget https://github.com/lachlan2k/phatcrack/releases/download/v0.1.5/docker-compose.yml
 
+# Update your hostname here:
 echo "HOST_NAME=phatcrack.lan" >> .env
 echo "DB_PASS=$(openssl rand -hex 16)" >> .env
 echo "PHATCRACK_USER=$(id -u phatcrack-server):$(id -g phatcrack-server)" >> .env
@@ -43,7 +48,7 @@ chown phatcrack-server:phatcrack-server filerepo
 docker compose up -d
 ```
 
-The default credentials are `admin:changeme`.
+You can then visit your local installation. The default credentials are `admin:changeme`.
 
 #### Agents
 
@@ -68,7 +73,7 @@ rm hashcat.7z
 mv hashcat-6.2.6 hashcat
 chown -R phatcrack-agent:phatcrack-agent ./hashcat
 
-
+# Download the phatcrack-agent program from the local server
 wget https://phatcrack.lan/phatcrack-agent
 # Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download/v0.1.5/phatcrack-agent
 
