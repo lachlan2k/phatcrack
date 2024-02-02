@@ -2,7 +2,7 @@ name: Docker Build & Publish API and Frontend
 
 on:
   schedule:
-    - cron: '18 11 * * *'
+    - cron: '0 0 * * 0'
   push:
     branches: [ "main" ]
     tags: [ 'v*.*.*' ]
