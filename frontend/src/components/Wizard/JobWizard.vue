@@ -524,14 +524,13 @@ async function saveAndStartAttack() {
 
         <!-- Review/start -->
         <template v-if="inputs.activeStep == StepIndex.Review">
-          <div v-if="props.firstStep == 0">
-            <!-- <p>Project</p> -->
-            <h3 class="text-center text-lg">Project Settings</h3>
+          <div v-if="props.firstStep == 0" class="mt-6">
+            <h3 class="text-lg font-bold">Project Settings</h3>
             <table class="compact-table table w-full">
               <thead>
                 <tr>
-                  <th>Option</th>
-                  <th>Value</th>
+                  <th class="w-1/2">Option</th>
+                  <th class="w-1/2">Value</th>
                 </tr>
               </thead>
               <tbody>
@@ -547,13 +546,13 @@ async function saveAndStartAttack() {
             </table>
           </div>
 
-          <div v-if="props.firstStep <= 1" class="mt-8">
-            <h3 class="text-center text-lg">Hashlist Settings</h3>
+          <div v-if="props.firstStep <= 1" class="mt-6">
+            <h3 class="text-lg font-bold">Hashlist Settings</h3>
             <table class="compact-table table w-full">
               <thead>
                 <tr>
-                  <th>Option</th>
-                  <th>Value</th>
+                  <th class="w-1/2">Option</th>
+                  <th class="w-1/2">Value</th>
                 </tr>
               </thead>
               <tbody>
@@ -573,8 +572,10 @@ async function saveAndStartAttack() {
             </table>
           </div>
 
-          <h3 class="text-center text-lg">Attack Settings</h3>
-          <AttackConfigDetails :hashcatParams="computedHashcatParams" :is-distributed="inputs.isDistributed"></AttackConfigDetails>
+          <div class="mt-6">
+            <h3 class="text-lg font-bold">Attack Settings</h3>
+            <AttackConfigDetails :hashcatParams="computedHashcatParams" :is-distributed="inputs.isDistributed"></AttackConfigDetails>
+          </div>
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">

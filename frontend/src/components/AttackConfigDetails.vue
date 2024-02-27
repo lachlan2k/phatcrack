@@ -49,8 +49,8 @@ const extraOptionsStr = computed(() => {
   <table class="compact-table table w-full">
     <thead>
       <tr>
-        <th>Option</th>
-        <th>Value</th>
+        <th class="w-1/2">Option</th>
+        <th class="w-1/2">Value</th>
       </tr>
     </thead>
     <tbody>
