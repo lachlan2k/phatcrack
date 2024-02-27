@@ -283,7 +283,7 @@ func handleRefresh(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  !user.HasRole(roles.RoleMFAEnrolled) && config.Get().IsMFARequired,
+			RequiresMFAEnrollment:  config.Get().IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
 		})
 	}
 }
@@ -329,7 +329,7 @@ func handleLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled),
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  !user.HasRole(roles.RoleMFAEnrolled) && config.Get().IsMFARequired,
+			RequiresMFAEnrollment:  config.Get().IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
 		}
 
 		logMessage := "Session started"
