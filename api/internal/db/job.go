@@ -103,7 +103,6 @@ func (j Job) ToDTO() apitypes.JobDTO {
 }
 
 func (r JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
-	// TODO
 	outlines := make([]apitypes.JobRuntimeOutputLineDTO, len(r.OutputLines.Data))
 	cracked := make([]apitypes.JobCrackedHashDTO, len(r.CrackedHashes.Data))
 

@@ -142,7 +142,6 @@ func handleHashlistDelete(c echo.Context) error {
 	return c.JSON(http.StatusOK, "ok")
 }
 
-// TODO: this endpoint doesn't validate that parameters like the name are of a sane length/charset
 func handleHashlistCreate(c echo.Context) error {
 	user := auth.UserFromReq(c)
 	if user == nil {
