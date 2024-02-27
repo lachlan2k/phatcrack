@@ -66,27 +66,16 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 		return h.handleJobKill(msg)
 
 	case wstypes.DownloadFileRequestType:
-		go func() {
-			err := h.handleDownloadFileRequest(msg)
-			if err != nil {
-				log.Printf("Error handling file download: %v", err)
-			}
-		}()
-		return nil
+		return h.handleDownloadFileRequest(msg)
 
 	case wstypes.DeleteFileRequestType:
-		go func() {
-			err := h.handleDeleteFileRequest(msg)
-			if err != nil {
-				log.Printf("Error handling file delete: %v", err)
-			}
-		}()
-		return nil
+		return h.handleDeleteFileRequest(msg)
 
 	default:
-		log.Printf("unrecognized message type: %q", msg.Type)
-		return nil
+		return fmt.Errorf("unrecognized message type: %q", msg.Type)
 	}
+
+	return nil
 }
 
 func (h *Handler) readLoop(ctx context.Context) error {
@@ -100,12 +89,12 @@ func (h *Handler) readLoop(ctx context.Context) error {
 
 		log.Printf("Received: %v", msg.Type)
 
-		// TODO: should we be error handling here? I don't think so
-		// Because if hashcat dies, for example, that shouldn't be reason to kill the agent
-		err = h.handleMessage(&msg)
-		if err != nil {
-			return fmt.Errorf("error when handling message: %v", err)
-		}
+		go func() {
+			err := h.handleMessage(&msg)
+			if err != nil {
+				log.Printf("Error when handling %s message: %v", msg.Type, err)
+			}
+		}()
 
 		select {
 		case <-ctx.Done():

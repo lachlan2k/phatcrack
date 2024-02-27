@@ -15,6 +15,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// The WSWrapper adds a buffer layer to the underlying websocket connection
+// It gracefully handles connection dropouts/reconnects in a manner that is transparent to the handler
 type WSWrapper struct {
 	DisableTLSVerification bool
 	Endpoint               string
