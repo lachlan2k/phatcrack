@@ -344,7 +344,14 @@ func (sess *HashcatSession) Kill() error {
 	if sess.proc == nil || sess.proc.Process == nil {
 		return nil
 	}
-	return sess.proc.Process.Kill()
+
+	err := sess.proc.Process.Kill()
+	
+	if errors.Is(err, os.ErrProcessDone) {
+		return nil
+	}
+	
+	return err
 }
 
 func (sess *HashcatSession) Cleanup() {
