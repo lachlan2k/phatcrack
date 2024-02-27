@@ -132,7 +132,8 @@ const numJobsFailed = (attack: AttackWithJobsDTO) =>
   ).length
 const numJobsQueued = (attack: AttackWithJobsDTO) =>
   attack.jobs.filter((x) => x.runtime_data.status == JobStatusAwaitingStart || x.runtime_data.status == JobStatusCreated).length
-const hashrateSum = (attack: AttackWithJobsDTO) => attack.jobs.map((x) => x.runtime_summary.hashrate).reduce((a, b) => a + b, 0)
+
+const hashrateSum = (attack: AttackWithJobsDTO) => attack.jobs.filter(x => x.runtime_data.status == JobStatusStarted).map((x) => x.runtime_summary.hashrate).reduce((a, b) => a + b, 0)
 
 const hashTypeStr = computed(() => {
   if (isLoading.value) {
