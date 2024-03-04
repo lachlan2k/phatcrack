@@ -133,7 +133,11 @@ const numJobsFailed = (attack: AttackWithJobsDTO) =>
 const numJobsQueued = (attack: AttackWithJobsDTO) =>
   attack.jobs.filter((x) => x.runtime_data.status == JobStatusAwaitingStart || x.runtime_data.status == JobStatusCreated).length
 
-const hashrateSum = (attack: AttackWithJobsDTO) => attack.jobs.filter(x => x.runtime_data.status == JobStatusStarted).map((x) => x.runtime_summary.hashrate).reduce((a, b) => a + b, 0)
+const hashrateSum = (attack: AttackWithJobsDTO) =>
+  attack.jobs
+    .filter((x) => x.runtime_data.status == JobStatusStarted)
+    .map((x) => x.runtime_summary.hashrate)
+    .reduce((a, b) => a + b, 0)
 
 const hashTypeStr = computed(() => {
   if (isLoading.value) {
@@ -233,7 +237,7 @@ function openAttackModal(attackIndex: number) {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="hash in currentHashes" :key="hash.normalized_hash">
+                  <tr v-for="hash in currentHashes" :key="hash.id + '|' + hash.normalized_hash">
                     <td class="overflow-hidden text-ellipsis whitespace-nowrap font-mono" style="max-width: 500px">
                       {{ hash.input_hash }}
                     </td>

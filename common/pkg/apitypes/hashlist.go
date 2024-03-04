@@ -14,6 +14,7 @@ type HashlistCreateResponseDTO struct {
 }
 
 type HashlistHashDTO struct {
+	ID             string `json:"id"`
 	InputHash      string `json:"input_hash"`
 	NormalizedHash string `json:"normalized_hash"`
 	IsCracked      bool   `json:"is_cracked"`

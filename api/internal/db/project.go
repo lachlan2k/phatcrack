@@ -1,6 +1,8 @@
 package db
 
 import (
+	"strconv"
+
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -153,6 +155,7 @@ type HashlistHash struct {
 
 func (h *HashlistHash) ToDTO() apitypes.HashlistHashDTO {
 	return apitypes.HashlistHashDTO{
+		ID:             strconv.FormatInt(int64(h.ID), 10),
 		InputHash:      h.InputHash,
 		NormalizedHash: h.InputHash,
 		PlaintextHex:   h.PlaintextHex,

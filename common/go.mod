@@ -11,6 +11,8 @@ require (
 	github.com/google/go-tpm v0.9.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/tkrajina/go-reflector v0.5.5 // indirect
+	github.com/tkrajina/typescriptify-golang-structs v0.1.11 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.10.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect

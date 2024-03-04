@@ -359,7 +359,15 @@ export interface HashlistCreateResponseDTO {
   id: string
   num_populated_from_potfile: number
 }
+export interface HashlistUpdateRequestDTO {
+  input_hashes: string[]
+}
+export interface HashlistUpdateResponseDTO {
+  id: string
+  num_populated_from_potfile: number
+}
 export interface HashlistHashDTO {
+  id: string
   input_hash: string
   normalized_hash: string
   is_cracked: boolean
