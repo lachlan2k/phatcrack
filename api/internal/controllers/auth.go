@@ -47,7 +47,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  !user.HasRole(roles.RoleMFAEnrolled) && config.Get().IsMFARequired,
+			RequiresMFAEnrollment:  config.Get().IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
 		})
 	})
 
