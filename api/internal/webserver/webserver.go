@@ -77,6 +77,7 @@ func Listen(port string) error {
 	controllers.HookAccountEndpoints(api.Group("/account"))
 	controllers.HookConfigEndpoints(api.Group("/config"))
 	controllers.HookUserEndpoints(api.Group("/user"))
+	controllers.HookPotfileEndpoints(api.Group("/potfile"))
 
 	adminAPI := api.Group("/admin")
 	adminAPI.Use(auth.AdminOnlyMiddleware(sessionHandler))

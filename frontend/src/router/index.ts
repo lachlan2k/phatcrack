@@ -31,7 +31,7 @@ const router = createRouter({
     },
     route('/agents', 'Agents', () => import('@/pages/Agents.vue')),
     route('/dashboard', 'Dashboard', () => import('@/pages/projects/index.vue')),
-    route('/potfile', 'Potfile', () => import('@/pages/Potfile.vue')),
+    route('/hash-search', 'Hash Search', () => import('@/pages/HashSearch.vue')),
 
     route('/project/:id', 'Project', () => import('@/pages/projects/project.vue')),
 

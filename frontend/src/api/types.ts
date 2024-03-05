@@ -359,13 +359,6 @@ export interface HashlistCreateResponseDTO {
   id: string
   num_populated_from_potfile: number
 }
-export interface HashlistUpdateRequestDTO {
-  input_hashes: string[]
-}
-export interface HashlistUpdateResponseDTO {
-  id: string
-  num_populated_from_potfile: number
-}
 export interface HashlistHashDTO {
   id: string
   input_hash: string
@@ -436,6 +429,18 @@ export interface GetAllRuleFilesDTO {
 }
 export interface ListfileUploadResponseDTO {
   listfile: ListfileDTO
+}
+export interface PotfileSearchRequestDTO {
+  hashes: string[]
+}
+export interface PotfileSearchResultDTO {
+  hash: string
+  hash_type: number
+  plaintext_hex: string
+  found: boolean
+}
+export interface PotfileSearchResponseDTO {
+  results: PotfileSearchResultDTO[]
 }
 export interface ProjectCreateRequestDTO {
   name: string

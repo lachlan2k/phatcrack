@@ -20,6 +20,7 @@ const route = useRoute()
 const pageLinks = [
   { name: 'Project Dashboard', icon: 'fa-gauge', to: '/dashboard' },
   { name: 'Wordlists & Rules', icon: 'fa-file', to: '/listfiles' },
+  { name: 'Hash Search', icon: 'fa-magnifying-glass', to: '/hash-search' },
   { name: 'Agents', icon: 'fa-robot', to: '/agents' }
 ]
 
@@ -98,7 +99,7 @@ async function logout() {
                 >
               </label>
 
-              <ul tabindex="0" class="menu dropdown-content rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow">
+              <ul tabindex="0" class="dropdown-content menu rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow">
                 <li>
                   <RouterLink to="/account">
                     <span><font-awesome-icon icon="fa-solid fa-user" /></span>

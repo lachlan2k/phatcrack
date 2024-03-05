@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
+import HashesInput from '@/components/HashesInput.vue'
 import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWizardHashDetect } from '@/composables/useWizardHashDetect'
@@ -92,33 +93,8 @@ const hashTypeOptionsToShow = computed(() =>
   <label class="label mt-2 font-bold">
     <span class="label-text">Hashes (one per line)</span>
   </label>
-  <textarea
-    placeholder="Hashes"
-    class="hashes-input textarea textarea-bordered w-full font-mono focus:outline-none"
-    rows="8"
-    v-model="hashes"
-  ></textarea>
+  <HashesInput v-model="hashes" />
   <div v-if="props.includeSaveButton" class="mt-4 flex justify-end">
     <button class="btn btn-primary" @click="emit('savePressed')">Save</button>
   </div>
 </template>
-
-<style scoped>
-textarea.hashes-input {
-  background-image: linear-gradient(to bottom, rgba(87, 87, 87, 0.05) 50%, transparent 50%);
-  background-repeat: repeat-y;
-
-  background-size: 100% 50px;
-
-  line-height: 25px;
-  font-size: 15px;
-
-  padding: 0;
-  padding-left: 3px;
-
-  white-space: pre;
-  resize: none;
-
-  background-attachment: local;
-}
-</style>
