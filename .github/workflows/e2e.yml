@@ -32,7 +32,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: test-reuslts
+          name: e2e/test-reuslts
           path: test-results
           retention-days: 7
 
