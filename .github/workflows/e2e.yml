@@ -32,9 +32,6 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: e2e/test-reuslts
-          path: test-results
+          name: test-reuslts
+          path: e2e/playwright-report
           retention-days: 7
-
-      - name: Stop application
-        run: docker compose -f docker-compose.test.yml down --remove-orphans
