@@ -1,0 +1,35 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  playwright:
+    name: 'Playwright Tests'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.42.1-jammy
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: cd e2e
+
+      - name: Start application
+        run: docker compose -f docker-compose.test.yml up -d --wait --build --force-recreate
+
+      - name: Install test dependencies
+        run: npm ci
+
+      - name: Install playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run tests
+        run: npx playwright test
+
+      - name: Stop application
+        run: docker compose -f docker-compose.test.yml down --remove-orphans
