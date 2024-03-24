@@ -18,9 +18,8 @@ Docker is the only supported deployment method for the server. The following ins
 
 ```sh
 # Ideally the container processes should be run rootless, so we'll create an unprivileged user.
-adduser --system --no-create-home phatcrack-server
+adduser --system --home /opt/phatcrack-server phatcrack-server
 
-mkdir -p /opt/phatcrack-server
 cd /opt/phatcrack-server
 
 wget https://github.com/lachlan2k/phatcrack/releases/download/v0.1.6/docker-compose.yml
@@ -40,7 +39,6 @@ chmod 600 .env
 ## And add ./certs:/etc/caddy/certs:ro as a mount in docker-compose.prod.yml for 
 # echo "TLS_OPTS=tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem" >> .env
 
-
 # Make a directory to persist files in
 mkdir filerepo
 chown phatcrack-server:phatcrack-server filerepo
@@ -58,13 +56,12 @@ On each agent, you can manually set up the agent as follows:
 
 ```sh
 # Create a user for the phatcrack agent
-adduser --system --no-create-home phatcrack-agent
+adduser --system --home /opt/phatcrack-agent phatcrack-agent
 
 # Depending on your distro, you may need to the phatcrack-agent to a group
-# usermod -aG video phatcrack-agent
+usermod -aG video phatcrack-agent
 
-mkdir -p /opt/phatcrack-agent/
-cd /opt/phatcrack-agent/
+cd /opt/phatcrack-agent
 
 # Download hashcat
 wget https://github.com/hashcat/hashcat/releases/download/v6.2.6/hashcat-6.2.6.7z -q -O hashcat.7z
