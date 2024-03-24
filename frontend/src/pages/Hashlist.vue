@@ -201,7 +201,7 @@ function openAttackModal(attackIndex: number) {
 
                 <div class="dropdown">
                   <label tabindex="0" class="btn btn-ghost btn-sm m-1">...</label>
-                  <ul tabindex="0" class="dropdown-content menu rounded-box z-[1] bg-base-100 p-2 shadow">
+                  <ul tabindex="0" class="menu dropdown-content rounded-box z-[1] bg-base-100 p-2 shadow">
                     <li>
                       <button
                         class="btn btn-ghost btn-sm"

@@ -53,7 +53,7 @@ async function logout() {
         </RouterLink>
         <div
           v-if="config?.is_maintenance_mode"
-          class="tooltip-white-bg tooltip tooltip-warning tooltip-bottom w-full"
+          class="tooltip-white-bg tooltip tooltip-bottom tooltip-warning w-full"
           data-tip="Your administrator has put Phatcrack in maintenance. You can't start new attacks."
         >
           <button class="btn btn-warning btn-sm mb-1 mt-4 w-full py-1">
@@ -99,7 +99,7 @@ async function logout() {
                 >
               </label>
 
-              <ul tabindex="0" class="dropdown-content menu rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow">
+              <ul tabindex="0" class="menu dropdown-content rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow">
                 <li>
                   <RouterLink to="/account">
                     <span><font-awesome-icon icon="fa-solid fa-user" /></span>
