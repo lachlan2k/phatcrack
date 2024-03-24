@@ -28,7 +28,13 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run tests
-        run: npx playwright test
+        run: npx playwright test --trace on
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: test-reuslts
+          path: test-results
+          retention-days: 7
 
       - name: Stop application
         run: docker compose -f docker-compose.test.yml down --remove-orphans
