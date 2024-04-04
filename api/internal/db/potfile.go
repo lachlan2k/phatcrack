@@ -5,14 +5,13 @@ import (
 
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type PotfileEntry struct {
 	UUIDBaseModel
-	Hash         string `gorm:"index:idx_uniq,unique"`
-	PlaintextHex string `gorm:"index:idx_uniq,unique"`
-	HashType     uint   `gorm:"index:idx_uniq,unique"`
+	Hash         string `gorm:"index:idx_potfile_hash,type:hash"`
+	PlaintextHex string
+	HashType     uint
 }
 
 type PotfileSearchResult struct {
@@ -36,36 +35,62 @@ func (r PotfileSearchResult) ToDTO() apitypes.PotfileSearchResultDTO {
 }
 
 func AddPotfileEntry(newEntry *PotfileEntry) (*PotfileEntry, error) {
-	return newEntry, GetInstance().
-		Clauses(clause.OnConflict{DoNothing: true}).
-		Create(newEntry).Error
+	err := GetInstance().Transaction(func(tx *gorm.DB) error {
+		var foundEntry PotfileEntry
+
+		err := tx.First(&foundEntry, "hash = ?", newEntry.Hash).Error
+
+		// If it wasn't found, create it
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return tx.Create(newEntry).Error
+		}
+		if err != nil {
+			return err
+		}
+
+		// or, if it was found, but is a different type of hash, or collission, create it
+		if foundEntry.HashType != newEntry.HashType || foundEntry.PlaintextHex != newEntry.PlaintextHex {
+			return tx.Create(newEntry).Error
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return newEntry, nil
 }
 
 func SearchPotfile(hashes []string) ([]PotfileSearchResult, error) {
-	results := make([]PotfileSearchResult, len(hashes))
+	results := make([]PotfileSearchResult, 0)
 
-	err := GetInstance().Transaction(func(tx *gorm.DB) error {
-		for i, hashToSearch := range hashes {
-			var foundEntry PotfileEntry
+	err := GetInstance().Debug().Transaction(func(tx *gorm.DB) error {
+		for _, loopHashToSearch := range hashes {
+			hashToSearch := loopHashToSearch
 
-			err := tx.First(&foundEntry, "hash = ?", hashToSearch).Error
+			foundEntries := []PotfileEntry{}
 
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				results[i] = PotfileSearchResult{
+			err := tx.Debug().Where("hash = ?", hashToSearch).Find(&foundEntries).Error
+
+			if errors.Is(err, gorm.ErrRecordNotFound) || len(foundEntries) == 0 {
+				results = append(results, PotfileSearchResult{
 					Entry: nil,
 					Hash:  hashToSearch,
 					Found: false,
-				}
+				})
 				continue
 			}
+
 			if err != nil {
 				return err
 			}
 
-			results[i] = PotfileSearchResult{
-				Entry: &foundEntry,
-				Hash:  hashToSearch,
-				Found: true,
+			for _, loopFoundEntry := range foundEntries {
+				foundEntry := loopFoundEntry
+				results = append(results, PotfileSearchResult{
+					Entry: &foundEntry,
+					Hash:  hashToSearch,
+					Found: true,
+				})
 			}
 		}
 		return nil
