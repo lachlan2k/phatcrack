@@ -329,7 +329,7 @@ func GetJobsForHashlist(hashlistId string) ([]Job, error) {
 
 	err := GetInstance().
 		Joins("join attacks on attacks.id = jobs.attack_id").
-		Where("attacks.hashlists_id = ?", hashlistId).
+		Where("attacks.hashlist_id = ?", hashlistId).
 		Find(&result).Error
 
 	if err != nil {
