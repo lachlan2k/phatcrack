@@ -63,13 +63,13 @@ func AddPotfileEntry(newEntry *PotfileEntry) (*PotfileEntry, error) {
 func SearchPotfile(hashes []string) ([]PotfileSearchResult, error) {
 	results := make([]PotfileSearchResult, 0)
 
-	err := GetInstance().Debug().Transaction(func(tx *gorm.DB) error {
+	err := GetInstance().Transaction(func(tx *gorm.DB) error {
 		for _, loopHashToSearch := range hashes {
 			hashToSearch := loopHashToSearch
 
 			foundEntries := []PotfileEntry{}
 
-			err := tx.Debug().Where("hash = ?", hashToSearch).Find(&foundEntries).Error
+			err := tx.Where("hash = ?", hashToSearch).Find(&foundEntries).Error
 
 			if errors.Is(err, gorm.ErrRecordNotFound) || len(foundEntries) == 0 {
 				results = append(results, PotfileSearchResult{
