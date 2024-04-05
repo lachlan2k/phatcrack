@@ -38,7 +38,7 @@ func AddPotfileEntry(newEntry *PotfileEntry) (*PotfileEntry, error) {
 	err := GetInstance().Transaction(func(tx *gorm.DB) error {
 		var foundEntry PotfileEntry
 
-		err := tx.First(&foundEntry, "hash = ?", newEntry.Hash).Error
+		err := tx.First(&foundEntry, "hash = ? and hash_type = ?", newEntry.Hash, newEntry.HashType).Error
 
 		// If it wasn't found, create it
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -48,8 +48,8 @@ func AddPotfileEntry(newEntry *PotfileEntry) (*PotfileEntry, error) {
 			return err
 		}
 
-		// or, if it was found, but is a different type of hash, or collission, create it
-		if foundEntry.HashType != newEntry.HashType || foundEntry.PlaintextHex != newEntry.PlaintextHex {
+		// or, if it was found, but is a colission, create it
+		if foundEntry.PlaintextHex != newEntry.PlaintextHex {
 			return tx.Create(newEntry).Error
 		}
 		return nil
