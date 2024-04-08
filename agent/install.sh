@@ -68,4 +68,4 @@ if [[ -n "$DISABLE_TLS_VERIFICATION" ]]; then
     tls_arg="-disable-tls-verification"
 fi
 
-./phatcrack-agent install -defaults -api-endpoint https://PHATCRACK_HOST/api/v1 -auth-key $PHATCRACK_API_KEY $tls_arg
+./phatcrack-agent install -defaults -api-endpoint https://$PHATCRACK_HOST/api/v1 -auth-key $PHATCRACK_API_KEY $tls_arg
