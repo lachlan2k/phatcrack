@@ -45,7 +45,7 @@ download_file() {
 }
 
 echo "Adding phatcrack-agent user..."
-adduser --system --home /opt/phatcrack-agent phatcrack-agent || true
+adduser --system --create-home --home /opt/phatcrack-agent phatcrack-agent || true
 
 echo "Adding phatcrack-agent user to video group (might error if it doesn't exist)"
 usermod -aG video phatcrack-agent || true
@@ -53,8 +53,8 @@ usermod -aG video phatcrack-agent || true
 cd /opt/phatcrack-agent
 
 echo "Downloading binaries"
-download_file https://$PHATCRACK_HOST/hashcat.7z hashcat.7z
-download_file https://$PHATCRACK_HOST/phatcrack-agent phatcrack-agent
+download_file $PHATCRACK_HOST/hashcat.7z hashcat.7z
+download_file $PHATCRACK_HOST/phatcrack-agent phatcrack-agent
 
 7z x hashcat.7z
 rm hashcat.7z
@@ -68,4 +68,7 @@ if [[ -n "$DISABLE_TLS_VERIFICATION" ]]; then
     tls_arg="-disable-tls-verification"
 fi
 
-./phatcrack-agent install -defaults -api-endpoint https://$PHATCRACK_HOST/api/v1 -auth-key $PHATCRACK_API_KEY $tls_arg
+./phatcrack-agent install -defaults -api-endpoint $PHATCRACK_HOST/api/v1 -auth-key $PHATCRACK_API_KEY $tls_arg
+
+systemctl daemon-reload
+systemctl enable --now phatcrack-agent
