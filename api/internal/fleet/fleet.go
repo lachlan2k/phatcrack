@@ -143,7 +143,7 @@ func StopJob(job db.Job, reason string) {
 }
 
 func RequestFileDownload(fileIDs ...uuid.UUID) {
-	if !config.Get().AutomaticallySyncListfiles {
+	if !config.Get().Agent.AutomaticallySyncListfiles {
 		return
 	}
 

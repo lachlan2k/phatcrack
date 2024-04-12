@@ -117,7 +117,7 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 		return err
 	}
 
-	if !config.Get().AutomaticallySyncListfiles {
+	if !config.Get().Agent.AutomaticallySyncListfiles {
 		return nil
 	}
 

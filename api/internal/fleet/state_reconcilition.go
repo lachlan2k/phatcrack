@@ -179,7 +179,7 @@ func stateReconciliation() error {
 				// Wordlist can now be safely deleted
 				db.HardDelete(&listfile)
 
-				if config.Get().AutomaticallySyncListfiles {
+				if config.Get().Agent.AutomaticallySyncListfiles {
 					// Tell all agents to delete it
 					broadcastMessageUnsafe(wstypes.DeleteFileRequestType, wstypes.DeleteFileRequestDTO{
 						FileID: listfile.ID.String(),

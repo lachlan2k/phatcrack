@@ -40,6 +40,10 @@ func ServerError(message string, internal error) *echo.HTTPError {
 	return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("%s (error id %s)", message, wrapped.id)).SetInternal(wrapped)
 }
 
+func GenericServerError(internal error) *echo.HTTPError {
+	return ServerError("Something went wrong", internal)
+}
+
 func CleanPath(filePath string) string {
 	_, file := path.Split(path.Clean(filePath))
 	return file

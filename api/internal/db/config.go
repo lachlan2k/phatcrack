@@ -17,6 +17,16 @@ func (c Config) TableName() string {
 	return "config"
 }
 
+func GetConfigJSONString() (string, error) {
+	var configRow Config
+	err := GetInstance().First(&configRow).Error
+	if err != nil {
+		return "", err
+	}
+
+	return configRow.Config.String(), nil
+}
+
 func GetConfig[ConfigT interface{}]() (*ConfigT, error) {
 	var configRow Config
 	err := GetInstance().First(&configRow).Error
@@ -28,6 +38,7 @@ func GetConfig[ConfigT interface{}]() (*ConfigT, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &conf, nil
 }
 

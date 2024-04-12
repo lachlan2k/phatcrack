@@ -379,7 +379,7 @@ func handleAttackStart(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 
-	if config.Get().IsMaintenanceMode {
+	if config.Get().General.IsMaintenanceMode {
 		return echo.NewHTTPError(http.StatusServiceUnavailable, "Phatcrack is in maintenance mode. Attacks cannot be scheduled.")
 	}
 
@@ -415,7 +415,7 @@ func handleAttackStart(c echo.Context) error {
 
 	db.SetAttackProgressString(attackId, "Processing (this can take a while)..")
 
-	jobMultiplier := config.Get().SplitJobsPerAgent
+	jobMultiplier := config.Get().Agent.SplitJobsPerAgent
 	if jobMultiplier <= 0 {
 		jobMultiplier = 1
 	}

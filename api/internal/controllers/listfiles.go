@@ -94,12 +94,12 @@ func handleListfileUpload(c echo.Context) error {
 		}
 	}
 
-	maxFileSize := config.Get().MaximumUploadedFileSize
+	maxFileSize := config.Get().General.MaximumUploadedFileSize
 	if !user.HasRole(roles.RoleAdmin) && uploadedFile.Size > maxFileSize {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Uploaded file too large (maximum %d bytes)", maxFileSize))
 	}
 
-	maxAutodetectSize := config.Get().MaximumUploadedFileLineScanSize
+	maxAutodetectSize := config.Get().General.MaximumUploadedFileLineScanSize
 	canAutodetectLineCount := uploadedFile.Size <= maxAutodetectSize
 
 	lineCount, err := strconv.Atoi(c.FormValue("file-line-count"))

@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -24,7 +23,9 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 	})
 
 	api.PUT("/refresh", handleRefresh(sessHandler))
-	api.POST("/login", handleLogin(sessHandler))
+	api.POST("/login", handleCredentialLogin(sessHandler))
+	// api.POST("/login/oidc/start", handleOIDCStart(sessHandler))
+	// api.POST("/login/oidc/callback", handleOIDCCallback(sessHandler))
 
 	api.POST("/logout", func(c echo.Context) error {
 		sessHandler.Destroy(c)
@@ -47,7 +48,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
+			RequiresMFAEnrollment:  config.Get().Auth.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
 		})
 	})
 
@@ -112,7 +113,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return c.JSON(http.StatusOK, false)
 		}
 
-		if user.HasRole(roles.RoleMFAEnrolled) || config.Get().IsMFARequired {
+		if user.HasRole(roles.RoleMFAEnrolled) || config.Get().Auth.IsMFARequired {
 			return c.JSON(http.StatusOK, true)
 		}
 
@@ -283,70 +284,7 @@ func handleRefresh(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
+			RequiresMFAEnrollment:  config.Get().Auth.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
 		})
-	}
-}
-
-func handleLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		req, err := util.BindAndValidate[apitypes.AuthLoginRequestDTO](c)
-		if err != nil {
-			return err
-		}
-
-		minTime := time.After(250 * time.Millisecond)
-		defer func() { <-minTime }()
-
-		user, err := db.GetUserByUsername(req.Username)
-		if err == db.ErrNotFound {
-			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
-		} else if err != nil {
-			return util.ServerError("Internal error", err)
-		}
-
-		hashingTest := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
-		if hashingTest == bcrypt.ErrMismatchedHashAndPassword {
-			AuditLog(c, log.Fields{
-				"attempted_username": user.Username,
-			}, "Incorrect password submitted")
-			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
-		}
-		if hashingTest != nil {
-			return util.ServerError("Internal error", hashingTest)
-		}
-
-		sessHandler.Start(c, auth.SessionData{
-			UserID:          user.ID.String(),
-			HasCompletedMFA: false,
-		})
-
-		response := apitypes.AuthLoginResponseDTO{
-			User: apitypes.AuthCurrentUserDTO{
-				ID:       user.ID.String(),
-				Username: user.Username,
-				Roles:    user.Roles,
-			},
-			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled),
-			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
-		}
-
-		logMessage := "Session started"
-		if response.IsAwaitingMFA {
-			logMessage += ", user needs to complete MFA"
-		}
-		if response.RequiresPasswordChange {
-			logMessage += ", user needs to change password"
-		}
-		if response.RequiresMFAEnrollment {
-			logMessage += ", user needs to enroll MFA"
-		}
-
-		AuditLog(c, log.Fields{
-			"authenticated_username": user.Username,
-		}, logMessage)
-
-		return c.JSON(http.StatusOK, response)
 	}
 }
