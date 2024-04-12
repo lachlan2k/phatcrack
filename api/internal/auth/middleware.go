@@ -48,11 +48,15 @@ func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
 	}
 }
 
-func EnforceAuthMiddleware(bypassPaths []string) echo.MiddlewareFunc {
+type EnforceAuthArgs struct {
+	BypassPaths []string
+}
+
+func EnforceAuthMiddleware(args EnforceAuthArgs) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			path := c.Request().URL.Path
-			for _, bypassPath := range bypassPaths {
+			for _, bypassPath := range args.BypassPaths {
 				if path == bypassPath {
 					return next(c)
 				}

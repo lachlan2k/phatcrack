@@ -20,11 +20,11 @@ type AuthConfig struct {
 	IsMFARequired                     bool `json:"is_mfa_required"`
 	RequirePasswordChangeOnFirstLogin bool `json:"require_password_change_on_first_login"`
 
-	OIDCClientID     string `json:"auth_oidc_client_id"`
-	OIDCClientSecret string `json:"auth_oidc_client_secret"`
-	OIDCEndpoint     string `json:"auth_oidc_endpoint"`
-	OIDCRedirectURL  string `json:"auth_oidc_redirect_url"`
-	OIDCScopes       string `json:"auth_oidc_scopes"`
+	OIDCClientID         string   `json:"auth_oidc_client_id"`
+	OIDCClientSecret     string   `json:"auth_oidc_client_secret"`
+	OIDCIssuerURL        string   `json:"auth_oidc_issuer_url"`
+	OIDCRedirectURL      string   `json:"auth_oidc_redirect_url"`
+	OIDCAdditionalScopes []string `json:"auth_oidc_scopes"`
 }
 
 type AgentConfig struct {
@@ -85,6 +85,8 @@ func MakeDefaultConfig() RuntimeConfig {
 
 			IsMFARequired:                     false,
 			RequirePasswordChangeOnFirstLogin: true,
+
+			OIDCAdditionalScopes: []string{},
 		},
 
 		Agent: AgentConfig{

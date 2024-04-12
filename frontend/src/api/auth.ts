@@ -7,9 +7,9 @@ import type {
   AuthWebAuthnStartChallengeResponseDTO
 } from './types'
 
-export function login(username: string, password: string): Promise<AuthLoginResponseDTO> {
+export function loginWithCredentials(username: string, password: string): Promise<AuthLoginResponseDTO> {
   return client
-    .post('/api/v1/auth/login', {
+    .post('/api/v1/auth/login/credentials', {
       username,
       password
     })

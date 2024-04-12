@@ -52,8 +52,12 @@ func Listen(port string) error {
 	api.Use(auth.CreateHeaderAuthMiddleware())
 	api.Use(sessionHandler.CreateMiddleware())
 
-	api.Use(auth.EnforceAuthMiddleware([]string{
-		"/api/v1/auth/login",
+	api.Use(auth.EnforceAuthMiddleware(auth.EnforceAuthArgs{
+		BypassPaths: []string{
+			"/api/v1/auth/login/credentials",
+			"/api/v1/auth/login/oidc/start",
+			"/api/v1/auth/login/oidc/callback",
+		},
 	}))
 
 	// If a user has "requires_password_change" etc they need to be able to do that

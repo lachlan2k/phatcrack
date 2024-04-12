@@ -17,6 +17,10 @@ import (
 
 func handleCredentialLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		if !isCredentialAuthAllowed() {
+			return echo.NewHTTPError(http.StatusBadRequest, "Credential auth is not enabled")
+		}
+
 		req, err := util.BindAndValidate[apitypes.AuthLoginRequestDTO](c)
 		if err != nil {
 			return err

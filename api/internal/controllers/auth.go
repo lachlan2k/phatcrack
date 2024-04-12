@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"slices"
 
 	log "github.com/sirupsen/logrus"
 
@@ -15,6 +16,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func isOIDCAuthAllowed() bool {
+	return slices.Contains(config.Get().Auth.EnabledMethods, config.AuthMethodOIDC)
+}
+
+func isCredentialAuthAllowed() bool {
+	return slices.Contains(config.Get().Auth.EnabledMethods, config.AuthMethodCredentials)
+}
+
 func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 	// Note: these endpoints are MFA-exempt, so tread carefully before you add anything else
 	// If adding a generic endpoint to update password, etc. maybe that should go elsewhere
@@ -23,9 +32,9 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 	})
 
 	api.PUT("/refresh", handleRefresh(sessHandler))
-	api.POST("/login", handleCredentialLogin(sessHandler))
-	// api.POST("/login/oidc/start", handleOIDCStart(sessHandler))
-	// api.POST("/login/oidc/callback", handleOIDCCallback(sessHandler))
+	api.POST("/login/credentials", handleCredentialLogin(sessHandler))
+	api.POST("/login/oidc/start", handleOIDCStart(sessHandler))
+	api.POST("/login/oidc/callback", handleOIDCCallback(sessHandler))
 
 	api.POST("/logout", func(c echo.Context) error {
 		sessHandler.Destroy(c)
