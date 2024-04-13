@@ -61,7 +61,7 @@ func seed() error {
 	}
 
 	if userCount == 0 {
-		_, err := RegisterUser("admin", "changeme", []string{roles.RoleAdmin, roles.RoleRequiresPasswordChange})
+		_, err := RegisterUserWithCredentials("admin", "changeme", []string{roles.RoleAdmin, roles.RoleRequiresPasswordChange})
 		if err != nil {
 			return err
 		}

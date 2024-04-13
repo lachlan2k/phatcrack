@@ -139,7 +139,7 @@ func handleCreateUser(c echo.Context) error {
 		req.Roles = append(req.Roles, roles.RoleRequiresPasswordChange)
 	}
 
-	newUser, err := db.RegisterUser(req.Username, password, req.Roles)
+	newUser, err := db.RegisterUserWithCredentials(req.Username, password, req.Roles)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
 			return echo.NewHTTPError(http.StatusConflict, "A user with that username already exists")

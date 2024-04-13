@@ -14,17 +14,29 @@ var lock sync.Mutex
 const AuthMethodCredentials = "auth_method_credentials"
 const AuthMethodOIDC = "auth_method_oidc"
 
+type AuthOIDCConfig struct {
+	ClientID     string `json:"auth_oidc_client_id"`
+	ClientSecret string `json:"auth_oidc_client_secret"`
+
+	IssuerURL   string `json:"auth_oidc_issuer_url"`
+	RedirectURL string `json:"auth_oidc_redirect_url"`
+
+	AutomaticUserCreation bool   `json:"oidc_automatic_creation"`
+	UsernameClaim         string `json:"oidc_username_field"`
+
+	RolesClaim   string `json:"oidc_role_field"`
+	RequiredRole string `json:"oidc_required_role"`
+
+	AdditionalScopes []string `json:"auth_oidc_scopes"`
+}
+
 type AuthConfig struct {
 	EnabledMethods []string `json:"auth_enabled_methods"`
 
 	IsMFARequired                     bool `json:"is_mfa_required"`
 	RequirePasswordChangeOnFirstLogin bool `json:"require_password_change_on_first_login"`
 
-	OIDCClientID         string   `json:"auth_oidc_client_id"`
-	OIDCClientSecret     string   `json:"auth_oidc_client_secret"`
-	OIDCIssuerURL        string   `json:"auth_oidc_issuer_url"`
-	OIDCRedirectURL      string   `json:"auth_oidc_redirect_url"`
-	OIDCAdditionalScopes []string `json:"auth_oidc_scopes"`
+	OIDC AuthOIDCConfig `json:"oidc"`
 }
 
 type AgentConfig struct {
@@ -86,7 +98,12 @@ func MakeDefaultConfig() RuntimeConfig {
 			IsMFARequired:                     false,
 			RequirePasswordChangeOnFirstLogin: true,
 
-			OIDCAdditionalScopes: []string{},
+			OIDC: AuthOIDCConfig{
+				AdditionalScopes:      []string{},
+				AutomaticUserCreation: true,
+				RolesClaim:            "groups",
+				UsernameClaim:         "email",
+			},
 		},
 
 		Agent: AgentConfig{

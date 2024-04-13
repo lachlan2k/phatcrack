@@ -36,6 +36,13 @@ func handleCredentialLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			return util.ServerError("Internal error", err)
 		}
 
+		if len(user.PasswordHash) == 0 {
+			AuditLog(c, log.Fields{
+				"attempted_username": user.Username,
+			}, "User attempted to log in with credentials, but no password on account")
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
+		}
+
 		hashingTest := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 		if hashingTest == bcrypt.ErrMismatchedHashAndPassword {
 			AuditLog(c, log.Fields{

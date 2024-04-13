@@ -77,7 +77,7 @@ func GetUserByUsername(username string) (*User, error) {
 	return &user, nil
 }
 
-func RegisterUser(username, password string, roles []string) (*User, error) {
+func RegisterUserWithCredentials(username, password string, roles []string) (*User, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -96,7 +96,21 @@ func RegisterUser(username, password string, roles []string) (*User, error) {
 	return user, nil
 }
 
-// callee is responsible for ensuring service account role is present
+func RegisterUserWithoutPassword(username string, roles []string) (*User, error) {
+	user := &User{
+		Username:     NormalizeUsername(username),
+		PasswordHash: "",
+		Roles:        roles,
+	}
+
+	err := GetInstance().Create(user).Error
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+// caller is responsible for ensuring service account role is present
 func RegisterServiceAccount(username string, apiKey string, roles []string) (*User, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(apiKey), bcrypt.DefaultCost)
 	if err != nil {

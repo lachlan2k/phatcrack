@@ -30,7 +30,9 @@ func migrateV1ToV2(oldConfig v1runtimeConfig) RuntimeConfig {
 			RequirePasswordChangeOnFirstLogin: oldConfig.RequirePasswordChangeOnFirstLogin,
 
 			// all oidc fields are new, and can happily default to an empty string
-			OIDCAdditionalScopes: []string{},
+			OIDC: AuthOIDCConfig{
+				AdditionalScopes: []string{},
+			},
 		},
 
 		Agent: AgentConfig{
