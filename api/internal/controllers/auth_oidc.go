@@ -167,7 +167,7 @@ func handleOIDCCallback(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			return util.GenericServerError(err)
 		}
 
-		if !slices.Contains(extractedRoles, ac.OIDC.RequiredRole) {
+		if len(ac.OIDC.RequiredRole) > 0 && !slices.Contains(extractedRoles, ac.OIDC.RequiredRole) {
 			return echo.NewHTTPError(http.StatusForbidden, "You do not have access to this application")
 		}
 
