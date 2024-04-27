@@ -14,7 +14,7 @@ test.describe(() => {
         const adminContext = await browser.newContext({ storageState: getAuthFilePath(adminUsername) })
         const adminPage = await adminContext.newPage()
 
-        await adminPage.goto('/admin')
+        await adminPage.goto('/admin/users')
 
         // Uncheck require password change
         await adminPage.locator('label').filter({ hasText: 'Require password change on' }).locator('input[type=checkbox]').setChecked(false)
@@ -59,7 +59,7 @@ test.describe(() => {
         const adminContext = await browser.newContext({ storageState: getAuthFilePath(adminUsername) })
         const adminPage = await adminContext.newPage()
 
-        await adminPage.goto('/admin')
+        await adminPage.goto('/admin/users')
 
         // Check require password change
         await adminPage.locator('label').filter({ hasText: 'Require password change on' }).locator('input[type=checkbox]').setChecked(true)
