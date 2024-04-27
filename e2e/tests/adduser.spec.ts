@@ -14,13 +14,17 @@ test.describe(() => {
         const adminContext = await browser.newContext({ storageState: getAuthFilePath(adminUsername) })
         const adminPage = await adminContext.newPage()
 
-        await adminPage.goto('/admin/users')
+        // Go to general settings
+        await adminPage.goto('/admin/general')
+        await expect(adminPage.getByRole('heading', { name: 'General Settings' })).toBeVisible()
 
         // Uncheck require password change
-        await adminPage.locator('label').filter({ hasText: 'Require password change on' }).locator('input[type=checkbox]').setChecked(false)
+        await adminPage.locator('label').filter({ hasText: 'Require password change on first login' }).locator('input[type=checkbox]').setChecked(false)
         await adminPage.locator('.card').filter({ hasText: 'Configuration' }).getByRole('button', { name: 'Save' }).click()
 
-        await expect(adminPage.getByRole('heading', { name: 'Users' })).toBeVisible()
+        // Go to user page
+        await adminPage.goto('/admin/users')
+        await expect(adminPage.getByRole('heading', { name: 'User Management' })).toBeVisible()
 
         const createUserBtn = adminPage.getByRole('button', { name: 'Create User' })
 
@@ -59,13 +63,17 @@ test.describe(() => {
         const adminContext = await browser.newContext({ storageState: getAuthFilePath(adminUsername) })
         const adminPage = await adminContext.newPage()
 
-        await adminPage.goto('/admin/users')
+        // Go to general settings
+        await adminPage.goto('/admin/general')
+        await expect(adminPage.getByRole('heading', { name: 'General Settings' })).toBeVisible()
 
-        // Check require password change
-        await adminPage.locator('label').filter({ hasText: 'Require password change on' }).locator('input[type=checkbox]').setChecked(true)
+        // Uncheck require password change
+        await adminPage.locator('label').filter({ hasText: 'Require password change on first login' }).locator('input[type=checkbox]').setChecked(true)
         await adminPage.locator('.card').filter({ hasText: 'Configuration' }).getByRole('button', { name: 'Save' }).click()
 
-        await expect(adminPage.getByRole('heading', { name: 'Users' })).toBeVisible()
+        // Go to user page
+        await adminPage.goto('/admin/users')
+        await expect(adminPage.getByRole('heading', { name: 'User Management' })).toBeVisible()
 
         const createUserBtn = adminPage.getByRole('button', { name: 'Create User' })
 
