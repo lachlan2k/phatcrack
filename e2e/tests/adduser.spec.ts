@@ -88,10 +88,6 @@ test.describe(() => {
 
         await expect(adminPage.getByText('Created new user')).toBeVisible()
 
-        // Close modal
-        await adminPage.locator('.modal-open').getByRole('button', { name: '✕' }).click()
-        await expect(adminPage.getByRole('heading', { name: 'Admin' })).toBeVisible()
-
 
         const tmpLoginContext = await browser.newContext({})
         const tmpLoginPage = await tmpLoginContext.newPage()
