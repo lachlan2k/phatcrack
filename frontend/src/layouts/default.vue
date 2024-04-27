@@ -90,40 +90,15 @@ async function logout() {
 
         <div class="flex flex-grow"></div>
 
-
-        <!-- <ul class="menu justify-self-end">
-          <li class="hover-bordered">
-            <details open>
-              <summary>
-                <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
-              Admin
-              </summary>
-              <ul>
-                <li v-for="link in adminPageLinks" v-if="isAdmin" :key="link.name" :class="route.path == link.to ? 'bordered' : ''" class="">
-                  <RouterLink :to="link.to" :class="route.path == link.to ? 'active' : ''">
-                    <span class="w-6 text-center"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
-            
-                    {{ link.name }}
-                  </RouterLink>
-                </li>
-              </ul>
-            </details>
-          </li>
-        </ul> -->
-
-
-
         <ul class="menu justify-self-end">
           <li class="hover-bordered" :class="route.path.startsWith('/admin') ? 'bordered' : 'hover-bordered'" v-if="isAdmin">
             <div class="text-content-neutral dropdown dropdown-top">
               <label tabindex="0" class="w-full cursor-pointer">
                 <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
-                <span
-                  >Admin Tools</span
-                >
+                <span>Admin Tools</span>
               </label>
 
-              <ul tabindex="0" class="menu dropdown-content rounded-box w-52 bg-base-100 p-2 pb-4 mb-2 text-black shadow">
+              <ul tabindex="0" class="menu dropdown-content rounded-box mb-2 w-52 bg-base-100 p-2 pb-4 text-black shadow">
                 <li v-for="link in adminPageLinks" :key="link.name">
                   <RouterLink :to="link.to">
                     <span class="min-w-[20px] text-center"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>

@@ -7,7 +7,7 @@ import AgentsTable from '@/components/Admin/AgentsTable.vue'
     <h1 class="text-4xl font-bold">Agent Management</h1>
 
     <div class="mt-6 flex flex-wrap gap-6">
-      <div class="card bg-base-100 shadow-xl">
+      <div class="card w-full bg-base-100 shadow-xl">
         <div class="card-body">
           <AgentsTable />
         </div>

@@ -207,21 +207,20 @@ async function onDeleteUser(id: string) {
         </span>
       </div>
     </Modal>
-    <h2 class="card-title">Users</h2>
     <div>
-      <button class="btn btn-primary btn-sm ml-8 mr-1" @click="() => (isServiceAccountCreateOpen = true)">Create Service Account</button>
       <button class="btn btn-primary btn-sm" @click="() => (isUserCreateOpen = true)">Create User</button>
+      <button class="btn btn-primary btn-sm ml-1" @click="() => (isServiceAccountCreateOpen = true)">Create Service Account</button>
     </div>
   </div>
 
   <div v-if="isLoading" class="flex h-56 h-full w-56 w-full justify-center self-center">
     <span class="loading loading-spinner loading-lg"></span>
   </div>
-  <table v-else class="table table-sm w-full">
+  <table v-else class="table w-full">
     <thead>
       <tr>
         <th>Username</th>
-        <th>Role</th>
+        <th>Roles</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -233,7 +232,7 @@ async function onDeleteUser(id: string) {
         <td>
           {{ user.roles.join(', ') }}
         </td>
-        <td class="text-center">
+        <td>
           <ConfirmModal @on-confirm="() => onDeleteUser(user.id)">
             <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
           </ConfirmModal>
