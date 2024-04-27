@@ -20,7 +20,7 @@ test.describe(() => {
 
         // Uncheck require password change
         await adminPage.locator('label').filter({ hasText: 'Require password change on first login' }).locator('input[type=checkbox]').setChecked(false)
-        await adminPage.locator('.card').filter({ hasText: 'Configuration' }).getByRole('button', { name: 'Save' }).click()
+        await adminPage.locator('.card').getByRole('button', { name: 'Save' }).click()
 
         // Go to user page
         await adminPage.goto('/admin/users')
@@ -69,7 +69,7 @@ test.describe(() => {
 
         // Uncheck require password change
         await adminPage.locator('label').filter({ hasText: 'Require password change on first login' }).locator('input[type=checkbox]').setChecked(true)
-        await adminPage.locator('.card').filter({ hasText: 'Configuration' }).getByRole('button', { name: 'Save' }).click()
+        await adminPage.locator('.card').getByRole('button', { name: 'Save' }).click()
 
         // Go to user page
         await adminPage.goto('/admin/users')
