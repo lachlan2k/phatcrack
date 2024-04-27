@@ -42,7 +42,10 @@ const router = createRouter({
     route('/wizard', 'Wizard', () => import('@/pages/Wizard.vue')),
 
     route('/account', 'Account', () => import('@/pages/Account.vue')),
-    route('/admin', 'Admin', () => import('@/pages/Admin.vue'))
+    
+    route('/admin/general', 'General Settings', () => import('@/pages/admin/GeneralSettings.vue')),
+    route('/admin/users', 'User Management', () => import('@/pages/admin/Users.vue')),
+    route('/admin/agents', 'Agent Management', () => import('@/pages/admin/Agents.vue')),
   ]
 })
 

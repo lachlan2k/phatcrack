@@ -24,6 +24,13 @@ const pageLinks = [
   { name: 'Agents', icon: 'fa-robot', to: '/agents' }
 ]
 
+const adminPageLinks = [
+  { name: 'General Settings', icon: 'fa-gear', to: '/admin/general' },
+  { name: 'Auth Settings', icon: 'fa-passport', to: '/admin/auth' },
+  { name: 'Manage Users', icon: 'fa-users', to: '/admin/users' },
+  { name: 'Manage Agents', icon: 'fa-robot', to: '/admin/agents' }
+]
+
 const version = ref('')
 
 onMounted(async () => {
@@ -83,13 +90,29 @@ async function logout() {
 
         <div class="flex flex-grow"></div>
 
+
         <ul class="menu justify-self-end">
-          <li class="hover-bordered" v-if="isAdmin" :class="route.path == '/admin' ? 'bordered' : 'hover-bordered'">
-            <RouterLink to="/admin" :class="route.path == '/admin' ? 'active' : ''">
-              <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
+          <li class="hover-bordered">
+            <details open>
+              <summary>
+                <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
               Admin
-            </RouterLink>
+              </summary>
+              <ul>
+                <li v-for="link in adminPageLinks" v-if="isAdmin" :key="link.name" :class="route.path == link.to ? 'bordered' : ''" class="">
+                  <RouterLink :to="link.to" :class="route.path == link.to ? 'active' : ''">
+                    <span class="w-6 text-center"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
+            
+                    {{ link.name }}
+                  </RouterLink>
+                </li>
+              </ul>
+            </details>
           </li>
+        </ul>
+
+
+        <ul class="menu justify-self-end">
           <li class="hover-bordered" :class="route.path == '/account' ? 'bordered' : 'hover-bordered'">
             <div class="text-content-neutral dropdown dropdown-top">
               <label tabindex="0" class="w-full cursor-pointer">
