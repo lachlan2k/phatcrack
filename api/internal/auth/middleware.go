@@ -30,7 +30,7 @@ func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
 
 			userHasCompleted := sess.HasCompletedMFA
 
-			if config.Get().Auth.IsMFARequired {
+			if config.Get().Auth.General.IsMFARequired {
 				if !userIsEnrolled {
 					return echo.NewHTTPError(http.StatusForbidden, "MFA not yet enrolled")
 				}

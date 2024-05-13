@@ -11,32 +11,35 @@ import (
 
 var lock sync.Mutex
 
-const AuthMethodCredentials = "auth_method_credentials"
-const AuthMethodOIDC = "auth_method_oidc"
+const AuthMethodCredentials = "method_credentials"
+const AuthMethodOIDC = "method_oidc"
 
 type AuthOIDCConfig struct {
-	ClientID     string `json:"auth_oidc_client_id"`
-	ClientSecret string `json:"auth_oidc_client_secret"`
+	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
 
-	IssuerURL   string `json:"auth_oidc_issuer_url"`
-	RedirectURL string `json:"auth_oidc_redirect_url"`
+	IssuerURL   string `json:"issuer_url"`
+	RedirectURL string `json:"redirect_url"`
 
-	AutomaticUserCreation bool   `json:"oidc_automatic_creation"`
-	UsernameClaim         string `json:"oidc_username_field"`
+	AutomaticUserCreation bool   `json:"automatic_creation"`
+	UsernameClaim         string `json:"username_field"`
 
-	RolesClaim   string `json:"oidc_role_field"`
-	RequiredRole string `json:"oidc_required_role"`
+	RolesClaim   string `json:"role_field"`
+	RequiredRole string `json:"required_role"`
+	Prompt       string `json:"prompt"`
 
-	AdditionalScopes []string `json:"auth_oidc_scopes"`
+	AdditionalScopes []string `json:"scopes"`
+}
+
+type AuthGeneralConfig struct {
+	EnabledMethods                    []string `json:"enabled_methods"`
+	IsMFARequired                     bool     `json:"is_mfa_required"`
+	RequirePasswordChangeOnFirstLogin bool     `json:"require_password_change_on_first_login"`
 }
 
 type AuthConfig struct {
-	EnabledMethods []string `json:"auth_enabled_methods"`
-
-	IsMFARequired                     bool `json:"is_mfa_required"`
-	RequirePasswordChangeOnFirstLogin bool `json:"require_password_change_on_first_login"`
-
-	OIDC AuthOIDCConfig `json:"oidc"`
+	General AuthGeneralConfig `json:"general"`
+	OIDC    AuthOIDCConfig    `json:"oidc"`
 }
 
 type AgentConfig struct {
@@ -63,25 +66,63 @@ type RuntimeConfig struct {
 const latestConfigVersion = 2
 
 func (conf RuntimeConfig) ToAdminDTO() apitypes.AdminConfigResponseDTO {
+	oidcClientSecret := ""
+	if len(conf.Auth.OIDC.ClientSecret) > 0 {
+		oidcClientSecret = "redacted"
+	}
+
 	return apitypes.AdminConfigResponseDTO{
-		IsSetupComplete:   conf.IsSetupComplete,
-		IsMFARequired:     conf.Auth.IsMFARequired,
-		IsMaintenanceMode: conf.General.IsMaintenanceMode,
+		Auth: &apitypes.AuthConfig{
+			General: &apitypes.GeneralAuthConfig{
+				EnabledMethods:                    conf.Auth.General.EnabledMethods,
+				IsMFARequired:                     conf.Auth.General.IsMFARequired,
+				RequirePasswordChangeOnFirstLogin: conf.Auth.General.RequirePasswordChangeOnFirstLogin,
+			},
 
-		AutomaticallySyncListfiles:        conf.Agent.AutomaticallySyncListfiles,
-		SplitJobsPerAgent:                 conf.Agent.SplitJobsPerAgent,
-		RequirePasswordChangeOnFirstLogin: conf.Auth.RequirePasswordChangeOnFirstLogin,
+			OIDC: &apitypes.AuthOIDCConfig{
+				ClientID:     conf.Auth.OIDC.ClientID,
+				ClientSecret: oidcClientSecret,
 
-		MaximumUploadedFileSize:         conf.General.MaximumUploadedFileSize,
-		MaximumUploadedFileLineScanSize: conf.General.MaximumUploadedFileLineScanSize,
+				IssuerURL:   conf.Auth.OIDC.IssuerURL,
+				RedirectURL: conf.Auth.OIDC.RedirectURL,
+
+				AutomaticUserCreation: conf.Auth.OIDC.AutomaticUserCreation,
+				UsernameClaim:         conf.Auth.OIDC.UsernameClaim,
+				Prompt:                conf.Auth.OIDC.Prompt,
+
+				RolesClaim:       conf.Auth.OIDC.RolesClaim,
+				RequiredRole:     conf.Auth.OIDC.RequiredRole,
+				AdditionalScopes: conf.Auth.OIDC.AdditionalScopes,
+			},
+		},
+
+		Agent: &apitypes.AgentConfig{
+			AutomaticallySyncListfiles: conf.Agent.AutomaticallySyncListfiles,
+			SplitJobsPerAgent:          conf.Agent.SplitJobsPerAgent,
+		},
+
+		General: &apitypes.GeneralConfig{
+			IsMaintenanceMode:               conf.General.IsMaintenanceMode,
+			MaximumUploadedFileSize:         conf.General.MaximumUploadedFileSize,
+			MaximumUploadedFileLineScanSize: conf.General.MaximumUploadedFileLineScanSize,
+		},
 	}
 }
 
-func (conf RuntimeConfig) ToPublicDTO() apitypes.ConfigDTO {
-	return apitypes.ConfigDTO{
-		IsMaintenanceMode:               conf.General.IsMaintenanceMode,
-		MaximumUploadedFileSize:         conf.General.MaximumUploadedFileSize,
-		MaximumUploadedFileLineScanSize: conf.General.MaximumUploadedFileLineScanSize,
+func (conf RuntimeConfig) ToPublicDTO() apitypes.PublicConfigDTO {
+	return apitypes.PublicConfigDTO{
+		Auth: apitypes.PublicAuthConfigDTO{
+			EnabledMethods: conf.Auth.General.EnabledMethods,
+			OIDC: apitypes.PublicOIDCConfigDTO{
+				Prompt: conf.Auth.OIDC.Prompt,
+			},
+		},
+
+		General: apitypes.PublicGeneralConfigDTO{
+			IsMaintenanceMode:               conf.General.IsMaintenanceMode,
+			MaximumUploadedFileSize:         conf.General.MaximumUploadedFileSize,
+			MaximumUploadedFileLineScanSize: conf.General.MaximumUploadedFileLineScanSize,
+		},
 	}
 }
 
@@ -93,10 +134,12 @@ func MakeDefaultConfig() RuntimeConfig {
 		ConfigVersion:   latestConfigVersion,
 
 		Auth: AuthConfig{
-			EnabledMethods: []string{AuthMethodCredentials},
+			General: AuthGeneralConfig{
+				EnabledMethods: []string{AuthMethodCredentials},
 
-			IsMFARequired:                     false,
-			RequirePasswordChangeOnFirstLogin: true,
+				IsMFARequired:                     false,
+				RequirePasswordChangeOnFirstLogin: true,
+			},
 
 			OIDC: AuthOIDCConfig{
 				AdditionalScopes:      []string{},

@@ -17,11 +17,11 @@ import (
 )
 
 func isOIDCAuthAllowed() bool {
-	return slices.Contains(config.Get().Auth.EnabledMethods, config.AuthMethodOIDC)
+	return slices.Contains(config.Get().Auth.General.EnabledMethods, config.AuthMethodOIDC)
 }
 
 func isCredentialAuthAllowed() bool {
-	return slices.Contains(config.Get().Auth.EnabledMethods, config.AuthMethodCredentials)
+	return slices.Contains(config.Get().Auth.General.EnabledMethods, config.AuthMethodCredentials)
 }
 
 func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
@@ -57,7 +57,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().Auth.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
+			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
 		})
 	})
 
@@ -122,7 +122,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return c.JSON(http.StatusOK, false)
 		}
 
-		if user.HasRole(roles.RoleMFAEnrolled) || config.Get().Auth.IsMFARequired {
+		if user.HasRole(roles.RoleMFAEnrolled) || config.Get().Auth.General.IsMFARequired {
 			return c.JSON(http.StatusOK, true)
 		}
 
@@ -293,7 +293,7 @@ func handleRefresh(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().Auth.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
+			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
 		})
 	}
 }

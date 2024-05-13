@@ -356,7 +356,7 @@ async function saveAndStartAttack() {
               class="max-w-xs"
             />
 
-            <HrOr class="my-4" />
+            <HrOr class="my-4 text-xl" />
 
             <label class="label font-bold">
               <span class="label-text">New Project Name</span>

@@ -6,16 +6,22 @@ import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { useToastError } from '@/composables/useToastError'
+import HrOr from '@/components/HrOr.vue'
+import { useConfigStore } from '@/stores/config'
 
 const toast = useToast()
 const authStore = useAuthStore()
 const router = useRouter()
 
+const configStore = useConfigStore()
+configStore.load()
+const { isCredentialAuthEnabled, isOIDCAuthEnabled, loading: isConfigLoading, config } = storeToRefs(configStore)
+
 const { hasCompletedAuth, isAwaitingMFA, requiresPasswordChange, requiresMFAEnrollment, loginError, isLoginLoading, loggedInUser } =
   storeToRefs(authStore)
 
 enum ActiveScreens {
-  Credentials,
+  FirstStep,
   PasswordChange,
   MFAEnrollment,
   MFAVerification,
@@ -24,7 +30,7 @@ enum ActiveScreens {
 
 const activeScreen = computed(() => {
   if (loggedInUser.value == null) {
-    return ActiveScreens.Credentials
+    return ActiveScreens.FirstStep
   }
 
   if (requiresPasswordChange.value) {
@@ -56,12 +62,16 @@ const username = ref('')
 const password = ref('')
 const newPassword = ref('')
 
-async function doLogin(event: Event) {
+async function doCredentialLogin(event: Event) {
   if (event) {
     event.preventDefault()
   }
 
   authStore.login(username.value, password.value)
+}
+
+async function startOIDCLogin() {
+  alert('oidc lol')
 }
 
 const { catcher } = useToastError()
@@ -153,7 +163,7 @@ watch(activeScreen, (newActiveScreen) => {
 
 const cardTitle = computed(() => {
   switch (activeScreen.value) {
-    case ActiveScreens.Credentials:
+    case ActiveScreens.FirstStep:
       return 'Login to Phatcrack'
 
     case ActiveScreens.PasswordChange:
@@ -182,29 +192,39 @@ const cardTitle = computed(() => {
           <h2>{{ cardTitle }}</h2>
         </div>
 
-        <form @submit="doLogin" v-if="activeScreen == ActiveScreens.Credentials">
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Username</span>
-            </label>
-            <input type="text" placeholder="john.doe" class="input input-bordered" v-model="username" />
-          </div>
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Password</span>
-            </label>
-            <input type="password" placeholder="hunter2" class="input input-bordered" v-model="password" />
-          </div>
-          <div v-if="loginError != null" class="mt-4 text-center text-red-500">
-            <p>{{ loginError }}</p>
-          </div>
-          <div class="form-control mt-6">
-            <button type="submit" class="btn btn-primary" :disabled="isLoginLoading">
-              <span class="loading loading-spinner loading-md" v-if="isLoginLoading"></span>
-              Login
+        <div v-if="activeScreen == ActiveScreens.FirstStep">
+          <form @submit="doCredentialLogin" v-if="isCredentialAuthEnabled">
+            <div v-if="loginError != null" class="my-2 text-center text-red-500">
+              <p>{{ loginError }}</p>
+            </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Username</span>
+              </label>
+              <input type="text" placeholder="john.doe" class="input input-bordered" v-model="username" />
+            </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Password</span>
+              </label>
+              <input type="password" placeholder="hunter2" class="input input-bordered" v-model="password" />
+            </div>
+            <div class="form-control mt-6">
+              <button type="submit" class="btn btn-primary" :disabled="isLoginLoading">
+                <span class="loading loading-spinner loading-md" v-if="isLoginLoading"></span>
+                Login with Credentials
+              </button>
+            </div>
+          </form>
+
+          <HrOr class="my-4" v-if="isCredentialAuthEnabled && isOIDCAuthEnabled" />
+
+          <div class="form-control" v-if="isOIDCAuthEnabled">
+            <button class="btn btn-primary" @click="startOIDCLogin" :disabled="isLoginLoading">
+              {{ config?.auth?.oidc?.prompt ?? 'Login with OIDC Provider' }}
             </button>
           </div>
-        </form>
+        </div>
 
         <div v-if="activeScreen == ActiveScreens.MFAVerification" class="text-center">
           <p>We need to verify your identity</p>
@@ -261,9 +281,3 @@ const cardTitle = computed(() => {
     </div>
   </main>
 </template>
-
-<style scoped>
-main {
-  /* font-size: 1.25rem; */
-}
-</style>

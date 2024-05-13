@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AgentConfig from '@/components/Admin/AgentConfig.vue'
 import AgentsTable from '@/components/Admin/AgentsTable.vue'
 </script>
 
@@ -10,6 +11,12 @@ import AgentsTable from '@/components/Admin/AgentsTable.vue'
       <div class="card w-full bg-base-100 shadow-xl">
         <div class="card-body">
           <AgentsTable />
+        </div>
+      </div>
+
+      <div class="card w-full bg-base-100 shadow-xl">
+        <div class="card-body">
+          <AgentConfig />
         </div>
       </div>
     </div>

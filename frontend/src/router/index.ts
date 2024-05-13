@@ -45,7 +45,8 @@ const router = createRouter({
 
     route('/admin/general', 'General Settings', () => import('@/pages/admin/GeneralSettings.vue')),
     route('/admin/users', 'User Management', () => import('@/pages/admin/Users.vue')),
-    route('/admin/agents', 'Agent Management', () => import('@/pages/admin/Agents.vue'))
+    route('/admin/agents', 'Agent Management', () => import('@/pages/admin/Agents.vue')),
+    route('/admin/auth', 'Auth Settings', () => import('@/pages/admin/Auth.vue'))
   ]
 })
 

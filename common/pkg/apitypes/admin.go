@@ -35,31 +35,6 @@ type AdminServiceAccountCreateResponseDTO struct {
 	APIKey   string   `json:"api_key"`
 }
 
-type AdminIsSetupCompleteResponseDTO struct {
-	IsComplete bool `json:"is_complete"`
-}
-
-type AdminConfigResponseDTO struct {
-	SplitJobsPerAgent                 int   `json:"split_jobs_per_agent"`
-	IsSetupComplete                   bool  `json:"is_setup_complete"`
-	IsMFARequired                     bool  `json:"is_mfa_required"`
-	IsMaintenanceMode                 bool  `json:"is_maintenance_mode"`
-	AutomaticallySyncListfiles        bool  `json:"auto_sync_listfiles"`
-	RequirePasswordChangeOnFirstLogin bool  `json:"require_password_change_on_first_login"`
-	MaximumUploadedFileSize           int64 `json:"maximum_uploaded_file_size"`
-	MaximumUploadedFileLineScanSize   int64 `json:"maximum_uploaded_file_line_scan_size"`
-}
-
-type AdminConfigRequestDTO struct {
-	SplitJobsPerAgent                 int   `json:"split_jobs_per_agent" validate:"min=1,max=4"`
-	IsMFARequired                     bool  `json:"is_mfa_required"`
-	IsMaintenanceMode                 bool  `json:"is_maintenance_mode"`
-	AutomaticallySyncListfiles        bool  `json:"auto_sync_listfiles"`
-	RequirePasswordChangeOnFirstLogin bool  `json:"require_password_change_on_first_login"`
-	MaximumUploadedFileSize           int64 `json:"maximum_uploaded_file_size"`
-	MaximumUploadedFileLineScanSize   int64 `json:"maximum_uploaded_file_line_scan_size"`
-}
-
 type AdminGetAllUsersResponseDTO struct {
 	Users []UserDTO `json:"users"`
 }

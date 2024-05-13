@@ -4,6 +4,45 @@ export interface AccountChangePasswordRequestDTO {
   new_password: string
   current_password: string
 }
+export interface AuthOIDCConfig {
+  client_id: string
+  client_secret: string
+  issuer_url: string
+  redirect_url: string
+  automatic_creation: boolean
+  username_field: string
+  role_field: string
+  required_role: string
+  scopes: string[]
+}
+export interface GeneralAuthConfig {
+  enabled_methods: string[]
+  is_mfa_required: boolean
+  require_password_change_on_first_login: boolean
+}
+export interface AuthConfig {
+  general?: GeneralAuthConfig
+  oidc?: AuthOIDCConfig
+}
+export interface AgentConfig {
+  auto_sync_listfiles: boolean
+  split_jobs_per_agent: number
+}
+export interface GeneralConfig {
+  is_maintenance_mode: boolean
+  maximum_uploaded_file_size: number
+  maximum_uploaded_file_line_scan_size: number
+}
+export interface AdminConfigRequestDTO {
+  auth?: AuthConfig
+  agent?: AgentConfig
+  general?: GeneralConfig
+}
+export interface AdminConfigResponseDTO {
+  auth?: AuthConfig
+  agent?: AgentConfig
+  general?: GeneralConfig
+}
 export interface AdminAgentCreateRequestDTO {
   name: string
 }
@@ -33,28 +72,6 @@ export interface AdminServiceAccountCreateResponseDTO {
   id: string
   roles: string[]
   api_key: string
-}
-export interface AdminIsSetupCompleteResponseDTO {
-  is_complete: boolean
-}
-export interface AdminConfigResponseDTO {
-  split_jobs_per_agent: number
-  is_setup_complete: boolean
-  is_mfa_required: boolean
-  is_maintenance_mode: boolean
-  auto_sync_listfiles: boolean
-  require_password_change_on_first_login: boolean
-  maximum_uploaded_file_size: number
-  maximum_uploaded_file_line_scan_size: number
-}
-export interface AdminConfigRequestDTO {
-  split_jobs_per_agent: number
-  is_mfa_required: boolean
-  is_maintenance_mode: boolean
-  auto_sync_listfiles: boolean
-  require_password_change_on_first_login: boolean
-  maximum_uploaded_file_size: number
-  maximum_uploaded_file_line_scan_size: number
 }
 export interface UserDTO {
   id: string
@@ -301,10 +318,21 @@ export interface AuthChangePasswordRequestDTO {
   old_password: string
   new_password: string
 }
-export interface ConfigDTO {
+export interface PublicOIDCConfigDTO {
+  prompt: string
+}
+export interface PublicAuthConfigDTO {
+  enabled_methods: string[]
+  oidc: PublicOIDCConfigDTO
+}
+export interface PublicGeneralConfigDTO {
   is_maintenance_mode: boolean
   maximum_uploaded_file_size: number
   maximum_uploaded_file_line_scan_size: number
+}
+export interface PublicConfigDTO {
+  auth: PublicAuthConfigDTO
+  general: PublicGeneralConfigDTO
 }
 export interface HashType {
   id: number

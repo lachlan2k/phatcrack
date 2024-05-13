@@ -8,7 +8,7 @@ import (
 )
 
 func HookConfigEndpoints(api *echo.Group) {
-	api.GET("/current", func(c echo.Context) error {
+	api.GET("/public", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, config.Get().ToPublicDTO())
 	})
 }

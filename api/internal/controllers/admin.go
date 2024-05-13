@@ -45,13 +45,43 @@ func HookAdminEndpoints(api *echo.Group) {
 		}
 
 		err = config.Update(func(newConf *config.RuntimeConfig) error {
-			newConf.Auth.IsMFARequired = req.IsMFARequired
-			newConf.General.IsMaintenanceMode = req.IsMaintenanceMode
-			newConf.Agent.AutomaticallySyncListfiles = req.AutomaticallySyncListfiles
-			newConf.Auth.RequirePasswordChangeOnFirstLogin = req.RequirePasswordChangeOnFirstLogin
-			newConf.Agent.SplitJobsPerAgent = req.SplitJobsPerAgent
-			newConf.General.MaximumUploadedFileSize = req.MaximumUploadedFileSize
-			newConf.General.MaximumUploadedFileLineScanSize = req.MaximumUploadedFileLineScanSize
+			if req.Agent != nil {
+				a := *req.Agent
+
+				newConf.Agent.AutomaticallySyncListfiles = a.AutomaticallySyncListfiles
+				newConf.Agent.SplitJobsPerAgent = a.SplitJobsPerAgent
+			}
+
+			if req.Auth != nil {
+				a := *req.Auth
+
+				if a.General != nil {
+					newConf.Auth.General.EnabledMethods = a.General.EnabledMethods
+					newConf.Auth.General.IsMFARequired = a.General.IsMFARequired
+					newConf.Auth.General.RequirePasswordChangeOnFirstLogin = a.General.RequirePasswordChangeOnFirstLogin
+				}
+
+				if a.OIDC != nil {
+					newConf.Auth.OIDC.ClientID = a.OIDC.ClientID
+					newConf.Auth.OIDC.ClientSecret = a.OIDC.ClientSecret
+					newConf.Auth.OIDC.IssuerURL = a.OIDC.IssuerURL
+					newConf.Auth.OIDC.RedirectURL = a.OIDC.RedirectURL
+					newConf.Auth.OIDC.AutomaticUserCreation = a.OIDC.AutomaticUserCreation
+					newConf.Auth.OIDC.UsernameClaim = a.OIDC.UsernameClaim
+					newConf.Auth.OIDC.RolesClaim = a.OIDC.RolesClaim
+					newConf.Auth.OIDC.RequiredRole = a.OIDC.RequiredRole
+					newConf.Auth.OIDC.AdditionalScopes = a.OIDC.AdditionalScopes
+				}
+			}
+
+			if req.General != nil {
+				g := *req.General
+
+				newConf.General.IsMaintenanceMode = g.IsMaintenanceMode
+				newConf.General.MaximumUploadedFileSize = g.MaximumUploadedFileSize
+				newConf.General.MaximumUploadedFileLineScanSize = g.MaximumUploadedFileLineScanSize
+			}
+
 			return nil
 		})
 
@@ -59,7 +89,7 @@ func HookAdminEndpoints(api *echo.Group) {
 			return util.ServerError("Failed to update config", err)
 		}
 
-		AuditLog(c, nil, "Admin updated configuration to %v", req)
+		AuditLog(c, nil, "Admin updated configurationv")
 
 		return c.JSON(http.StatusOK, config.Get().ToAdminDTO())
 	})
@@ -135,7 +165,7 @@ func handleCreateUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
 	}
 
-	if config.Get().Auth.RequirePasswordChangeOnFirstLogin {
+	if config.Get().Auth.General.RequirePasswordChangeOnFirstLogin {
 		req.Roles = append(req.Roles, roles.RoleRequiresPasswordChange)
 	}
 

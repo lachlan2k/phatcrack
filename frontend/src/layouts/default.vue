@@ -59,7 +59,7 @@ async function logout() {
           </div>
         </RouterLink>
         <div
-          v-if="config?.is_maintenance_mode"
+          v-if="config?.general?.is_maintenance_mode"
           class="tooltip-white-bg tooltip tooltip-bottom tooltip-warning w-full"
           data-tip="Your administrator has put Phatcrack in maintenance. You can't start new attacks."
         >

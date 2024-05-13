@@ -24,10 +24,12 @@ func migrateV1ToV2(oldConfig v1runtimeConfig) RuntimeConfig {
 		IsSetupComplete: oldConfig.IsSetupComplete,
 
 		Auth: AuthConfig{
-			EnabledMethods: []string{AuthMethodCredentials},
+			General: AuthGeneralConfig{
+				EnabledMethods: []string{AuthMethodCredentials},
 
-			IsMFARequired:                     oldConfig.IsMFARequired,
-			RequirePasswordChangeOnFirstLogin: oldConfig.RequirePasswordChangeOnFirstLogin,
+				IsMFARequired:                     oldConfig.IsMFARequired,
+				RequirePasswordChangeOnFirstLogin: oldConfig.RequirePasswordChangeOnFirstLogin,
+			},
 
 			// all oidc fields are new, and can happily default to an empty string
 			OIDC: AuthOIDCConfig{

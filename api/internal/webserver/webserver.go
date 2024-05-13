@@ -54,6 +54,7 @@ func Listen(port string) error {
 
 	api.Use(auth.EnforceAuthMiddleware(auth.EnforceAuthArgs{
 		BypassPaths: []string{
+			"/api/v1/config/public",
 			"/api/v1/auth/login/credentials",
 			"/api/v1/auth/login/oidc/start",
 			"/api/v1/auth/login/oidc/callback",
@@ -63,6 +64,9 @@ func Listen(port string) error {
 	// If a user has "requires_password_change" etc they need to be able to do that
 	// Don't worry, the sessionhandler middleware is already enforcing auth
 	controllers.HookAuthEndpoints(api.Group("/auth"), sessionHandler)
+
+	// Config endpoints are publicly accessible (as they include things like what auth options should be listed)
+	controllers.HookConfigEndpoints(api.Group("/config"))
 
 	api.Use(auth.EnforceMFAMiddleware(sessionHandler))
 
@@ -79,7 +83,6 @@ func Listen(port string) error {
 	controllers.HookAgentEndpoints(api.Group("/agent"))
 	controllers.HookJobEndpoints(api.Group("/job"))
 	controllers.HookAccountEndpoints(api.Group("/account"))
-	controllers.HookConfigEndpoints(api.Group("/config"))
 	controllers.HookUserEndpoints(api.Group("/user"))
 	controllers.HookPotfileEndpoints(api.Group("/potfile"))
 

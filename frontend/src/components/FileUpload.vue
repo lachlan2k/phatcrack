@@ -44,11 +44,11 @@ const validationError = computed(() => {
     return 'Please select a file'
   }
 
-  if (fileToUpload.value.size > conf.maximum_uploaded_file_line_scan_size && lineCount.value == 0) {
+  if (fileToUpload.value.size > conf.general.maximum_uploaded_file_line_scan_size && lineCount.value == 0) {
     return 'Please set the line count'
   }
 
-  if (fileToUpload.value.size > conf.maximum_uploaded_file_size && !isAdmin) {
+  if (fileToUpload.value.size > conf.general.maximum_uploaded_file_size && !isAdmin) {
     return 'File is too large'
   }
 
@@ -60,7 +60,7 @@ const requiresLineCountSpecified = computed(() => {
     return false
   }
 
-  return fileToUpload.value.size > (config.value?.maximum_uploaded_file_line_scan_size ?? 0)
+  return fileToUpload.value.size > (config.value?.general.maximum_uploaded_file_line_scan_size ?? 0)
 })
 
 watch(requiresLineCountSpecified, (doesRequire) => {
@@ -152,7 +152,7 @@ async function onSubmit(event: Event) {
     <input type="number" class="input input-bordered" v-model="lineCount" />
     <label class="label" v-if="lineCount == 0">
       <span class="label-text text-error"
-        >Files larger {{ bytesToReadable(config?.maximum_uploaded_file_line_scan_size ?? 0) }} require a line count</span
+        >Files larger {{ bytesToReadable(config?.general.maximum_uploaded_file_line_scan_size ?? 0) }} require a line count</span
       >
     </label>
   </div>
@@ -170,7 +170,7 @@ async function onSubmit(event: Event) {
   <div class="form-control mt-1">
     <label class="label font-bold">
       <span class="label-text" v-if="isAdmin">Pick a file</span>
-      <span class="label-text" v-else>Pick a file (max {{ bytesToReadable(config?.maximum_uploaded_file_size ?? 0) }})</span>
+      <span class="label-text" v-else>Pick a file (max {{ bytesToReadable(config?.general.maximum_uploaded_file_size ?? 0) }})</span>
     </label>
     <input type="file" ref="fileInputEl" @change="onFileSelect" class="file-input file-input-bordered file-input-ghost" name="file" />
   </div>

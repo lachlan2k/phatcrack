@@ -209,7 +209,7 @@ func handleOIDCCallback(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			},
 			IsAwaitingMFA:          userToAuth.HasRole(roles.RoleMFAEnrolled),
 			RequiresPasswordChange: userToAuth.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().Auth.IsMFARequired && !userToAuth.HasRole(roles.RoleMFAEnrolled) && !userToAuth.HasRole(roles.RoleMFAExempt),
+			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !userToAuth.HasRole(roles.RoleMFAEnrolled) && !userToAuth.HasRole(roles.RoleMFAExempt),
 		}
 
 		logMessage := "Session started"
