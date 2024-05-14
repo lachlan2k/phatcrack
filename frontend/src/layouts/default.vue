@@ -25,8 +25,7 @@ const pageLinks = [
 ]
 
 const adminPageLinks = [
-  { name: 'General Settings', icon: 'fa-gear', to: '/admin/general' },
-  { name: 'Auth Settings', icon: 'fa-passport', to: '/admin/auth' },
+  { name: 'Configuration', icon: 'fa-gear', to: '/admin/general' },
   { name: 'Manage Users', icon: 'fa-users', to: '/admin/users' },
   { name: 'Manage Agents', icon: 'fa-robot', to: '/admin/agents' }
 ]

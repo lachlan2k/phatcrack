@@ -11,6 +11,7 @@ export interface AuthOIDCConfig {
   redirect_url: string
   automatic_creation: boolean
   username_field: string
+  prompt: string
   role_field: string
   required_role: string
   scopes: string[]
@@ -39,9 +40,9 @@ export interface AdminConfigRequestDTO {
   general?: GeneralConfig
 }
 export interface AdminConfigResponseDTO {
-  auth?: AuthConfig
-  agent?: AgentConfig
-  general?: GeneralConfig
+  auth: AuthConfig
+  agent: AgentConfig
+  general: GeneralConfig
 }
 export interface AdminAgentCreateRequestDTO {
   name: string

@@ -246,20 +246,31 @@ func extractUsernameAndRoles(claims map[string]any, ac config.AuthConfig) (strin
 		return "", nil, fmt.Errorf("username claim %q was empty", ac.OIDC.UsernameClaim)
 	}
 
-	roleClaim := claims[ac.OIDC.RolesClaim]
+	roles := make([]string, 0)
 
-	rolesAny, ok := roleClaim.([]any)
-	if !ok {
-		return "", nil, fmt.Errorf("couldn't cast roles %v (type of %T) to []any", roleClaim, roleClaim)
+	hasRolesClaim := false
+	var roleClaim any
+	if len(ac.OIDC.RolesClaim) > 0 {
+		roleClaim, ok = claims[ac.OIDC.RolesClaim]
+		if ok {
+			hasRolesClaim = true
+		}
 	}
 
-	roles := make([]string, len(rolesAny))
-	for i, v := range rolesAny {
-		roleStr, ok := v.(string)
+	if hasRolesClaim {
+		rolesAny, ok := roleClaim.([]any)
 		if !ok {
-			return "", nil, fmt.Errorf("failed to cast role item [%d] %v (type of %T) to string", i, v, v)
+			return "", nil, fmt.Errorf("couldn't cast roles %v (type of %T) to []any", roleClaim, roleClaim)
 		}
-		roles[i] = roleStr
+
+		roles := make([]string, len(rolesAny))
+		for i, v := range rolesAny {
+			roleStr, ok := v.(string)
+			if !ok {
+				return "", nil, fmt.Errorf("failed to cast role item [%d] %v (type of %T) to string", i, v, v)
+			}
+			roles = append(roles, roleStr)
+		}
 	}
 
 	return claimUsernameStr, roles, nil

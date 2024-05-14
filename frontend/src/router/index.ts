@@ -29,6 +29,11 @@ const router = createRouter({
       name: 'login-home',
       component: () => import('@/pages/Login.vue')
     },
+    {
+      path: '/oidc-callback',
+      name: 'oidc-callback',
+      component: () => import('@/pages/LoginOIDCCallback.vue')
+    },
     route('/agents', 'Agents', () => import('@/pages/Agents.vue')),
     route('/dashboard', 'Dashboard', () => import('@/pages/projects/index.vue')),
     route('/hash-search', 'Hash Search', () => import('@/pages/HashSearch.vue')),
@@ -43,10 +48,9 @@ const router = createRouter({
 
     route('/account', 'Account', () => import('@/pages/Account.vue')),
 
-    route('/admin/general', 'General Settings', () => import('@/pages/admin/GeneralSettings.vue')),
+    route('/admin/general', 'General Settings', () => import('@/pages/admin/Configuration.vue')),
     route('/admin/users', 'User Management', () => import('@/pages/admin/Users.vue')),
-    route('/admin/agents', 'Agent Management', () => import('@/pages/admin/Agents.vue')),
-    route('/admin/auth', 'Auth Settings', () => import('@/pages/admin/Auth.vue'))
+    route('/admin/agents', 'Agent Management', () => import('@/pages/admin/Agents.vue'))
   ]
 })
 

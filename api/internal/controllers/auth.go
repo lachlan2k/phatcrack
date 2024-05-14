@@ -33,7 +33,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 
 	api.PUT("/refresh", handleRefresh(sessHandler))
 	api.POST("/login/credentials", handleCredentialLogin(sessHandler))
-	api.POST("/login/oidc/start", handleOIDCStart(sessHandler))
+	api.GET("/login/oidc/start", handleOIDCStart(sessHandler))
 	api.POST("/login/oidc/callback", handleOIDCCallback(sessHandler))
 
 	api.POST("/logout", func(c echo.Context) error {

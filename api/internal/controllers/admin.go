@@ -63,7 +63,9 @@ func HookAdminEndpoints(api *echo.Group) {
 
 				if a.OIDC != nil {
 					newConf.Auth.OIDC.ClientID = a.OIDC.ClientID
-					newConf.Auth.OIDC.ClientSecret = a.OIDC.ClientSecret
+					if a.OIDC.ClientSecret != "redacted" {
+						newConf.Auth.OIDC.ClientSecret = a.OIDC.ClientSecret
+					}
 					newConf.Auth.OIDC.IssuerURL = a.OIDC.IssuerURL
 					newConf.Auth.OIDC.RedirectURL = a.OIDC.RedirectURL
 					newConf.Auth.OIDC.AutomaticUserCreation = a.OIDC.AutomaticUserCreation

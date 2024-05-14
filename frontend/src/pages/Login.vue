@@ -15,7 +15,7 @@ const router = useRouter()
 
 const configStore = useConfigStore()
 configStore.load()
-const { isCredentialAuthEnabled, isOIDCAuthEnabled, loading: isConfigLoading, config } = storeToRefs(configStore)
+const { isCredentialAuthEnabled, isOIDCAuthEnabled, config } = storeToRefs(configStore)
 
 const { hasCompletedAuth, isAwaitingMFA, requiresPasswordChange, requiresMFAEnrollment, loginError, isLoginLoading, loggedInUser } =
   storeToRefs(authStore)
@@ -71,7 +71,7 @@ async function doCredentialLogin(event: Event) {
 }
 
 async function startOIDCLogin() {
-  alert('oidc lol')
+  window.location.href = '/api/v1/auth/login/oidc/start'
 }
 
 const { catcher } = useToastError()
@@ -221,7 +221,7 @@ const cardTitle = computed(() => {
 
           <div class="form-control" v-if="isOIDCAuthEnabled">
             <button class="btn btn-primary" @click="startOIDCLogin" :disabled="isLoginLoading">
-              {{ config?.auth?.oidc?.prompt ?? 'Login with OIDC Provider' }}
+              {{ config?.auth?.oidc?.prompt || 'Login with SSO' }}
             </button>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { loginWithCredentials as apiLogin, refreshAuth as apiRefreshAuth, logout as apiLogout } from '@/api/auth'
+import { loginWithCredentials as apiLogin, refreshAuth as apiRefreshAuth, logout as apiLogout, loginWithOIDCCallback } from '@/api/auth'
 import type { AuthLoginResponseDTO, AuthRefreshResponseDTO, AuthWhoamiResponseDTO } from '@/api/types'
 
 export type AuthState = {
@@ -25,6 +25,24 @@ export const useAuthStore = defineStore({
     } as AuthState),
 
   actions: {
+    async handleOIDCCallback(querystring: string) {
+      this.isLoginLoading = true
+
+      try {
+        const details = await loginWithOIDCCallback(querystring)
+        this.whoamiDetails = details
+        this.loginError = null
+      } catch (err: any) {
+        this.whoamiDetails = null
+        this.loginError = err.response.data.message
+      } finally {
+        this.hasTriedAuth = true
+        this.isLoginLoading = false
+      }
+
+      return this.loggedInUser != null
+    },
+
     async login(username: string, password: string): Promise<boolean> {
       this.isLoginLoading = true
       try {

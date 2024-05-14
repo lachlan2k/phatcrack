@@ -46,7 +46,7 @@ export function adminGetConfig(): Promise<AdminConfigResponseDTO> {
   return client.get('/api/v1/admin/config').then((res) => res.data)
 }
 
-export function adminSetConfig(newConfig: AdminConfigRequestDTO): Promise<AdminConfigRequestDTO> {
+export function adminSetConfig(newConfig: AdminConfigRequestDTO): Promise<AdminConfigResponseDTO> {
   return client.put('/api/v1/admin/config', newConfig).then((res) => res.data)
 }
 

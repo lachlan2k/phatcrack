@@ -72,7 +72,7 @@ func (conf RuntimeConfig) ToAdminDTO() apitypes.AdminConfigResponseDTO {
 	}
 
 	return apitypes.AdminConfigResponseDTO{
-		Auth: &apitypes.AuthConfig{
+		Auth: apitypes.AuthConfig{
 			General: &apitypes.GeneralAuthConfig{
 				EnabledMethods:                    conf.Auth.General.EnabledMethods,
 				IsMFARequired:                     conf.Auth.General.IsMFARequired,
@@ -96,12 +96,12 @@ func (conf RuntimeConfig) ToAdminDTO() apitypes.AdminConfigResponseDTO {
 			},
 		},
 
-		Agent: &apitypes.AgentConfig{
+		Agent: apitypes.AgentConfig{
 			AutomaticallySyncListfiles: conf.Agent.AutomaticallySyncListfiles,
 			SplitJobsPerAgent:          conf.Agent.SplitJobsPerAgent,
 		},
 
-		General: &apitypes.GeneralConfig{
+		General: apitypes.GeneralConfig{
 			IsMaintenanceMode:               conf.General.IsMaintenanceMode,
 			MaximumUploadedFileSize:         conf.General.MaximumUploadedFileSize,
 			MaximumUploadedFileLineScanSize: conf.General.MaximumUploadedFileLineScanSize,

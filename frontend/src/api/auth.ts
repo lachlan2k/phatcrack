@@ -16,6 +16,10 @@ export function loginWithCredentials(username: string, password: string): Promis
     .then((res) => res.data)
 }
 
+export function loginWithOIDCCallback(querystring: string): Promise<AuthLoginResponseDTO> {
+  return client.post('/api/v1/auth/login/oidc/callback' + querystring).then((res) => res.data)
+}
+
 function urlSafeB64Encode(value: ArrayBuffer) {
   return btoa(String.fromCharCode.apply(null, new Uint8Array(value) as unknown as number[]))
     .replace(/\+/g, '-')

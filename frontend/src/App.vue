@@ -26,7 +26,14 @@ const activeAttacksStore = useActiveAttacksStore()
 
 const { hasCompletedAuth, hasTriedAuth, loggedInUser, isLoggedIn } = storeToRefs(authStore)
 
-onMounted(() => {
+onMounted(async () => {
+  await router.isReady()
+
+  router.beforeEach(() => {
+    authStore.refreshAuth()
+    configStore.load()
+  })
+
   authStore.refreshAuth()
   configStore.load()
 
@@ -40,11 +47,6 @@ onMounted(() => {
       activeAttacksStore.load()
     }
   }, 15 * 1000)
-})
-
-router.beforeEach(() => {
-  authStore.refreshAuth()
-  configStore.load()
 })
 
 onBeforeUnmount(() => {
@@ -76,7 +78,7 @@ watch(isLoggedIn, (newIsLoggedIn, oldIsLoggedIn) => {
 // check to see if we're logged in our not
 // if we're not logged in, go to login page
 watch(hasTriedAuth, (newHasTriedAuth, oldHasTriedAuth) => {
-  if (newHasTriedAuth && !oldHasTriedAuth) {
+  if (newHasTriedAuth && !oldHasTriedAuth && router.currentRoute.value.path != '/oidc-callback') {
     if (!isLoggedIn.value) {
       router.push('/')
     }

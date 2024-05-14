@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import { reactive, watch } from 'vue'
 import { useToast } from 'vue-toastification'
-import { useApi } from '@/composables/useApi'
-import { adminGetConfig, adminSetConfig } from '@/api/admin'
 import { useConfigStore } from '@/stores/config'
 import { useToastError } from '@/composables/useToastError'
+import { useAdminConfigStore } from '@/stores/adminConfig'
+import { storeToRefs } from 'pinia'
 
 const configStore = useConfigStore()
-const { data: settingsData, silentlyRefresh: reloadSettings, isLoading } = useApi(adminGetConfig)
+const adminConfigStore = useAdminConfigStore()
+const { config: adminConfig } = storeToRefs(adminConfigStore)
+adminConfigStore.load()
 
 const generalSettings = reactive({
-  is_maintenance_mode: false,
-  maximum_uploaded_file_size: 1,
-  maximum_uploaded_file_line_scan_size: 1
+  is_maintenance_mode: adminConfig.value?.general?.is_maintenance_mode ?? false,
+  maximum_uploaded_file_size: adminConfig.value?.general?.maximum_uploaded_file_size ?? 1,
+  maximum_uploaded_file_line_scan_size: adminConfig.value?.general?.maximum_uploaded_file_line_scan_size ?? 1
 })
 
-watch(settingsData, (newSettings) => {
+watch(adminConfig, (newSettings) => {
   const general = newSettings?.general
   if (general == null) {
     return
@@ -31,7 +33,7 @@ const { catcher } = useToastError()
 
 async function onSave() {
   try {
-    await adminSetConfig({
+    await adminConfigStore.update({
       general: {
         is_maintenance_mode: generalSettings.is_maintenance_mode,
         maximum_uploaded_file_size: generalSettings.maximum_uploaded_file_size,
@@ -43,7 +45,7 @@ async function onSave() {
   } catch (e: any) {
     catcher(e)
   } finally {
-    reloadSettings()
+    adminConfigStore.load()
   }
 }
 </script>
@@ -83,7 +85,7 @@ async function onSave() {
       <tr>
         <td></td>
         <td>
-          <button class="btn btn-primary btn-sm" @click="() => onSave()">Save</button>
+          <button class="btn btn-primary btn-sm" @click="() => onSave()" :disabled="adminConfigStore.loading">Save</button>
         </td>
       </tr>
     </tbody>

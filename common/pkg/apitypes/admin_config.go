@@ -47,7 +47,7 @@ type AdminConfigRequestDTO struct {
 }
 
 type AdminConfigResponseDTO struct {
-	Auth    *AuthConfig    `json:"auth"`
-	Agent   *AgentConfig   `json:"agent"`
-	General *GeneralConfig `json:"general"`
+	Auth    AuthConfig    `json:"auth"`
+	Agent   AgentConfig   `json:"agent"`
+	General GeneralConfig `json:"general"`
 }
