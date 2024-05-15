@@ -55,7 +55,7 @@ async function onChangePassword() {
   <main class="w-full p-4">
     <h1 class="text-4xl font-bold">Welcome {{ loggedInUser?.username }}</h1>
     <div class="mt-6 flex flex-wrap gap-6">
-      <div class="card bg-base-100 shadow-xl">
+      <div class="card bg-base-100 shadow-xl" v-if="!loggedInUser?.is_password_locked">
         <div class="card-body">
           <h2 class="card-title">Change Password</h2>
 
@@ -101,6 +101,11 @@ async function onChangePassword() {
               Change Password
             </button>
           </span>
+        </div>
+      </div>
+      <div class="card bg-base-100 shadow-xl" v-else>
+        <div class="card-body">
+          <p>Your account is externally managed and you cannot set a password.</p>
         </div>
       </div>
     </div>

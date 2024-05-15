@@ -8,9 +8,10 @@ type AuthLoginRequestDTO struct {
 }
 
 type AuthCurrentUserDTO struct {
-	ID       string   `json:"id"`
-	Username string   `json:"username"`
-	Roles    []string `json:"roles"`
+	ID               string   `json:"id"`
+	Username         string   `json:"username"`
+	Roles            []string `json:"roles"`
+	IsPasswordLocked bool     `json:"is_password_locked"`
 }
 
 type AuthLoginResponseDTO struct {

@@ -36,10 +36,10 @@ func handleCredentialLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			return util.ServerError("Internal error", err)
 		}
 
-		if len(user.PasswordHash) == 0 {
+		if user.IsPasswordLocked() {
 			AuditLog(c, log.Fields{
 				"attempted_username": user.Username,
-			}, "User attempted to log in with credentials, but no password on account")
+			}, "User attempted to log in with credentials, but password is locked")
 			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 		}
 
@@ -61,9 +61,10 @@ func handleCredentialLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 
 		response := apitypes.AuthLoginResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       user.ID.String(),
-				Username: user.Username,
-				Roles:    user.Roles,
+				ID:               user.ID.String(),
+				Username:         user.Username,
+				Roles:            user.Roles,
+				IsPasswordLocked: user.IsPasswordLocked(),
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled),
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),

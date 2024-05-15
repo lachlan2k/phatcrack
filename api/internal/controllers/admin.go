@@ -70,6 +70,7 @@ func HookAdminEndpoints(api *echo.Group) {
 					newConf.Auth.OIDC.RedirectURL = a.OIDC.RedirectURL
 					newConf.Auth.OIDC.AutomaticUserCreation = a.OIDC.AutomaticUserCreation
 					newConf.Auth.OIDC.UsernameClaim = a.OIDC.UsernameClaim
+					newConf.Auth.OIDC.Prompt = a.OIDC.Prompt
 					newConf.Auth.OIDC.RolesClaim = a.OIDC.RolesClaim
 					newConf.Auth.OIDC.RequiredRole = a.OIDC.RequiredRole
 					newConf.Auth.OIDC.AdditionalScopes = a.OIDC.AdditionalScopes

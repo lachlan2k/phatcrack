@@ -51,9 +51,10 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 
 		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       user.ID.String(),
-				Username: user.Username,
-				Roles:    user.Roles,
+				ID:               user.ID.String(),
+				Username:         user.Username,
+				Roles:            user.Roles,
+				IsPasswordLocked: user.IsPasswordLocked(),
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
@@ -76,16 +77,16 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 		if !user.HasRole(roles.RoleRequiresPasswordChange) {
 			return echo.NewHTTPError(http.StatusBadRequest, "This endpoint is only available to users who are required to change their password")
 		}
-
-		if len(user.PasswordHash) > 0 {
-			err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword))
-			if err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, "Old password was incorrect")
-			}
+		if user.IsPasswordLocked() {
+			return echo.NewHTTPError(http.StatusBadRequest, "Password locked")
 		}
-
 		if req.NewPassword == req.OldPassword {
 			return echo.NewHTTPError(http.StatusBadRequest, "New password must be different to old password")
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword))
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Old password was incorrect")
 		}
 
 		newPasswordHash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
@@ -287,9 +288,10 @@ func handleRefresh(sessHandler auth.SessionHandler) echo.HandlerFunc {
 
 		return c.JSON(http.StatusOK, apitypes.AuthWhoamiResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       user.ID.String(),
-				Username: user.Username,
-				Roles:    user.Roles,
+				ID:               user.ID.String(),
+				Username:         user.Username,
+				Roles:            user.Roles,
+				IsPasswordLocked: user.IsPasswordLocked(),
 			},
 			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
 			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),

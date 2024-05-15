@@ -28,7 +28,7 @@ const oidcAuthSettings = reactive({
   client_secret: initialOIDC?.client_secret ?? '',
 
   issuer_url: initialOIDC?.issuer_url ?? '',
-  redirect_url: initialOIDC?.redirect_url ?? '',
+  base_url: initialOIDC?.redirect_url.replace('/oidc-callback', '') ?? '',
 
   automatic_user_creation: initialOIDC?.automatic_user_creation ?? false,
   username_claim: initialOIDC?.username_claim ?? '',
@@ -63,7 +63,7 @@ watch(adminConfig, (newSettings) => {
     oidcAuthSettings.client_id = oidc.client_id
     oidcAuthSettings.client_secret = oidc.client_secret
     oidcAuthSettings.issuer_url = oidc.issuer_url
-    oidcAuthSettings.redirect_url = oidc.redirect_url
+    oidcAuthSettings.base_url = oidc.redirect_url.replace('/oidc-callback', '')
     oidcAuthSettings.automatic_user_creation = oidc.automatic_user_creation
     oidcAuthSettings.username_claim = oidc.username_claim
     oidcAuthSettings.prompt = oidc.prompt
@@ -75,6 +75,17 @@ watch(adminConfig, (newSettings) => {
 
 const toast = useToast()
 const { catcher } = useToastError()
+
+const displayRedirectURL = computed(() => oidcAuthSettings.base_url + '/oidc-callback')
+
+function autoFillBaseURL() {
+  oidcAuthSettings.base_url = window.location.origin
+}
+
+function copyRedirectURL() {
+  navigator.clipboard.writeText(displayRedirectURL.value)
+  toast.success('Copied!')
+}
 
 async function onSave() {
   const general: GeneralAuthConfigDTO = {
@@ -91,7 +102,7 @@ async function onSave() {
     client_id: oidcAuthSettings.client_id,
     client_secret: oidcAuthSettings.client_secret,
     issuer_url: oidcAuthSettings.issuer_url,
-    redirect_url: oidcAuthSettings.redirect_url,
+    redirect_url: displayRedirectURL.value,
     automatic_user_creation: oidcAuthSettings.automatic_user_creation,
     username_claim: oidcAuthSettings.username_claim,
     prompt: oidcAuthSettings.prompt,
@@ -180,15 +191,42 @@ async function onSave() {
             <input type="text" class="input input-bordered input-sm" v-model="oidcAuthSettings.issuer_url" placeholder="https://sso.lan" />
           </td>
         </tr>
+        <tr></tr>
+        <tr>
+          <td>Base URL</td>
+          <td>
+            <span class="relative block">
+              <input
+                type="text"
+                class="input input-bordered input-sm block"
+                v-model="oidcAuthSettings.base_url"
+                placeholder="https://phatcrack.lan"
+              />
+              <span
+                class="tooltip absolute right-0 top-0"
+                data-tip="Fill out based on current URL"
+                v-if="oidcAuthSettings.base_url.length == 0"
+              >
+                <button class="btn btn-ghost btn-sm" @click="autoFillBaseURL">
+                  <font-awesome-icon icon="fa-solid fa-pen-to-square"></font-awesome-icon>
+                </button>
+              </span>
+            </span>
+          </td>
+        </tr>
+
         <tr>
           <td>Redirect URL</td>
-          <td>
-            <input
-              type="text"
-              class="input input-bordered input-sm"
-              v-model="oidcAuthSettings.redirect_url"
-              placeholder="https://phatcrack.lan"
-            />
+          <td class="max-w-[200px] whitespace-nowrap">
+            <span
+              class="tooltip w-full cursor-pointer"
+              v-if="oidcAuthSettings.base_url != ''"
+              data-tip="Click to copy"
+              @click="copyRedirectURL"
+            >
+              <p class="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-xs">{{ displayRedirectURL }}</p>
+            </span>
+            <p v-else>-</p>
           </td>
         </tr>
 

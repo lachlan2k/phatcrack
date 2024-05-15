@@ -33,6 +33,10 @@ func handleChangePassword(c echo.Context) error {
 		return util.ServerError("Failed to update password", err)
 	}
 
+	if dbUser.IsPasswordLocked() {
+		return echo.NewHTTPError(http.StatusBadRequest, "Password locked")
+	}
+
 	currentPasswordCheckErr := bcrypt.CompareHashAndPassword([]byte(dbUser.PasswordHash), []byte(req.CurrentPassword))
 	if currentPasswordCheckErr == bcrypt.ErrMismatchedHashAndPassword {
 		return echo.NewHTTPError(http.StatusBadRequest, "Incorrect current password")

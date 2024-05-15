@@ -10,6 +10,8 @@ import (
 	"gorm.io/datatypes"
 )
 
+const UserPasswordLocked = "*"
+
 type User struct {
 	UUIDBaseModel
 	Username     string `gorm:"uniqueIndex"`
@@ -34,6 +36,10 @@ func (u *User) ToMinimalDTO() apitypes.UserMinimalDTO {
 		ID:       u.ID.String(),
 		Username: u.Username,
 	}
+}
+
+func (u *User) IsPasswordLocked() bool {
+	return u.PasswordHash == UserPasswordLocked || len(u.PasswordHash) == 0
 }
 
 func (u *User) HasRole(roleToCheck string) bool {
@@ -99,7 +105,7 @@ func RegisterUserWithCredentials(username, password string, roles []string) (*Us
 func RegisterUserWithoutPassword(username string, roles []string) (*User, error) {
 	user := &User{
 		Username:     NormalizeUsername(username),
-		PasswordHash: "",
+		PasswordHash: UserPasswordLocked,
 		Roles:        roles,
 	}
 

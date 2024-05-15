@@ -205,9 +205,10 @@ func handleOIDCCallback(sessHandler auth.SessionHandler) echo.HandlerFunc {
 
 		response := apitypes.AuthLoginResponseDTO{
 			User: apitypes.AuthCurrentUserDTO{
-				ID:       userToAuth.ID.String(),
-				Username: userToAuth.Username,
-				Roles:    userToAuth.Roles,
+				ID:               userToAuth.ID.String(),
+				Username:         userToAuth.Username,
+				Roles:            userToAuth.Roles,
+				IsPasswordLocked: userToAuth.IsPasswordLocked(),
 			},
 			IsAwaitingMFA:          userToAuth.HasRole(roles.RoleMFAEnrolled),
 			RequiresPasswordChange: userToAuth.HasRole(roles.RoleRequiresPasswordChange),

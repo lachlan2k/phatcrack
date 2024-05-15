@@ -9,9 +9,9 @@ export interface AuthOIDCConfigDTO {
   client_secret: string
   issuer_url: string
   redirect_url: string
+  prompt: string
   automatic_user_creation: boolean
   username_claim: string
-  prompt: string
   role_field: string
   required_role: string
   scopes: string[]
@@ -245,6 +245,7 @@ export interface AuthCurrentUserDTO {
   id: string
   username: string
   roles: string[]
+  is_password_locked: boolean
 }
 export interface AuthLoginResponseDTO {
   user: AuthCurrentUserDTO
