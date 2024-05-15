@@ -8,6 +8,8 @@ export type AuthState = {
   isLoginLoading: boolean
   loginError: string | null
   hasTriedAuth: boolean
+  hasLoggedOut: boolean
+  isRefreshing: boolean
 }
 
 export const useAuthStore = defineStore({
@@ -21,7 +23,9 @@ export const useAuthStore = defineStore({
       isLoginLoading: false,
 
       // When the app first loads, we don't want to assume a session timeout, so we want to check auth at least once
-      hasTriedAuth: false
+      hasTriedAuth: false,
+      hasLoggedOut: false,
+      isRefreshing: false
     } as AuthState),
 
   actions: {
@@ -62,21 +66,38 @@ export const useAuthStore = defineStore({
 
     async logout() {
       try {
-        apiLogout()
+        await apiLogout()
       } finally {
+        this.hasLoggedOut = true
+        this.loginError = ''
         this.whoamiDetails = null
       }
     },
 
     async refreshAuth() {
+      if (this.isRefreshing) {
+        return
+      }
+      this.isRefreshing = true
+
       try {
         const details = await apiRefreshAuth()
         this.whoamiDetails = details
         this.loginError = null
       } catch (err: any) {
+
         // We were logged in before, and now we're not
         if (this.loggedInUser != null) {
-          this.loginError = 'Session timeout'
+          if (this.hasLoggedOut) {
+            // Did we click logout? if so, reset and don't show a session timeout
+            this.hasLoggedOut = false
+            this.loginError = ''
+          } else {
+            // Otherwise, probably a session timeout
+            this.loginError = 'Session timeout'
+          }
+        } else if (err.response.data.message == 'Login required') {
+          // this "Login required" error is generic and pointless so we ignore it
         } else {
           this.loginError = err.response.data.message
         }
@@ -84,6 +105,7 @@ export const useAuthStore = defineStore({
         this.whoamiDetails = null
       } finally {
         this.hasTriedAuth = true
+        this.isRefreshing = false
       }
     }
   },

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { logout as apiLogout } from '@/api/auth'
 import { storeToRefs } from 'pinia'
 import { useConfigStore } from '@/stores/config'
 import { onMounted, ref } from 'vue'
@@ -37,7 +36,7 @@ onMounted(async () => {
 })
 
 async function logout() {
-  await apiLogout()
+  await authStore.logout()
   router.push('/login')
   authStore.refreshAuth()
 }
