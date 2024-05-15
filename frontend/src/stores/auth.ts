@@ -96,10 +96,10 @@ export const useAuthStore = defineStore({
             // Otherwise, probably a session timeout
             this.loginError = 'Session timeout'
           }
-        } else if (err.response.data.message == 'Login required') {
+        } else if (err?.response?.data?.message == 'Login required') {
           // this "Login required" error is generic and pointless so we ignore it
         } else {
-          this.loginError = err.response.data.message
+          this.loginError = err?.response?.data?.message || 'Unknown Error'
         }
 
         this.whoamiDetails = null
