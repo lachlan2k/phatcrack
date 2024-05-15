@@ -16,7 +16,7 @@ test.describe(() => {
 
         // Go to general settings
         await adminPage.goto('/admin/general')
-        await expect(adminPage.getByRole('heading', { name: 'General Settings' })).toBeVisible()
+        await expect(adminPage.getByRole('heading', { name: 'Configuration' })).toBeVisible()
 
         // Go to auth tab
         await adminPage.locator('.tab').filter({ hasText: 'Auth' }).click()
@@ -68,7 +68,7 @@ test.describe(() => {
 
         // Go to general settings
         await adminPage.goto('/admin/general')
-        await expect(adminPage.getByRole('heading', { name: 'General Settings' })).toBeVisible()
+        await expect(adminPage.getByRole('heading', { name: 'Configuration' })).toBeVisible()
 
         // Go to auth tab
         await adminPage.locator('.tab').filter({ hasText: 'Auth' }).click()
