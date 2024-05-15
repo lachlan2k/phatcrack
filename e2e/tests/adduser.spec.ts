@@ -18,8 +18,11 @@ test.describe(() => {
         await adminPage.goto('/admin/general')
         await expect(adminPage.getByRole('heading', { name: 'General Settings' })).toBeVisible()
 
+        // Go to auth tab
+        await adminPage.locator('.tab').filter({ hasText: 'Auth' }).click()
+
         // Uncheck require password change
-        await adminPage.locator('label').filter({ hasText: 'Require password change on first login' }).locator('input[type=checkbox]').setChecked(false)
+        await adminPage.locator('tr').filter({ hasText: 'Require password change on first login' }).locator('input[type=checkbox]').setChecked(false)
         await adminPage.locator('.card').getByRole('button', { name: 'Save' }).click()
 
         // Go to user page
@@ -67,8 +70,11 @@ test.describe(() => {
         await adminPage.goto('/admin/general')
         await expect(adminPage.getByRole('heading', { name: 'General Settings' })).toBeVisible()
 
+        // Go to auth tab
+        await adminPage.locator('.tab').filter({ hasText: 'Auth' }).click()
+
         // Uncheck require password change
-        await adminPage.locator('label').filter({ hasText: 'Require password change on first login' }).locator('input[type=checkbox]').setChecked(true)
+        await adminPage.locator('tr').filter({ hasText: 'Require password change on first login' }).locator('input[type=checkbox]').setChecked(true)
         await adminPage.locator('.card').getByRole('button', { name: 'Save' }).click()
 
         // Go to user page

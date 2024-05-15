@@ -142,6 +142,11 @@ async function onSave() {
       </tr>
 
       <tr>
+        <td>Require password change on first login</td>
+        <td><input type="checkbox" v-model="generalAuthSettings.require_password_change_on_first_login" class="toggle" /></td>
+      </tr>
+
+      <tr>
         <td>Enable Single-Sign On (OIDC)</td>
         <td><input type="checkbox" v-model="generalAuthSettings.enable_oidc_login" class="toggle" /></td>
       </tr>
