@@ -21,8 +21,8 @@ type AuthOIDCConfig struct {
 	IssuerURL   string `json:"issuer_url"`
 	RedirectURL string `json:"redirect_url"`
 
-	AutomaticUserCreation bool   `json:"automatic_creation"`
-	UsernameClaim         string `json:"username_field"`
+	AutomaticUserCreation bool   `json:"automatic_user_creation"`
+	UsernameClaim         string `json:"username_claim"`
 
 	RolesClaim   string `json:"role_field"`
 	RequiredRole string `json:"required_role"`
@@ -72,14 +72,14 @@ func (conf RuntimeConfig) ToAdminDTO() apitypes.AdminConfigResponseDTO {
 	}
 
 	return apitypes.AdminConfigResponseDTO{
-		Auth: apitypes.AuthConfig{
-			General: &apitypes.GeneralAuthConfig{
+		Auth: apitypes.AuthConfigDTO{
+			General: &apitypes.GeneralAuthConfigDTO{
 				EnabledMethods:                    conf.Auth.General.EnabledMethods,
 				IsMFARequired:                     conf.Auth.General.IsMFARequired,
 				RequirePasswordChangeOnFirstLogin: conf.Auth.General.RequirePasswordChangeOnFirstLogin,
 			},
 
-			OIDC: &apitypes.AuthOIDCConfig{
+			OIDC: &apitypes.AuthOIDCConfigDTO{
 				ClientID:     conf.Auth.OIDC.ClientID,
 				ClientSecret: oidcClientSecret,
 
@@ -96,12 +96,12 @@ func (conf RuntimeConfig) ToAdminDTO() apitypes.AdminConfigResponseDTO {
 			},
 		},
 
-		Agent: apitypes.AgentConfig{
+		Agent: apitypes.AgentConfigDTO{
 			AutomaticallySyncListfiles: conf.Agent.AutomaticallySyncListfiles,
 			SplitJobsPerAgent:          conf.Agent.SplitJobsPerAgent,
 		},
 
-		General: apitypes.GeneralConfig{
+		General: apitypes.GeneralConfigDTO{
 			IsMaintenanceMode:               conf.General.IsMaintenanceMode,
 			MaximumUploadedFileSize:         conf.General.MaximumUploadedFileSize,
 			MaximumUploadedFileLineScanSize: conf.General.MaximumUploadedFileLineScanSize,

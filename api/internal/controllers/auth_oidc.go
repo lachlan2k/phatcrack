@@ -61,13 +61,14 @@ func getOidcUtils(ctx context.Context) (*oidcUtils, error) {
 	}, nil
 }
 
-func handleOIDCStart(sessHandler auth.SessionHandler) echo.HandlerFunc {
+func handleOIDCStart(_ auth.SessionHandler) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if !isOIDCAuthAllowed() {
 			return echo.NewHTTPError(http.StatusBadRequest, "OIDC auth is not enabled")
 		}
 
-		ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
 		utils, err := getOidcUtils(ctx)
 
 		if err != nil {
@@ -114,7 +115,8 @@ func handleOIDCCallback(sessHandler auth.SessionHandler) echo.HandlerFunc {
 
 		ac := config.Get().Auth
 
-		ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
 		utils, err := getOidcUtils(ctx)
 		if err != nil {
 			return util.GenericServerError(err)
@@ -263,7 +265,6 @@ func extractUsernameAndRoles(claims map[string]any, ac config.AuthConfig) (strin
 			return "", nil, fmt.Errorf("couldn't cast roles %v (type of %T) to []any", roleClaim, roleClaim)
 		}
 
-		roles := make([]string, len(rolesAny))
 		for i, v := range rolesAny {
 			roleStr, ok := v.(string)
 			if !ok {

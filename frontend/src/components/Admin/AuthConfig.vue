@@ -6,7 +6,7 @@ import { useToastError } from '@/composables/useToastError'
 import { useAdminConfigStore } from '@/stores/adminConfig'
 import { storeToRefs } from 'pinia'
 import { AuthMethodCredentials, AuthMethodOIDC } from '@/api/config'
-import type { AdminConfigRequestDTO, AuthOIDCConfig, GeneralAuthConfig } from '@/api/types'
+import type { AdminConfigRequestDTO, AuthOIDCConfigDTO, GeneralAuthConfigDTO } from '@/api/types'
 
 const configStore = useConfigStore()
 const adminConfigStore = useAdminConfigStore()
@@ -30,8 +30,8 @@ const oidcAuthSettings = reactive({
   issuer_url: initialOIDC?.issuer_url ?? '',
   redirect_url: initialOIDC?.redirect_url ?? '',
 
-  automatic_user_creation: initialOIDC?.automatic_creation ?? false,
-  username_claim: initialOIDC?.username_field ?? '',
+  automatic_user_creation: initialOIDC?.automatic_user_creation ?? false,
+  username_claim: initialOIDC?.username_claim ?? '',
   prompt: initialOIDC?.prompt ?? '',
 
   roles_claim: initialOIDC?.role_field ?? '',
@@ -64,8 +64,8 @@ watch(adminConfig, (newSettings) => {
     oidcAuthSettings.client_secret = oidc.client_secret
     oidcAuthSettings.issuer_url = oidc.issuer_url
     oidcAuthSettings.redirect_url = oidc.redirect_url
-    oidcAuthSettings.automatic_user_creation = oidc.automatic_creation
-    oidcAuthSettings.username_claim = oidc.username_field
+    oidcAuthSettings.automatic_user_creation = oidc.automatic_user_creation
+    oidcAuthSettings.username_claim = oidc.username_claim
     oidcAuthSettings.prompt = oidc.prompt
     oidcAuthSettings.roles_claim = oidc.role_field
     oidcAuthSettings.required_role = oidc.required_role
@@ -77,7 +77,7 @@ const toast = useToast()
 const { catcher } = useToastError()
 
 async function onSave() {
-  const general: GeneralAuthConfig = {
+  const general: GeneralAuthConfigDTO = {
     enabled_methods: [
       ...(generalAuthSettings.enable_cred_login ? [AuthMethodCredentials] : []),
       ...(generalAuthSettings.enable_oidc_login ? [AuthMethodOIDC] : [])
@@ -87,13 +87,13 @@ async function onSave() {
     require_password_change_on_first_login: generalAuthSettings.require_password_change_on_first_login
   }
 
-  const oidc: AuthOIDCConfig = {
+  const oidc: AuthOIDCConfigDTO = {
     client_id: oidcAuthSettings.client_id,
     client_secret: oidcAuthSettings.client_secret,
     issuer_url: oidcAuthSettings.issuer_url,
     redirect_url: oidcAuthSettings.redirect_url,
-    automatic_creation: oidcAuthSettings.automatic_user_creation,
-    username_field: oidcAuthSettings.username_claim,
+    automatic_user_creation: oidcAuthSettings.automatic_user_creation,
+    username_claim: oidcAuthSettings.username_claim,
     prompt: oidcAuthSettings.prompt,
     role_field: oidcAuthSettings.roles_claim,
     required_role: oidcAuthSettings.required_role,
@@ -169,7 +169,9 @@ async function onSave() {
         </tr>
         <tr>
           <td>Client Secret</td>
-          <td><input type="text" class="input input-bordered input-sm" v-model="oidcAuthSettings.client_secret" placeholder="1234" /></td>
+          <td>
+            <input type="password" class="input input-bordered input-sm" v-model="oidcAuthSettings.client_secret" placeholder="1234" />
+          </td>
         </tr>
 
         <tr>

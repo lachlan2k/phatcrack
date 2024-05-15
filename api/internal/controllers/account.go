@@ -22,7 +22,7 @@ func handleChangePassword(c echo.Context) error {
 	}
 
 	u := auth.UserFromReq(c)
-	if err != nil {
+	if u == nil {
 		return echo.ErrUnauthorized
 	}
 

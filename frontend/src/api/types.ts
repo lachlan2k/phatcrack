@@ -4,45 +4,45 @@ export interface AccountChangePasswordRequestDTO {
   new_password: string
   current_password: string
 }
-export interface AuthOIDCConfig {
+export interface AuthOIDCConfigDTO {
   client_id: string
   client_secret: string
   issuer_url: string
   redirect_url: string
-  automatic_creation: boolean
-  username_field: string
+  automatic_user_creation: boolean
+  username_claim: string
   prompt: string
   role_field: string
   required_role: string
   scopes: string[]
 }
-export interface GeneralAuthConfig {
+export interface GeneralAuthConfigDTO {
   enabled_methods: string[]
   is_mfa_required: boolean
   require_password_change_on_first_login: boolean
 }
-export interface AuthConfig {
-  general?: GeneralAuthConfig
-  oidc?: AuthOIDCConfig
+export interface AuthConfigDTO {
+  general?: GeneralAuthConfigDTO
+  oidc?: AuthOIDCConfigDTO
 }
-export interface AgentConfig {
+export interface AgentConfigDTO {
   auto_sync_listfiles: boolean
   split_jobs_per_agent: number
 }
-export interface GeneralConfig {
+export interface GeneralConfigDTO {
   is_maintenance_mode: boolean
   maximum_uploaded_file_size: number
   maximum_uploaded_file_line_scan_size: number
 }
 export interface AdminConfigRequestDTO {
-  auth?: AuthConfig
-  agent?: AgentConfig
-  general?: GeneralConfig
+  auth?: AuthConfigDTO
+  agent?: AgentConfigDTO
+  general?: GeneralConfigDTO
 }
 export interface AdminConfigResponseDTO {
-  auth: AuthConfig
-  agent: AgentConfig
-  general: GeneralConfig
+  auth: AuthConfigDTO
+  agent: AgentConfigDTO
+  general: GeneralConfigDTO
 }
 export interface AdminAgentCreateRequestDTO {
   name: string
