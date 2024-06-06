@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -17,11 +18,13 @@ import (
 )
 
 type AgentConnection struct {
-	conn    *websocket.Conn
-	agentId string
+	conn      *websocket.Conn
+	writeLock sync.Mutex
+	agentId   string
 }
 
-func (a *AgentConnection) MarkDisconnected() {
+// Should only be called by Handle()
+func (a *AgentConnection) markDisconnected() {
 	fleetLock.Lock()
 	defer fleetLock.Unlock()
 
@@ -36,6 +39,9 @@ func (a *AgentConnection) MarkDisconnected() {
 	newInfo.TimeOfLastDisconnect = time.Now()
 
 	db.UpdateAgentInfo(a.agentId, newInfo)
+
+	a.writeLock.Lock() // To ensure no writeMessage is trying to use a.conn
+	defer a.writeLock.Unlock()
 	a.conn = nil
 }
 
@@ -71,6 +77,9 @@ func (a *AgentConnection) handleMessage(msg *wstypes.Message) error {
 }
 
 func (a *AgentConnection) sendMessage(msgType string, payload interface{}) error {
+	a.writeLock.Lock()
+	defer a.writeLock.Unlock()
+
 	if a.conn == nil {
 		return errors.New("connection closed")
 	}
@@ -91,6 +100,8 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 	if err != nil {
 		return fmt.Errorf("couldn't unmarshal %v to hearbeat dto: %w", msg.Payload, err)
 	}
+
+	defer LazyQueueStateReconciliation()
 
 	availableListfiles := make([]db.AgentFile, len(payload.Listfiles))
 	listfilesToCheckMap := make(map[string]*db.AgentFile)
@@ -160,8 +171,6 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 		a.RequestFileDownload(filesToRequestDownload...)
 	}
 
-	LazyQueueStateReconciliation()
-
 	return nil
 }
 
@@ -187,7 +196,7 @@ func (a *AgentConnection) RequestFileDelete(fileID string) error {
 }
 
 func (a *AgentConnection) Handle() error {
-	defer a.MarkDisconnected()
+	defer a.markDisconnected()
 
 	agentInfo, err := db.GetAgent(a.agentId)
 	if err != nil {
