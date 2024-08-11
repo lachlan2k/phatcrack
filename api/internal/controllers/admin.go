@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/hex"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"crypto/rand"
@@ -135,6 +136,8 @@ func HookAdminEndpoints(api *echo.Group) {
 		return c.JSON(http.StatusOK, "ok")
 	})
 
+	api.POST("/agent-registration-key/create", handleAgentRegistrationKeyCreate)
+
 	api.DELETE("/user/:id", handleDeleteUser)
 	api.DELETE("/agent/:id", handleDeleteAgent)
 }
@@ -234,7 +237,7 @@ func handleAgentCreate(c echo.Context) error {
 		return err
 	}
 
-	newAgent, key, err := db.CreateAgent(req.Name)
+	newAgent, key, err := db.CreateAgent(req.Name, req.Ephemeral)
 	if err != nil {
 		return util.ServerError("Failed to create agent", err)
 	}
@@ -247,6 +250,30 @@ func handleAgentCreate(c echo.Context) error {
 		Name: req.Name,
 		ID:   newAgent.ID.String(),
 		Key:  key,
+	})
+}
+
+func handleAgentRegistrationKeyCreate(c echo.Context) error {
+	req, err := util.BindAndValidate[apitypes.AdminAgentRegistrationKeyCreateRequestDTO](c)
+	if err != nil {
+		return err
+	}
+
+	newRegKey, key, err := db.CreateAgentRegistrationKey(req.Name, req.Ephemeral)
+	if err != nil {
+		return util.ServerError("Failed to create agent registration key", err)
+	}
+
+	AuditLog(c, log.Fields{
+		"key_id":   newRegKey.ID,
+		"key_name": newRegKey.Name,
+	}, "New agent registration key created")
+
+	return c.JSON(http.StatusCreated, apitypes.AdminAgentRegistrationKeyCreateResponseDTO{
+		Ephemeral: newRegKey.Ephemeral,
+		Name:      newRegKey.Name,
+		ID:        strconv.Itoa(int(newRegKey.ID)),
+		Key:       key,
 	})
 }
 

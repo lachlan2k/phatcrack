@@ -78,6 +78,7 @@ func runMigrations() {
 	instance := GetInstance()
 
 	instance.AutoMigrate(&Agent{})
+	instance.AutoMigrate(&AgentRegistrationKey{})
 
 	instance.AutoMigrate(&Job{})
 	instance.AutoMigrate(&JobRuntimeData{})

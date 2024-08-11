@@ -12,6 +12,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/filerepo"
 	"github.com/lachlan2k/phatcrack/api/internal/fleet"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
 func HookAgentHandlerEndpoints(api *echo.Group) {
@@ -21,6 +22,7 @@ func HookAgentHandlerEndpoints(api *echo.Group) {
 		return c.String(http.StatusOK, "pong agent")
 	})
 
+	api.POST("/register", handleAgentRegister)
 	api.GET("/ws", handleAgentWs)
 	api.GET("/download-file/:id", handleAgentDownloadFile)
 }
@@ -92,4 +94,38 @@ func handleAgentWs(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func handleAgentRegister(c echo.Context) error {
+	body, err := util.BindAndValidate[apitypes.AgentRegisterRequestDTO](c)
+	if err != nil {
+		return err
+	}
+
+	registrationKey := c.Request().Header.Get("Authorization")
+	if len(registrationKey) == 0 {
+		return echo.ErrUnauthorized
+	}
+
+	keyData, err := db.GetAgentRegistrationKeyByKey(registrationKey)
+	if err != nil {
+		return echo.ErrUnauthorized
+	}
+
+	name := body.Name
+	if name == "" {
+		name = keyData.Name + "-" + uuid.NewString()[:8]
+	}
+
+	// TODO: make this not-racey
+	newAgent, newAuthKey, err := db.CreateAgent(name, keyData.Ephemeral)
+	if err != nil {
+		return util.GenericServerError(err)
+	}
+
+	return c.JSON(http.StatusOK, apitypes.AgentRegisterResponseDTO{
+		Name: newAgent.Name,
+		ID:   newAgent.ID.String(),
+		Key:  newAuthKey,
+	})
 }

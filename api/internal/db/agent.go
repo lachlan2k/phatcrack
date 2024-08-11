@@ -22,8 +22,16 @@ type Agent struct {
 	Name              string
 	KeyHash           string
 	IsMaintenanceMode bool `gorm:"default:false; not null"`
+	Ephemeral         bool
 	AgentInfo         datatypes.JSONType[AgentInfo]
 	AgentDevices      datatypes.JSONType[AgentDeviceInfo]
+}
+
+type AgentRegistrationKey struct {
+	SimpleBaseModel
+	Name      string
+	KeyHash   string
+	Ephemeral bool
 }
 
 type AgentFile struct {
@@ -77,15 +85,16 @@ func (a Agent) ToDTO() apitypes.AgentDTO {
 	}
 }
 
-func CreateAgent(name string) (newAgent *Agent, plaintextKey string, err error) {
+func CreateAgent(name string, ephemeral bool) (newAgent *Agent, plaintextKey string, err error) {
 	plaintextKey, keyHash, err := util.GenAgentKeyAndHash()
 	if err != nil {
 		return
 	}
 
 	agent := &Agent{
-		Name:    name,
-		KeyHash: keyHash,
+		Name:      name,
+		KeyHash:   keyHash,
+		Ephemeral: ephemeral,
 	}
 
 	err = GetInstance().Create(agent).Error
@@ -95,6 +104,37 @@ func CreateAgent(name string) (newAgent *Agent, plaintextKey string, err error) 
 
 	newAgent = agent
 	return
+}
+
+func CreateAgentRegistrationKey(name string, ephemeral bool) (newKey *AgentRegistrationKey, plaintextKey string, err error) {
+	plaintextKey, keyHash, err := util.GenAgentKeyAndHash()
+	if err != nil {
+		return
+	}
+
+	key := &AgentRegistrationKey{
+		Name:      name,
+		KeyHash:   keyHash,
+		Ephemeral: ephemeral,
+	}
+
+	err = GetInstance().Create(key).Error
+	if err != nil {
+		return
+	}
+
+	newKey = key
+	return
+}
+
+func GetAgentRegistrationKeyByKey(key string) (*AgentRegistrationKey, error) {
+	keyHash := util.HashAgentKey(key)
+	registrationKey := &AgentRegistrationKey{}
+	err := GetInstance().Where(&AgentRegistrationKey{KeyHash: keyHash}).First(registrationKey).Error
+	if err != nil {
+		return nil, err
+	}
+	return registrationKey, nil
 }
 
 func GetAllAgents() ([]Agent, error) {

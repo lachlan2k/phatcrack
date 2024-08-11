@@ -1,13 +1,27 @@
 package apitypes
 
 type AdminAgentCreateRequestDTO struct {
-	Name string `json:"name" validate:"required,min=4,max=64,username"`
+	Name      string `json:"name" validate:"required,min=4,max=64,username"`
+	Ephemeral bool   `json:"ephemeral"`
 }
 
 type AdminAgentCreateResponseDTO struct {
-	Name string `json:"name"`
-	ID   string `json:"id"`
-	Key  string `json:"key"`
+	Ephemeral bool   `json:"ephemeral"`
+	Name      string `json:"name"`
+	ID        string `json:"id"`
+	Key       string `json:"key"`
+}
+
+type AdminAgentRegistrationKeyCreateRequestDTO struct {
+	Name      string `json:"name" validate:"required,min=4,max=64,username"`
+	Ephemeral bool   `json:"ephemeral"`
+}
+
+type AdminAgentRegistrationKeyCreateResponseDTO struct {
+	Ephemeral bool   `json:"ephemeral"`
+	Name      string `json:"name"`
+	ID        string `json:"id"`
+	Key       string `json:"key"`
 }
 
 type AdminUserCreateRequestDTO struct {

@@ -144,6 +144,20 @@ func stateReconciliation() error {
 			}
 		}
 
+		// Ephemeral agents get deleted when they are considered dead
+		// TODO: double check nothing will die now that the agent is to be deleted
+		// Maybe make a slice of agentsToDelete ?
+		if agent.Ephemeral && newInfo.Status == db.AgentStatusDead {
+			err = db.HardDelete(&agent)
+			if err != nil {
+				log.
+					WithField("agent_id", agent.ID.String()).
+					WithError(err).
+					Error("Failed to delete ephemeral agent after it died")
+			}
+			needsSave = false
+		}
+
 		if needsSave {
 			err := db.UpdateAgentInfo(agent.ID.String(), newInfo)
 			if err != nil {
