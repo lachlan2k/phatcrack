@@ -33,6 +33,7 @@ func (h *Handler) downloadFile(fileID string) error {
 	if err != nil {
 		return err
 	}
+	defer outFile.Close()
 
 	tr := &http.Transport{}
 	if h.conf.DisableTLSVerification {
