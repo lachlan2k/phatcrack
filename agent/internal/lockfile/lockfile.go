@@ -9,13 +9,13 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 type Lockfile struct {
 	path string
 
 	id          string
-	f           *os.File
 	mu          sync.Mutex
 	stopWriting context.CancelFunc
 	created     time.Time
@@ -25,7 +25,7 @@ const (
 	writeInterval = time.Second
 
 	// If a lockfile hasn't been updated in this long, consider the owner dead
-	staleAge = 15 * time.Second
+	staleAge = 10 * time.Second
 
 	// Time to wait after we delete a stale lockfile
 	// This prevents the race condition where we have 2 writers who both delete the lockfile, and writer B deletes writer A's new lockfile
@@ -40,14 +40,18 @@ type lockdata struct {
 
 func (data lockdata) isStale() bool {
 	updatedT := time.Unix(data.Updated, 0)
-	staleDeadline := updatedT.Add(staleAge)
-	return time.Now().After(staleDeadline)
+
+	return time.Since(updatedT) > staleAge
 }
 
 func New(path string) Lockfile {
 	return Lockfile{
 		path: path,
 	}
+}
+
+func (l *Lockfile) MyID() string {
+	return l.id
 }
 
 func (l *Lockfile) Acquire(ctx context.Context) error {
@@ -79,27 +83,24 @@ func (l *Lockfile) tryAcquire() error {
 			return errors.New("lock is held by another process")
 		}
 	}
-
-	// Try to claim the lockfile
-	f, err := os.OpenFile(l.path, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0644)
-	if err != nil {
-		return err
-	}
+	// If we fail to read it that probably means the lockfile doesn't exist, in which case let's proceed
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	l.id = uuid.NewString()
-	l.f = f
 	l.created = time.Now()
 
+	// Try to claim the lockfile
 	// Write, read it back to make sure we have the lock
-	l.write()
+	err = l.write(true)
+	if err != nil {
+		l.id = ""
+		return err
+	}
 	err = l.ensureHeld()
 	if err != nil {
-		l.f.Close()
 		l.id = ""
-		l.f = nil
 		return err
 	}
 
@@ -125,6 +126,7 @@ func (l *Lockfile) readData() (*lockdata, error) {
 }
 
 func (l *Lockfile) ensureHeld() error {
+	// If someone else is writing, their write will appear in N seconds, so we check after N+1
 	time.Sleep(writeInterval + time.Second)
 	data, err := l.readData()
 	if err != nil {
@@ -136,22 +138,31 @@ func (l *Lockfile) ensureHeld() error {
 	return nil
 }
 
-func (l *Lockfile) write() {
+func (l *Lockfile) write(create bool) error {
+	flags := os.O_WRONLY
+	if create {
+		flags |= os.O_CREATE | os.O_EXCL
+	}
+
+	f, err := os.OpenFile(l.path, flags, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
 	d := lockdata{
 		Created: l.created.Unix(),
 		Updated: time.Now().Unix(),
 		ID:      l.id,
 	}
 
-	buff, err := json.Marshal(d)
+	// buff, err := json.Marshal(d)
+	err = json.NewEncoder(f).Encode(d)
 	if err != nil {
-		return
+		return err
 	}
 
-	// TODO: make sure it wipes the existing content
-	l.f.Truncate(0)
-	l.f.Seek(0, 0)
-	l.f.Write(buff)
+	return f.Sync()
 }
 
 func (l *Lockfile) startWriting() {
@@ -162,9 +173,11 @@ func (l *Lockfile) startWriting() {
 
 func (l *Lockfile) writeLoop(ctx context.Context) {
 	for {
-
 		l.mu.Lock()
-		l.write()
+		err := l.write(false)
+		if err != nil {
+			logrus.WithError(err).Warn("Unexpected problem when writing lockfile")
+		}
 		l.mu.Unlock()
 
 		select {
@@ -180,10 +193,8 @@ func (l *Lockfile) Unlock() {
 	defer l.mu.Unlock()
 
 	l.stopWriting()
-	l.f.Close()
 	l.delete()
 
-	l.f = nil
 	l.stopWriting = nil
 }
 
