@@ -10,9 +10,11 @@ import (
 	"time"
 
 	"log"
+	"path"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
+	"github.com/lachlan2k/phatcrack/agent/internal/lockfile"
 	"github.com/lachlan2k/phatcrack/agent/internal/wswrapper"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
@@ -30,6 +32,7 @@ type Handler struct {
 	fileDownloadLock  sync.Mutex
 	isDownloadingFile bool
 	activeJobs        map[string]*ActiveJob
+	fileLock          *lockfile.Lockfile
 }
 
 func (h *Handler) sendMessage(msgType string, payload interface{}) error {
@@ -74,8 +77,6 @@ func (h *Handler) handleMessage(msg *wstypes.Message) error {
 	default:
 		return fmt.Errorf("unrecognized message type: %q", msg.Type)
 	}
-
-	return nil
 }
 
 func (h *Handler) readLoop(ctx context.Context) error {
@@ -173,6 +174,7 @@ func Run(conf *config.Config) error {
 		conn:       conn,
 		conf:       conf,
 		activeJobs: make(map[string]*ActiveJob),
+		fileLock:   lockfile.New(path.Join(conf.ListfileDirectory, "agent.lock")),
 	}
 
 	conn.Setup()

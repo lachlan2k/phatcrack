@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"log"
 
@@ -70,11 +71,17 @@ func (h *Handler) handleDownloadFileRequest(msg *wstypes.Message) error {
 	}
 
 	h.fileDownloadLock.Lock()
-	h.isDownloadingFile = true
+	defer h.fileDownloadLock.Unlock()
 
+	err := h.fileLock.AcquireWithTimeout(10 * time.Second)
+	if err != nil {
+		return err
+	}
+	defer h.fileLock.Unlock()
+
+	h.isDownloadingFile = true
 	defer func() {
 		h.isDownloadingFile = false
-		h.fileDownloadLock.Unlock()
 	}()
 
 	payload, err := util.UnmarshalJSON[wstypes.DownloadFileRequestDTO](msg.Payload)

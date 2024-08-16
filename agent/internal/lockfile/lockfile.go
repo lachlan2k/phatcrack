@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
+	"github.com/labstack/gommon/log"
 )
 
 type Lockfile struct {
@@ -44,8 +44,8 @@ func (data lockdata) isStale() bool {
 	return time.Since(updatedT) > staleAge
 }
 
-func New(path string) Lockfile {
-	return Lockfile{
+func New(path string) *Lockfile {
+	return &Lockfile{
 		path: path,
 	}
 }
@@ -68,6 +68,11 @@ func (l *Lockfile) Acquire(ctx context.Context) error {
 		case <-time.After(time.Second):
 		}
 	}
+}
+
+func (l *Lockfile) AcquireWithTimeout(timeout time.Duration) error {
+	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(timeout))
+	return l.Acquire(ctx)
 }
 
 func (l *Lockfile) tryAcquire() error {
@@ -176,7 +181,7 @@ func (l *Lockfile) writeLoop(ctx context.Context) {
 		l.mu.Lock()
 		err := l.write(false)
 		if err != nil {
-			logrus.WithError(err).Warn("Unexpected problem when writing lockfile")
+			log.Warnf("Unexpected problem when writing lockfile: %v", err)
 		}
 		l.mu.Unlock()
 
