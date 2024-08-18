@@ -8,8 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"log"
+
 	"github.com/google/uuid"
-	"github.com/labstack/gommon/log"
 )
 
 type Lockfile struct {
@@ -181,7 +182,7 @@ func (l *Lockfile) writeLoop(ctx context.Context) {
 		l.mu.Lock()
 		err := l.write(false)
 		if err != nil {
-			log.Warnf("Unexpected problem when writing lockfile: %v", err)
+			log.Printf("Unexpected problem when writing lockfile: %v", err)
 		}
 		l.mu.Unlock()
 
