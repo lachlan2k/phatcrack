@@ -8,9 +8,11 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v4"
+	"github.com/lachlan2k/phatcrack/api/internal/accesscontrol"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
 	"github.com/lachlan2k/phatcrack/api/internal/db"
@@ -31,8 +33,9 @@ func HookListsEndpoints(api *echo.Group) {
 	api.GET("/wordlist/all", handleGetAllWordlists)
 	api.GET("/rulefile/all", handleGetAllRuleFiles)
 
-	api.GET("/wordlist/:id", handleGetWordlist)
-	api.GET("/rulefile/:id", handlGetRuleFile)
+	api.GET("/listfile/:id", handleGetListfile)
+	api.GET("/wordlist/:id", handleGetListfile)
+	api.GET("/rulefile/:id", handleGetListfile)
 
 	api.DELETE("/listfile/:id", handleListfileDelete)
 }
@@ -58,6 +61,16 @@ func handleListfileDelete(c echo.Context) error {
 	}
 
 	isAllowed := user.HasRole(roles.RoleAdmin) || listfile.CreatedByUserID == user.ID
+	if !isAllowed && listfile.AttachedProjectID != nil {
+		projId := listfile.AttachedProjectID.String()
+		ok, err := accesscontrol.HasRightsToProjectID(user, projId)
+		if err != nil {
+			log.WithError(err).WithField("project_id", projId).WithField("user_id", user.ID.String()).Warn("Failed to check project access control for listfile")
+		} else if ok {
+			isAllowed = true
+		}
+	}
+
 	if !isAllowed {
 		return echo.ErrForbidden
 	}
@@ -79,6 +92,24 @@ func handleListfileUpload(c echo.Context) error {
 	fileType := c.FormValue("file-type")
 	if fileType != db.ListfileTypeRulefile && fileType != db.ListfileTypeWordlist {
 		return echo.ErrBadRequest
+	}
+
+	var projectID *uuid.UUID = nil
+	projectIDStr := c.FormValue("project-id")
+
+	if len(projectIDStr) > 0 {
+		ok, err := accesscontrol.HasRightsToProjectID(user, projectIDStr)
+		if err != nil {
+			return util.GenericServerError(err)
+		}
+		if !ok {
+			return echo.ErrForbidden
+		}
+		u, err := uuid.Parse(projectIDStr)
+		if err != nil {
+			return echo.ErrBadRequest
+		}
+		projectID = &u
 	}
 
 	uploadedFile, err := c.FormFile("file")
@@ -142,11 +173,12 @@ func handleListfileUpload(c echo.Context) error {
 
 	// TODO rollback on later failures? We might run out of disk space on the io.Copy, etc
 	listfile, err := db.CreateListfile(&db.Listfile{
-		Name:            filename,
-		FileType:        fileType,
-		SizeInBytes:     uint64(uploadedFile.Size),
-		Lines:           uint64(lineCount),
-		CreatedByUserID: user.ID,
+		Name:              filename,
+		FileType:          fileType,
+		SizeInBytes:       uint64(uploadedFile.Size),
+		Lines:             uint64(lineCount),
+		CreatedByUserID:   user.ID,
+		AttachedProjectID: projectID,
 	})
 	if err != nil {
 		return util.ServerError("Failed to create new listfile", err)
@@ -172,13 +204,13 @@ func handleListfileUpload(c echo.Context) error {
 	return c.JSON(http.StatusCreated, listfile.ToDTO())
 }
 
-func handleGetWordlist(c echo.Context) error {
+func handleGetListfile(c echo.Context) error {
 	id := c.Param("id")
 	if !util.AreValidUUIDs(id) {
 		return echo.ErrBadRequest
 	}
 
-	list, err := db.GetListfile(id)
+	listfile, err := db.GetListfile(id)
 	if err == db.ErrNotFound {
 		return echo.ErrNotFound
 	}
@@ -186,28 +218,32 @@ func handleGetWordlist(c echo.Context) error {
 		return util.ServerError("Failed to fetch wordlist", err)
 	}
 
-	return c.JSON(http.StatusOK, list.ToDTO())
-}
+	if listfile.AttachedProjectID != nil {
+		user := auth.UserFromReq(c)
+		if user == nil {
+			return echo.ErrForbidden
+		}
 
-func handlGetRuleFile(c echo.Context) error {
-	id := c.Param("id")
-	if !util.AreValidUUIDs(id) {
-		return echo.ErrBadRequest
+		ok, err := accesscontrol.HasRightsToProjectID(user, listfile.AttachedProjectID.String())
+		if err != nil {
+			log.WithError(err).
+				WithField("project_id", listfile.AttachedProjectID.String()).
+				WithField("user_id", user.ID.String()).
+				Warn("Failed to lookup user access to listifle")
+
+			return echo.ErrNotFound
+		}
+
+		if !ok {
+			return echo.ErrNotFound
+		}
 	}
 
-	list, err := db.GetListfile(id)
-	if err == db.ErrNotFound {
-		return echo.ErrNotFound
-	}
-	if err != nil {
-		return util.ServerError("Failed to fetch rulefile", err)
-	}
-
-	return c.JSON(http.StatusOK, list.ToDTO())
+	return c.JSON(http.StatusOK, listfile.ToDTO())
 }
 
 func handleGetAllWordlists(c echo.Context) error {
-	lists, err := db.GetAllWordlists()
+	lists, err := db.GetAllPublicWordlists()
 	if err != nil {
 		return util.ServerError("Failed to fetch wordlists", err)
 	}
@@ -226,7 +262,7 @@ func handleGetAllWordlists(c echo.Context) error {
 }
 
 func handleGetAllRuleFiles(c echo.Context) error {
-	lists, err := db.GetAllRulefiles()
+	lists, err := db.GetAllPublicRulefiles()
 	if err != nil {
 		return util.ServerError("Failed to fetch rulefiles", err)
 	}

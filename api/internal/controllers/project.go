@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
@@ -24,6 +25,8 @@ func HookProjectEndpoints(api *echo.Group) {
 	api.POST("/create", handleProjectCreate)
 	api.GET("/:id", handleProjectGet)
 	api.DELETE("/:id", handleProjectDelete)
+
+	api.GET("/:id/listfiles", handleProjectListfilesGet)
 
 	api.GET("/:id/shares", handleProjectGetShares)
 	api.POST("/:id/shares", handleProjectAddShare)
@@ -291,4 +294,40 @@ func handleProjectDeleteShare(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, shares.ToDTO())
+}
+
+func handleProjectListfilesGet(c echo.Context) error {
+	projId := c.Param("proj-id")
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+	if !util.AreValidUUIDs(projId) {
+		return echo.ErrBadRequest
+	}
+
+	ok, err := accesscontrol.HasRightsToProjectID(user, projId)
+	if err != nil {
+		return util.GenericServerError(err)
+	}
+	if !ok {
+		return echo.ErrForbidden
+	}
+
+	listfiles, err := db.GetAllListfilesAvailableToProject(projId)
+	if err != nil {
+		return util.ServerError("Failed to fetch listfiles", err)
+	}
+
+	var res apitypes.GetAllListfilesDTO
+	res.Listfiles = make([]apitypes.ListfileDTO, len(listfiles))
+	for i, lf := range listfiles {
+		res.Listfiles[i] = lf.ToDTO()
+	}
+
+	slices.SortStableFunc(res.Listfiles, func(a, b apitypes.ListfileDTO) int {
+		return int(b.Lines) - int(a.Lines)
+	})
+
+	return c.JSON(http.StatusOK, res)
 }

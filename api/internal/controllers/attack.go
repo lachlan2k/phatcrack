@@ -307,11 +307,7 @@ func handleAttackCreate(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	rulefiles, err := db.GetAllRulefiles()
-	if err != nil {
-		return util.ServerError("Failed to get information to validate hashcat params", err)
-	}
-	wordlists, err := db.GetAllWordlists()
+	listfiles, err := db.GetAllListfilesAvailableToProject(hashlist.ProjectID.String())
 	if err != nil {
 		return util.ServerError("Failed to get information to validate hashcat params", err)
 	}
@@ -319,8 +315,8 @@ func handleAttackCreate(c echo.Context) error {
 	// Check all specified wordlists exactly match the ID of a known wordlist
 	for _, suppliedWordlist := range req.HashcatParams.WordlistFilenames {
 		found := false
-		for _, dbWordlist := range wordlists {
-			if dbWordlist.ID.String() == suppliedWordlist {
+		for _, dbListfile := range listfiles {
+			if dbListfile.ID.String() == suppliedWordlist && dbListfile.FileType == db.ListfileTypeWordlist {
 				found = true
 				break
 			}
@@ -334,15 +330,15 @@ func handleAttackCreate(c echo.Context) error {
 	// Same for rulefiles
 	for _, suppliedRulefile := range req.HashcatParams.RulesFilenames {
 		found := false
-		for _, dbRulefile := range rulefiles {
-			if dbRulefile.ID.String() == suppliedRulefile {
+		for _, dbListfile := range listfiles {
+			if dbListfile.ID.String() == suppliedRulefile && dbListfile.FileType == db.ListfileTypeRulefile {
 				found = true
 				break
 			}
 		}
 
 		if !found {
-			return echo.NewHTTPError(http.StatusBadRequest, "Invalid rulefile supplied: %v", suppliedRulefile)
+			return echo.NewHTTPError(http.StatusBadRequest, "Invalid rulefile supplied: %q", suppliedRulefile)
 		}
 	}
 
