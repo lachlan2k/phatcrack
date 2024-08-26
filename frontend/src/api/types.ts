@@ -46,8 +46,20 @@ export interface AdminConfigResponseDTO {
 }
 export interface AdminAgentCreateRequestDTO {
   name: string
+  ephemeral: boolean
 }
 export interface AdminAgentCreateResponseDTO {
+  ephemeral: boolean
+  name: string
+  id: string
+  key: string
+}
+export interface AdminAgentRegistrationKeyCreateRequestDTO {
+  name: string
+  ephemeral: boolean
+}
+export interface AdminAgentRegistrationKeyCreateResponseDTO {
+  ephemeral: boolean
   name: string
   id: string
   key: string
@@ -114,6 +126,14 @@ export interface AgentDTO {
 
 export interface AgentGetAllResponseDTO {
   agents: AgentDTO[]
+}
+export interface AgentRegisterRequestDTO {
+  name: string
+}
+export interface AgentRegisterResponseDTO {
+  name: string
+  id: string
+  key: string
 }
 export interface HashcatParams {
   attack_mode: number
@@ -450,12 +470,16 @@ export interface ListfileDTO {
   available_for_use: boolean
   pending_delete: boolean
   created_by_user_id: string
+  associated_project_id: string
 }
 export interface GetAllWordlistsDTO {
   wordlists: ListfileDTO[]
 }
 export interface GetAllRuleFilesDTO {
   rulefiles: ListfileDTO[]
+}
+export interface GetAllListfilesDTO {
+  listfiles: ListfileDTO[]
 }
 export interface ListfileUploadResponseDTO {
   listfile: ListfileDTO

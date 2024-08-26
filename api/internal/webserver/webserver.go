@@ -77,7 +77,7 @@ func Listen(port string) error {
 
 	controllers.HookHashcatEndpoints(api.Group("/hashcat"))
 	controllers.HookProjectEndpoints(api.Group("/project"))
-	controllers.HookListsEndpoints(api.Group("/list"))
+	controllers.HookListsEndpoints(api.Group("/listfiles"))
 	controllers.HookHashlistEndpoints(api.Group("/hashlist"))
 	controllers.HookAttackEndpoints(api.Group(("/attack")))
 	controllers.HookAgentEndpoints(api.Group("/agent"))

@@ -36,7 +36,8 @@ const newAgentValidationError = computed(() => {
 async function onCreateAgent() {
   try {
     const res = await adminCreateAgent({
-      name: newAgentName.value
+      name: newAgentName.value,
+      ephemeral: false
     })
 
     toast.info(`Created new agent ${res.name}.\n\nNew agent's auth key (note this down, won't be displayed again):\n${res.key}`, {

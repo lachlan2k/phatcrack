@@ -21,8 +21,7 @@ type Project struct {
 	OwnerUser   User      `gorm:"constraint:OnDelete:SET NULL;"`
 	OwnerUserID uuid.UUID `gorm:"type:uuid"`
 
-	ProjectShare        []ProjectShare `gorm:"constraint:OnDelete:CASCADE;"`
-	AssociatedListfiles []Listfile     `gorm:"constraint:OnDelete:SET NULL;"`
+	ProjectShare []ProjectShare `gorm:"constraint:OnDelete:CASCADE;"`
 }
 
 func (p *Project) ToDTO() apitypes.ProjectDTO {

@@ -85,7 +85,6 @@ export const useAuthStore = defineStore({
         this.whoamiDetails = details
         this.loginError = null
       } catch (err: any) {
-
         // We were logged in before, and now we're not
         if (this.loggedInUser != null) {
           if (this.hasLoggedOut) {

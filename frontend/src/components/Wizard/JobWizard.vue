@@ -9,8 +9,6 @@ import { computed, watch, reactive } from 'vue'
 import { createHashlist, createProject, createAttack, startAttack, getProject, getHashlist } from '@/api/project'
 import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
-import { useApi } from '@/composables/useApi'
-import { getAllRulefiles, getAllWordlists } from '@/api/listfiles'
 import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
 import { useToast } from 'vue-toastification'
 import {
@@ -23,6 +21,7 @@ import {
 } from '@/util/hashcat'
 import { useResourcesStore } from '@/stores/resources'
 import { useToastError } from '@/composables/useToastError'
+import { useListfilesStore } from '@/stores/listfiles'
 
 /*
  * Props
@@ -65,8 +64,9 @@ const projectSelectOptions = computed(() => [
   }))
 ])
 
-const { data: allWordlists } = useApi(getAllWordlists)
-const { data: allRulefiles } = useApi(getAllRulefiles)
+const listfileStore = useListfilesStore()
+listfileStore.load(true)
+const { wordlists, rulefiles } = listfileStore
 
 const steps = [
   { name: 'Choose or Create Project' },
@@ -415,36 +415,16 @@ async function saveAndStartAttack() {
 
           <!-- Wordlist -->
           <div v-if="inputs.attackMode === 0">
-            <WordlistSelect
-              label-text="Select Wordlist"
-              :list="allWordlists?.wordlists ?? []"
-              v-model="inputs.selectedWordlists"
-              :limit="1"
-            />
+            <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="inputs.selectedWordlists" :limit="1" />
             <hr class="my-4" />
-            <WordlistSelect
-              label-text="Select Rule File(s)"
-              :list="allRulefiles?.rulefiles ?? []"
-              v-model="inputs.selectedRulefiles"
-              :limit="Infinity"
-            />
+            <WordlistSelect label-text="Select Rule File(s)" :list="rulefiles" v-model="inputs.selectedRulefiles" :limit="Infinity" />
           </div>
 
           <!-- Combinator -->
           <div v-if="inputs.attackMode === 1">
-            <WordlistSelect
-              label-text="Select Left Wordlist"
-              :list="allWordlists?.wordlists ?? []"
-              v-model="inputs.combinatorLeft"
-              :limit="1"
-            />
+            <WordlistSelect label-text="Select Left Wordlist" :list="wordlists" v-model="inputs.combinatorLeft" :limit="1" />
             <hr class="my-4" />
-            <WordlistSelect
-              label-text="Select Right Wordlist"
-              :list="allWordlists?.wordlists ?? []"
-              v-model="inputs.combinatorRight"
-              :limit="1"
-            />
+            <WordlistSelect label-text="Select Right Wordlist" :list="wordlists" v-model="inputs.combinatorRight" :limit="1" />
           </div>
 
           <!-- Brute-force/Mask -->
@@ -458,12 +438,7 @@ async function saveAndStartAttack() {
 
           <!-- Wordlist + Mask -->
           <div v-if="inputs.attackMode === 6">
-            <WordlistSelect
-              label-text="Select Wordlist"
-              :list="allWordlists?.wordlists ?? []"
-              v-model="inputs.selectedWordlists"
-              :limit="1"
-            />
+            <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="inputs.selectedWordlists" :limit="1" />
             <hr class="my-4" />
             <MaskInput v-model="inputs.mask" />
             <label class="label cursor-pointer justify-start">
@@ -476,12 +451,7 @@ async function saveAndStartAttack() {
           <div v-if="inputs.attackMode === 7">
             <MaskInput v-model="inputs.mask" />
             <hr class="my-4" />
-            <WordlistSelect
-              label-text="Select Wordlist"
-              :list="allWordlists?.wordlists ?? []"
-              v-model="inputs.selectedWordlists"
-              :limit="1"
-            />
+            <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="inputs.selectedWordlists" :limit="1" />
             <label class="label cursor-pointer justify-start">
               <input type="checkbox" v-model="inputs.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
               <span><span class="label-text ml-4 font-bold">Mask increment?</span></span>

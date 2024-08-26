@@ -1,10 +1,9 @@
-import { getAllRulefiles, getAllWordlists } from '@/api/listfiles'
+import { getAllListfiles, LISTFILE_TYPE_RULEFILE, LISTFILE_TYPE_WORDLIST } from '@/api/listfiles'
 import type { ListfileDTO } from '@/api/types'
 import { defineStore } from 'pinia'
 
 export type ListfileStore = {
-  wordlists: ListfileDTO[]
-  rulefiles: ListfileDTO[]
+  listfiles: ListfileDTO[]
   loading: boolean
 }
 
@@ -13,8 +12,7 @@ export const useListfilesStore = defineStore({
 
   state: () =>
     ({
-      wordlists: [],
-      rulefiles: [],
+      listfiles: [],
       loading: false
     } as ListfileStore),
 
@@ -24,15 +22,11 @@ export const useListfilesStore = defineStore({
         return
       }
 
-      if (forceRefetch || (this.wordlists.length === 0 && this.rulefiles.length == 0)) {
+      if (forceRefetch || (this.listfiles.length === 0)) {
         this.loading = true
         try {
-          const wordlistsReq = getAllWordlists()
-          const rulefilesReq = getAllRulefiles()
-          const [{ wordlists }, { rulefiles }] = await Promise.all([wordlistsReq, rulefilesReq])
-
-          this.wordlists = wordlists
-          this.rulefiles = rulefiles
+          const { listfiles } = await getAllListfiles()
+          this.listfiles = listfiles
         } finally {
           this.loading = false
         }
@@ -41,6 +35,8 @@ export const useListfilesStore = defineStore({
   },
 
   getters: {
-    byId: (state) => (id: string) => state.wordlists.find((x) => x.id == id) ?? state.rulefiles.find((x) => x.id == id)
+    byId: (state) => (id: string) => state.listfiles.find((x) => x.id == id),
+    wordlists: (state) => state.listfiles.filter(x => x.file_type === LISTFILE_TYPE_WORDLIST),
+    rulefiles: (state) => state.listfiles.filter(x => x.file_type === LISTFILE_TYPE_RULEFILE)
   }
 })

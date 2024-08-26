@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"slices"
 	"strconv"
 
 	"github.com/google/uuid"
@@ -24,20 +23,12 @@ import (
 )
 
 func HookListsEndpoints(api *echo.Group) {
-	api.GET("/ping", func(c echo.Context) error {
-		return c.String(http.StatusOK, "pong lists")
-	})
+	api.GET("/all", handleGetAllListfiles)
 
 	api.POST("/upload", handleListfileUpload)
 
-	api.GET("/wordlist/all", handleGetAllWordlists)
-	api.GET("/rulefile/all", handleGetAllRuleFiles)
-
-	api.GET("/listfile/:id", handleGetListfile)
-	api.GET("/wordlist/:id", handleGetListfile)
-	api.GET("/rulefile/:id", handleGetListfile)
-
-	api.DELETE("/listfile/:id", handleListfileDelete)
+	api.GET("/:id", handleGetListfile)
+	api.DELETE("/:id", handleListfileDelete)
 }
 
 func handleListfileDelete(c echo.Context) error {
@@ -242,40 +233,17 @@ func handleGetListfile(c echo.Context) error {
 	return c.JSON(http.StatusOK, listfile.ToDTO())
 }
 
-func handleGetAllWordlists(c echo.Context) error {
-	lists, err := db.GetAllPublicWordlists()
+func handleGetAllListfiles(c echo.Context) error {
+	listfiles, err := db.GetAllPublicListfiles()
 	if err != nil {
-		return util.ServerError("Failed to fetch wordlists", err)
+		return util.ServerError("Failed to fetch listfiles", err)
 	}
 
-	var res apitypes.GetAllWordlistsDTO
-	res.Wordlists = make([]apitypes.ListfileDTO, len(lists))
-	for i, list := range lists {
-		res.Wordlists[i] = list.ToDTO()
+	var res apitypes.GetAllListfilesDTO
+	res.Listfiles = make([]apitypes.ListfileDTO, len(listfiles))
+	for i, lf := range listfiles {
+		res.Listfiles[i] = lf.ToDTO()
 	}
-
-	slices.SortStableFunc(res.Wordlists, func(a, b apitypes.ListfileDTO) int {
-		return int(b.Lines) - int(a.Lines)
-	})
-
-	return c.JSON(http.StatusOK, res)
-}
-
-func handleGetAllRuleFiles(c echo.Context) error {
-	lists, err := db.GetAllPublicRulefiles()
-	if err != nil {
-		return util.ServerError("Failed to fetch rulefiles", err)
-	}
-
-	var res apitypes.GetAllRuleFilesDTO
-	res.RuleFiles = make([]apitypes.ListfileDTO, len(lists))
-	for i, list := range lists {
-		res.RuleFiles[i] = list.ToDTO()
-	}
-
-	slices.SortStableFunc(res.RuleFiles, func(a, b apitypes.ListfileDTO) int {
-		return int(b.Lines) - int(a.Lines)
-	})
 
 	return c.JSON(http.StatusOK, res)
 }

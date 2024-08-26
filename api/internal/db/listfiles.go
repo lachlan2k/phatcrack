@@ -100,6 +100,15 @@ func GetAllListfilesAvailableToProject(projectID string) ([]Listfile, error) {
 	return listfiles, nil
 }
 
+func GetAllPublicListfiles() ([]Listfile, error) {
+	listfiles := []Listfile{}
+	err := GetInstance().Where("attached_project_id is NULL").Find(&listfiles).Error
+	if err != nil {
+		return nil, err
+	}
+	return listfiles, nil
+}
+
 func GetAllListfiles() ([]Listfile, error) {
 	listfiles := []Listfile{}
 	err := GetInstance().Find(&listfiles).Error
