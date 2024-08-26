@@ -61,7 +61,7 @@ func seed() error {
 	}
 
 	if userCount == 0 {
-		_, err := RegisterUserWithCredentials("admin", "changeme", []string{roles.RoleAdmin, roles.RoleRequiresPasswordChange})
+		_, err := RegisterUserWithCredentials("admin", "changeme", []string{roles.UserRoleAdmin, roles.UserRoleRequiresPasswordChange})
 		if err != nil {
 			return err
 		}
@@ -113,7 +113,7 @@ func WipeEverything() error {
 
 		return tx.Create(&User{
 			Username:     "admin",
-			Roles:        []string{roles.RoleAdmin, roles.RoleRequiresPasswordChange},
+			Roles:        []string{roles.UserRoleAdmin, roles.UserRoleRequiresPasswordChange},
 			PasswordHash: "$2a$10$6bms9eKxGvegFOd7XTA.XORrgn/ulqvWAVTcUGnXjVmvrR2O9/ViK",
 		}).Error
 	})

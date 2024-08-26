@@ -280,7 +280,7 @@ func GetAllRunningJobsForUser(user *User) (RunningJobsForUser, error) {
 		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
 		Joins("join projects on projects.id = hashlists.project_id")
 
-	if user.HasRole(roles.RoleAdmin) {
+	if user.HasRole(roles.UserRoleAdmin) {
 		query = query.Where("job_runtime_data.status = ?", JobStatusStarted)
 	} else {
 		query = query.

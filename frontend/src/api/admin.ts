@@ -9,7 +9,9 @@ import type {
   AdminServiceAccountCreateRequestDTO,
   AdminServiceAccountCreateResponseDTO,
   AdminUserCreateRequestDTO,
-  AdminUserCreateResponseDTO
+  AdminUserCreateResponseDTO,
+  AdminUserUpdateRequestDTO,
+  UserDTO
 } from './types'
 
 export function adminGetAllUsers(): Promise<AdminGetAllUsersResponseDTO> {
@@ -18,6 +20,10 @@ export function adminGetAllUsers(): Promise<AdminGetAllUsersResponseDTO> {
 
 export function adminCreateUser(newUserData: AdminUserCreateRequestDTO): Promise<AdminUserCreateResponseDTO> {
   return client.post('/api/v1/admin/user/create', newUserData).then((res) => res.data)
+}
+
+export function adminUpdateUser(id: string, userData: AdminUserUpdateRequestDTO): Promise<UserDTO> {
+  return client.put('/api/v1/admin/user/' + id, userData).then((res) => res.data)
 }
 
 export function adminCreateServiceAccount(

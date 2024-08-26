@@ -35,7 +35,7 @@ func CreateHeaderAuthMiddleware() echo.MiddlewareFunc {
 			if err != nil {
 				return util.ServerError("Failed to check API key", err)
 			}
-			if !slices.Contains(user.Roles, roles.RoleServiceAccount) {
+			if !slices.Contains(user.Roles, roles.UserRoleServiceAccount) {
 				log.WithField("user_dto", user.ToDTO()).Warn("Request sucessfully authorized by bearer token, but account isn't a service account")
 				return echo.ErrUnauthorized
 			}

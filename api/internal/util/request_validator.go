@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/resources"
-	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
+	"github.com/lachlan2k/phatcrack/api/internal/roles"
 )
 
 func BindAndValidate[DTO interface{}](c echo.Context) (DTO, error) {
@@ -29,26 +29,12 @@ type RequestValidator struct {
 func (v *RequestValidator) Init() {
 	// Register other validators
 	v.Validator.RegisterValidation("userroles", func(fl validator.FieldLevel) bool {
-		roles, ok := fl.Field().Interface().([]string)
+		providedRoles, ok := fl.Field().Interface().([]string)
 		if !ok {
 			return false
 		}
 
-		for _, role := range roles {
-			found := false
-			for _, allowedRole := range apitypes.UserSignupRoles {
-				if role == allowedRole {
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				return false
-			}
-		}
-
-		return true
+		return roles.AreRolesAssignable(providedRoles)
 	})
 
 	standardNameRegex := regexp.MustCompile(`^[\w \-\.']+$`)
@@ -62,7 +48,7 @@ func (v *RequestValidator) Init() {
 		return standardNameRegex.MatchString(name)
 	})
 
-	usernameRegex := regexp.MustCompile(`^[\w\._]+$`)
+	usernameRegex := regexp.MustCompile(`^[\w\.@_]+$`)
 
 	v.Validator.RegisterValidation("username", func(fl validator.FieldLevel) bool {
 		username, ok := fl.Field().Interface().(string)

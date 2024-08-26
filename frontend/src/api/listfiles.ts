@@ -6,7 +6,7 @@ export const LISTFILE_TYPE_WORDLIST = 'Wordlist'
 export const LISTFILE_TYPE_RULEFILE = 'Rulefile'
 
 export function getAllListfiles(): Promise<GetAllListfilesDTO> {
-  return client.get('/api/v1/listfiles/all').then(res => res.data)
+  return client.get('/api/v1/listfiles/all').then((res) => res.data)
 }
 
 export function deleteListfile(id: string): Promise<string> {

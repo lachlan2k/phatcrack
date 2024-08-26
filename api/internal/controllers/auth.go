@@ -56,9 +56,9 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 				Roles:            user.Roles,
 				IsPasswordLocked: user.IsPasswordLocked(),
 			},
-			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
-			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
+			IsAwaitingMFA:          user.HasRole(roles.UserRoleMFAEnrolled) && !sessData.HasCompletedMFA,
+			RequiresPasswordChange: user.HasRole(roles.UserRoleRequiresPasswordChange),
+			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !user.HasRole(roles.UserRoleMFAEnrolled) && !user.HasRole(roles.UserRoleMFAExempt),
 		})
 	})
 
@@ -74,7 +74,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return echo.ErrForbidden
 		}
 
-		if !user.HasRole(roles.RoleRequiresPasswordChange) {
+		if !user.HasRole(roles.UserRoleRequiresPasswordChange) {
 			return echo.NewHTTPError(http.StatusBadRequest, "This endpoint is only available to users who are required to change their password")
 		}
 		if user.IsPasswordLocked() {
@@ -97,7 +97,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 		user.PasswordHash = string(newPasswordHash)
 
 		for i, role := range user.Roles {
-			if role == roles.RoleRequiresPasswordChange {
+			if role == roles.UserRoleRequiresPasswordChange {
 				user.Roles = append(user.Roles[:i], user.Roles[i+1:]...)
 				break
 			}
@@ -123,7 +123,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return c.JSON(http.StatusOK, false)
 		}
 
-		if user.HasRole(roles.RoleMFAEnrolled) || config.Get().Auth.General.IsMFARequired {
+		if user.HasRole(roles.UserRoleMFAEnrolled) || config.Get().Auth.General.IsMFARequired {
 			return c.JSON(http.StatusOK, true)
 		}
 
@@ -293,9 +293,9 @@ func handleRefresh(sessHandler auth.SessionHandler) echo.HandlerFunc {
 				Roles:            user.Roles,
 				IsPasswordLocked: user.IsPasswordLocked(),
 			},
-			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled) && !sessData.HasCompletedMFA,
-			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
+			IsAwaitingMFA:          user.HasRole(roles.UserRoleMFAEnrolled) && !sessData.HasCompletedMFA,
+			RequiresPasswordChange: user.HasRole(roles.UserRoleRequiresPasswordChange),
+			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !user.HasRole(roles.UserRoleMFAEnrolled) && !user.HasRole(roles.UserRoleMFAExempt),
 		})
 	}
 }

@@ -66,9 +66,9 @@ func handleCredentialLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 				Roles:            user.Roles,
 				IsPasswordLocked: user.IsPasswordLocked(),
 			},
-			IsAwaitingMFA:          user.HasRole(roles.RoleMFAEnrolled),
-			RequiresPasswordChange: user.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !user.HasRole(roles.RoleMFAEnrolled) && !user.HasRole(roles.RoleMFAExempt),
+			IsAwaitingMFA:          user.HasRole(roles.UserRoleMFAEnrolled),
+			RequiresPasswordChange: user.HasRole(roles.UserRoleRequiresPasswordChange),
+			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !user.HasRole(roles.UserRoleMFAEnrolled) && !user.HasRole(roles.UserRoleMFAExempt),
 		}
 
 		logMessage := "Session started"

@@ -191,7 +191,7 @@ func handleOIDCCallback(sessHandler auth.SessionHandler) echo.HandlerFunc {
 			}
 
 			// Create a new user
-			newUser, err := db.RegisterUserWithoutPassword(username, []string{roles.RoleStandard})
+			newUser, err := db.RegisterUserWithoutPassword(username, []string{roles.UserRoleStandard})
 			if err != nil {
 				return util.GenericServerError(fmt.Errorf("failed to create user: %v", err))
 			}
@@ -210,9 +210,9 @@ func handleOIDCCallback(sessHandler auth.SessionHandler) echo.HandlerFunc {
 				Roles:            userToAuth.Roles,
 				IsPasswordLocked: userToAuth.IsPasswordLocked(),
 			},
-			IsAwaitingMFA:          userToAuth.HasRole(roles.RoleMFAEnrolled),
-			RequiresPasswordChange: userToAuth.HasRole(roles.RoleRequiresPasswordChange),
-			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !userToAuth.HasRole(roles.RoleMFAEnrolled) && !userToAuth.HasRole(roles.RoleMFAExempt),
+			IsAwaitingMFA:          userToAuth.HasRole(roles.UserRoleMFAEnrolled),
+			RequiresPasswordChange: userToAuth.HasRole(roles.UserRoleRequiresPasswordChange),
+			RequiresMFAEnrollment:  config.Get().Auth.General.IsMFARequired && !userToAuth.HasRole(roles.UserRoleMFAEnrolled) && !userToAuth.HasRole(roles.UserRoleMFAExempt),
 		}
 
 		logMessage := "Session started"

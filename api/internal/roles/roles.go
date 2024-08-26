@@ -1,19 +1,19 @@
 package roles
 
-const RoleAdmin = "admin"
-const RoleStandard = "standard"
-const RoleServiceAccount = "service_account"
+const UserRoleAdmin = "admin"
+const UserRoleStandard = "standard"
+const UserRoleServiceAccount = "service_account"
+const UserRoleMFAExempt = "mfa_exempt"
+const UserRoleRequiresPasswordChange = "requires_password_change"
 
-const RoleMFAEnrolled = "mfa_enrolled"
-const RoleMFAExempt = "mfa_exempt"
-const RoleRequiresPasswordChange = "requires_password_change"
+const UserRoleMFAEnrolled = "mfa_enrolled"
 
-var RolesAllowedOnRegistration = []string{RoleAdmin, RoleStandard}
+var UserAssignableRoles = []string{UserRoleStandard, UserRoleAdmin, UserRoleServiceAccount, UserRoleMFAExempt, UserRoleRequiresPasswordChange}
 
-func AreRolesAllowedOnRegistration(roles []string) bool {
+func AreRolesAssignable(roles []string) bool {
 	for _, role := range roles {
 		found := false
-		for _, allowedRole := range RolesAllowedOnRegistration {
+		for _, allowedRole := range UserAssignableRoles {
 			if role == allowedRole {
 				found = true
 				break

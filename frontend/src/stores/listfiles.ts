@@ -22,7 +22,7 @@ export const useListfilesStore = defineStore({
         return
       }
 
-      if (forceRefetch || (this.listfiles.length === 0)) {
+      if (forceRefetch || this.listfiles.length === 0) {
         this.loading = true
         try {
           const { listfiles } = await getAllListfiles()
@@ -36,7 +36,7 @@ export const useListfilesStore = defineStore({
 
   getters: {
     byId: (state) => (id: string) => state.listfiles.find((x) => x.id == id),
-    wordlists: (state) => state.listfiles.filter(x => x.file_type === LISTFILE_TYPE_WORDLIST),
-    rulefiles: (state) => state.listfiles.filter(x => x.file_type === LISTFILE_TYPE_RULEFILE)
+    wordlists: (state) => state.listfiles.filter((x) => x.file_type === LISTFILE_TYPE_WORDLIST),
+    rulefiles: (state) => state.listfiles.filter((x) => x.file_type === LISTFILE_TYPE_RULEFILE)
   }
 })

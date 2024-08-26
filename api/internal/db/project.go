@@ -198,7 +198,7 @@ func GetProject(projId string) (*Project, error) {
 
 func GetProjectForUser(projId string, user *User) (*Project, error) {
 	proj := &Project{}
-	if user.HasRole(roles.RoleAdmin) {
+	if user.HasRole(roles.UserRoleAdmin) {
 		return GetProject(projId)
 	}
 
@@ -225,7 +225,7 @@ func GetAllProjects() ([]Project, error) {
 }
 
 func GetAllProjectsForUser(user *User) ([]Project, error) {
-	if user.HasRole(roles.RoleAdmin) {
+	if user.HasRole(roles.UserRoleAdmin) {
 		return GetAllProjects()
 	}
 	projs := []Project{}
@@ -420,7 +420,7 @@ func GetAllAttacksWithProgressStringsForUser(user *User) ([]AttackIDTree, error)
 		Joins("left join project_shares on project_shares.project_id = projects.id").
 		Where("starts_with(progress_string, 'Processing')")
 
-	if !user.HasRole(roles.RoleAdmin) {
+	if !user.HasRole(roles.UserRoleAdmin) {
 		query = query.Where("owner_user_id = ? or project_shares.user_id = ?", user.ID, user.ID)
 	}
 

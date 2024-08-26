@@ -8,7 +8,7 @@ import (
 )
 
 func HasOwnershipRightsToProject(user *db.User, project *db.Project) bool {
-	return project.OwnerUserID == user.ID || user.HasRole(roles.RoleAdmin)
+	return project.OwnerUserID == user.ID || user.HasRole(roles.UserRoleAdmin)
 }
 
 func HasRightsToProject(user *db.User, project *db.Project) bool {
@@ -16,7 +16,7 @@ func HasRightsToProject(user *db.User, project *db.Project) bool {
 		return true
 	}
 
-	if user.HasRole(roles.RoleAdmin) {
+	if user.HasRole(roles.UserRoleAdmin) {
 		return true
 	}
 
@@ -30,7 +30,7 @@ func HasRightsToProject(user *db.User, project *db.Project) bool {
 }
 
 func HasRightsToProjectID(user *db.User, projId string) (bool, error) {
-	if user.HasRole(roles.RoleAdmin) {
+	if user.HasRole(roles.UserRoleAdmin) {
 		return true, nil
 	}
 

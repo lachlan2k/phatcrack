@@ -3,7 +3,7 @@
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "compilerOptions": {
     "lib": [
-      "ES2017",
+      "ES2020",
       "DOM",
       "DOM.Iterable"
     ],

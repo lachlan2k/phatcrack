@@ -138,6 +138,8 @@ func HookAdminEndpoints(api *echo.Group) {
 
 	api.POST("/agent-registration-key/create", handleAgentRegistrationKeyCreate)
 
+	api.PUT("/user/:id", handleUpdateUser)
+
 	api.DELETE("/user/:id", handleDeleteUser)
 	api.DELETE("/agent/:id", handleDeleteAgent)
 }
@@ -166,13 +168,13 @@ func handleCreateUser(c echo.Context) error {
 		}
 	}
 
-	rolesOk := roles.AreRolesAllowedOnRegistration(req.Roles)
+	rolesOk := roles.AreRolesAssignable(req.Roles)
 	if !rolesOk {
 		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
 	}
 
 	if config.Get().Auth.General.RequirePasswordChangeOnFirstLogin {
-		req.Roles = append(req.Roles, roles.RoleRequiresPasswordChange)
+		req.Roles = append(req.Roles, roles.UserRoleRequiresPasswordChange)
 	}
 
 	newUser, err := db.RegisterUserWithCredentials(req.Username, password, req.Roles)
@@ -202,7 +204,7 @@ func handleCreateServiceAccount(c echo.Context) error {
 		return err
 	}
 
-	rolesOk := roles.AreRolesAllowedOnRegistration(req.Roles)
+	rolesOk := roles.AreRolesAssignable(req.Roles)
 	if !rolesOk {
 		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
 	}
@@ -212,7 +214,7 @@ func handleCreateServiceAccount(c echo.Context) error {
 		return util.ServerError("Couldn't create service account", err)
 	}
 
-	allRoles := append(req.Roles, roles.RoleMFAExempt, roles.RoleServiceAccount)
+	allRoles := append(req.Roles, roles.UserRoleMFAExempt, roles.UserRoleServiceAccount)
 
 	newUser, err := db.RegisterServiceAccount(req.Username, apiKey, allRoles)
 	if err != nil {
@@ -277,8 +279,60 @@ func handleAgentRegistrationKeyCreate(c echo.Context) error {
 	})
 }
 
+func handleUpdateUser(c echo.Context) error {
+	id := c.Param("id")
+	if !util.AreValidUUIDs(id) {
+		return echo.ErrBadRequest
+	}
+
+	req, err := util.BindAndValidate[apitypes.AdminUserUpdateRequestDTO](c)
+	if err != nil {
+		return err
+	}
+
+	user, err := db.GetUserByID(id)
+	if err == db.ErrNotFound {
+		return echo.NewHTTPError(http.StatusNotFound, "User does not exist")
+	}
+	if err != nil {
+		return util.ServerError("Failed to retrieve user to update", err)
+	}
+
+	AuditLog(c, log.Fields{
+		"user_id":      id,
+		"new_username": req.Username,
+		"new_roles":    req.Roles,
+	}, "Admin is updating user")
+
+	if req.Username != user.Username {
+		_, err := db.GetUserByUsername(req.Username)
+		if err == nil {
+			// err is nil, i.e. we found a match
+			return echo.NewHTTPError(http.StatusBadRequest, "Username already taken")
+		}
+		if err == db.ErrNotFound {
+			// pass
+		} else {
+			return util.GenericServerError(err)
+		}
+	}
+
+	// Already validated
+	user.Username = req.Username
+	user.Roles = req.Roles
+	err = db.Save(user)
+	if err != nil {
+		return util.ServerError("Failed to save user", err)
+	}
+
+	return c.JSON(http.StatusOK, user.ToDTO())
+}
+
 func handleDeleteUser(c echo.Context) error {
 	id := c.Param("id")
+	if !util.AreValidUUIDs(id) {
+		return echo.ErrBadRequest
+	}
 
 	user, err := db.GetUserByID(id)
 	if err == db.ErrNotFound {

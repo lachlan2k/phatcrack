@@ -38,6 +38,11 @@ type AdminUserCreateResponseDTO struct {
 	GeneratedPassword string   `json:"generated_password"`
 }
 
+type AdminUserUpdateRequestDTO struct {
+	Username string   `json:"username" validate:"required,min=4,max=64,username"`
+	Roles    []string `json:"roles" validate:"required,userroles"`
+}
+
 type AdminServiceAccountCreateRequestDTO struct {
 	Username string   `json:"username" validate:"required,min=4,max=64,username"`
 	Roles    []string `json:"roles" validate:"required,userroles"`

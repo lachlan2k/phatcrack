@@ -51,7 +51,7 @@ func handleListfileDelete(c echo.Context) error {
 		return util.ServerError("Failed to get listfile prior to deletion", err)
 	}
 
-	isAllowed := user.HasRole(roles.RoleAdmin) || listfile.CreatedByUserID == user.ID
+	isAllowed := user.HasRole(roles.UserRoleAdmin) || listfile.CreatedByUserID == user.ID
 	if !isAllowed && listfile.AttachedProjectID != nil {
 		projId := listfile.AttachedProjectID.String()
 		ok, err := accesscontrol.HasRightsToProjectID(user, projId)
@@ -117,7 +117,7 @@ func handleListfileUpload(c echo.Context) error {
 	}
 
 	maxFileSize := config.Get().General.MaximumUploadedFileSize
-	if !user.HasRole(roles.RoleAdmin) && uploadedFile.Size > maxFileSize {
+	if !user.HasRole(roles.UserRoleAdmin) && uploadedFile.Size > maxFileSize {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Uploaded file too large (maximum %d bytes)", maxFileSize))
 	}
 

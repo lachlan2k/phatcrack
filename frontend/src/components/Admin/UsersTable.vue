@@ -1,21 +1,85 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
-import ConfirmModal from '../ConfirmModal.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import IconButton from '@/components/IconButton.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
-import { adminCreateServiceAccount, adminCreateUser, adminDeleteUser, adminGetAllUsers } from '@/api/admin'
+import { adminCreateServiceAccount, adminCreateUser, adminDeleteUser, adminGetAllUsers, adminUpdateUser } from '@/api/admin'
 import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, reactive } from 'vue'
 import { usePagination } from '@/composables/usePagination'
 import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
+import { userAssignableRoles, UserRole, userSignupRoles } from '@/api/users'
+import CheckboxSet from '@/components/CheckboxSet.vue'
 
 const isUserCreateOpen = ref(false)
 const isServiceAccountCreateOpen = ref(false)
+const isUserEditOpen = ref(false)
 
-const { data: allUsers, fetchData: fetchUsers, isLoading } = useApi(adminGetAllUsers)
+const { data: allUsers, fetchData: fetchUsers, silentlyRefresh: silentlyFetchUsers, isLoading } = useApi(adminGetAllUsers)
+
+const editInputs = reactive({
+  id: '',
+  username: '',
+  roleMap: {} as { [key: string]: boolean }
+})
+
+watch(
+  () => editInputs.roleMap,
+  (current, last) => {
+    // These two are mutually exclusive
+    if (current[UserRole.Standard] && current[UserRole.Admin]) {
+      if (last[UserRole.Standard]) {
+        editInputs.roleMap = {
+          ...current,
+          [UserRole.Standard]: false
+        }
+      }
+
+      if (last[UserRole.Admin]) {
+        editInputs.roleMap = {
+          ...current,
+          [UserRole.Admin]: false
+        }
+      }
+    }
+  }
+)
+
+function onEditUser(userId: string) {
+  const userToEdit = allUsers.value?.users?.find((x) => x.id === userId) ?? null
+  if (!userToEdit) {
+    return
+  }
+
+  editInputs.id = userId
+  editInputs.username = userToEdit.username
+
+  const roleEntries = userAssignableRoles.map((x) => [x, userToEdit.roles.includes(x)])
+  editInputs.roleMap = Object.fromEntries(roleEntries)
+
+  isUserEditOpen.value = true
+}
+
+async function onSaveUser() {
+  const roles = Object.entries(editInputs.roleMap)
+    .filter(([_, val]) => val === true)
+    .map(([key]) => key)
+
+  try {
+    await adminUpdateUser(editInputs.id, {
+      username: editInputs.username,
+      roles
+    })
+    toast.success('Saved user')
+  } catch (e) {
+    catcher(e, 'Failed to save user: ')
+  } finally {
+    silentlyFetchUsers()
+  }
+}
 
 const usersToPaginate = computed(() => allUsers.value?.users ?? [])
 
@@ -27,12 +91,12 @@ const {
   activePage
 } = usePagination(usersToPaginate, 10)
 
-const possibleRoles = ['admin', 'standard']
+const possibleRoles = [...userSignupRoles]
 
 const newUserUsername = ref('')
 const newUserGenPassword = ref(false)
 const newUserPassword = ref('')
-const newUserRole = ref('standard')
+const newUserRole = ref(UserRole.Standard)
 
 watch(newUserGenPassword, (newVal) => {
   if (newVal === true) {
@@ -135,6 +199,28 @@ async function onDeleteUser(id: string) {
 
 <template>
   <div class="flex flex-row justify-between">
+    <Modal v-model:is-open="isUserEditOpen">
+      <h3 class="text-lg font-bold">Edit User</h3>
+
+      <div class="form-control">
+        <label for="" class="label font-bold"><span class="label-text">Username</span> </label>
+        <input v-model="editInputs.username" type="text" placeholder="j.smith" class="input input-bordered w-full max-w-xs" />
+      </div>
+
+      <div class="form-control mt-3">
+        <label class="label font-bold">
+          <span class="label-text">Roles</span>
+        </label>
+        <CheckboxSet v-model="editInputs.roleMap" />
+      </div>
+
+      <div class="form-control mt-6">
+        <span class="tooltip">
+          <button @click="onSaveUser" class="btn btn-primary w-full">Save</button>
+        </span>
+      </div>
+    </Modal>
+
     <Modal v-model:isOpen="isUserCreateOpen">
       <h3 class="text-lg font-bold">Create a new user</h3>
 
@@ -236,6 +322,7 @@ async function onDeleteUser(id: string) {
           <ConfirmModal @on-confirm="() => onDeleteUser(user.id)">
             <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
           </ConfirmModal>
+          <IconButton icon="fa-solid fa-pencil" color="primary" tooltip="Edit" @click="() => onEditUser(user.id)" />
         </td>
       </tr>
     </tbody>

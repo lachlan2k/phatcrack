@@ -71,8 +71,8 @@ func Listen(port string) error {
 	api.Use(auth.EnforceMFAMiddleware(sessionHandler))
 
 	api.Use(auth.RoleRestrictedMiddleware(
-		[]string{roles.RoleAdmin, roles.RoleStandard},
-		[]string{roles.RoleRequiresPasswordChange}, // disallowed
+		[]string{roles.UserRoleAdmin, roles.UserRoleStandard},
+		[]string{roles.UserRoleRequiresPasswordChange}, // disallowed
 	))
 
 	controllers.HookHashcatEndpoints(api.Group("/hashcat"))

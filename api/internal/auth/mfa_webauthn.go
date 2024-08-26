@@ -69,7 +69,7 @@ func MFAWebAuthnBeginRegister(c echo.Context, sessHandler SessionHandler) (marsh
 		return
 	}
 
-	if user.HasRole(roles.RoleMFAEnrolled) {
+	if user.HasRole(roles.UserRoleMFAEnrolled) {
 		userPresentableErr = errors.New("user already enrolled in MFA")
 		return
 	}
@@ -124,7 +124,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 		return
 	}
 
-	if user.HasRole(roles.RoleMFAEnrolled) {
+	if user.HasRole(roles.UserRoleMFAEnrolled) {
 		userPresentableErr = errors.New("user already enrolled in MFA")
 		return
 	}
@@ -160,7 +160,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 
 	user.MFAType = MFATypeWebAuthn
 	user.MFAData = marshalledBytes
-	user.Roles = append(user.Roles, roles.RoleMFAEnrolled)
+	user.Roles = append(user.Roles, roles.UserRoleMFAEnrolled)
 
 	err = db.GetInstance().Save(user).Error
 	if err != nil {
@@ -178,7 +178,7 @@ func MFAWebAuthnBeginLogin(c echo.Context, sessHandler SessionHandler) (marshall
 		return
 	}
 
-	if !user.HasRole(roles.RoleMFAEnrolled) {
+	if !user.HasRole(roles.UserRoleMFAEnrolled) {
 		userPresentableErr = fmt.Errorf("user is not enrolled in MFA")
 		return
 	}

@@ -18,12 +18,12 @@ func EnforceMFAMiddleware(s SessionHandler) echo.MiddlewareFunc {
 
 			userIsEnrolled := false
 			for _, userRole := range user.Roles {
-				if userRole == roles.RoleMFAEnrolled {
+				if userRole == roles.UserRoleMFAEnrolled {
 					userIsEnrolled = true
 				}
 
 				// Early exit if they're exempt
-				if userRole == roles.RoleMFAExempt {
+				if userRole == roles.UserRoleMFAExempt {
 					return next(c)
 				}
 			}

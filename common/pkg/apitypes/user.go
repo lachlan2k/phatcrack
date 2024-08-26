@@ -18,5 +18,7 @@ type UsersGetAllResponseDTO struct {
 const UserRoleAdmin = "admin"
 const UserRoleStandard = "standard"
 const UserRoleServiceAccount = "service_account"
+const UserRoleMFAExempt = "mfa_exempt"
+const UserRoleRequiresPasswordChange = "requires_password_change"
 
-var UserSignupRoles = []string{UserRoleStandard, UserRoleAdmin}
+var UserAssignableRoles = []string{UserRoleStandard, UserRoleAdmin, UserRoleServiceAccount, UserRoleMFAExempt, UserRoleRequiresPasswordChange}
