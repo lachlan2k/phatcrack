@@ -3,7 +3,7 @@ import IconButton from '@/components/IconButton.vue'
 import Modal from '@/components/Modal.vue'
 import FileUpload from '@/components/FileUpload.vue'
 
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { bytesToReadable } from '@/util/units'
 import { useListfilesStore } from '@/stores/listfiles'
@@ -11,15 +11,23 @@ import ConfirmModal from '@/components/ConfirmModal.vue'
 import type { ListfileDTO } from '@/api/types'
 import { useAuthStore } from '@/stores/auth'
 import { useToastError } from '@/composables/useToastError'
-import { deleteListfile } from '@/api/listfiles'
+import { deleteListfile, type ListfileTypeT } from '@/api/listfiles'
 import { useToast } from 'vue-toastification'
 
 const listfilesStore = useListfilesStore()
 const { load: loadListfiles } = listfilesStore
-const { wordlists, rulefiles } = storeToRefs(useListfilesStore())
+const { groupedByType } = storeToRefs(listfilesStore)
+const listfiles = computed(() => Object.values(groupedByType.value).flat())
 
-const isWordlistUploadOpen = ref(false)
-const isRulefileUploadOpen = ref(false)
+const isListfileUploadOpen = ref(false)
+
+const listfileTypes = {
+  Rulefile: { icon: 'fa-rectangle-list' },
+  Wordlist: { icon: 'fa-book-open' },
+  Charset: { icon: 'fa-arrow-down-a-z' }
+} as { [key: string]: { icon: string } }
+
+const getIconForType = (type: string) => listfileTypes[type]?.icon ?? 'fa-question'
 
 loadListfiles(true)
 
@@ -28,12 +36,19 @@ const refreshTimer = ref(0)
 onMounted(() => {
   refreshTimer.value = setInterval(() => {
     loadListfiles(true)
-  }, 1000 * 60) // every 60 seconds
+  }, 1000 * 60)
 })
 
 onBeforeUnmount(() => {
   clearInterval(refreshTimer.value)
 })
+
+function speedUpRefresh() {
+  clearInterval(refreshTimer.value)
+  refreshTimer.value = setInterval(() => {
+    loadListfiles(true)
+  }, 1000 * 10)
+}
 
 const authStore = useAuthStore()
 const { loggedInUser, isAdmin } = storeToRefs(authStore)
@@ -57,6 +72,7 @@ const toast = useToast()
 const { catcher } = useToastError()
 
 async function onDeleteListfile(listfile: ListfileDTO) {
+  speedUpRefresh()
   try {
     await deleteListfile(listfile.id)
     toast.info(`Marked ${listfile.name} for deletion`)
@@ -75,16 +91,16 @@ async function onDeleteListfile(listfile: ListfileDTO) {
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <div class="flex flex-row justify-between">
-            <Modal v-model:isOpen="isWordlistUploadOpen">
-              <FileUpload fileType="Wordlist" />
+            <Modal v-model:isOpen="isListfileUploadOpen">
+              <FileUpload @on-upload-finish="() => speedUpRefresh()" :allowed-file-types="Object.keys(listfileTypes) as ListfileTypeT[]" />
             </Modal>
-            <h2 class="card-title">Wordlists</h2>
-            <button class="btn btn-primary btn-sm" @click="() => (isWordlistUploadOpen = true)">Upload Wordlist</button>
+            <h2 class="card-title">Listfiles</h2>
+            <button class="btn btn-primary btn-sm" @click="() => (isListfileUploadOpen = true)">Upload Listfile</button>
           </div>
-
           <table class="table w-full">
             <thead>
               <tr>
+                <th>Type</th>
                 <th>Name</th>
                 <th>Size</th>
                 <th>Lines</th>
@@ -93,74 +109,33 @@ async function onDeleteListfile(listfile: ListfileDTO) {
             </thead>
             <tbody>
               <tr
-                :class="isGreyed(wordlist) ? 'greyed-out-row hover text-gray-500' : 'hover'"
-                v-for="wordlist in wordlists"
-                :key="wordlist.id"
+                :class="isGreyed(listfile) ? 'greyed-out-row hover text-gray-500' : 'hover'"
+                v-for="listfile in listfiles"
+                :key="listfile.id"
               >
+                <td class="text-center">
+                  <div class="tooltip" :data-tip="listfile.file_type">
+                    <font-awesome-icon :icon="'fa-solid ' + getIconForType(listfile.file_type)" />
+                  </div>
+                </td>
                 <td>
-                  <strong>{{ wordlist.name }}</strong>
-                  <span class="pl-2 text-sm text-gray-500" v-if="wordlist.pending_delete">
+                  <strong>{{ listfile.name }}</strong>
+                  <span class="pl-2 text-sm text-gray-500" v-if="!listfile.available_for_use">
+                    <div class="tooltip" data-tip="Syncing...">
+                      <font-awesome-icon icon="fa-solid fa-hourglass-end" />
+                    </div>
+                  </span>
+                  <span class="pl-2 text-sm text-gray-500" v-if="listfile.pending_delete">
                     <div class="tooltip" data-tip="Marked for death">
                       <font-awesome-icon icon="fa-solid fa-skull-crossbones" title="" />
                     </div>
                   </span>
                 </td>
 
-                <td>{{ bytesToReadable(wordlist.size_in_bytes) }}</td>
-                <td>{{ wordlist.lines }}</td>
+                <td>{{ bytesToReadable(listfile.size_in_bytes) }}</td>
+                <td>{{ listfile.lines }}</td>
                 <td class="text-center">
-                  <ConfirmModal @on-confirm="() => onDeleteListfile(wordlist)" v-if="canDelete(wordlist)">
-                    <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
-                  </ConfirmModal>
-                  <div v-else class="tooltip cursor-not-allowed text-gray-300" :data-tip="'You can\'t delete this'">
-                    <button class="btn btn-ghost btn-xs cursor-not-allowed">
-                      <font-awesome-icon icon="fa-solid fa-lock" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-          <div class="flex flex-row justify-between">
-            <Modal v-model:isOpen="isRulefileUploadOpen">
-              <FileUpload fileType="Rulefile" />
-            </Modal>
-            <h2 class="card-title">Rulefiles</h2>
-            <button class="btn btn-primary btn-sm" @click="() => (isRulefileUploadOpen = true)">Upload Rulefile</button>
-          </div>
-
-          <table class="table w-full">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Size</th>
-                <th>Lines</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                :class="isGreyed(rulefile) ? 'greyed-out-row hover text-gray-500' : 'hover'"
-                v-for="rulefile in rulefiles"
-                :key="rulefile.id"
-              >
-                <td>
-                  <strong>{{ rulefile.name }}</strong>
-                  <span class="pl-2 text-sm text-gray-500" v-if="rulefile.pending_delete">
-                    <div class="tooltip" data-tip="Marked for death">
-                      <font-awesome-icon icon="fa-solid fa-skull-crossbones" />
-                    </div>
-                  </span>
-                </td>
-                <td>{{ bytesToReadable(rulefile.size_in_bytes) }}</td>
-                <td>{{ rulefile.lines }}</td>
-                <td class="text-center">
-                  <ConfirmModal @on-confirm="() => onDeleteListfile(rulefile)" v-if="canDelete(rulefile)">
+                  <ConfirmModal @on-confirm="() => onDeleteListfile(listfile)" v-if="canDelete(listfile)">
                     <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
                   </ConfirmModal>
                   <div v-else class="tooltip cursor-not-allowed text-gray-300" :data-tip="'You can\'t delete this'">

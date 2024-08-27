@@ -18,7 +18,7 @@ const route = useRoute()
 
 const pageLinks = [
   { name: 'Project Dashboard', icon: 'fa-gauge', to: '/dashboard' },
-  { name: 'Wordlists & Rules', icon: 'fa-file', to: '/listfiles' },
+  { name: 'Listfiles', icon: 'fa-file', to: '/listfiles' },
   { name: 'Hash Search', icon: 'fa-magnifying-glass', to: '/hash-search' },
   { name: 'Agents', icon: 'fa-robot', to: '/agents' }
 ]

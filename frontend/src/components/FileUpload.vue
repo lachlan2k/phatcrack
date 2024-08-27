@@ -3,15 +3,13 @@ import { ref, computed, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 
 import { bytesToReadable } from '@/util/units'
-import { uploadListfile } from '@/api/listfiles'
+import { uploadListfile, type ListfileTypeT } from '@/api/listfiles'
 import { useListfilesStore } from '@/stores/listfiles'
 import type { AxiosProgressEvent } from 'axios'
 import { useConfigStore } from '@/stores/config'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useToastError } from '@/composables/useToastError'
-
-type FileType = 'Wordlist' | 'Rulefile'
 
 const configStore = useConfigStore()
 const { config } = storeToRefs(configStore)
@@ -21,14 +19,18 @@ const authStore = useAuthStore()
 const { isAdmin } = storeToRefs(authStore)
 
 const props = defineProps<{
-  fileType: FileType | null
+  allowedFileTypes: ListfileTypeT[]
+  projectId?: string
 }>()
+
+const emit = defineEmits(['onUploadStart', 'onUploadFinish'])
 
 const fileInputEl = ref<HTMLInputElement | null>(null)
 
 const fileName = ref('')
 const lineCount = ref(0)
-const fileType = ref(props.fileType ?? 'Wordlist')
+const selectedFileType = ref(props.allowedFileTypes[0])
+
 const fileToUpload = ref<File | null>(null)
 
 const isLoading = ref(false)
@@ -105,12 +107,16 @@ async function onSubmit(event: Event) {
   const formData = new FormData()
 
   formData.append('file-name', fileName.value)
-  formData.append('file-type', props.fileType ?? fileType.value)
+  formData.append('file-type', selectedFileType.value)
   formData.append('file-line-count', lineCount.value.toString())
   formData.append('file', fileToUpload.value)
+  if (props.projectId != null && props.projectId == '') {
+    formData.append('project-id', props.projectId)
+  }
 
   try {
     isLoading.value = true
+    emit('onUploadStart')
     const uploadedFile = await uploadListfile(formData, (newProgress: AxiosProgressEvent) => (progress.value = newProgress))
     toast.success('Successfully uploaded file: ' + uploadedFile.name)
     listfilesStore.load(true)
@@ -127,12 +133,13 @@ async function onSubmit(event: Event) {
     catcher(e)
   } finally {
     isLoading.value = false
+    emit('onUploadFinish')
   }
 }
 </script>
 
 <template>
-  <h3 class="text-lg font-bold">Upload a {{ props.fileType == null ? 'File' : props.fileType }}</h3>
+  <h3 class="text-lg font-bold">Upload a {{ props.allowedFileTypes.length == 1 ? props.allowedFileTypes[0] : 'File' }}</h3>
   <div class="form-control mt-1">
     <label class="label font-bold">
       <span class="label-text">Name</span>
@@ -141,7 +148,7 @@ async function onSubmit(event: Event) {
       type="text"
       class="input input-bordered"
       v-model="fileName"
-      :placeholder="fileType == 'Rulefile' ? 'best64.rule' : 'rockyou.txt'"
+      :placeholder="selectedFileType == 'Rulefile' ? 'best64.rule' : 'rockyou.txt'"
     />
   </div>
 
@@ -157,13 +164,12 @@ async function onSubmit(event: Event) {
     </label>
   </div>
 
-  <div class="form-control mt-1" v-if="props.fileType == null">
+  <div class="form-control mt-1" v-if="props.allowedFileTypes.length > 1">
     <label class="label font-bold">
       <span class="label-text">File type</span>
     </label>
-    <select class="select select-bordered" v-model="fileType">
-      <option value="Wordlist">Wordlist</option>
-      <option value="Rulefile">Rulefile</option>
+    <select class="select select-bordered" v-model="selectedFileType">
+      <option v-for="allowedType in props.allowedFileTypes" :value="allowedType" :key="allowedType">{{ allowedType }}</option>
     </select>
   </div>
 

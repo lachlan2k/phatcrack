@@ -36,7 +36,37 @@ export const useListfilesStore = defineStore({
 
   getters: {
     byId: (state) => (id: string) => state.listfiles.find((x) => x.id == id),
+
     wordlists: (state) => state.listfiles.filter((x) => x.file_type === LISTFILE_TYPE_WORDLIST),
-    rulefiles: (state) => state.listfiles.filter((x) => x.file_type === LISTFILE_TYPE_RULEFILE)
+    rulefiles: (state) => state.listfiles.filter((x) => x.file_type === LISTFILE_TYPE_RULEFILE),
+
+    groupedByType: (state) => {
+      // map to { wordlists: [...], rulefiles: [...], etc... }
+      const map = {} as { [key: string]: ListfileDTO[] }
+
+      const sortedInsert = (arr: ListfileDTO[] | null, val: ListfileDTO): ListfileDTO[] => {
+        if (arr == null || arr.length == 0) {
+          return [val]
+        }
+
+        // Find the first one bigger
+        const index = arr.findIndex((x) => x.lines > val.lines)
+        if (index == -1) {
+          return [...arr, val]
+        }
+
+        return [...arr.slice(0, index), val, ...arr.slice(index)]
+      }
+
+      const grouped = state.listfiles.reduce(
+        (acc, obj) => ({
+          ...acc,
+          [obj.file_type]: sortedInsert(acc[obj.file_type], obj)
+        }),
+        map
+      )
+
+      return grouped
+    }
   }
 })

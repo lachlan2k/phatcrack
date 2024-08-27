@@ -5,6 +5,8 @@ import type { GetAllListfilesDTO, ListfileDTO } from './types'
 export const LISTFILE_TYPE_WORDLIST = 'Wordlist'
 export const LISTFILE_TYPE_RULEFILE = 'Rulefile'
 
+export type ListfileTypeT = 'Wordlist' | 'Rulefile'
+
 export function getAllListfiles(): Promise<GetAllListfilesDTO> {
   return client.get('/api/v1/listfiles/all').then((res) => res.data)
 }

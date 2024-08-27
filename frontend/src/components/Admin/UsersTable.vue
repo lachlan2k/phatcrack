@@ -65,7 +65,7 @@ function onEditUser(userId: string) {
 
 async function onSaveUser() {
   const roles = Object.entries(editInputs.roleMap)
-    .filter(([_, val]) => val === true)
+    .filter(([, val]) => val === true)
     .map(([key]) => key)
 
   try {
