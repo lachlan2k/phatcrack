@@ -28,12 +28,16 @@ const listfileTypes = {
   Charset: { icon: 'fa-arrow-down-a-z' }
 } as { [key: string]: { icon: string } }
 
-const listfileTypesFilter = ref(Object.fromEntries(
-  Object.keys(listfileTypes).map(x => [x, true]).concat([['Unknown', true]])
-))
+const listfileTypesFilter = ref(
+  Object.fromEntries(
+    Object.keys(listfileTypes)
+      .map((x) => [x, true])
+      .concat([['Unknown', true]])
+  )
+)
 
 const filteredListfiles = computed(() => {
-  return listfiles.value.filter(x => listfileTypesFilter.value[x.file_type] ?? listfileTypesFilter.value['Unknown'] ?? true)
+  return listfiles.value.filter((x) => listfileTypesFilter.value[x.file_type] ?? listfileTypesFilter.value['Unknown'] ?? true)
 })
 
 const getIconForType = (type: string) => listfileTypes[type]?.icon ?? 'fa-question'
@@ -100,7 +104,6 @@ async function onDeleteListfile(listfile: ListfileDTO) {
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <div class="flex flex-row justify-between">
-
             <Modal v-model:isOpen="isListfileUploadOpen">
               <FileUpload @on-upload-finish="() => speedUpRefresh()" :allowed-file-types="Object.keys(listfileTypes) as ListfileTypeT[]" />
             </Modal>
@@ -108,8 +111,8 @@ async function onDeleteListfile(listfile: ListfileDTO) {
 
             <div>
               <div class="dropdown mr-2">
-                <label tabindex="0" class="btn btn-sm ">Filter</label>
-                <ul tabindex="0" class="menu dropdown-content mt-1 rounded-box z-[1] bg-base-100 p-2 shadow min-w-[200px]">
+                <label tabindex="0" class="btn btn-sm">Filter</label>
+                <ul tabindex="0" class="menu dropdown-content rounded-box z-[1] mt-1 min-w-[200px] bg-base-100 p-2 shadow">
                   <CheckboxSet v-model="listfileTypesFilter" />
                 </ul>
               </div>
