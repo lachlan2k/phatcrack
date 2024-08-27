@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 
 const props = defineProps<{
   modelValue: {
@@ -18,6 +18,7 @@ function toggleValue(key: string) {
   }
 
   emit('update:modelValue', newValue)
+  return !props.modelValue[key]
 }
 </script>
 
@@ -26,15 +27,14 @@ function toggleValue(key: string) {
     <div v-for="[key, value] in entries" :key="key">
       <label
         class="label cursor-pointer"
-        @click="
-          (e) => {
-            e.preventDefault()
-            toggleValue(key)
-          }
-        "
       >
         <span class="label-text">{{ key }}</span>
-        <input type="checkbox" :checked="value" class="checkbox" />
+        <input type="checkbox" :checked="value" :value="value" class="checkbox" @click="
+          (e) => {
+            e.stopPropagation()
+            toggleValue(key)
+          }
+        " />
       </label>
     </div>
   </div>

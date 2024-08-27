@@ -13,6 +13,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useToastError } from '@/composables/useToastError'
 import { deleteListfile, type ListfileTypeT } from '@/api/listfiles'
 import { useToast } from 'vue-toastification'
+import CheckboxSet from '@/components/CheckboxSet.vue'
 
 const listfilesStore = useListfilesStore()
 const { load: loadListfiles } = listfilesStore
@@ -26,6 +27,14 @@ const listfileTypes = {
   Wordlist: { icon: 'fa-book-open' },
   Charset: { icon: 'fa-arrow-down-a-z' }
 } as { [key: string]: { icon: string } }
+
+const listfileTypesFilter = ref(Object.fromEntries(
+  Object.keys(listfileTypes).map(x => [x, true]).concat([['Unknown', true]])
+))
+
+const filteredListfiles = computed(() => {
+  return listfiles.value.filter(x => listfileTypesFilter.value[x.file_type] ?? listfileTypesFilter.value['Unknown'] ?? true)
+})
 
 const getIconForType = (type: string) => listfileTypes[type]?.icon ?? 'fa-question'
 
@@ -91,11 +100,21 @@ async function onDeleteListfile(listfile: ListfileDTO) {
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
           <div class="flex flex-row justify-between">
+
             <Modal v-model:isOpen="isListfileUploadOpen">
               <FileUpload @on-upload-finish="() => speedUpRefresh()" :allowed-file-types="Object.keys(listfileTypes) as ListfileTypeT[]" />
             </Modal>
             <h2 class="card-title">Listfiles</h2>
-            <button class="btn btn-primary btn-sm" @click="() => (isListfileUploadOpen = true)">Upload Listfile</button>
+
+            <div>
+              <div class="dropdown mr-2">
+                <label tabindex="0" class="btn btn-sm ">Filter</label>
+                <ul tabindex="0" class="menu dropdown-content mt-1 rounded-box z-[1] bg-base-100 p-2 shadow min-w-[200px]">
+                  <CheckboxSet v-model="listfileTypesFilter" />
+                </ul>
+              </div>
+              <button class="btn btn-primary btn-sm" @click="() => (isListfileUploadOpen = true)">Upload Listfile</button>
+            </div>
           </div>
           <table class="table w-full">
             <thead>
@@ -110,7 +129,7 @@ async function onDeleteListfile(listfile: ListfileDTO) {
             <tbody>
               <tr
                 :class="isGreyed(listfile) ? 'greyed-out-row hover text-gray-500' : 'hover'"
-                v-for="listfile in listfiles"
+                v-for="listfile in filteredListfiles"
                 :key="listfile.id"
               >
                 <td class="text-center">
