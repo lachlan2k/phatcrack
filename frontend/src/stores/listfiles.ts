@@ -1,9 +1,11 @@
-import { getAllListfiles, LISTFILE_TYPE_RULEFILE, LISTFILE_TYPE_WORDLIST } from '@/api/listfiles'
+import { getAllListfiles, getListfilesForProject, LISTFILE_TYPE_RULEFILE, LISTFILE_TYPE_WORDLIST } from '@/api/listfiles'
 import type { ListfileDTO } from '@/api/types'
 import { defineStore } from 'pinia'
 
 export type ListfileStore = {
   listfiles: ListfileDTO[]
+  projectListfileMap: { [key: string]: ListfileDTO[] }
+  projectLoadingMap: { [key: string]: boolean }
   loading: boolean
 }
 
@@ -13,6 +15,8 @@ export const useListfilesStore = defineStore({
   state: () =>
     ({
       listfiles: [],
+      projectListfileMap: {},
+      projectLoadingMap: {},
       loading: false
     } as ListfileStore),
 
@@ -30,6 +34,21 @@ export const useListfilesStore = defineStore({
         } finally {
           this.loading = false
         }
+      }
+    },
+
+    async loadForProject(projectId: string) {
+      if (this.projectLoadingMap[projectId]) {
+        return
+      }
+
+      this.projectLoadingMap[projectId] = true
+
+      try {
+        const { listfiles } = await getListfilesForProject(projectId)
+        this.projectListfileMap[projectId] = listfiles
+      } finally {
+        this.projectLoadingMap[projectId] = false
       }
     }
   },
@@ -67,6 +86,14 @@ export const useListfilesStore = defineStore({
       )
 
       return grouped
-    }
+    },
+
+    attachedToProject: (state) => (projectId: string) => state.projectListfileMap[projectId] ?? [],
+
+    // Returns all listfiles a project can use, filtered by type. Places project-specific ones first
+    availableToProjectByType: (state) => (projectId: string, type: string) =>
+      (state.projectListfileMap[projectId] ?? [])
+        .filter((x) => x.file_type === type)
+        .concat(state.listfiles.filter((x) => x.file_type === type))
   }
 })

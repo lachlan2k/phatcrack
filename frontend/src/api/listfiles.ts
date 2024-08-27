@@ -11,6 +11,10 @@ export function getAllListfiles(): Promise<GetAllListfilesDTO> {
   return client.get('/api/v1/listfiles/all').then((res) => res.data)
 }
 
+export function getListfilesForProject(projectId: string): Promise<GetAllListfilesDTO> {
+  return client.get(`/api/v1/project/${projectId}/listfiles`).then((res) => res.data)
+}
+
 export function deleteListfile(id: string): Promise<string> {
   return client.delete('/api/v1/listfiles/' + id).then((res) => res.data)
 }
