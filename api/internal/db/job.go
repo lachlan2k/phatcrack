@@ -68,7 +68,6 @@ type JobRuntimeData struct {
 
 	OutputLines   pgJSONBArray[JobRuntimeOutputLine]
 	StatusUpdates pgJSONBArray[hashcattypes.HashcatStatus]
-	CrackedHashes pgJSONBArray[JobCrackedHash]
 }
 
 const (
@@ -104,17 +103,12 @@ func (j Job) ToDTO() apitypes.JobDTO {
 
 func (r JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
 	outlines := make([]apitypes.JobRuntimeOutputLineDTO, len(r.OutputLines.Data))
-	cracked := make([]apitypes.JobCrackedHashDTO, len(r.CrackedHashes.Data))
 
 	for i, line := range r.OutputLines.Data {
 		outlines[i] = apitypes.JobRuntimeOutputLineDTO{
 			Stream: line.Data().Stream,
 			Line:   line.Data().Line,
 		}
-	}
-
-	for i, hash := range r.CrackedHashes.Data {
-		cracked[i] = hash.Data().ToDTO()
 	}
 
 	return apitypes.JobRuntimeDataDTO{
@@ -128,7 +122,6 @@ func (r JobRuntimeData) ToDTO() apitypes.JobRuntimeDataDTO {
 
 		OutputLines:   outlines,
 		StatusUpdates: r.StatusUpdates.Unwrap(),
-		CrackedHashes: cracked,
 		CmdLine:       r.CmdLine,
 	}
 }
@@ -178,18 +171,6 @@ func (j *Job) ToSimpleDTO() apitypes.JobSimpleDTO {
 		AttackID:        j.AttackID.String(),
 		HashType:        j.HashType,
 		AssignedAgentID: j.AssignedAgentID.String(),
-	}
-}
-
-type JobCrackedHash struct {
-	Hash         string
-	PlaintextHex string
-}
-
-func (h JobCrackedHash) ToDTO() apitypes.JobCrackedHashDTO {
-	return apitypes.JobCrackedHashDTO{
-		Hash:         h.Hash,
-		PlaintextHex: h.PlaintextHex,
 	}
 }
 
@@ -318,7 +299,6 @@ func CreateJob(job *Job) (*Job, error) {
 		job.RuntimeData.Status = JobStatusCreated
 		job.RuntimeData.OutputLines.Init()
 		job.RuntimeData.StatusUpdates.Init()
-		job.RuntimeData.CrackedHashes.Init()
 	}
 
 	return job, GetInstance().Create(job).Error
@@ -358,7 +338,6 @@ func CreateJobTx(job *Job, tx *gorm.DB) (*Job, error) {
 		job.RuntimeData.Status = JobStatusCreated
 		job.RuntimeData.OutputLines.Init()
 		job.RuntimeData.StatusUpdates.Init()
-		job.RuntimeData.CrackedHashes.Init()
 	}
 
 	return job, tx.Create(job).Error
@@ -450,26 +429,49 @@ func SetJobScheduled(jobId string, agentId string) error {
 }
 
 func AddJobCrackedHash(jobId string, hash string, plaintextHex string) error {
-	dbLine := datatypes.NewJSONType(JobCrackedHash{
-		Hash:         hash,
-		PlaintextHex: plaintextHex,
-	})
-
-	err := GetInstance().Exec(
-		"update job_runtime_data set cracked_hashes = array_append(cracked_hashes, ?) where job_id = ?",
-		dbLine, jobId,
-	).Error
-	if err != nil {
-		return err
-	}
-
-	return GetInstance().
+	attemptedInsert := GetInstance().
 		Table("hashlist_hashes").
 		Where("normalized_hash = ?", hash).
 		Updates(&HashlistHash{
 			PlaintextHex: plaintextHex,
 			IsCracked:    true,
-		}).Error
+		})
+
+	if attemptedInsert.Error != nil {
+		return attemptedInsert.Error
+	}
+
+	if attemptedInsert.RowsAffected >= 1 {
+		return nil
+	}
+
+	// this is a mystery hash we didn't know about!?
+	var result struct {
+		HashlistID uuid.UUID
+	}
+
+	err := GetInstance().
+		Table("jobs").
+		Select("hashlists.id as hashlist_id").
+		Joins("join attacks on attacks.id = jobs.attack_id").
+		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
+		Where("jobs.id = ?", jobId).
+		Scan(&result).Error
+
+	if err != nil {
+		return err
+	}
+
+	newHash := &HashlistHash{
+		HashlistID:     result.HashlistID,
+		NormalizedHash: hash,
+		InputHash:      hash,
+		PlaintextHex:   plaintextHex,
+		IsCracked:      true,
+		IsUnexpected:   true,
+	}
+
+	return GetInstance().Save(newHash).Error
 }
 
 // TODO: actually, on second thought, I want to keep all stderr lines, and only roll-over stdout lines

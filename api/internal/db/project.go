@@ -151,6 +151,7 @@ type HashlistHash struct {
 	InputHash      string
 	PlaintextHex   string
 	IsCracked      bool
+	IsUnexpected   bool
 }
 
 func (h *HashlistHash) ToDTO() apitypes.HashlistHashDTO {

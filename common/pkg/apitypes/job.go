@@ -38,7 +38,6 @@ type JobRuntimeDataDTO struct {
 
 	OutputLines   []JobRuntimeOutputLineDTO    `json:"output_lines"`
 	StatusUpdates []hashcattypes.HashcatStatus `json:"status_updates"`
-	CrackedHashes []JobCrackedHashDTO          `json:"cracked_hashes"`
 }
 
 type JobRuntimeSummaryDTO struct {
@@ -48,11 +47,6 @@ type JobRuntimeSummaryDTO struct {
 	StartedTime            int64   `json:"started_time"`
 	StoppedTime            int64   `json:"stopped_time"`
 	CmdLine                string  `json:"cmd_line"`
-}
-
-type JobCrackedHashDTO struct {
-	Hash         string `json:"hash"`
-	PlaintextHex string `json:"plaintext_hex"`
 }
 
 type JobDTO struct {
