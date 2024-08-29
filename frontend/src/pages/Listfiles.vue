@@ -101,7 +101,7 @@ async function onDeleteListfile(listfile: ListfileDTO) {
   <main class="w-full p-4">
     <h1 class="text-4xl font-bold">Listfiles</h1>
     <div class="mt-6 flex flex-wrap gap-6">
-      <div class="card bg-base-100 shadow-xl min-w-[800px]">
+      <div class="card min-w-[800px] bg-base-100 shadow-xl">
         <div class="card-body">
           <div class="flex flex-row justify-between">
             <Modal v-model:isOpen="isListfileUploadOpen">

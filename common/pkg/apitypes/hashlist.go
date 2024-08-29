@@ -18,6 +18,7 @@ type HashlistHashDTO struct {
 	InputHash      string `json:"input_hash"`
 	NormalizedHash string `json:"normalized_hash"`
 	IsCracked      bool   `json:"is_cracked"`
+	IsUnexpected   bool   `json:"is_unexpected"`
 	PlaintextHex   string `json:"plaintext_hex"`
 }
 

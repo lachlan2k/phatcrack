@@ -176,10 +176,6 @@ export interface JobRuntimeSummaryDTO {
   stopped_time: number
   cmd_line: string
 }
-export interface JobCrackedHashDTO {
-  hash: string
-  plaintext_hex: string
-}
 export interface HashcatStatusGuess {
   guess_base: string
   guess_base_count: number
@@ -222,7 +218,6 @@ export interface JobRuntimeDataDTO {
   cmd_line: string
   output_lines: JobRuntimeOutputLineDTO[]
   status_updates: HashcatStatus[]
-  cracked_hashes: JobCrackedHashDTO[]
 }
 export interface JobDTO {
   id: string
@@ -418,6 +413,7 @@ export interface HashlistHashDTO {
   input_hash: string
   normalized_hash: string
   is_cracked: boolean
+  is_unexpected: boolean
   plaintext_hex: string
 }
 export interface HashlistDTO {
