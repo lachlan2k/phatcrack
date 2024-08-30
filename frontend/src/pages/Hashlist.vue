@@ -103,6 +103,7 @@ const filteredHashes = computed(() => {
 
   return arr.filter(
     (x) =>
+      x.username.toLowerCase().includes(filterText.value) ||
       decodeHex(x.plaintext_hex).toLowerCase().includes(filterText.value) ||
       x.input_hash.toLowerCase().includes(filterText.value) ||
       x.normalized_hash.toLowerCase().includes(filterText.value)
@@ -232,12 +233,16 @@ function openAttackModal(attackIndex: number) {
               <table class="compact-table hashlist-table table table-sm w-full">
                 <thead>
                   <tr>
+                    <th v-if="hashlistData?.has_usernames">Username</th>
                     <th>Original Hash</th>
                     <th>Cracked Plaintext</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="hash in currentHashes" :key="hash.id + '|' + hash.normalized_hash">
+                    <td class="font-mono" v-if="hashlistData?.has_usernames">
+                      {{ hash.username }}
+                    </td>
                     <td>
                       <div
                         class="tooltip tooltip-right mr-[5px] h-[15px] w-[15px]"

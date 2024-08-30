@@ -25,13 +25,17 @@ watch(data, (newData) => {
   inputs.hashType = newData.hash_type.toString()
   inputs.hashes = newData.hashes.map((x) => x.input_hash).join('\n')
 })
+
+const onSave = () => alert('Sorry, this isnt implement :((')
 </script>
 
 <template>
   <HashlistInputs
     :includeSaveButton="true"
+    :hasUsernames="data?.has_usernames ?? false"
     v-model:hashlistName="inputs.hashlistName"
     v-model:hashType="inputs.hashType"
     v-model:hashes="inputs.hashes"
+    @savePressed="() => onSave()"
   />
 </template>

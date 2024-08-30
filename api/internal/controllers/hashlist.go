@@ -173,7 +173,18 @@ func handleHashlistCreate(c echo.Context) error {
 
 	hashes := make([]db.HashlistHash, len(normalizedHashes))
 	for i, inputHash := range req.InputHashes {
-		hashes[i].InputHash = inputHash
+		if req.HasUsernames {
+			username, splitHash, err := hashcathelpers.SplitUsername(inputHash)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate hash, error splitting username on line %d", i).SetInternal(err)
+			}
+
+			hashes[i].Username = username
+			hashes[i].InputHash = splitHash
+		} else {
+			hashes[i].InputHash = inputHash
+		}
+
 		hashes[i].NormalizedHash = normalizedHashes[i]
 	}
 
@@ -183,8 +194,9 @@ func handleHashlistCreate(c echo.Context) error {
 		Name:    req.Name,
 		Version: 1,
 
-		HashType: req.HashType,
-		Hashes:   hashes,
+		HasUsernames: req.HasUsernames,
+		HashType:     req.HashType,
+		Hashes:       hashes,
 	})
 
 	if err != nil {

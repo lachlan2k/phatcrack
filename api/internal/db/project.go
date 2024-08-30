@@ -84,8 +84,9 @@ type Hashlist struct {
 	Name    string
 	Version uint
 
-	HashType int
-	Hashes   []HashlistHash `gorm:"constraint:OnDelete:CASCADE;"`
+	HashType     int
+	Hashes       []HashlistHash `gorm:"constraint:OnDelete:CASCADE;"`
+	HasUsernames bool
 
 	Attacks []Attack `gorm:"constraint:OnDelete:CASCADE;"`
 }
@@ -100,13 +101,14 @@ func (h *Hashlist) ToDTO(withHashes bool) apitypes.HashlistDTO {
 	}
 
 	return apitypes.HashlistDTO{
-		ID:          h.ID.String(),
-		ProjectID:   h.ProjectID.String(),
-		Name:        h.Name,
-		TimeCreated: h.CreatedAt.Unix(),
-		HashType:    h.HashType,
-		Hashes:      hashes,
-		Version:     h.Version,
+		ID:           h.ID.String(),
+		ProjectID:    h.ProjectID.String(),
+		Name:         h.Name,
+		TimeCreated:  h.CreatedAt.Unix(),
+		HashType:     h.HashType,
+		Hashes:       hashes,
+		Version:      h.Version,
+		HasUsernames: h.HasUsernames,
 	}
 }
 
@@ -150,6 +152,7 @@ type HashlistHash struct {
 	NormalizedHash string
 	InputHash      string
 	PlaintextHex   string
+	Username       string
 	IsCracked      bool
 	IsUnexpected   bool
 }
@@ -158,6 +161,7 @@ func (h *HashlistHash) ToDTO() apitypes.HashlistHashDTO {
 	return apitypes.HashlistHashDTO{
 		ID:             strconv.FormatInt(int64(h.ID), 10),
 		InputHash:      h.InputHash,
+		Username:       h.Username,
 		NormalizedHash: h.InputHash,
 		PlaintextHex:   h.PlaintextHex,
 		IsCracked:      h.IsCracked,

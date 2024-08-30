@@ -410,6 +410,7 @@ export interface HashlistCreateResponseDTO {
 }
 export interface HashlistHashDTO {
   id: string
+  username: string
   input_hash: string
   normalized_hash: string
   is_cracked: boolean
@@ -424,6 +425,7 @@ export interface HashlistDTO {
   hash_type: number
   hashes: HashlistHashDTO[]
   version: number
+  has_usernames: boolean
 }
 export interface HashlistResponseMultipleDTO {
   hashlists: HashlistDTO[]

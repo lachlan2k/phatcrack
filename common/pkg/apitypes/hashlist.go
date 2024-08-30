@@ -15,6 +15,7 @@ type HashlistCreateResponseDTO struct {
 
 type HashlistHashDTO struct {
 	ID             string `json:"id"`
+	Username       string `json:"username"`
 	InputHash      string `json:"input_hash"`
 	NormalizedHash string `json:"normalized_hash"`
 	IsCracked      bool   `json:"is_cracked"`
@@ -23,13 +24,14 @@ type HashlistHashDTO struct {
 }
 
 type HashlistDTO struct {
-	ID          string            `json:"id"`
-	ProjectID   string            `json:"project_id"`
-	Name        string            `json:"name"`
-	TimeCreated int64             `json:"time_created"`
-	HashType    int               `json:"hash_type"`
-	Hashes      []HashlistHashDTO `json:"hashes"`
-	Version     uint              `json:"version"`
+	ID           string            `json:"id"`
+	ProjectID    string            `json:"project_id"`
+	Name         string            `json:"name"`
+	TimeCreated  int64             `json:"time_created"`
+	HashType     int               `json:"hash_type"`
+	Hashes       []HashlistHashDTO `json:"hashes"`
+	Version      uint              `json:"version"`
+	HasUsernames bool              `json:"has_usernames"`
 }
 
 type HashlistResponseMultipleDTO struct {

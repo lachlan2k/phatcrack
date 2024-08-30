@@ -192,6 +192,39 @@ func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 	return candidates, nil
 }
 
+type hashAndUsername struct {
+	username string
+	hash     string
+}
+
+const usernameSeparator = ":"
+
+func splitUsernames(hashes []string) ([]hashAndUsername, error) {
+	results := make([]hashAndUsername, len(hashes))
+
+	for i := range hashes {
+		split := strings.SplitN(hashes[i], usernameSeparator, 2)
+		if len(split) != 2 {
+			return nil, fmt.Errorf("line %d did not contain username separator %q", i, usernameSeparator)
+		}
+
+		results[i] = hashAndUsername{
+			username: split[0],
+			hash:     split[1],
+		}
+	}
+
+	return results, nil
+}
+
+func SplitUsername(hash string) (string, string, error) {
+	username, hash, found := strings.Cut(hash, usernameSeparator)
+	if !found {
+		return "", "", fmt.Errorf("hash did not contain username separator")
+	}
+	return username, hash, nil
+}
+
 func NormalizeHashes(hashes []string, hashType int, hasUsernames bool) ([]string, error) {
 	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-normalize")
 	if err != nil {
@@ -203,12 +236,18 @@ func NormalizeHashes(hashes []string, hashType int, hasUsernames bool) ([]string
 	tmpFile.Chmod(0600)
 
 	for index, hash := range hashes {
+		hashToWrite := hash
+
 		if hasUsernames {
-			_, hash, _ = strings.Cut(hash, ":")
+			_, splitHash, err := SplitUsername(hash)
+			if err != nil {
+				return nil, fmt.Errorf("line %d: %v", index, err)
+			}
+			hashToWrite = splitHash
 		}
 
 		// Use the list index as a "username" so hashcat outputs them in a nice way
-		_, err = tmpFile.WriteString(strconv.Itoa(index) + ":" + strings.TrimSpace(hash) + "\n")
+		_, err = tmpFile.WriteString(strconv.Itoa(index) + ":" + strings.TrimSpace(hashToWrite) + "\n")
 		if err != nil {
 			return nil, fmt.Errorf("failed to write example hash to file: %w", err)
 		}

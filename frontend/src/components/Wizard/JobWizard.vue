@@ -95,6 +95,7 @@ const inputs = reactive({
   selectedHashlistId: props.existingHashlistId ?? '',
   hashType: '0',
   hashes: '',
+  hasUsernames: false,
 
   attackMode: 0,
   selectedWordlists: [] as string[],
@@ -217,7 +218,7 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
       name: inputs.hashlistName,
       hash_type: Number(inputs.hashType),
       input_hashes: hashesArr.value,
-      has_usernames: false
+      has_usernames: inputs.hasUsernames
     })
 
     toast.success(`Created hashlist "${inputs.hashlistName}"!`)
@@ -379,7 +380,12 @@ async function saveAndStartAttack() {
         <!-- Create Hashlist -->
         <template v-if="inputs.activeStep == StepIndex.Hashlist">
           <div class="form-control">
-            <HashlistInputs v-model:hashes="inputs.hashes" v-model:hashType="inputs.hashType" v-model:hashlistName="inputs.hashlistName" />
+            <HashlistInputs
+              v-model:hasUsernames="inputs.hasUsernames"
+              v-model:hashes="inputs.hashes"
+              v-model:hashType="inputs.hashType"
+              v-model:hashlistName="inputs.hashlistName"
+            />
 
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
