@@ -404,6 +404,13 @@ export interface HashlistCreateRequestDTO {
   input_hashes: string[]
   has_usernames: boolean
 }
+export interface HashlistAppendRequestDTO {
+  input_hashes: string[]
+}
+export interface HashlistAppendResponseDTO {
+  num_new_hashes: number
+  num_populated_from_potfile: number
+}
 export interface HashlistCreateResponseDTO {
   id: string
   num_populated_from_potfile: number

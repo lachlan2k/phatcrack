@@ -10,6 +10,7 @@ import {
   JobStatusStarted,
   JobStopReasonFinished,
   JobStopReasonUserStopped,
+  appendToHashlist,
   getHashlist
 } from '@/api/project'
 import { exportResults, ExportFormat } from '@/util/exportHashlist'
@@ -27,6 +28,10 @@ import { getAttacksWithJobsForHashlist } from '@/api/project'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
 import AttackDetailsModal from '@/components/AttackDetailsModal/index.vue'
 import { useProjectsStore } from '@/stores/projects'
+import { useHashesInput } from '@/composables/useHashesInput'
+import HashesInput from '@/components/HashesInput.vue'
+import { useToast } from 'vue-toastification'
+import { useToastError } from '@/composables/useToastError'
 
 const hashlistId = useRoute().params.id as string
 const { data: hashlistData, isLoading: isLoadingHashlist, silentlyRefresh: refreshHashlist } = useApi(() => getHashlist(hashlistId))
@@ -165,10 +170,49 @@ function openAttackModal(attackIndex: number) {
   attackModalAttackIndex.value = attackIndex
   isAttackModalOpen.value = true
 }
+
+const isHashAddModalOpen = ref(false)
+const isAppendHashesLoading = ref(false)
+const { hashesInput: appendHashesInput, hashesArr: appendHashesArr } = useHashesInput()
+
+const toast = useToast()
+const { catcher } = useToastError()
+
+async function onAppendHashes() {
+  isAppendHashesLoading.value = true
+
+  try {
+    const res = await appendToHashlist(hashlistId, appendHashesArr.value)
+    toast.success(
+      `Added ${res.num_new_hashes} new hashes.` +
+        (res.num_populated_from_potfile > 0 ? `${res.num_populated_from_potfile} already cracked.` : '')
+    )
+    appendHashesInput.value = ''
+    isHashAddModalOpen.value = false
+    refreshHashlist()
+  } catch (e) {
+    catcher(e, 'Failed to append hashes: ')
+  } finally {
+    isAppendHashesLoading.value = false
+  }
+}
 </script>
 
 <template>
   <AttackDetailsModal v-if="selectedAttack != null" :attack="selectedAttack" v-model:isOpen="isAttackModalOpen"></AttackDetailsModal>
+
+  <Modal v-model:isOpen="isHashAddModalOpen">
+    <div class="w-screen max-w-[600px]">
+      <h3 class="text-lg font-bold">Add new hashes</h3>
+      <small class="text-sm">Note: This will not affect your current attacks. You must start new attacks to attack these hashes.</small>
+
+      <HashesInput class="mt-4" v-model="appendHashesInput" />
+
+      <div class="mt-4 flex justify-end">
+        <button class="btn btn-primary" :disabled="isAppendHashesLoading" @click="() => onAppendHashes()">Append</button>
+      </div>
+    </div>
+  </Modal>
 
   <main class="h-full w-full p-4">
     <div v-if="isLoading" class="flex h-full w-full justify-center">
@@ -200,21 +244,21 @@ function openAttackModal(attackIndex: number) {
                   cracked)
                 </h2>
 
-                <div class="dropdown">
-                  <label tabindex="0" class="btn btn-ghost btn-sm m-1">...</label>
-                  <ul tabindex="0" class="menu dropdown-content rounded-box z-[1] bg-base-100 p-2 shadow">
-                    <li>
-                      <button
-                        class="btn btn-ghost btn-sm"
-                        @click="() => exportResults(hashlistId, ExportFormat.ColonSeparated, onlyShowCracked)"
-                      >
-                        Export
-                      </button>
-                    </li>
-                    <li>
-                      <button class="btn btn-ghost btn-sm" @click="() => (isHashlistEditorOpen = true)">Edit</button>
-                    </li>
-                  </ul>
+                <div>
+                  <div class="tooltip" data-tip="Add more hashes">
+                    <button class="btn btn-ghost btn-sm" @click="() => (isHashAddModalOpen = true)">
+                      <font-awesome-icon icon="fa-solid fa-plus-circle" />
+                    </button>
+                  </div>
+
+                  <div class="tooltip" data-tip="Export as colon-separated file">
+                    <button
+                      class="btn btn-ghost btn-sm"
+                      @click="() => exportResults(hashlistId, ExportFormat.ColonSeparated, onlyShowCracked)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-download" />
+                    </button>
+                  </div>
                 </div>
               </div>
               <div class="form-control">

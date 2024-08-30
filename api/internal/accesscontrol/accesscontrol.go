@@ -44,6 +44,22 @@ func HasRightsToProjectID(user *db.User, projId string) (bool, error) {
 	return HasRightsToProject(user, proj), nil
 }
 
+func HasRightsToHashlistID(user *db.User, hashlistId string) (bool, error) {
+	if user.HasRole(roles.UserRoleAdmin) {
+		return true, nil
+	}
+
+	projId, err := db.GetHashlistProjID(hashlistId)
+	if projId == "" || err == db.ErrNotFound {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	return HasRightsToProjectID(user, projId)
+}
+
 func HasRightsToJobID(user *db.User, jobID string) (bool, error) {
 	projId, err := db.GetJobProjID(jobID)
 	if err == db.ErrNotFound {

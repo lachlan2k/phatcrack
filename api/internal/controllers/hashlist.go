@@ -23,6 +23,7 @@ func HookHashlistEndpoints(api *echo.Group) {
 
 	api.POST("/create", handleHashlistCreate)
 	api.GET("/:hashlist-id", handleHashlistGet)
+	api.POST("/:hashlist-id/append", handleHashlistAppend)
 	api.DELETE("/:hashlist-id", handleHashlistDelete)
 	api.GET("/:hashlist-id/attacks", handleAttackGetAllForHashlist)
 	api.GET("/:hashlist-id/attacks-with-jobs", handleAttacksAndJobsForHashlist)
@@ -220,6 +221,76 @@ func handleHashlistCreate(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, apitypes.HashlistCreateResponseDTO{
 		ID:                      newHashlist.ID.String(),
+		NumPopulatedFromPotfile: numFromPotfile,
+	})
+}
+
+func handleHashlistAppend(c echo.Context) error {
+	hashlistId := c.Param("hashlist-id")
+	if !util.AreValidUUIDs(hashlistId) {
+		return echo.ErrBadRequest
+	}
+
+	req, err := util.BindAndValidate[apitypes.HashlistAppendRequestDTO](c)
+	if err != nil {
+		return err
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	allowed, err := accesscontrol.HasRightsToHashlistID(user, hashlistId)
+	if err != nil {
+		return util.GenericServerError(err)
+	}
+	if !allowed {
+		return echo.ErrForbidden
+	}
+
+	hashlist, err := db.GetHashlist(hashlistId)
+	if err != nil {
+		return err
+	}
+
+	// Ensure provided algorithm type is valid and normalize
+	normalizedHashes, err := hashcathelpers.NormalizeHashes(req.Hashes, hashlist.HashType, hashlist.HasUsernames)
+	if err != nil {
+		log.Warnf("Failed to validated newly appended hashes for hashlist %q because %v", hashlistId, err)
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate and normalize hashes. Please ensure your hashes are valid for the given hash type.").SetInternal(err)
+	}
+
+	hashes := make([]db.HashlistHash, len(normalizedHashes))
+	for i, inputHash := range req.Hashes {
+		if hashlist.HasUsernames {
+			username, splitHash, err := hashcathelpers.SplitUsername(inputHash)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, "Failed to validate hash, error splitting username on line %d", i).SetInternal(err)
+			}
+
+			hashes[i].Username = username
+			hashes[i].InputHash = splitHash
+		} else {
+			hashes[i].InputHash = inputHash
+		}
+
+		hashes[i].NormalizedHash = normalizedHashes[i]
+		hashes[i].HashlistID = hashlist.ID
+	}
+
+	numNewHashes, err := db.AppendToHashlist(hashes)
+	if err != nil {
+		return util.GenericServerError(err)
+	}
+
+	numFromPotfile, err := db.PopulateHashlistFromPotfile(hashlistId)
+	if err != nil {
+		return util.GenericServerError(err)
+	}
+
+	return c.JSON(http.StatusOK, apitypes.HashlistAppendResponseDTO{
+		NumNewHashes:            numNewHashes,
 		NumPopulatedFromPotfile: numFromPotfile,
 	})
 }

@@ -8,6 +8,15 @@ type HashlistCreateRequestDTO struct {
 	HasUsernames bool     `json:"has_usernames"`
 }
 
+type HashlistAppendRequestDTO struct {
+	Hashes []string `json:"input_hashes" validate:"required,min=1,dive,required,min=4"`
+}
+
+type HashlistAppendResponseDTO struct {
+	NumNewHashes            int64 `json:"num_new_hashes"`
+	NumPopulatedFromPotfile int64 `json:"num_populated_from_potfile"`
+}
+
 type HashlistCreateResponseDTO struct {
 	ID                      string `json:"id"`
 	NumPopulatedFromPotfile int64  `json:"num_populated_from_potfile"`

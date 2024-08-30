@@ -132,6 +132,39 @@ func CreateHashlist(hashlist *Hashlist) (*Hashlist, error) {
 	return hashlist, err
 }
 
+// Caller must ensure HashlistHash.HashlistID is set correctly
+func AppendToHashlist(newHashes []HashlistHash) (int64, error) {
+	count := int64(0)
+
+	err := GetInstance().Transaction(func(tx *gorm.DB) error {
+		for _, newHash := range newHashes {
+			existingCount := int64(0)
+			err := tx.Table("hashlist_hashes").Where(
+				"hashlist_id = ? and input_hash = ? and username = ?", newHash.HashlistID.String(), newHash.InputHash, newHash.Username,
+			).Count(&existingCount).Error
+
+			if err != nil && err != ErrNotFound {
+				return err
+			}
+
+			if existingCount == 0 {
+				err := tx.Create(&newHash).Error
+				if err != nil {
+					return err
+				}
+				count++
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func PopulateHashlistFromPotfile(hashlistId string) (int64, error) {
 	res := GetInstance().Exec(
 		`UPDATE hashlist_hashes

@@ -5,6 +5,8 @@ import type {
   AttackMultipleDTO,
   AttackStartResponseDTO,
   AttackWithJobsMultipleDTO,
+  HashlistAppendRequestDTO,
+  HashlistAppendResponseDTO,
   HashlistDTO,
   HashlistResponseMultipleDTO,
   ProjectAddShareRequestDTO,
@@ -55,6 +57,14 @@ export function deleteProjectShare(projId: string, userId: string): Promise<Proj
 
 export function createHashlist(body: HashlistCreateRequestDTO): Promise<HashlistCreateResponseDTO> {
   return client.post(`/api/v1/hashlist/create`, body).then((res) => res.data)
+}
+
+export function appendToHashlist(hashlistId: string, hashes: string[]): Promise<HashlistAppendResponseDTO> {
+  return client
+    .post(`/api/v1/hashlist/${hashlistId}/append`, {
+      input_hashes: hashes
+    } as HashlistAppendRequestDTO)
+    .then((res) => res.data)
 }
 
 export function createAttack(body: AttackCreateRequestDTO): Promise<AttackDTO> {
