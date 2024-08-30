@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Modal from '@/components/Modal.vue'
-import HashlistEditor from '@/components/HashlistEditor.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
 
 import {
@@ -91,7 +90,6 @@ const isLoading = computed(() => {
 })
 
 const isAttackWizardOpen = ref(false)
-const isHashlistEditorOpen = ref(false)
 
 const filterText = ref('')
 const onlyShowCracked = ref(false)
@@ -234,9 +232,6 @@ async function onAppendHashes() {
       <div class="flex flex-wrap gap-4">
         <div class="mt-3 flex flex-wrap gap-6">
           <div class="card bg-base-100 shadow-xl">
-            <Modal v-model:isOpen="isHashlistEditorOpen">
-              <HashlistEditor v-if="isHashlistEditorOpen" :hashlistId="hashlistData!.id" />
-            </Modal>
             <div class="card-body" style="min-width: 500px">
               <div class="flex flex-row justify-between">
                 <h2 class="card-title">
