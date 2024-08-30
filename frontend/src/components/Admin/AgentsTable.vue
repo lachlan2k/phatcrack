@@ -83,6 +83,7 @@ async function onDeleteAgent(id: string) {
         </span>
       </div>
     </Modal>
+    <h2 class="card-title">Agents</h2>
     <button class="btn btn-primary btn-sm" @click="() => (isAgentCreateOpen = true)">Create Agent</button>
   </div>
 

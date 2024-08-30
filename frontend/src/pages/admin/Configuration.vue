@@ -20,7 +20,10 @@ const ComponentToRender = computed(() => tabs[activeTab.value].component)
     <div class="mt-6 flex flex-wrap gap-6">
       <div class="card min-w-[600px] bg-base-100 shadow-xl">
         <div class="card-body justify-between">
-          <div class="tabs">
+          <div class="tabs justify-center">
+            <a class="tab tab-bordered grow">
+              <span></span>
+            </a>
             <a
               v-for="(tab, i) in tabs"
               :key="i"
@@ -29,6 +32,9 @@ const ComponentToRender = computed(() => tabs[activeTab.value].component)
               @click="activeTab = i"
             >
               <span class="mx-2"> <font-awesome-icon :icon="'fa-solid ' + tab.icon" class="mr-2" />{{ tab.name }} </span>
+            </a>
+            <a class="tab tab-bordered grow">
+              <span></span>
             </a>
           </div>
 
