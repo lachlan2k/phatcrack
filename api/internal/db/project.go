@@ -161,7 +161,7 @@ func (h *HashlistHash) ToDTO() apitypes.HashlistHashDTO {
 		NormalizedHash: h.InputHash,
 		PlaintextHex:   h.PlaintextHex,
 		IsCracked:      h.IsCracked,
-		IsUnexpected:   h.IsCracked,
+		IsUnexpected:   h.IsUnexpected,
 	}
 }
 
