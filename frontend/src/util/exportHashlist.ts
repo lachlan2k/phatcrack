@@ -17,23 +17,33 @@ const hexToString = (hex: string) => {
   return str
 }
 
-function getExportBlob(hashes: HashlistHashDTO[], format: ExportFormat) {
+function getExportBlob(hashes: HashlistHashDTO[], format: ExportFormat, hasUsernames: boolean) {
   switch (format) {
     case ExportFormat.JSON:
       return new Blob([JSON.stringify(hashes)], { type: 'application/json' })
     case ExportFormat.CSV: {
       // Poor man's CSV, vulnerable to csv injection etc, but bleh
       // TODO: something proper csv generation
-      const stringified = [['hash', 'plaintext']]
-        .concat(hashes.map((x) => [x.input_hash, hexToString(x.plaintext_hex)]))
-        .map((x) => x.join(','))
-        .join(',')
+      const stringified = 
+        hasUsernames ?
+          [['username', 'hash', 'plaintext']]
+            .concat(hashes.map((x) => [x.username, x.input_hash, hexToString(x.plaintext_hex)]))
+            .map((x) => x.join(','))
+            .join(',') :
+          [['hash', 'plaintext']]
+            .concat(hashes.map((x) => [x.input_hash, hexToString(x.plaintext_hex)]))
+            .map((x) => x.join(','))
+            .join(',')
+
+
 
       return new Blob([stringified], { type: 'text/csv' })
     }
 
     case ExportFormat.ColonSeparated: {
-      const textBlob = hashes.map((x) => `${x.input_hash}:${hexToString(x.plaintext_hex)}`).join('\n')
+      const textBlob = hashes.map((x) =>
+        hasUsernames ?  `${x.username}:${x.input_hash}:${hexToString(x.plaintext_hex)}` :  `${x.input_hash}:${hexToString(x.plaintext_hex)}`
+      ).join('\n')
       return new Blob([textBlob], { type: 'text/plain' })
     }
   }
@@ -54,7 +64,7 @@ export async function exportResults(hashlistId: string, format: ExportFormat, cr
   const hashlist = await getHashlist(hashlistId)
   const filtered = crackedOnly ? hashlist.hashes.filter((x) => x.is_cracked) : hashlist.hashes
 
-  const blob = getExportBlob(filtered, format)
+  const blob = getExportBlob(filtered, format, hashlist.has_usernames)
   const url = URL.createObjectURL(blob)
 
   const a = document.createElement('a')
