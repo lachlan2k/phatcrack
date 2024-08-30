@@ -238,8 +238,19 @@ function openAttackModal(attackIndex: number) {
                 </thead>
                 <tbody>
                   <tr v-for="hash in currentHashes" :key="hash.id + '|' + hash.normalized_hash">
-                    <td class="overflow-hidden text-ellipsis whitespace-nowrap font-mono" style="max-width: 500px">
-                      {{ hash.input_hash }}
+                    <td>
+                      <div
+                        class="tooltip tooltip-right mr-[5px] h-[15px] w-[15px]"
+                        data-tip="This hash was unexpected and automatically appended (issue #22)"
+                        v-if="hash.is_unexpected"
+                      >
+                        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="align-middle" />
+                      </div>
+                      <span
+                        class="inline-block overflow-hidden text-ellipsis whitespace-nowrap align-middle font-mono"
+                        :class="hash.is_unexpected ? 'max-w-[480px]' : 'max-w-[500px]'"
+                        >{{ hash.input_hash }}</span
+                      >
                     </td>
                     <td class="font-mono">
                       <strong>{{ decodeHex(hash.plaintext_hex) || '-' }}</strong>
