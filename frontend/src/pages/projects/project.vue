@@ -12,13 +12,13 @@ import { useResourcesStore } from '@/stores/resources'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { timeSince } from '@/util/units'
 import { useToast } from 'vue-toastification'
 import { useToastError } from '@/composables/useToastError'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
 import { useActiveAttacksStore } from '@/stores/activeAttacks'
+import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
 
 const projId = useRoute().params.id as string
 
@@ -172,7 +172,9 @@ const quantityStr = (num: number, str: string) => {
                       </div>
                     </td>
                     <td @click="navigate" class="cursor-pointer">{{ hashlist.hash_type }} - {{ getHashTypeName(hashlist.hash_type) }}</td>
-                    <td @click="navigate" class="cursor-pointer">{{ timeSince(hashlist.time_created * 1000) }}</td>
+                    <td @click="navigate" class="cursor-pointer">
+                      <TimeSinceDisplay :timestamp="hashlist.time_created * 1000" />
+                    </td>
                     <td class="w-0 text-center">
                       <ConfirmModal @on-confirm="() => onDeleteHashlist(hashlist.id)">
                         <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />

@@ -24,26 +24,25 @@ function getExportBlob(hashes: HashlistHashDTO[], format: ExportFormat, hasUsern
     case ExportFormat.CSV: {
       // Poor man's CSV, vulnerable to csv injection etc, but bleh
       // TODO: something proper csv generation
-      const stringified = 
-        hasUsernames ?
-          [['username', 'hash', 'plaintext']]
+      const stringified = hasUsernames
+        ? [['username', 'hash', 'plaintext']]
             .concat(hashes.map((x) => [x.username, x.input_hash, hexToString(x.plaintext_hex)]))
             .map((x) => x.join(','))
-            .join(',') :
-          [['hash', 'plaintext']]
+            .join(',')
+        : [['hash', 'plaintext']]
             .concat(hashes.map((x) => [x.input_hash, hexToString(x.plaintext_hex)]))
             .map((x) => x.join(','))
             .join(',')
-
-
 
       return new Blob([stringified], { type: 'text/csv' })
     }
 
     case ExportFormat.ColonSeparated: {
-      const textBlob = hashes.map((x) =>
-        hasUsernames ?  `${x.username}:${x.input_hash}:${hexToString(x.plaintext_hex)}` :  `${x.input_hash}:${hexToString(x.plaintext_hex)}`
-      ).join('\n')
+      const textBlob = hashes
+        .map((x) =>
+          hasUsernames ? `${x.username}:${x.input_hash}:${hexToString(x.plaintext_hex)}` : `${x.input_hash}:${hexToString(x.plaintext_hex)}`
+        )
+        .join('\n')
       return new Blob([textBlob], { type: 'text/plain' })
     }
   }

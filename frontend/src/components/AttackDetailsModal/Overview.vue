@@ -16,7 +16,7 @@ import type { AttackWithJobsDTO } from '@/api/types'
 import { useAgentsStore } from '@/stores/agents'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import { timeBetween, timeDurationToReadable } from '@/util/units'
-import { timeSince } from '@/util/units'
+import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
 
 import { computed } from 'vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
@@ -132,7 +132,7 @@ async function onDeleteAttack() {
           <div class="badge badge-ghost mr-1" v-else>Unknown state</div>
         </td>
         <td>{{ hashrateStr(job.runtime_summary.hashrate) }}</td>
-        <td>{{ timeSince(job.runtime_summary.started_time * 1000) }}</td>
+        <td><TimeSinceDisplay :timestamp="job.runtime_summary.started_time * 1000" /></td>
 
         <td v-if="job.runtime_summary.estimated_time_remaining > 0">
           {{ timeDurationToReadable(job.runtime_summary.estimated_time_remaining) }}

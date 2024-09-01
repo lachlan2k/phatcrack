@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import IconButton from '@/components/IconButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
 
-import { timeSince } from '@/util/units'
 import { useProjectsStore } from '@/stores/projects'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
@@ -83,7 +83,9 @@ const quantityStr = (num: number, str: string) => {
                       {{ usersStore.byId(project.owner_user_id)?.username ?? 'Unknown user' }}
                     </span>
                   </td>
-                  <td class="cursor-pointer" @click="navigate">{{ timeSince(project.time_created * 1000) }}</td>
+                  <td class="cursor-pointer" @click="navigate">
+                    <TimeSinceDisplay :timestamp="project.time_created * 1000" />
+                  </td>
                   <td class="w-0 text-center">
                     <ConfirmModal @on-confirm="() => onDeleteProject(project.id)">
                       <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
