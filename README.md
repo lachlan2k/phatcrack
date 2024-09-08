@@ -18,7 +18,7 @@ Docker is the only supported deployment method for the server. The following ins
 
 ```sh
 # Ideally the container processes should be run rootless, so we'll create an unprivileged user.
-adduser --system --home /opt/phatcrack-server phatcrack-server
+adduser --system --create-home --home /opt/phatcrack-server phatcrack-server
 
 cd /opt/phatcrack-server
 
@@ -56,7 +56,7 @@ On each agent, you can manually set up the agent as follows:
 
 ```sh
 # Create a user for the phatcrack agent
-adduser --system --home /opt/phatcrack-agent phatcrack-agent
+adduser --system --create-home --home /opt/phatcrack-agent phatcrack-agent
 
 # Depending on your distro, you may need to the phatcrack-agent to a group
 usermod -aG video phatcrack-agent
