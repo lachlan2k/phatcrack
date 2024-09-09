@@ -7,6 +7,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/util"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
+	log "github.com/sirupsen/logrus"
 )
 
 func HookPotfileEndpoints(api *echo.Group) {
@@ -18,6 +19,10 @@ func handlePotfileSearch(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	AuditLog(c, log.Fields{
+		"num_hashes": len(req.Hashes),
+	}, "User is performing a hash search")
 
 	results, err := db.SearchPotfile(req.Hashes)
 	if err != nil {
