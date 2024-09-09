@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   frontend:
     image: ghcr.io/lachlan2k/phatcrack/frontend:latest

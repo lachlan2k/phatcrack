@@ -3,6 +3,8 @@ package db
 import (
 	"database/sql/driver"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,6 +14,7 @@ import (
 	"gorm.io/driver/postgres"
 
 	"gorm.io/gorm"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 // Same as gorm default, except uses uuid instead of uint
@@ -43,8 +46,17 @@ var dbInstance *gorm.DB = nil
 var ErrNotFound = gorm.ErrRecordNotFound
 
 func Connect(dsn string) error {
+	l := gormlogger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), gormlogger.Config{
+		SlowThreshold:             time.Second,
+		LogLevel:                  gormlogger.Warn,
+		IgnoreRecordNotFoundError: true,
+		Colorful:                  true,
+	})
+
 	var err error
-	dbInstance, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	dbInstance, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: l,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to connect to db: %w", err)
 	}
