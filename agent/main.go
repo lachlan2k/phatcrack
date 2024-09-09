@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"log"
@@ -19,7 +20,13 @@ func main() {
 	}
 
 	configPath := flag.String("config", "/opt/phatcrack-agent/config.json", "Location of config file")
+	versionP := flag.Bool("version", false, "Print version")
 	flag.Parse()
+
+	if *versionP {
+		fmt.Printf("Phatcrack Agent version %s", version.Version())
+		return
+	}
 
 	conf := config.LoadConfig(*configPath)
 
