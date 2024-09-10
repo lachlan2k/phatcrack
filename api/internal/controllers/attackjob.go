@@ -121,7 +121,7 @@ func handleAttacksAndJobsForHashlist(c echo.Context) error {
 	for i, attack := range attacks {
 		attackDTOs[i].AttackDTO = attack.ToDTO()
 
-		jobs, err := db.GetJobsForAttack(attack.ID.String(), c.QueryParams().Has("includeRuntimeData"))
+		jobs, err := db.GetJobsForAttack(attack.ID.String(), c.QueryParams().Has("includeRuntimeData"), false)
 		if err != nil {
 			return util.ServerError("Failed to get job for an attack", err)
 		}

@@ -140,7 +140,7 @@ func handleDeleteAttack(c echo.Context) error {
 		"attack_id":    attackId,
 	}, "User deleted attack")
 
-	jobsToStop, err := db.GetJobsForAttack(attackId, false)
+	jobsToStop, err := db.GetJobsForAttack(attackId, false, false)
 	if err != nil {
 		return util.ServerError("Failed to get jobs to stop", err)
 	}
@@ -185,7 +185,7 @@ func handleAttackStopAllJobs(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	jobs, err := db.GetJobsForAttack(attackId, false)
+	jobs, err := db.GetJobsForAttack(attackId, false, false)
 	if err != nil {
 		return util.ServerError("Failed to get jobs for attack", err)
 	}
@@ -224,7 +224,7 @@ func handleAttackJobGetAll(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	jobs, err := db.GetJobsForAttack(attackId, c.QueryParams().Has("includeRuntimeData"))
+	jobs, err := db.GetJobsForAttack(attackId, c.QueryParams().Has("includeRuntimeData"), false)
 	if err != nil {
 		return util.ServerError("Failed to get jobs for attack", err)
 	}

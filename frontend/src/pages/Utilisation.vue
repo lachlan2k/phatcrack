@@ -1,34 +1,23 @@
 <script setup lang="ts">
 import { useApi } from '@/composables/useApi'
-import { getJobCountPerUser } from '@/api/project';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { useUsersStore } from '@/stores/users';
-import type { RunningJobCountForUserDTO } from '@/api/types';
+import { getJobCountPerUser } from '@/api/project'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const { data, silentlyRefresh } = useApi(getJobCountPerUser)
-
-const userStore = useUsersStore()
-userStore.load()
 
 let intervalId = ref<number | null>(null)
 
 onMounted(() => {
-    intervalId.value = setInterval(() => silentlyRefresh, 30*1000)
+  intervalId.value = setInterval(() => silentlyRefresh, 30 * 1000)
 })
 
 onBeforeUnmount(() => {
-    if (intervalId.value != null) {
-        clearInterval(intervalId.value)
-    }
+  if (intervalId.value != null) {
+    clearInterval(intervalId.value)
+  }
 })
 
-const enrichRowWithUsername = (x: RunningJobCountForUserDTO) => 
-    ({ username: userStore.byId(x.user_id)?.username ?? 'Unknown User', job_count: x.job_count })
-
-const sortedData = computed(
-    () => (data.value?.result.sort((a, b) => b.job_count - a.job_count) ?? []).map(enrichRowWithUsername)
-)
-
+const sortedData = computed(() => data.value?.result.slice().sort((a, b) => b.job_count - a.job_count) ?? [])
 </script>
 
 <template>

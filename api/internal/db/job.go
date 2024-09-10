@@ -253,7 +253,7 @@ func (jobs RunningJobsForUser) ToDTO() []apitypes.RunningJobForUserDTO {
 }
 
 type RunningJobCountForUser struct {
-	UserID   string
+	Username string
 	JobCount uint
 }
 
@@ -264,7 +264,7 @@ func (l RunningJobCountPerUserList) ToDTO() apitypes.RunningJobCountPerUsersDTO 
 
 	for i := range l {
 		results[i] = apitypes.RunningJobCountForUserDTO{
-			UserID:   l[i].UserID,
+			Username: l[i].Username,
 			JobCount: l[i].JobCount,
 		}
 	}
@@ -279,7 +279,7 @@ func GetRunningJobCountPerUser() (RunningJobCountPerUserList, error) {
 
 	err := GetInstance().
 		Table("job_runtime_data").
-		Select("users.id as user_id, count(jobs.id) as job_count").
+		Select("users.username as username, count(jobs.id) as job_count").
 		Joins("join jobs on jobs.id = job_runtime_data.job_id").
 		Joins("join attacks on attacks.id = jobs.attack_id").
 		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
@@ -563,16 +563,20 @@ func GetJobHashtype(jobId string) (uint, error) {
 	return result.HashType, nil
 }
 
-func GetJobsForAttack(attackId string, includeRuntimeData bool) ([]Job, error) {
+func GetJobsForAttack(attackId string, includeRuntimeData bool, includeTargetHashes bool) ([]Job, error) {
 	jobs := []Job{}
 
-	inst := GetInstance()
+	query := GetInstance().Debug()
+
 	if includeRuntimeData {
-		inst = inst.Preload("RuntimeData")
+		query = query.Preload("RuntimeData")
 	}
 
-	err := inst.
-		Select("distinct on (jobs.id) jobs.*").
+	if !includeTargetHashes {
+		query = query.Omit("TargetHashes")
+	}
+
+	err := query.
 		Where("jobs.attack_id = ?", attackId).
 		Find(&jobs).Error
 

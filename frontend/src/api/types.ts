@@ -471,7 +471,7 @@ export interface RunningJobsForUserResponseDTO {
   jobs: RunningJobForUserDTO[]
 }
 export interface RunningJobCountForUserDTO {
-  user_id: string
+  username: string
   job_count: number
 }
 export interface RunningJobCountPerUsersDTO {
