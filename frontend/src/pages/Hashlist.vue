@@ -104,12 +104,14 @@ const filteredHashes = computed(() => {
     return arr
   }
 
+  const searchTerm = filterText.value.trim().toLowerCase()
+
   return arr.filter(
     (x) =>
-      x.username.toLowerCase().includes(filterText.value) ||
-      decodeHex(x.plaintext_hex).toLowerCase().includes(filterText.value) ||
-      x.input_hash.toLowerCase().includes(filterText.value) ||
-      x.normalized_hash.toLowerCase().includes(filterText.value)
+      x.username.toLowerCase().includes(searchTerm) ||
+      decodeHex(x.plaintext_hex).toLowerCase().includes(searchTerm) ||
+      x.input_hash.toLowerCase().includes(searchTerm) ||
+      x.normalized_hash.toLowerCase().includes(searchTerm)
   )
 })
 
