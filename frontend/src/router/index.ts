@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DefaultLayout from '@/layouts/default.vue'
 
-function withDefaultLayout(component: () => any) {
+function withDefaultLayout(component: () => any, name: string) {
   return {
     component: DefaultLayout,
-    children: [{ path: '', component }]
+    children: [{ path: '', name: `${name} Layout`, component }]
   }
 }
 
@@ -12,7 +12,7 @@ function route(path: string, name: string, component: () => any) {
   return {
     path,
     name,
-    ...withDefaultLayout(component)
+    ...withDefaultLayout(component, name)
   }
 }
 
@@ -47,6 +47,8 @@ const router = createRouter({
     route('/wizard', 'Wizard', () => import('@/pages/Wizard.vue')),
 
     route('/account', 'Account', () => import('@/pages/Account.vue')),
+
+    route('/utilisation', 'Utilisation', () => import('@/pages/Utilisation.vue')),
 
     route('/admin/general', 'General Settings', () => import('@/pages/admin/Configuration.vue')),
     route('/admin/users', 'User Management', () => import('@/pages/admin/Users.vue')),

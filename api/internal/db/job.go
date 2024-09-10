@@ -284,7 +284,8 @@ func GetRunningJobCountPerUser() (RunningJobCountPerUserList, error) {
 		Joins("join attacks on attacks.id = jobs.attack_id").
 		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
 		Joins("join projects on projects.id = hashlists.project_id").
-		Joins("join users on users.id = projects.ownwer_user_id").
+		Joins("join users on users.id = projects.owner_user_id").
+		Group("users.id").
 		Where("job_runtime_data.status = ?", JobStatusStarted).
 		Scan(&results).Error
 

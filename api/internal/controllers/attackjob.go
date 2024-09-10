@@ -31,7 +31,7 @@ func HookJobEndpoints(api *echo.Group) {
 			Jobs: jobs.ToDTO(),
 		})
 	})
-	api.GET("/count-per-user", func(c echo.Context) error {
+	api.GET("/running-count-per-user", func(c echo.Context) error {
 		counts, err := db.GetRunningJobCountPerUser()
 		if err != nil {
 			return util.ServerError("Failed to load job count per user", err)

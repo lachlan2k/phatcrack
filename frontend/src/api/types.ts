@@ -470,6 +470,13 @@ export interface RunningJobForUserDTO {
 export interface RunningJobsForUserResponseDTO {
   jobs: RunningJobForUserDTO[]
 }
+export interface RunningJobCountForUserDTO {
+  user_id: string
+  job_count: number
+}
+export interface RunningJobCountPerUsersDTO {
+  result: RunningJobCountForUserDTO[]
+}
 export interface ListfileDTO {
   id: string
   file_type: string

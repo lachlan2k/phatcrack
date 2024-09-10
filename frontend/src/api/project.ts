@@ -11,6 +11,7 @@ import type {
   HashlistResponseMultipleDTO,
   ProjectAddShareRequestDTO,
   ProjectSharesDTO,
+  RunningJobCountPerUsersDTO,
   RunningJobsForUserResponseDTO
 } from './types'
 import type { AttackCreateRequestDTO } from './types'
@@ -111,6 +112,10 @@ export function getAttacksInitialising(): Promise<AttackIDTreeMultipleDTO> {
 
 export function getRunningJobs(): Promise<RunningJobsForUserResponseDTO> {
   return client.get('/api/v1/job/all-running').then((res) => res.data)
+}
+
+export function getJobCountPerUser(): Promise<RunningJobCountPerUsersDTO> {
+  return client.get('/api/v1/job/running-count-per-user').then((res) => res.data)
 }
 
 export const JobStatusCreated = 'JobStatus-Created'
