@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -249,6 +250,52 @@ func (jobs RunningJobsForUser) ToDTO() []apitypes.RunningJobForUserDTO {
 		out[i] = job.ToDTO()
 	}
 	return out
+}
+
+type RunningJobCountForUser struct {
+	UserID   string
+	JobCount uint
+}
+
+type RunningJobCountPerUserList []RunningJobCountForUser
+
+func (l RunningJobCountPerUserList) ToDTO() apitypes.RunningJobCountPerUsersDTO {
+	results := make([]apitypes.RunningJobCountForUserDTO, len(l))
+
+	for i := range l {
+		results[i] = apitypes.RunningJobCountForUserDTO{
+			UserID:   l[i].UserID,
+			JobCount: l[i].JobCount,
+		}
+	}
+
+	return apitypes.RunningJobCountPerUsersDTO{
+		Result: results,
+	}
+}
+
+func GetRunningJobCountPerUser() (RunningJobCountPerUserList, error) {
+	results := []RunningJobCountForUser{}
+
+	err := GetInstance().
+		Table("job_runtime_data").
+		Select("users.id as user_id, count(jobs.id) as job_count").
+		Joins("join jobs on jobs.id = job_runtime_data.job_id").
+		Joins("join attacks on attacks.id = jobs.attack_id").
+		Joins("join hashlists on hashlists.id = attacks.hashlist_id").
+		Joins("join projects on projects.id = hashlists.project_id").
+		Joins("join users on users.id = projects.ownwer_user_id").
+		Where("job_runtime_data.status = ?", JobStatusStarted).
+		Scan(&results).Error
+
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return []RunningJobCountForUser{}, nil
+		}
+		return nil, err
+	}
+
+	return results, nil
 }
 
 func GetAllRunningJobsForUser(user *User) (RunningJobsForUser, error) {

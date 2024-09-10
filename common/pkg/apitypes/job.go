@@ -83,3 +83,12 @@ type RunningJobForUserDTO struct {
 type RunningJobsForUserResponseDTO struct {
 	Jobs []RunningJobForUserDTO `json:"jobs"`
 }
+
+type RunningJobCountForUserDTO struct {
+	UserID   string `json:"user_id"`
+	JobCount uint   `json:"job_count"`
+}
+
+type RunningJobCountPerUsersDTO struct {
+	Result []RunningJobCountForUserDTO `json:"result"`
+}
