@@ -46,7 +46,7 @@ adduser --system --create-home --home /opt/phatcrack-server phatcrack-server
 cd /opt/phatcrack-server
 
 echo "Downloading docker-compose.yml..."
-wget -q https://github.com/lachlan2k/phatcrack/releases/download/v0.5.1/docker-compose.yml
+wget -q https://github.com/lachlan2k/phatcrack/releases/download/v0.5.2/docker-compose.yml
 
 
 read -p "What DNS hostname will resolve to your Phatcrack instance (leave blank for anything)?: " server_hostname
