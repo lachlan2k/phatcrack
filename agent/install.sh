@@ -45,7 +45,7 @@ download_file() {
 }
 
 echo "Adding phatcrack-agent user..."
-adduser --system --create-home --home /opt/phatcrack-agent phatcrack-agent || true
+useradd --system --create-home --home-dir /opt/phatcrack-agent phatcrack-agent || true
 
 echo "Adding phatcrack-agent user to video group (might error if it doesn't exist)"
 usermod -aG video phatcrack-agent || true

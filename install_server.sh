@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -xe
+set -e
 
 is_yes() {
     [[ "$1" =~ ^([yY][eE][sS]|[yY])$ ]]
@@ -41,7 +41,7 @@ else
 fi
 
 echo "Creating phatcrack-server user..."
-adduser --system --create-home --home /opt/phatcrack-server phatcrack-server
+useradd --system --create-home --home-dir /opt/phatcrack-server phatcrack-server
 
 cd /opt/phatcrack-server
 
@@ -56,7 +56,7 @@ if [ "$server_hostname" == "" ]; then
     echo "TLS_OPTS=tls internal" >> .env
 
 else
-
+    echo "HOST_NAME=$server_hostname" >> .env
     read -p "Would you like to use self-signed certificates? (yes/no): " use_self_signed
     if is_yes "$use_self_signed"; then
         echo "TLS_OPTS=tls internal" >> .env
