@@ -24,7 +24,22 @@ if ! command -v docker &>/dev/null; then
 
     if is_yes "$install_docker"; then
         echo "Installing Docker..."
-        curl -fsSL https://get.docker.com | bash
+
+        case "$(. /etc/os-release && echo "$ID")" in
+
+            # EL-derivatvie distros not supported by get.docker.com
+            rocky|almalinux)
+                sudo yum install -y yum-utils
+                sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+                sudo yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            ;;
+            
+            *)
+                curl -fsSL https://get.docker.com | bash
+            ;;
+
+        esac
+
         if ! command -v docker &>/dev/null; then
             echo "Docker installation failed. Exiting..."
             exit 1
@@ -46,14 +61,14 @@ useradd --system --create-home --home-dir /opt/phatcrack-server phatcrack-server
 cd /opt/phatcrack-server
 
 echo "Downloading docker-compose.yml..."
-wget -q https://github.com/lachlan2k/phatcrack/releases/download/v0.5.2/docker-compose.yml
+curl -qLO https://github.com/lachlan2k/phatcrack/releases/download/v0.5.2/docker-compose.yml
 
 
 read -p "What DNS hostname will resolve to your Phatcrack instance (leave blank for anything)?: " server_hostname
 if [ "$server_hostname" == "" ]; then
 
-    echo "HOST_NAME=*:443" >> .env
-    echo "TLS_OPTS=tls internal" >> .env
+    echo "HOST_NAME=:443" >> .env
+    echo "TLS_OPTS=\"tls internal {\\non_demand\\n}\"" >> .env
 
 else
     echo "HOST_NAME=$server_hostname" >> .env
@@ -65,7 +80,7 @@ else
 
         if is_yes "$provide_certs"; then
             mkdir ./certs
-            sed -i '/^\s*# - \.\/certs:\/etc\/caddy\/Certs:ro/s/^# //' compose.yml
+            sed -i '/^\s*# - \.\/certs:\/etc\/caddy\/Certs:ro/s/^# //' docker-compose.yml
             echo "TLS_OPTS=tls /etc/caddy/certs/cert.pem /etc/caddy/certs/key.pem" >> .env
 
             echo "Please provide your certificates files cert.pem and key.pem in /opt/phatcrack-server/certs/"
