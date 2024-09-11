@@ -566,7 +566,7 @@ func GetJobHashtype(jobId string) (uint, error) {
 func GetJobsForAttack(attackId string, includeRuntimeData bool, includeTargetHashes bool) ([]Job, error) {
 	jobs := []Job{}
 
-	query := GetInstance().Debug()
+	query := GetInstance()
 
 	if includeRuntimeData {
 		query = query.Preload("RuntimeData")
