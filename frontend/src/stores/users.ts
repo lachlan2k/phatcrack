@@ -14,7 +14,7 @@ export const useUsersStore = defineStore({
     ({
       users: [],
       isLoading: false
-    } as UsersState),
+    }) as UsersState,
 
   actions: {
     async load(forceRefetch: boolean = false) {

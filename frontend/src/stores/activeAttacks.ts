@@ -16,7 +16,7 @@ export const useActiveAttacksStore = defineStore({
       jobs: [],
       initialisingAttacks: [],
       loading: false
-    } as ActiveAttacksStore),
+    }) as ActiveAttacksStore,
 
   actions: {
     async load() {

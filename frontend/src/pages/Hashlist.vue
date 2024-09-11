@@ -41,7 +41,7 @@ const {
   silentlyRefresh: refreshAttack
 } = useApi(() => getAttacksWithJobsForHashlist(hashlistId))
 
-const intervalId = ref(0)
+const intervalId = ref<number | null>(null)
 
 async function intervalLoop() {
   await Promise.all([refreshAttack(), refreshHashlist()])
@@ -53,7 +53,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearInterval(intervalId.value)
+  if (intervalId.value != null) clearInterval(intervalId.value)
 })
 
 const resources = useResourcesStore()

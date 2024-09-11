@@ -14,7 +14,7 @@ export const useProjectsStore = defineStore({
     ({
       projects: [],
       isLoading: false
-    } as ProjectsState),
+    }) as ProjectsState,
 
   actions: {
     async load(forceRefetch: boolean = false) {

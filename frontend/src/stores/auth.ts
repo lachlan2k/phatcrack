@@ -26,7 +26,7 @@ export const useAuthStore = defineStore({
       hasTriedAuth: false,
       hasLoggedOut: false,
       isRefreshing: false
-    } as AuthState),
+    }) as AuthState,
 
   actions: {
     async handleOIDCCallback(querystring: string) {

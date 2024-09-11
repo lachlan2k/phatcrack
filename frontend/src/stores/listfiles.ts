@@ -18,7 +18,7 @@ export const useListfilesStore = defineStore({
       projectListfileMap: {},
       projectLoadingMap: {},
       loading: false
-    } as ListfileStore),
+    }) as ListfileStore,
 
   actions: {
     async load(forceRefetch = false) {

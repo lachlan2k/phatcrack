@@ -10,7 +10,7 @@ export type ConfigStore = {
 export const useAdminConfigStore = defineStore({
   id: 'admin-config-store',
 
-  state: () => ({ config: null, loadingCount: 0 } as ConfigStore),
+  state: () => ({ config: null, loadingCount: 0 }) as ConfigStore,
 
   actions: {
     async load() {

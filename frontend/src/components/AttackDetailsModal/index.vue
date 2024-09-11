@@ -67,7 +67,7 @@ const logLines = computed<string>(() => {
     <Overview
       :attack="attack"
       v-if="selectedJob == null"
-      @selectJob="(jobId: string) => selectedJobID = jobId"
+      @selectJob="(jobId: string) => (selectedJobID = jobId)"
       @closed="
         () => {
           isOpen = false

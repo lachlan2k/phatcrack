@@ -14,7 +14,7 @@ export const useAgentsStore = defineStore({
     ({
       agents: [],
       loading: false
-    } as AgentsStore),
+    }) as AgentsStore,
 
   actions: {
     async load(forceRefetch = false) {
