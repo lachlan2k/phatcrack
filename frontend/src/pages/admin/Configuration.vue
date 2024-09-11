@@ -21,19 +21,19 @@ const ComponentToRender = computed(() => tabs[activeTab.value].component)
       <div class="card min-w-[600px] bg-base-100 shadow-xl">
         <div class="card-body justify-between">
           <div class="tabs tabs-bordered">
-            <a class="tab tab-bordered grow">
+            <a class="tab-bordered tab grow">
               <span></span>
             </a>
             <a
               v-for="(tab, i) in tabs"
               :key="i"
-              class="tab tab-bordered"
+              class="tab-bordered tab"
               :class="activeTab == i ? 'tab-active' : ''"
               @click="activeTab = i"
             >
               <span class="mx-2"> <font-awesome-icon :icon="'fa-solid ' + tab.icon" class="mr-2" />{{ tab.name }} </span>
             </a>
-            <a class="tab tab-bordered grow">
+            <a class="tab-bordered tab grow">
               <span></span>
             </a>
           </div>
