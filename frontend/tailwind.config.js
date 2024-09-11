@@ -8,7 +8,7 @@ module.exports = {
       },
     },
   },
-  plugins: [require('daisyui'), require('@tailwindcss/typography'), require('prettier-plugin-tailwindcss')],
+  plugins: [require('daisyui'), require('@tailwindcss/typography')],
   daisyui: {
     themes: [{
       corporate: {
