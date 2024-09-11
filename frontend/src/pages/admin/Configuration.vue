@@ -20,7 +20,7 @@ const ComponentToRender = computed(() => tabs[activeTab.value].component)
     <div class="mt-6 flex flex-wrap gap-6">
       <div class="card min-w-[600px] bg-base-100 shadow-xl">
         <div class="card-body justify-between">
-          <div class="tabs justify-center">
+          <div class="tabs tabs-bordered">
             <a class="tab tab-bordered grow">
               <span></span>
             </a>

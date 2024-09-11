@@ -92,10 +92,10 @@ async function logout() {
         <ul class="menu justify-self-end">
           <li class="hover-bordered" :class="route.path.startsWith('/admin') ? 'bordered' : 'hover-bordered'" v-if="isAdmin">
             <div class="text-content-neutral dropdown dropdown-top">
-                <label tabindex="0" class="w-full cursor-pointer col-span-2">
-                  <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
-                  <span>Admin Tools</span>
-                </label>
+              <label tabindex="0" class="col-span-2 w-full cursor-pointer">
+                <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
+                <span>Admin Tools</span>
+              </label>
 
               <ul tabindex="0" class="menu dropdown-content rounded-box mb-2 w-52 bg-base-100 p-2 pb-4 text-black shadow">
                 <li v-for="link in adminPageLinks" :key="link.name">
@@ -110,7 +110,7 @@ async function logout() {
 
           <li class="hover-bordered" :class="route.path == '/account' ? 'bordered' : 'hover-bordered'">
             <div class="text-content-neutral dropdown dropdown-top">
-              <label tabindex="0" class="w-full cursor-pointer col-span-2">
+              <label tabindex="0" class="col-span-2 w-full cursor-pointer">
                 <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-user" /></span>
                 <span
                   >Welcome, <strong>{{ loggedInUser?.username }}</strong></span

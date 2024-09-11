@@ -19,3 +19,7 @@
 table.table-first-col-bold tr > td:first-of-type {
   font-weight: bold;
 }
+
+.btn {
+  text-transform: uppercase;
+}
