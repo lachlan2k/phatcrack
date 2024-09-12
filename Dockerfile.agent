@@ -1,5 +1,5 @@
 # This Dockerfile builds and serves the agent
-FROM golang:1.21 AS builder
+FROM golang:1.23 AS builder
 
 COPY agent /app/agent
 COPY common /app/common
