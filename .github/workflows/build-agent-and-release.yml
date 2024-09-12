@@ -61,7 +61,7 @@ jobs:
         asset_content_type: application/octet-stream
 
     # Replace :latest with specific version tag for release
-    - run: sed -i 's/:latest/:${{ steps.get_version.outputs.version }}/' docker-compose.prod.yml
+    - run: sed -i 's/:-latest/:-${{ steps.get_version.outputs.version }}/' docker-compose.prod.yml
     
     - name: Upload Docker Compose as Release Asset
       if: github.event_name != 'pull_request'
@@ -74,3 +74,15 @@ jobs:
         asset_path: ./docker-compose.prod.yml
         asset_name: docker-compose.yml
         asset_content_type: application/x-yaml
+
+    - name: Upload all-in-one install script as Release Asset
+      if: github.event_name != 'pull_request'
+      id: upload-install-script-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./install_server.sh
+        asset_name: install_server.sh
+        asset_content_type: text/x-shellscript

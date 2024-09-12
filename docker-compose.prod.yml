@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: ghcr.io/lachlan2k/phatcrack/frontend:latest
+    image: ghcr.io/lachlan2k/phatcrack/frontend:${PHATCRACK_VERSION_TAG:-latest}
     restart: unless-stopped
     environment:
       - TLS_OPTS
@@ -14,7 +14,7 @@ services:
       # - ./certs:/etc/caddy/Certs:ro
 
   api:
-    image: ghcr.io/lachlan2k/phatcrack/api:latest
+    image: ghcr.io/lachlan2k/phatcrack/api:${PHATCRACK_VERSION_TAG:-latest}
     restart: unless-stopped
     depends_on:
       db:
@@ -43,7 +43,7 @@ services:
 
   # Optional: just a local server for the agent binary
   agent-server:
-    image: ghcr.io/lachlan2k/phatcrack/agent-server:latest
+    image: ghcr.io/lachlan2k/phatcrack/agent-server:${PHATCRACK_VERSION_TAG:-latest}
     restart: unless-stopped
 
 volumes:
