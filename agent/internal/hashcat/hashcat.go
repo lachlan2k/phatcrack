@@ -90,6 +90,11 @@ func (params HashcatParams) maskArgs() ([]string, error) {
 
 	args := []string{}
 
+	if len(params.MaskCustomCharsets) > 0 || params.MaskShardedCharset != "" {
+		// This allows us to pass nullbytes etc
+		args = append(args, "--hex-charset")
+	}
+
 	for i, charset := range params.MaskCustomCharsets {
 		// Hashcat accepts paramters --custom-charset1 to --custom-charset4
 		args = append(args, fmt.Sprintf("--custom-charset%d", i+1), charset)

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"time"
@@ -347,6 +348,11 @@ func handleAttackCreate(c echo.Context) error {
 
 	// Enforce correct hashtype
 	req.HashcatParams.HashType = uint(hashlist.HashType)
+
+	// hexlify mask custom charactersets
+	for i := range req.HashcatParams.MaskCustomCharsets {
+		req.HashcatParams.MaskCustomCharsets[i] = hex.EncodeToString([]byte(req.HashcatParams.MaskCustomCharsets[i]))
+	}
 
 	hashcatParams := datatypes.NewJSONType(req.HashcatParams)
 

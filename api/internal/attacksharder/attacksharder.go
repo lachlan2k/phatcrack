@@ -1,6 +1,7 @@
 package attacksharder
 
 import (
+	"encoding/hex"
 	"fmt"
 
 	"github.com/lachlan2k/phatcrack/api/internal/db"
@@ -122,7 +123,7 @@ func shardMaskAttack(attack *db.Attack, numJobs int) ([]*db.Job, *db.Hashlist, e
 
 	err = db.GetInstance().Transaction(func(tx *gorm.DB) error {
 		for i := 0; i < numJobs; i++ {
-			params.MaskShardedCharset = string(shardedCharsets[i])
+			params.MaskShardedCharset = hex.EncodeToString(shardedCharsets[i])
 
 			dbJob, err := db.CreateJobTx(&db.Job{
 				HashlistVersion: hashlist.Version,
