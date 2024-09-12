@@ -23,3 +23,7 @@ table.table-first-col-bold tr > td:first-of-type {
 .btn {
   text-transform: uppercase;
 }
+
+.btn.normal-case {
+  text-transform: none;
+}
