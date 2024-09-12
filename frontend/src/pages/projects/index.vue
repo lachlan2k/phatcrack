@@ -67,13 +67,13 @@ const quantityStr = (num: number, str: string) => {
                   <td class="cursor-pointer" @click="navigate">
                     {{ project.name }}
                     <div
-                      class="badge badge-neutral float-right my-1 mr-1 whitespace-nowrap font-normal"
+                      class="badge badge-neutral float-right mr-1 whitespace-nowrap font-normal"
                       v-if="activeAttacksStore.initialisingAttacksForProject(project.id).length > 0"
                     >
                       {{ quantityStr(activeAttacksStore.initialisingAttacksForProject(project.id).length, 'attack') }} processing
                     </div>
                     <div
-                      class="badge badge-info float-right my-1 mr-1 whitespace-nowrap font-normal"
+                      class="badge badge-info float-right mr-1 whitespace-nowrap font-normal"
                       v-if="activeAttacksStore.jobsForProject(project.id).length > 0"
                     >
                       {{ quantityStr(activeAttacksStore.jobsForProject(project.id).length, 'job') }} running

@@ -159,13 +159,13 @@ const quantityStr = (num: number, str: string) => {
                     <td @click="navigate" class="cursor-pointer">
                       {{ hashlist.name }}
                       <div
-                        class="badge badge-neutral float-right my-1 mr-1 whitespace-nowrap font-normal"
+                        class="badge badge-neutral float-right mr-1 whitespace-nowrap font-normal"
                         v-if="activeAttacksStore.initialisingAttacksForHashlist(hashlist.id).length > 0"
                       >
                         {{ quantityStr(activeAttacksStore.initialisingAttacksForHashlist(hashlist.id).length, 'attack') }} processing
                       </div>
                       <div
-                        class="badge badge-info float-right my-1 mr-1 whitespace-nowrap font-normal"
+                        class="badge badge-info float-right mr-1 whitespace-nowrap font-normal"
                         v-if="activeAttacksStore.jobsForHashlist(hashlist.id).length > 0"
                       >
                         {{ quantityStr(activeAttacksStore.jobsForHashlist(hashlist.id).length, 'job') }} running
