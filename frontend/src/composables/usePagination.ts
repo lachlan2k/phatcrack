@@ -30,10 +30,8 @@ export function usePagination<ItemT>(items: Ref<ItemT[]>, itemsPerPage: number) 
   return {
     next,
     prev,
-    ...toRefs({
-      activePage,
-      totalPages,
-      currentItems
-    })
+    activePage,
+    totalPages,
+    currentItems
   }
 }
