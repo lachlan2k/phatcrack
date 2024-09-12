@@ -1,4 +1,4 @@
-FROM golang:1.21
+FROM golang:1.23
 
 RUN apt-get update -y
 RUN apt-get upgrade -y
@@ -11,7 +11,7 @@ RUN 7z x hashcat.7z
 
 WORKDIR /app
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 
 WORKDIR /app/phatcrack/api
 
