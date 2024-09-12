@@ -30,10 +30,10 @@ async function doSearch() {
   }
 }
 
-const resources = useResourcesStore()
+const resourcesStore = useResourcesStore()
 
-const { getHashTypeName } = storeToRefs(resources)
-resources.loadHashTypes()
+const { getHashTypeName } = storeToRefs(resourcesStore)
+resourcesStore.loadHashTypes()
 </script>
 
 <template>

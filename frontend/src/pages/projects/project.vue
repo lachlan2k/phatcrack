@@ -38,10 +38,10 @@ const { data: hashlistData, isLoading: isLoadingHashlists, fetchData: fetchHashl
 const isShareModalOpen = ref(false)
 const isWizardOpen = ref(false)
 
-const resources = useResourcesStore()
+const resourcesStore = useResourcesStore()
 
-const { getHashTypeName, isHashTypesLoaded } = storeToRefs(resources)
-resources.loadHashTypes()
+const { getHashTypeName, isHashTypesLoaded } = storeToRefs(resourcesStore)
+resourcesStore.loadHashTypes()
 
 const isLoading = computed(() => {
   return isLoadingProject.value || isLoadingHashlists.value || !isHashTypesLoaded.value

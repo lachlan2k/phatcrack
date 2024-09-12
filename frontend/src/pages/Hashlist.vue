@@ -56,10 +56,10 @@ onBeforeUnmount(() => {
   if (intervalId.value != null) clearInterval(intervalId.value)
 })
 
-const resources = useResourcesStore()
+const resourcesStore = useResourcesStore()
 
-const { getHashTypeName, isHashTypesLoaded } = storeToRefs(resources)
-resources.loadHashTypes()
+const { getHashTypeName, isHashTypesLoaded } = storeToRefs(resourcesStore)
+resourcesStore.loadHashTypes()
 
 const projectStore = useProjectsStore()
 projectStore.load(true)

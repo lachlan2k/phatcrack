@@ -66,7 +66,7 @@ const projectSelectOptions = computed(() => [
 
 const listfileStore = useListfilesStore()
 listfileStore.load(true)
-const { wordlists, rulefiles } = listfileStore
+const { wordlists, rulefiles } = storeToRefs(listfileStore)
 
 const steps = [
   { name: 'Choose or Create Project' },
