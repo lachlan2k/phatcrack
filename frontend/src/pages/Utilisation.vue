@@ -2,6 +2,7 @@
 import { useApi } from '@/composables/useApi'
 import { getJobCountPerUser } from '@/api/project'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import EmptyTable from '@/components/EmptyTable.vue';
 
 const { data, silentlyRefresh } = useApi(getJobCountPerUser)
 
@@ -44,6 +45,7 @@ const sortedData = computed(() => data.value?.result.slice().sort((a, b) => b.jo
               </tr>
             </tbody>
           </table>
+          <EmptyTable v-if="sortedData.length == 0" text="No Jobs Running" icon="fa-bars-progress" />
         </div>
       </div>
     </div>

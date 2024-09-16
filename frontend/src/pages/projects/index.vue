@@ -2,6 +2,7 @@
 import IconButton from '@/components/IconButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
+import EmptyTable from '@/components/EmptyTable.vue'
 
 import { useProjectsStore } from '@/stores/projects'
 import { storeToRefs } from 'pinia'
@@ -95,6 +96,8 @@ const quantityStr = (num: number, str: string) => {
               </RouterLink>
             </tbody>
           </table>
+          <EmptyTable v-if="projects.length == 0" text="No Projects Yet" icon="fa-folder" />
+
           <p class="mt-2">
             <span class="text-sm text-slate-500"> <font-awesome-icon icon="fa-solid fa-link" /> = Shared </span>
           </p>

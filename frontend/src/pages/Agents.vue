@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import EmptyTable from '@/components/EmptyTable.vue'
 import { storeToRefs } from 'pinia'
 import { useAgentsStore } from '@/stores/agents'
 import { formatDeviceName } from '@/util/formatDeviceName'
@@ -121,6 +122,7 @@ async function toggleMaintenance(agent: AgentDTO) {
               </tr>
             </tbody>
           </table>
+          <EmptyTable v-if="allAgents.length == 0" text="No Agents Yet" icon="fa-robot" />
         </div>
       </div>
     </div>

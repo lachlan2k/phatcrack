@@ -2,6 +2,7 @@
 import IconButton from '@/components/IconButton.vue'
 import Modal from '@/components/Modal.vue'
 import FileUpload from '@/components/FileUpload.vue'
+import EmptyTable from '@/components/EmptyTable.vue'
 
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
@@ -169,6 +170,7 @@ async function onDeleteListfile(listfile: ListfileDTO) {
               </tr>
             </tbody>
           </table>
+          <EmptyTable v-if="listfiles.length == 0" text="No Listfiles Uploaded Yet" icon="fa-file" />
         </div>
       </div>
     </div>
