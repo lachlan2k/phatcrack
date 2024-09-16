@@ -1,6 +1,6 @@
+import { defineStore } from 'pinia'
 import { getAllAgents } from '@/api/agent'
 import type { AgentDTO } from '@/api/types'
-import { defineStore } from 'pinia'
 
 export type AgentsStore = {
   agents: AgentDTO[]

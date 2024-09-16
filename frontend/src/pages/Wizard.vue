@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import JobWizard from '@/components/Wizard/JobWizard.vue'
 import { useRouter } from 'vue-router'
+import JobWizard from '@/components/Wizard/JobWizard.vue'
 
 const router = useRouter()
 

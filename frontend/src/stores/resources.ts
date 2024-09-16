@@ -1,6 +1,6 @@
+import { defineStore } from 'pinia'
 import { loadHashTypes } from '@/api/hashcat'
 import type { HashType } from '@/api/types'
-import { defineStore } from 'pinia'
 
 export type ResourceStore = {
   hashTypes: HashType[]

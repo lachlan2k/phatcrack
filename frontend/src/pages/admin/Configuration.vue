@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import type { Component } from 'vue'
 import AgentConfig from '@/components/Admin/AgentConfig.vue'
 import GeneralConfig from '@/components/Admin/GeneralConfig.vue'
 import AuthConfig from '@/components/Admin/AuthConfig.vue'
-import { computed, ref } from 'vue'
-import type { Component } from 'vue'
 
 const tab = (name: string, icon: string, component: Component) => ({ name, icon, component })
 

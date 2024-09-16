@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import { useToast } from 'vue-toastification'
+import { ref, computed } from 'vue'
+import ConfirmModal from '../ConfirmModal.vue'
 import Modal from '@/components/Modal.vue'
 import IconButton from '@/components/IconButton.vue'
 import { formatDeviceName } from '@/util/formatDeviceName'
 import { adminCreateAgent, adminDeleteAgent } from '@/api/admin'
 import { useApi } from '@/composables/useApi'
-import { useToast } from 'vue-toastification'
-import { ref, computed } from 'vue'
 import { getAllAgents } from '@/api/agent'
 import { useToastError } from '@/composables/useToastError'
-import ConfirmModal from '../ConfirmModal.vue'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
 const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'

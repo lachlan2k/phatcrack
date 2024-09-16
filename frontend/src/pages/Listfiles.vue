@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useToast } from 'vue-toastification'
 import IconButton from '@/components/IconButton.vue'
 import Modal from '@/components/Modal.vue'
 import FileUpload from '@/components/FileUpload.vue'
 import EmptyTable from '@/components/EmptyTable.vue'
 
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { bytesToReadable } from '@/util/units'
 import { useListfilesStore } from '@/stores/listfiles'
 import ConfirmModal from '@/components/ConfirmModal.vue'
@@ -13,7 +14,6 @@ import type { ListfileDTO } from '@/api/types'
 import { useAuthStore } from '@/stores/auth'
 import { useToastError } from '@/composables/useToastError'
 import { deleteListfile, type ListfileTypeT } from '@/api/listfiles'
-import { useToast } from 'vue-toastification'
 import CheckboxSet from '@/components/CheckboxSet.vue'
 
 const listfilesStore = useListfilesStore()

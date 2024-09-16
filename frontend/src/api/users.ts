@@ -1,5 +1,5 @@
-import { client } from '.'
 import type { UsersGetAllResponseDTO } from './types'
+import { client } from '.'
 
 export enum UserRole {
   Standard = 'standard',

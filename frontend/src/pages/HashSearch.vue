@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { searchPotfile } from '@/api/potfile'
 import HashesInput from '@/components/HashesInput.vue'
 import type { PotfileSearchResponseDTO } from '@/api/types'
@@ -7,7 +8,6 @@ import decodeHex from '@/util/decodeHex'
 import { useHashesInput } from '@/composables/useHashesInput'
 import { useToastError } from '@/composables/useToastError'
 import { useResourcesStore } from '@/stores/resources'
-import { storeToRefs } from 'pinia'
 
 const { hashesInput, hashesArr } = useHashesInput()
 

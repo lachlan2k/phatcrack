@@ -1,6 +1,6 @@
+import { defineStore } from 'pinia'
 import type { UserMinimalDTO } from '@/api/types'
 import { getAllUsers } from '@/api/users'
-import { defineStore } from 'pinia'
 
 export type UsersState = {
   users: UserMinimalDTO[]

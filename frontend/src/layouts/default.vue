@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { useConfigStore } from '@/stores/config'
 import { onMounted, ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useConfigStore } from '@/stores/config'
 import { adminGetVersion } from '@/api/admin'
 
 const authStore = useAuthStore()

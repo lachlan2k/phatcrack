@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { accountChangePassword } from '@/api/account'
-import { useToastError } from '@/composables/useToastError'
-import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import { useToast } from 'vue-toastification'
+import { accountChangePassword } from '@/api/account'
+import { useToastError } from '@/composables/useToastError'
+import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 const { loggedInUser } = storeToRefs(authStore)

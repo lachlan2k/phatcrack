@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { timeSince } from '@/util/units'
 import { computed } from 'vue'
+import { timeSince } from '@/util/units'
 
 const props = defineProps<{
   timestamp: number

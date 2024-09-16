@@ -8,7 +8,8 @@ module.exports = {
     'eslint:recommended',
     '@vue/eslint-config-typescript',
     '@vue/eslint-config-prettier/skip-formatting',
-    'plugin:import/recommended'
+    'plugin:import/recommended',
+    'plugin:import/typescript',
   ],
   parserOptions: {
     ecmaVersion: 'latest'
@@ -18,7 +19,8 @@ module.exports = {
     node: true
   },
   rules: {
-    'vue/multi-word-component-names': 0 
+    'vue/multi-word-component-names': 0 ,
+    'import/order': 'error'
   },
   settings: {
     'import/resolver': {

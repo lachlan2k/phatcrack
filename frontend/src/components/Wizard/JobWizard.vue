@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
+import { computed, watch, reactive } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useToast } from 'vue-toastification'
 import HashlistInputs from './HashlistInputs.vue'
-import SearchableDropdown from '@/components/SearchableDropdown.vue'
 import MaskInput from './MaskInput.vue'
+import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
+import SearchableDropdown from '@/components/SearchableDropdown.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import HrOr from '@/components/HrOr.vue'
-import { computed, watch, reactive } from 'vue'
 import { createHashlist, createProject, createAttack, startAttack, getProject, getHashlist } from '@/api/project'
-import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
 import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
-import { useToast } from 'vue-toastification'
 import {
   AttackModeCombinator,
   AttackModeDictionary,

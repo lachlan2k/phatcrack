@@ -1,6 +1,6 @@
+import { defineStore } from 'pinia'
 import { getAttacksInitialising, getRunningJobs } from '@/api/project'
 import type { AttackIDTreeDTO, RunningJobForUserDTO } from '@/api/types'
-import { defineStore } from 'pinia'
 
 export type ActiveAttacksStore = {
   jobs: RunningJobForUserDTO[]

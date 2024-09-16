@@ -1,6 +1,6 @@
+import { defineStore } from 'pinia'
 import { getAllProjects } from '@/api/project'
 import type { ProjectDTO } from '@/api/types'
-import { defineStore } from 'pinia'
 
 export type ProjectsState = {
   projects: ProjectDTO[]

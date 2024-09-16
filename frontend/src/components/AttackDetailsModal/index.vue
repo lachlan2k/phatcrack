@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import Overview from './Overview.vue'
 import {
   JobStatusAwaitingStart,
   JobStatusCreated,
@@ -10,9 +12,7 @@ import {
 
 import Modal from '@/components/Modal.vue'
 
-import Overview from './Overview.vue'
 import type { AttackWithJobsDTO, JobDTO } from '@/api/types'
-import { computed, ref } from 'vue'
 import { useAgentsStore } from '@/stores/agents'
 
 const props = defineProps<{

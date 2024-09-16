@@ -1,4 +1,3 @@
-import { client } from '.'
 import type {
   AdminAgentCreateRequestDTO,
   AdminAgentCreateResponseDTO,
@@ -13,6 +12,7 @@ import type {
   AdminUserUpdateRequestDTO,
   UserDTO
 } from './types'
+import { client } from '.'
 
 export function adminGetAllUsers(): Promise<AdminGetAllUsersResponseDTO> {
   return client.get('/api/v1/admin/user/all').then(res => res.data)

@@ -1,6 +1,6 @@
 import type { AxiosProgressEvent } from 'axios'
-import { client } from '.'
 import type { GetAllListfilesDTO, ListfileDTO } from './types'
+import { client } from '.'
 
 export const LISTFILE_TYPE_WORDLIST = 'Wordlist'
 export const LISTFILE_TYPE_RULEFILE = 'Rulefile'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ListfileDTO } from '@/api/types'
 import { watch } from 'vue'
+import type { ListfileDTO } from '@/api/types'
 
 const props = defineProps<{
   labelText: string

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import EmptyTable from '@/components/EmptyTable.vue'
 import { storeToRefs } from 'pinia'
+import { useToast } from 'vue-toastification'
+import EmptyTable from '@/components/EmptyTable.vue'
 import { useAgentsStore } from '@/stores/agents'
 import { formatDeviceName } from '@/util/formatDeviceName'
 import { adminAgentSetMaintenance } from '@/api/admin'
 import type { AgentDTO } from '@/api/types'
 import { useAuthStore } from '@/stores/auth'
 import { useToastError } from '@/composables/useToastError'
-import { useToast } from 'vue-toastification'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
 const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'

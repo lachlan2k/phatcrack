@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { computed, ref } from 'vue'
+import { useToast } from 'vue-toastification'
 import SearchableDropdown from './SearchableDropdown.vue'
 import IconButton from './IconButton.vue'
 import { addProjectShare, deleteProjectShare, getProjectShares } from '@/api/project'
@@ -6,9 +9,6 @@ import { useApi } from '@/composables/useApi'
 import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
-import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
-import { useToast } from 'vue-toastification'
 import type { UserMinimalDTO } from '@/api/types'
 
 const props = defineProps<{

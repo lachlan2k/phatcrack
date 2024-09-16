@@ -1,6 +1,6 @@
+import { defineStore } from 'pinia'
 import { getAllListfiles, getListfilesForProject, LISTFILE_TYPE_RULEFILE, LISTFILE_TYPE_WORDLIST } from '@/api/listfiles'
 import type { ListfileDTO } from '@/api/types'
-import { defineStore } from 'pinia'
 
 export type ListfileStore = {
   listfiles: ListfileDTO[]

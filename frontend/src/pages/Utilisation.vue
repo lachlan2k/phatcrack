@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useApi } from '@/composables/useApi'
 import { getJobCountPerUser } from '@/api/project'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import EmptyTable from '@/components/EmptyTable.vue'
 
 const { data, silentlyRefresh } = useApi(getJobCountPerUser)

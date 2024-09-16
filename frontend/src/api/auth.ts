@@ -1,4 +1,3 @@
-import { client } from '.'
 import type {
   AuthLoginResponseDTO,
   AuthWhoamiResponseDTO,
@@ -6,6 +5,7 @@ import type {
   AuthWebAuthnStartEnrollmentResponseDTO,
   AuthWebAuthnStartChallengeResponseDTO
 } from './types'
+import { client } from '.'
 
 export function loginWithCredentials(username: string, password: string): Promise<AuthLoginResponseDTO> {
   return client

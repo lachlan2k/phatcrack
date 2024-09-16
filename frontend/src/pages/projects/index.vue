@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useToast } from 'vue-toastification'
 import IconButton from '@/components/IconButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
 import EmptyTable from '@/components/EmptyTable.vue'
 
 import { useProjectsStore } from '@/stores/projects'
-import { storeToRefs } from 'pinia'
-import { useToast } from 'vue-toastification'
 import { useToastError } from '@/composables/useToastError'
 import { deleteProject } from '@/api/project'
 import { useUsersStore } from '@/stores/users'

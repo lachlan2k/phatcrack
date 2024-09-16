@@ -1,7 +1,7 @@
-import { useAuthStore } from '@/stores/auth'
 import axios from 'axios'
 import { reactive, toRefs, type UnwrapRef } from 'vue'
 import { useToastError } from './useToastError'
+import { useAuthStore } from '@/stores/auth'
 
 interface UseAPIState<DTOType> {
   isLoading: boolean

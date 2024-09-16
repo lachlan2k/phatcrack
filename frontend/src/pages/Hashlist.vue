@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useToast } from 'vue-toastification'
 import Modal from '@/components/Modal.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
 
@@ -16,11 +20,8 @@ import {
 import { exportResults, ExportFormat } from '@/util/exportHashlist'
 import { useApi } from '@/composables/useApi'
 import { useResourcesStore } from '@/stores/resources'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
 import decodeHex from '@/util/decodeHex'
 import { usePagination } from '@/composables/usePagination'
-import { storeToRefs } from 'pinia'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import { timeDurationToReadable } from '@/util/units'
 import type { AttackWithJobsDTO } from '@/api/types'
@@ -29,7 +30,6 @@ import AttackDetailsModal from '@/components/AttackDetailsModal/index.vue'
 import { useProjectsStore } from '@/stores/projects'
 import { useHashesInput } from '@/composables/useHashesInput'
 import HashesInput from '@/components/HashesInput.vue'
-import { useToast } from 'vue-toastification'
 import { useToastError } from '@/composables/useToastError'
 
 const hashlistId = useRoute().params.id as string
