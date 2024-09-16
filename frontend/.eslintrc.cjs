@@ -7,7 +7,8 @@ module.exports = {
     'plugin:vue/vue3-essential',
     'eslint:recommended',
     '@vue/eslint-config-typescript',
-    '@vue/eslint-config-prettier/skip-formatting'
+    '@vue/eslint-config-prettier/skip-formatting',
+    'plugin:import/recommended'
   ],
   parserOptions: {
     ecmaVersion: 'latest'
@@ -17,6 +18,11 @@ module.exports = {
     node: true
   },
   rules: {
-    'vue/multi-word-component-names': 0
-  }
+    'vue/multi-word-component-names': 0 
+  },
+  settings: {
+    'import/resolver': {
+      typescript: true
+    },
+  },
 }

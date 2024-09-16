@@ -10,7 +10,8 @@ import {
   JobStopReasonFinished,
   JobStopReasonUserStopped,
   appendToHashlist,
-  getHashlist
+  getHashlist,
+  getAttacksWithJobsForHashlist
 } from '@/api/project'
 import { exportResults, ExportFormat } from '@/util/exportHashlist'
 import { useApi } from '@/composables/useApi'
@@ -23,7 +24,6 @@ import { storeToRefs } from 'pinia'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import { timeDurationToReadable } from '@/util/units'
 import type { AttackWithJobsDTO } from '@/api/types'
-import { getAttacksWithJobsForHashlist } from '@/api/project'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
 import AttackDetailsModal from '@/components/AttackDetailsModal/index.vue'
 import { useProjectsStore } from '@/stores/projects'

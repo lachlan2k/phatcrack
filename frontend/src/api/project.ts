@@ -12,10 +12,8 @@ import type {
   ProjectAddShareRequestDTO,
   ProjectSharesDTO,
   RunningJobCountPerUsersDTO,
-  RunningJobsForUserResponseDTO
-} from './types'
-import type { AttackCreateRequestDTO } from './types'
-import type {
+  RunningJobsForUserResponseDTO,
+  AttackCreateRequestDTO,
   HashlistCreateRequestDTO,
   HashlistCreateResponseDTO,
   ProjectCreateRequestDTO,
