@@ -25,10 +25,11 @@ type AdminAgentRegistrationKeyCreateResponseDTO struct {
 }
 
 type AdminUserCreateRequestDTO struct {
-	Username    string   `json:"username" validate:"required,min=4,max=64,username"`
-	Password    string   `json:"password" validate:"max=128"`
-	GenPassword bool     `json:"gen_password"`
-	Roles       []string `json:"roles" validate:"required,userroles"`
+	Username     string   `json:"username" validate:"required,min=4,max=64,username"`
+	Password     string   `json:"password" validate:"max=128"`
+	GenPassword  bool     `json:"gen_password"`
+	LockPassword bool     `json:"lock_password"`
+	Roles        []string `json:"roles" validate:"required,userroles"`
 }
 
 type AdminUserCreateResponseDTO struct {

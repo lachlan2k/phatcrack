@@ -23,6 +23,7 @@ const { data: allUsers, fetchData: fetchUsers, silentlyRefresh: silentlyFetchUse
 const editInputs = reactive({
   id: '',
   username: '',
+  passwordLocked: false,
   roleMap: {} as { [key: string]: boolean }
 })
 
@@ -94,9 +95,17 @@ const {
 const possibleRoles = [...userSignupRoles]
 
 const newUserUsername = ref('')
+const newUserLockPassword = ref(false)
 const newUserGenPassword = ref(false)
 const newUserPassword = ref('')
 const newUserRole = ref(UserRole.Standard)
+
+watch(newUserLockPassword, (newVal) => {
+  if (newVal === true) {
+    newUserPassword.value = ''
+    newUserGenPassword.value = false
+  }
+})
 
 watch(newUserGenPassword, (newVal) => {
   if (newVal === true) {
@@ -133,6 +142,7 @@ async function onCreateUser() {
     const res = await adminCreateUser({
       username: newUserUsername.value,
       gen_password: genPassword,
+      lock_password: newUserLockPassword.value,
       password: newUserPassword.value,
       roles: [newUserRole.value]
     })
@@ -232,18 +242,23 @@ async function onDeleteUser(id: string) {
       </div>
 
       <div class="form-control">
+        <label class="label font-bold"><span class="label-text">SSO-only User?</span></label>
+        <input type="checkbox" v-model="newUserLockPassword" class="checkbox" />
+      </div>
+
+      <div class="form-control">
         <label class="label font-bold">
           <span class="label-text">Password</span>
-          <span @click="() => (newUserGenPassword = !newUserGenPassword)" class="tooltip cursor-pointer">
+          <span @click="() => (newUserGenPassword = !newUserGenPassword)" class="tooltip cursor-pointer" v-if="!newUserLockPassword">
             <font-awesome-icon icon="fa-solid fa-dice" />
           </span>
         </label>
         <input
           v-model="newUserPassword"
           type="password"
-          :placeholder="newUserGenPassword ? 'Randomly generated' : 'hunter2'"
+          :placeholder="newUserLockPassword ? '(Locked)' : newUserGenPassword ? 'Randomly generated' : 'hunter2'"
           class="input input-bordered w-full max-w-xs"
-          :disabled="newUserGenPassword"
+          :disabled="newUserGenPassword || newUserLockPassword"
         />
       </div>
 

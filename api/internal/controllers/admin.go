@@ -150,6 +150,12 @@ func handleCreateUser(c echo.Context) error {
 		return err
 	}
 
+	if req.LockPassword {
+		if req.Password != "" || req.GenPassword {
+			return echo.NewHTTPError(http.StatusBadRequest, "Cannot set a password when password is locked")
+		}
+	}
+
 	password := req.Password
 	generatedPassword := ""
 
@@ -177,7 +183,13 @@ func handleCreateUser(c echo.Context) error {
 		req.Roles = append(req.Roles, roles.UserRoleRequiresPasswordChange)
 	}
 
-	newUser, err := db.RegisterUserWithCredentials(req.Username, password, req.Roles)
+	var newUser *db.User
+	if req.LockPassword {
+		newUser, err = db.RegisterUserWithoutPassword(req.Username, req.Roles)
+	} else {
+		newUser, err = db.RegisterUserWithCredentials(req.Username, password, req.Roles)
+	}
+
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
 			return echo.NewHTTPError(http.StatusConflict, "A user with that username already exists")

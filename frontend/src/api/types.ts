@@ -68,6 +68,7 @@ export interface AdminUserCreateRequestDTO {
   username: string
   password: string
   gen_password: boolean
+  lock_password: boolean
   roles: string[]
 }
 export interface AdminUserCreateResponseDTO {
@@ -301,13 +302,11 @@ export interface CredentialParameter {
 }
 export interface UserEntity {
   name: string
-  icon?: string
-  displayName?: string
+  displayName: string
   id: any
 }
 export interface RelyingPartyEntity {
   name: string
-  icon?: string
   id: string
 }
 export interface PublicKeyCredentialCreationOptions {
@@ -318,7 +317,9 @@ export interface PublicKeyCredentialCreationOptions {
   timeout?: number
   excludeCredentials?: CredentialDescriptor[]
   authenticatorSelection?: AuthenticatorSelection
+  hints?: string[]
   attestation?: string
+  attestationFormats?: string[]
   extensions?: { [key: string]: any }
 }
 export interface AuthWebAuthnStartEnrollmentResponseDTO {
@@ -330,6 +331,7 @@ export interface PublicKeyCredentialRequestOptions {
   rpId?: string
   allowCredentials?: CredentialDescriptor[]
   userVerification?: string
+  hints?: string[]
   extensions?: { [key: string]: any }
 }
 export interface AuthWebAuthnStartChallengeResponseDTO {
