@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useToast } from 'vue-toastification'
+
 import {
   JobStatusAwaitingStart,
   JobStatusCreated,
@@ -13,13 +14,11 @@ import {
   startAttack,
   stopAttack
 } from '@/api/project'
-
 import type { AttackWithJobsDTO } from '@/api/types'
 import { useAgentsStore } from '@/stores/agents'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import { timeBetween, timeDurationToReadable } from '@/util/units'
 import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
-
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
 import { useToastError } from '@/composables/useToastError'

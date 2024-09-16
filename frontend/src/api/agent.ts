@@ -1,4 +1,5 @@
 import type { AgentGetAllResponseDTO } from './types'
+
 import { client } from '.'
 
 export function getAllAgents(): Promise<AgentGetAllResponseDTO> {

@@ -3,12 +3,12 @@ import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
+
 import Modal from '@/components/Modal.vue'
 import ProjectShare from '@/components/ProjectShare.vue'
 import IconButton from '@/components/IconButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
-
 import { getProject, getHashlistsForProject, deleteHashlist, deleteProject } from '@/api/project'
 import { useApi } from '@/composables/useApi'
 import { useResourcesStore } from '@/stores/resources'

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+
 import { AuthMethodCredentials, AuthMethodOIDC, getCurrentConfig } from '@/api/config'
 import type { PublicConfigDTO } from '@/api/types'
 

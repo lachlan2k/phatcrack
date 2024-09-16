@@ -1,4 +1,5 @@
 import type { PublicConfigDTO } from './types'
+
 import { client } from '.'
 
 export const AuthMethodCredentials = 'method_credentials'

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
 import DefaultLayout from '@/layouts/default.vue'
 
 function withDefaultLayout(component: () => any, name: string) {

@@ -1,5 +1,7 @@
 import type { AxiosProgressEvent } from 'axios'
+
 import type { GetAllListfilesDTO, ListfileDTO } from './types'
+
 import { client } from '.'
 
 export const LISTFILE_TYPE_WORDLIST = 'Wordlist'

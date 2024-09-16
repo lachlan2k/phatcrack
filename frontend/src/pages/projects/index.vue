@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
-import IconButton from '@/components/IconButton.vue'
-import ConfirmModal from '@/components/ConfirmModal.vue'
-import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
-import EmptyTable from '@/components/EmptyTable.vue'
 
+import IconButton from '@/components/IconButton.vue'
+import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
 import { useProjectsStore } from '@/stores/projects'
 import { useToastError } from '@/composables/useToastError'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import { deleteProject } from '@/api/project'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
+import EmptyTable from '@/components/EmptyTable.vue'
 import { useActiveAttacksStore } from '@/stores/activeAttacks'
 
 const projectsStore = useProjectsStore()

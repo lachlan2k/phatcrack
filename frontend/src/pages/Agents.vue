@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
+
 import EmptyTable from '@/components/EmptyTable.vue'
 import { useAgentsStore } from '@/stores/agents'
 import { formatDeviceName } from '@/util/formatDeviceName'

@@ -1,4 +1,5 @@
 import type { DetectHashTypeRequestDTO, DetectHashTypeResponseDTO, HashTypesDTO } from './types'
+
 import { client } from '.'
 
 export function loadHashTypes(): Promise<HashTypesDTO> {

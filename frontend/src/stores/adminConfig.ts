@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+
 import { adminGetConfig, adminSetConfig } from '@/api/admin'
 import type { AdminConfigResponseDTO, AdminConfigRequestDTO } from '@/api/types'
 

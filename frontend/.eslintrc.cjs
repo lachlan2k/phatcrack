@@ -20,7 +20,9 @@ module.exports = {
   },
   rules: {
     'vue/multi-word-component-names': 0 ,
-    'import/order': 'error'
+    'import/order': ['error', { 'newlines-between': 'always' }],
+    'import/newline-after-import': 'error',
+    'import/first': 'error'
   },
   settings: {
     'import/resolver': {

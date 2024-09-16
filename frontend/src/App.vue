@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
+
 import { useAuthStore } from './stores/auth'
 import { useConfigStore } from './stores/config'
 import { useProjectsStore } from './stores/projects'

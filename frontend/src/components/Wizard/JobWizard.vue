@@ -2,8 +2,10 @@
 import { computed, watch, reactive } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
+
 import HashlistInputs from './HashlistInputs.vue'
 import MaskInput from './MaskInput.vue'
+
 import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'

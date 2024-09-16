@@ -12,6 +12,7 @@ import type {
   AdminUserUpdateRequestDTO,
   UserDTO
 } from './types'
+
 import { client } from '.'
 
 export function adminGetAllUsers(): Promise<AdminGetAllUsersResponseDTO> {

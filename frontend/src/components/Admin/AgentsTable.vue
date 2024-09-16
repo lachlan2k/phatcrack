@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useToast } from 'vue-toastification'
 import { ref, computed } from 'vue'
+
 import ConfirmModal from '../ConfirmModal.vue'
+
 import Modal from '@/components/Modal.vue'
 import IconButton from '@/components/IconButton.vue'
 import { formatDeviceName } from '@/util/formatDeviceName'

@@ -1,4 +1,5 @@
 import type { PotfileSearchResponseDTO } from './types'
+
 import { client } from '.'
 
 export function searchPotfile(hashes: string[]): Promise<PotfileSearchResponseDTO> {

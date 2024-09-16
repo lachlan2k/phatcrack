@@ -2,11 +2,11 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
+
 import IconButton from '@/components/IconButton.vue'
 import Modal from '@/components/Modal.vue'
 import FileUpload from '@/components/FileUpload.vue'
 import EmptyTable from '@/components/EmptyTable.vue'
-
 import { bytesToReadable } from '@/util/units'
 import { useListfilesStore } from '@/stores/listfiles'
 import ConfirmModal from '@/components/ConfirmModal.vue'

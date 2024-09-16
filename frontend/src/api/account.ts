@@ -1,4 +1,5 @@
 import type { AccountChangePasswordRequestDTO } from './types'
+
 import { client } from '.'
 
 export function accountChangePassword(body: AccountChangePasswordRequestDTO): Promise<string> {

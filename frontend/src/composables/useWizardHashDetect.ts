@@ -1,4 +1,5 @@
 import { computed, type Ref } from 'vue'
+
 import { detectHashType } from '@/api/hashcat'
 import { useApi } from '@/composables/useApi'
 

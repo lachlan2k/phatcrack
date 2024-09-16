@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useToast } from 'vue-toastification'
-
 import type { AxiosProgressEvent } from 'axios'
 import { storeToRefs } from 'pinia'
+
 import { bytesToReadable } from '@/util/units'
 import { uploadListfile, type ListfileTypeT } from '@/api/listfiles'
 import { useListfilesStore } from '@/stores/listfiles'

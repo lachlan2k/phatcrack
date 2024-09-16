@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
+
 import { searchPotfile } from '@/api/potfile'
 import HashesInput from '@/components/HashesInput.vue'
 import type { PotfileSearchResponseDTO } from '@/api/types'

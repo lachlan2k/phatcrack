@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+
 import { getAllAgents } from '@/api/agent'
 import type { AgentDTO } from '@/api/types'
 

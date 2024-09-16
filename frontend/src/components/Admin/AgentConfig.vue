@@ -2,6 +2,7 @@
 import { reactive, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { storeToRefs } from 'pinia'
+
 import { useConfigStore } from '@/stores/config'
 import { useToastError } from '@/composables/useToastError'
 import { useAdminConfigStore } from '@/stores/adminConfig'

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+
 import { getAllProjects } from '@/api/project'
 import type { ProjectDTO } from '@/api/types'
 

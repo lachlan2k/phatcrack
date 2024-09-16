@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+
 import { loginWithCredentials as apiLogin, refreshAuth as apiRefreshAuth, logout as apiLogout, loginWithOIDCCallback } from '@/api/auth'
 import type { AuthLoginResponseDTO, AuthRefreshResponseDTO, AuthWhoamiResponseDTO } from '@/api/types'
 

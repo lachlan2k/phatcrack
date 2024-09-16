@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import { useToast } from 'vue-toastification'
+
 import { accountChangePassword } from '@/api/account'
 import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'

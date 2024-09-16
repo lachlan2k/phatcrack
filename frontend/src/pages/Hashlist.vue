@@ -3,9 +3,9 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
+
 import Modal from '@/components/Modal.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
-
 import {
   JobStatusAwaitingStart,
   JobStatusCreated,

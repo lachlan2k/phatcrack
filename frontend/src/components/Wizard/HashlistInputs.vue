@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
 import HashesInput from '@/components/HashesInput.vue'
 import { useWizardHashDetect } from '@/composables/useWizardHashDetect'

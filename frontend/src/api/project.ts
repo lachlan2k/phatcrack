@@ -19,6 +19,7 @@ import type {
   ProjectDTO,
   ProjectResponseMultipleDTO
 } from './types'
+
 import { client } from '.'
 
 export function createProject(name: string, description: string): Promise<ProjectDTO> {
