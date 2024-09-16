@@ -35,13 +35,13 @@ const tableRows = computed(() => {
     return []
   }
 
-  return data.value.user_ids.map((id) => userStore.byId(id)).filter((x) => x != null) as UserMinimalDTO[]
+  return data.value.user_ids.map(id => userStore.byId(id)).filter(x => x != null) as UserMinimalDTO[]
 })
 
 const dropdownUsers = computed(() => {
   return users.value
-    ?.filter((x) => x.id != loggedInUser.value?.id && usersSharedWith.value.every((y) => x.id !== y))
-    .map((x) => ({
+    ?.filter(x => x.id != loggedInUser.value?.id && usersSharedWith.value.every(y => x.id !== y))
+    .map(x => ({
       text: x.username,
       value: x.id
     }))

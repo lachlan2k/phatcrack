@@ -44,7 +44,7 @@ const selectedJob = computed<JobDTO | null>(() => {
     return null
   }
 
-  return props.attack.jobs.find((x) => x.id == selectedJobID.value) ?? null
+  return props.attack.jobs.find(x => x.id == selectedJobID.value) ?? null
 })
 
 const logLines = computed<string>(() => {
@@ -56,7 +56,7 @@ const logLines = computed<string>(() => {
     '$ ' +
     selectedJob.value.runtime_data.cmd_line +
     '\n\n' +
-    selectedJob.value.runtime_data.output_lines.map((x) => x.stream).join('\n') +
+    selectedJob.value.runtime_data.output_lines.map(x => x.stream).join('\n') +
     (selectedJob.value.runtime_data.error_string != '' ? '\n\n> Error: ' + selectedJob.value.runtime_data.error_string : '')
   )
 })

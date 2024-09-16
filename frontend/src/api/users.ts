@@ -15,5 +15,5 @@ export const userSignupRoles = [UserRole.Standard, UserRole.Admin]
 export const userAssignableRoles = [...userSignupRoles, UserRole.RequiresPasswordChange, UserRole.MFAExempt]
 
 export function getAllUsers(): Promise<UsersGetAllResponseDTO> {
-  return client.get('/api/v1/user/all').then((res) => res.data)
+  return client.get('/api/v1/user/all').then(res => res.data)
 }

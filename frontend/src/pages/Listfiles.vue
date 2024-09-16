@@ -32,13 +32,13 @@ const listfileTypes = {
 const listfileTypesFilter = ref(
   Object.fromEntries(
     Object.keys(listfileTypes)
-      .map((x) => [x, true])
+      .map(x => [x, true])
       .concat([['Unknown', true]])
   )
 )
 
 const filteredListfiles = computed(() => {
-  return listfiles.value.filter((x) => listfileTypesFilter.value[x.file_type] ?? listfileTypesFilter.value['Unknown'] ?? true)
+  return listfiles.value.filter(x => listfileTypesFilter.value[x.file_type] ?? listfileTypesFilter.value['Unknown'] ?? true)
 })
 
 const getIconForType = (type: string) => listfileTypes[type]?.icon ?? 'fa-question'

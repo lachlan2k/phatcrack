@@ -34,6 +34,6 @@ export const useAgentsStore = defineStore({
   },
 
   getters: {
-    byId: (state) => (id: string) => state.agents.find((x) => x.id == id)
+    byId: state => (id: string) => state.agents.find(x => x.id == id)
   }
 })

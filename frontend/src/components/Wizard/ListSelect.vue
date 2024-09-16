@@ -25,7 +25,7 @@ if (props.modelValue.length > props.limit) {
 
 watch(
   () => props.modelValue,
-  (newVal) => {
+  newVal => {
     if (newVal.length > props.limit) {
       constrainAndEmit(newVal)
     }
@@ -34,7 +34,7 @@ watch(
 
 watch(
   () => props.limit,
-  (newLimit) => {
+  newLimit => {
     if (newLimit < props.modelValue.length) {
       constrainAndEmit(props.modelValue)
     }
@@ -43,7 +43,7 @@ watch(
 
 function toggleSelected(id: string) {
   if (props.modelValue.includes(id)) {
-    constrainAndEmit(props.modelValue.filter((x) => x != id))
+    constrainAndEmit(props.modelValue.filter(x => x != id))
   } else {
     constrainAndEmit([...props.modelValue, id])
   }

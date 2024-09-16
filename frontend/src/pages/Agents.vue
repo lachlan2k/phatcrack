@@ -48,7 +48,7 @@ async function toggleMaintenance(agent: AgentDTO) {
             <div class="stat-title">Agents Online & Healthy</div>
             <div class="stat-value flex justify-between">
               <span
-                >{{ allAgents.filter((x) => x.agent_info.status == AgentStatusHealthy).length ?? '?' }}/{{ allAgents.length ?? '?' }}</span
+                >{{ allAgents.filter(x => x.agent_info.status == AgentStatusHealthy).length ?? '?' }}/{{ allAgents.length ?? '?' }}</span
               >
               <span class="mt-1 text-2xl text-primary">
                 <font-awesome-icon icon="fa-solid fa-robot" />
@@ -70,7 +70,7 @@ async function toggleMaintenance(agent: AgentDTO) {
                 <th v-if="isAdmin">Version</th>
                 <th>Devices</th>
                 <th>Status</th>
-                <th v-if="isAdmin || allAgents.some((agent) => agent.is_maintenance_mode)">Maintenance</th>
+                <th v-if="isAdmin || allAgents.some(agent => agent.is_maintenance_mode)">Maintenance</th>
               </tr>
             </thead>
             <tbody class="first-col-bold">

@@ -22,7 +22,7 @@ if (isSSOCallback) {
 }
 
 // We redirect back to /login to complete MFA if its required, and to then show the welcome tick
-watch(loggedInUser, (newLoggedInUser) => {
+watch(loggedInUser, newLoggedInUser => {
   if (newLoggedInUser != null) {
     router.push('/login')
   }

@@ -95,7 +95,7 @@ const filterText = ref('')
 const onlyShowCracked = ref(false)
 
 const allHashes = computed(() => hashlistData.value?.hashes ?? [])
-const crackedHashes = computed(() => allHashes.value.filter((x) => x.is_cracked))
+const crackedHashes = computed(() => allHashes.value.filter(x => x.is_cracked))
 
 const filteredHashes = computed(() => {
   const arr = onlyShowCracked.value ? crackedHashes.value : allHashes.value
@@ -107,7 +107,7 @@ const filteredHashes = computed(() => {
   const searchTerm = filterText.value.trim().toLowerCase()
 
   return arr.filter(
-    (x) =>
+    x =>
       x.username.toLowerCase().includes(searchTerm) ||
       decodeHex(x.plaintext_hex).toLowerCase().includes(searchTerm) ||
       x.input_hash.toLowerCase().includes(searchTerm) ||
@@ -124,25 +124,25 @@ const numberOfHashesCracked = computed(() => {
 // TODO: this will almost certainl perform terribly, and the code isn't super tidy?
 // When maturing this page, it might be worthwhile pulling this out to a weakmap or something computed
 const numJobs = (attack: AttackWithJobsDTO) => attack.jobs.length
-const numJobsRunning = (attack: AttackWithJobsDTO) => attack.jobs.filter((x) => x.runtime_data.status == JobStatusStarted).length
+const numJobsRunning = (attack: AttackWithJobsDTO) => attack.jobs.filter(x => x.runtime_data.status == JobStatusStarted).length
 const numJobsFinished = (attack: AttackWithJobsDTO) =>
-  attack.jobs.filter((x) => x.runtime_data.status == JobStatusExited && x.runtime_data.stop_reason == JobStopReasonFinished).length
+  attack.jobs.filter(x => x.runtime_data.status == JobStatusExited && x.runtime_data.stop_reason == JobStopReasonFinished).length
 const numJobsStopped = (attack: AttackWithJobsDTO) =>
-  attack.jobs.filter((x) => x.runtime_data.status == JobStatusExited && x.runtime_data.stop_reason == JobStopReasonUserStopped).length
+  attack.jobs.filter(x => x.runtime_data.status == JobStatusExited && x.runtime_data.stop_reason == JobStopReasonUserStopped).length
 const numJobsFailed = (attack: AttackWithJobsDTO) =>
   attack.jobs.filter(
-    (x) =>
+    x =>
       x.runtime_data.status == JobStatusExited &&
       x.runtime_data.stop_reason != JobStopReasonFinished &&
       x.runtime_data.stop_reason != JobStopReasonUserStopped
   ).length
 const numJobsQueued = (attack: AttackWithJobsDTO) =>
-  attack.jobs.filter((x) => x.runtime_data.status == JobStatusAwaitingStart || x.runtime_data.status == JobStatusCreated).length
+  attack.jobs.filter(x => x.runtime_data.status == JobStatusAwaitingStart || x.runtime_data.status == JobStatusCreated).length
 
 const hashrateSum = (attack: AttackWithJobsDTO) =>
   attack.jobs
-    .filter((x) => x.runtime_data.status == JobStatusStarted)
-    .map((x) => x.runtime_summary.hashrate)
+    .filter(x => x.runtime_data.status == JobStatusStarted)
+    .map(x => x.runtime_summary.hashrate)
     .reduce((a, b) => a + b, 0)
 
 const hashTypeStr = computed(() => {
@@ -369,8 +369,8 @@ async function onAppendHashes() {
                       <div class="badge badge-ghost whitespace-nowrap">No jobs</div>
                     </td>
                     <td>{{ hashrateStr(hashrateSum(attack)) }}</td>
-                    <td v-if="attack.jobs.some((x) => x.runtime_summary.estimated_time_remaining > 0)">
-                      {{ timeDurationToReadable(Math.max(...attack.jobs.map((x) => x.runtime_summary.estimated_time_remaining), 0)) }}
+                    <td v-if="attack.jobs.some(x => x.runtime_summary.estimated_time_remaining > 0)">
+                      {{ timeDurationToReadable(Math.max(...attack.jobs.map(x => x.runtime_summary.estimated_time_remaining), 0)) }}
                       left
                     </td>
                     <td v-else>-</td>

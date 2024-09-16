@@ -13,11 +13,11 @@ export function loginWithCredentials(username: string, password: string): Promis
       username,
       password
     })
-    .then((res) => res.data)
+    .then(res => res.data)
 }
 
 export function loginWithOIDCCallback(querystring: string): Promise<AuthLoginResponseDTO> {
-  return client.post('/api/v1/auth/login/oidc/callback' + querystring).then((res) => res.data)
+  return client.post('/api/v1/auth/login/oidc/callback' + querystring).then(res => res.data)
 }
 
 function urlSafeB64Encode(value: ArrayBuffer) {
@@ -28,7 +28,7 @@ function urlSafeB64Encode(value: ArrayBuffer) {
 }
 
 export function startMFAEnrollment(): Promise<AuthWebAuthnStartEnrollmentResponseDTO> {
-  return client.post('/api/v1/auth/mfa/start-enrollment?method=MFATypeWebAuthn').then((res) => res.data)
+  return client.post('/api/v1/auth/mfa/start-enrollment?method=MFATypeWebAuthn').then(res => res.data)
 }
 
 export function finishMFAEnrollment(cred: PublicKeyCredential): Promise<string> {
@@ -44,11 +44,11 @@ export function finishMFAEnrollment(cred: PublicKeyCredential): Promise<string> 
         attestationObject: urlSafeB64Encode(attestationResponse.attestationObject)
       }
     })
-    .then((res) => res.data)
+    .then(res => res.data)
 }
 
 export function startMFAChallenge(): Promise<AuthWebAuthnStartChallengeResponseDTO> {
-  return client.post('/api/v1/auth/mfa/start-challenge?method=MFATypeWebAuthn').then((res) => res.data)
+  return client.post('/api/v1/auth/mfa/start-challenge?method=MFATypeWebAuthn').then(res => res.data)
 }
 
 export function finishMFAChallenge(cred: PublicKeyCredential): Promise<string> {
@@ -66,17 +66,17 @@ export function finishMFAChallenge(cred: PublicKeyCredential): Promise<string> {
         userHandle: urlSafeB64Encode(assertion.userHandle as ArrayBuffer)
       }
     })
-    .then((res) => res.data)
+    .then(res => res.data)
 }
 
 export function changeTemporaryPassword(body: AuthChangePasswordRequestDTO): Promise<string> {
-  return client.post('/api/v1/auth/change-temporary-password', body).then((res) => res.data)
+  return client.post('/api/v1/auth/change-temporary-password', body).then(res => res.data)
 }
 
 export function refreshAuth(): Promise<AuthWhoamiResponseDTO> {
-  return client.put('/api/v1/auth/refresh').then((res) => res.data)
+  return client.put('/api/v1/auth/refresh').then(res => res.data)
 }
 
 export function logout(): Promise<null> {
-  return client.post('/api/v1/auth/logout').then((res) => res.data)
+  return client.post('/api/v1/auth/logout').then(res => res.data)
 }

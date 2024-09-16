@@ -56,12 +56,12 @@ const extraOptionsStr = computed(() => {
     <tbody>
       <tr v-if="hashcatParams.wordlist_filenames.length > 0">
         <td><strong>Wordlist</strong></td>
-        <td>{{ hashcatParams.wordlist_filenames.map((id) => listfileName(id)).join(', ') }}</td>
+        <td>{{ hashcatParams.wordlist_filenames.map(id => listfileName(id)).join(', ') }}</td>
       </tr>
 
       <tr v-if="hashcatParams.rules_filenames.length > 0">
         <td><strong>Rules</strong></td>
-        <td>{{ hashcatParams.rules_filenames.map((id) => listfileName(id)).join(', ') }}</td>
+        <td>{{ hashcatParams.rules_filenames.map(id => listfileName(id)).join(', ') }}</td>
       </tr>
 
       <tr v-if="hashcatParams.mask != ''">

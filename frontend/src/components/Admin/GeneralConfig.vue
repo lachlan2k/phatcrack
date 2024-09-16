@@ -17,7 +17,7 @@ const generalSettings = reactive({
   maximum_uploaded_file_line_scan_size: adminConfig.value?.general?.maximum_uploaded_file_line_scan_size ?? 1
 })
 
-watch(adminConfig, (newSettings) => {
+watch(adminConfig, newSettings => {
   const general = newSettings?.general
   if (general == null) {
     return

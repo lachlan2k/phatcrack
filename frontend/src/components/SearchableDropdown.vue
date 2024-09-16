@@ -15,19 +15,19 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue'])
 
 function textForValue(val: string) {
-  return props.options.find((x) => x.value === val)?.text ?? ''
+  return props.options.find(x => x.value === val)?.text ?? ''
 }
 
 const inputText = ref(textForValue(props.modelValue))
 
 watch(
   () => props.modelValue,
-  (newModelVal) => {
+  newModelVal => {
     inputText.value = textForValue(newModelVal)
   }
 )
 
-const filteredOptions = computed(() => props.options.filter((x) => x.text.toLowerCase().includes(inputText.value.toLowerCase())))
+const filteredOptions = computed(() => props.options.filter(x => x.text.toLowerCase().includes(inputText.value.toLowerCase())))
 
 const optionsVisible = ref(false)
 

@@ -38,7 +38,7 @@ agentStore.load()
 const getAgentName = (id: string) => agentStore.byId(id)?.name ?? 'Unknown'
 
 const canStop = computed(() => {
-  return props.attack.jobs.some((x) => x.runtime_data.status == JobStatusStarted || x.runtime_data.status == JobStatusAwaitingStart)
+  return props.attack.jobs.some(x => x.runtime_data.status == JobStatusStarted || x.runtime_data.status == JobStatusAwaitingStart)
 })
 
 const toast = useToast()

@@ -110,24 +110,24 @@ export const useAuthStore = defineStore({
   },
 
   getters: {
-    isLoggedIn: (state) => state.whoamiDetails?.user != null,
-    loggedInUser: (state) => state.whoamiDetails?.user,
+    isLoggedIn: state => state.whoamiDetails?.user != null,
+    loggedInUser: state => state.whoamiDetails?.user,
 
-    hasCompletedAuth: (state) =>
+    hasCompletedAuth: state =>
       state.whoamiDetails?.user != null &&
       !state.whoamiDetails?.is_awaiting_mfa &&
       !state.whoamiDetails?.requires_password_change &&
       !state.whoamiDetails?.requires_mfa_enrollment,
 
-    isAwaitingMFA: (state) => state?.whoamiDetails?.is_awaiting_mfa ?? false,
-    requiresPasswordChange: (state) => state?.whoamiDetails?.requires_password_change ?? false,
-    requiresMFAEnrollment: (state) => state?.whoamiDetails?.requires_mfa_enrollment,
+    isAwaitingMFA: state => state?.whoamiDetails?.is_awaiting_mfa ?? false,
+    requiresPasswordChange: state => state?.whoamiDetails?.requires_password_change ?? false,
+    requiresMFAEnrollment: state => state?.whoamiDetails?.requires_mfa_enrollment,
 
-    username: (state) => state.whoamiDetails?.user.username,
+    username: state => state.whoamiDetails?.user.username,
 
-    error: (state) => state.loginError,
+    error: state => state.loginError,
 
-    isAdmin: (state) => state.whoamiDetails?.user.roles.includes('admin') ?? false,
-    hasRole: (state) => (role: string) => state.whoamiDetails?.user.roles.includes(role) ?? false
+    isAdmin: state => state.whoamiDetails?.user.roles.includes('admin') ?? false,
+    hasRole: state => (role: string) => state.whoamiDetails?.user.roles.includes(role) ?? false
   }
 })

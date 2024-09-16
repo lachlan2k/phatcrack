@@ -52,7 +52,7 @@ if (hasCompletedAuth.value) {
   router.push('/dashboard')
 }
 
-watch(hasCompletedAuth, (hasCompletedAuth) => {
+watch(hasCompletedAuth, hasCompletedAuth => {
   if (hasCompletedAuth) {
     router.push('/dashboard')
   }
@@ -103,7 +103,7 @@ async function doPasswordChange(event: Event) {
 }
 
 function urlSafeB64Decode(value: string) {
-  return Uint8Array.from(atob(value.replace(/_/g, '/').replace(/-/g, '+')), (c) => c.charCodeAt(0))
+  return Uint8Array.from(atob(value.replace(/_/g, '/').replace(/-/g, '+')), c => c.charCodeAt(0))
 }
 
 async function enrollKey() {
@@ -117,7 +117,7 @@ async function enrollKey() {
         ...response.publicKey.user,
         id: urlSafeB64Decode(response.publicKey.user.id as string)
       },
-      excludeCredentials: response.publicKey.excludeCredentials?.map((cred) => ({
+      excludeCredentials: response.publicKey.excludeCredentials?.map(cred => ({
         ...cred,
         id: urlSafeB64Decode(cred.id as unknown as string)
       })),
@@ -140,7 +140,7 @@ async function verifyKey() {
     publicKey: {
       ...response.publicKey,
       challenge: urlSafeB64Decode(response.publicKey.challenge as unknown as string), // type codegen is wrong, its a base64 encoded string once marshalled, not a []byte
-      allowCredentials: response.publicKey.allowCredentials?.map((cred) => ({
+      allowCredentials: response.publicKey.allowCredentials?.map(cred => ({
         ...cred,
         id: urlSafeB64Decode(cred.id as unknown as string)
       }))
@@ -155,7 +155,7 @@ async function verifyKey() {
   await authStore.refreshAuth()
 }
 
-watch(activeScreen, (newActiveScreen) => {
+watch(activeScreen, newActiveScreen => {
   if (newActiveScreen == ActiveScreens.MFAVerification) {
     verifyKey()
   }

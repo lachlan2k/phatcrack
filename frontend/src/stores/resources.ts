@@ -35,7 +35,7 @@ export const useResourcesStore = defineStore({
   },
 
   getters: {
-    isHashTypesLoaded: (state) => state.hashTypes.length > 0,
-    getHashTypeName: (state) => (hashId: number) => state.hashTypes.find((x) => x.id == hashId)?.name ?? ''
+    isHashTypesLoaded: state => state.hashTypes.length > 0,
+    getHashTypeName: state => (hashId: number) => state.hashTypes.find(x => x.id == hashId)?.name ?? ''
   }
 })

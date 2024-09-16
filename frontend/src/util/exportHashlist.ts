@@ -26,12 +26,12 @@ function getExportBlob(hashes: HashlistHashDTO[], format: ExportFormat, hasUsern
       // TODO: something proper csv generation
       const stringified = hasUsernames
         ? [['username', 'hash', 'plaintext']]
-            .concat(hashes.map((x) => [x.username, x.input_hash, hexToString(x.plaintext_hex)]))
-            .map((x) => x.join(','))
+            .concat(hashes.map(x => [x.username, x.input_hash, hexToString(x.plaintext_hex)]))
+            .map(x => x.join(','))
             .join(',')
         : [['hash', 'plaintext']]
-            .concat(hashes.map((x) => [x.input_hash, hexToString(x.plaintext_hex)]))
-            .map((x) => x.join(','))
+            .concat(hashes.map(x => [x.input_hash, hexToString(x.plaintext_hex)]))
+            .map(x => x.join(','))
             .join(',')
 
       return new Blob([stringified], { type: 'text/csv' })
@@ -39,7 +39,7 @@ function getExportBlob(hashes: HashlistHashDTO[], format: ExportFormat, hasUsern
 
     case ExportFormat.ColonSeparated: {
       const textBlob = hashes
-        .map((x) =>
+        .map(x =>
           hasUsernames ? `${x.username}:${x.input_hash}:${hexToString(x.plaintext_hex)}` : `${x.input_hash}:${hexToString(x.plaintext_hex)}`
         )
         .join('\n')
@@ -61,7 +61,7 @@ function getExportFilename(hashlist: HashlistDTO, format: ExportFormat) {
 
 export async function exportResults(hashlistId: string, format: ExportFormat, crackedOnly: boolean) {
   const hashlist = await getHashlist(hashlistId)
-  const filtered = crackedOnly ? hashlist.hashes.filter((x) => x.is_cracked) : hashlist.hashes
+  const filtered = crackedOnly ? hashlist.hashes.filter(x => x.is_cracked) : hashlist.hashes
 
   const blob = getExportBlob(filtered, format, hashlist.has_usernames)
   const url = URL.createObjectURL(blob)

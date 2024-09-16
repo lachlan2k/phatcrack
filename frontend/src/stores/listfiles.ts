@@ -54,12 +54,12 @@ export const useListfilesStore = defineStore({
   },
 
   getters: {
-    byId: (state) => (id: string) => state.listfiles.find((x) => x.id == id),
+    byId: state => (id: string) => state.listfiles.find(x => x.id == id),
 
-    wordlists: (state) => state.listfiles.filter((x) => x.file_type === LISTFILE_TYPE_WORDLIST),
-    rulefiles: (state) => state.listfiles.filter((x) => x.file_type === LISTFILE_TYPE_RULEFILE),
+    wordlists: state => state.listfiles.filter(x => x.file_type === LISTFILE_TYPE_WORDLIST),
+    rulefiles: state => state.listfiles.filter(x => x.file_type === LISTFILE_TYPE_RULEFILE),
 
-    groupedByType: (state) => {
+    groupedByType: state => {
       // map to { wordlists: [...], rulefiles: [...], etc... }
       const map = {} as { [key: string]: ListfileDTO[] }
 
@@ -69,7 +69,7 @@ export const useListfilesStore = defineStore({
         }
 
         // Find the first one bigger
-        const index = arr.findIndex((x) => x.lines > val.lines)
+        const index = arr.findIndex(x => x.lines > val.lines)
         if (index == -1) {
           return [...arr, val]
         }
@@ -88,12 +88,12 @@ export const useListfilesStore = defineStore({
       return grouped
     },
 
-    attachedToProject: (state) => (projectId: string) => state.projectListfileMap[projectId] ?? [],
+    attachedToProject: state => (projectId: string) => state.projectListfileMap[projectId] ?? [],
 
     // Returns all listfiles a project can use, filtered by type. Places project-specific ones first
-    availableToProjectByType: (state) => (projectId: string, type: string) =>
+    availableToProjectByType: state => (projectId: string, type: string) =>
       (state.projectListfileMap[projectId] ?? [])
-        .filter((x) => x.file_type === type)
-        .concat(state.listfiles.filter((x) => x.file_type === type))
+        .filter(x => x.file_type === type)
+        .concat(state.listfiles.filter(x => x.file_type === type))
   }
 })

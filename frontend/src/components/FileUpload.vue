@@ -65,7 +65,7 @@ const requiresLineCountSpecified = computed(() => {
   return fileToUpload.value.size > (config.value?.general.maximum_uploaded_file_line_scan_size ?? 0)
 })
 
-watch(requiresLineCountSpecified, (doesRequire) => {
+watch(requiresLineCountSpecified, doesRequire => {
   if (doesRequire) {
     // Set it back to 0 to ask the server to calculate it
     lineCount.value = 0

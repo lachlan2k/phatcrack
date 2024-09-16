@@ -6,8 +6,8 @@ export function useHashesInput() {
     return hashesInput.value
       .trim()
       .split(/\n+/)
-      .filter((x) => !!x)
-      .map((x) => x.trim())
+      .filter(x => !!x)
+      .map(x => x.trim())
   })
   return { hashesInput, hashesArr }
 }

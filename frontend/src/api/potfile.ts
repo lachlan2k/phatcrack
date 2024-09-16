@@ -6,5 +6,5 @@ export function searchPotfile(hashes: string[]): Promise<PotfileSearchResponseDT
     .post('/api/v1/potfile/search', {
       hashes
     })
-    .then((res) => res.data)
+    .then(res => res.data)
 }

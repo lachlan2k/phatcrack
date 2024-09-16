@@ -44,13 +44,13 @@ const hashesArr = computed(() => {
   return hashes.value
     .trim()
     .split(/\n+/)
-    .filter((x) => !!x)
-    .map((x) => x.trim())
+    .filter(x => !!x)
+    .map(x => x.trim())
 })
 
 const { detectButtonClass, detectButtonClick, detectButtonText, suggestedHashTypes, isLoadingSuggestions } = useWizardHashDetect(hashesArr)
 
-watch(suggestedHashTypes, (newHashTypes) => {
+watch(suggestedHashTypes, newHashTypes => {
   const types = newHashTypes?.possible_types
   if (!types || types.length == 0) {
     return
@@ -61,14 +61,14 @@ watch(suggestedHashTypes, (newHashTypes) => {
 const filteredHashTypes = computed(() => {
   const suggested = suggestedHashTypes.value?.possible_types
   if (suggested != null) {
-    return allHashTypes.value.filter((hashType) => suggested.includes(hashType.id))
+    return allHashTypes.value.filter(hashType => suggested.includes(hashType.id))
   }
 
   return allHashTypes.value
 })
 
 const hashTypeOptionsToShow = computed(() =>
-  filteredHashTypes.value.map((type) => ({
+  filteredHashTypes.value.map(type => ({
     value: type.id.toString(),
     text: `${type.id} - ${type.name}`
   }))

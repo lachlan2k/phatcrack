@@ -19,7 +19,7 @@ export const attackModes = [
 ]
 
 export function getAttackModeName(id: number): string {
-  return attackModes.find((x) => x.value == id)?.name ?? ''
+  return attackModes.find(x => x.value == id)?.name ?? ''
 }
 
 export function modeHasMask(value: number): boolean {

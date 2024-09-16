@@ -32,6 +32,6 @@ export const useProjectsStore = defineStore({
   },
 
   getters: {
-    byId: (state) => (projId: string) => state.projects.find((x) => x.id === projId) ?? null
+    byId: state => (projId: string) => state.projects.find(x => x.id === projId) ?? null
   }
 })

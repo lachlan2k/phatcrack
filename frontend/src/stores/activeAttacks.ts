@@ -38,9 +38,9 @@ export const useActiveAttacksStore = defineStore({
   },
 
   getters: {
-    jobsForProject: (state) => (projectId: string) => state.jobs.filter((x) => x.project_id === projectId),
-    initialisingAttacksForHashlist: (state) => (hashlistId: string) => state.initialisingAttacks.filter((x) => x.hashlist_id == hashlistId),
-    initialisingAttacksForProject: (state) => (projectId: string) => state.initialisingAttacks.filter((x) => x.project_id == projectId),
-    jobsForHashlist: (state) => (hashlistId: string) => state.jobs.filter((x) => x.hashlist_id === hashlistId)
+    jobsForProject: state => (projectId: string) => state.jobs.filter(x => x.project_id === projectId),
+    initialisingAttacksForHashlist: state => (hashlistId: string) => state.initialisingAttacks.filter(x => x.hashlist_id == hashlistId),
+    initialisingAttacksForProject: state => (projectId: string) => state.initialisingAttacks.filter(x => x.project_id == projectId),
+    jobsForHashlist: state => (hashlistId: string) => state.jobs.filter(x => x.hashlist_id === hashlistId)
   }
 })

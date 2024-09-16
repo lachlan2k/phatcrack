@@ -48,7 +48,7 @@ const validationError = computed<string | null>(() => {
   return null
 })
 
-watch(adminConfig, (newSettings) => {
+watch(adminConfig, newSettings => {
   const general = newSettings?.auth?.general
   const oidc = newSettings?.auth?.oidc
 

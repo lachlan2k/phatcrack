@@ -58,7 +58,7 @@ resourcesStore.loadHashTypes()
 
 const projectSelectOptions = computed(() => [
   { value: '', text: 'Create new project 🖋' },
-  ...projects.value.map((project) => ({
+  ...projects.value.map(project => ({
     value: project.id,
     text: project.name
   }))
@@ -117,17 +117,17 @@ const inputs = reactive({
 // TODO: refactor so that selectedWordlists isn't the source of truth
 watch(
   () => inputs.combinatorLeft,
-  (newLeft) => (inputs.selectedWordlists = [...newLeft, ...inputs.combinatorRight])
+  newLeft => (inputs.selectedWordlists = [...newLeft, ...inputs.combinatorRight])
 )
 watch(
   () => inputs.combinatorRight,
-  (newRight) => (inputs.selectedWordlists = [...inputs.combinatorLeft, ...newRight])
+  newRight => (inputs.selectedWordlists = [...inputs.combinatorLeft, ...newRight])
 )
 
 // If a user starts typing in a new project name, then de-select existing project
 watch(
   () => inputs.projectName,
-  (newProjName) => {
+  newProjName => {
     if (newProjName != '') {
       inputs.selectedProjectId = ''
     }
@@ -137,7 +137,7 @@ watch(
 // If a user selects an existing project, remove the project name they've typed
 watch(
   () => inputs.selectedProjectId,
-  (newSelectedProj) => {
+  newSelectedProj => {
     if (newSelectedProj != '') {
       inputs.projectName = ''
     }
@@ -148,11 +148,11 @@ const hashesArr = computed(() => {
   return inputs.hashes
     .trim()
     .split(/\n+/)
-    .filter((x) => !!x)
-    .map((x) => x.trim())
+    .filter(x => !!x)
+    .map(x => x.trim())
 })
 
-const selectedHashType = computed(() => allHashTypes.value.find((x) => x.id.toString() === inputs.hashType))
+const selectedHashType = computed(() => allHashTypes.value.find(x => x.id.toString() === inputs.hashType))
 
 /*
  * Step validations

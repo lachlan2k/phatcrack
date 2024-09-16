@@ -7,7 +7,7 @@ export function usePagination<ItemT>(items: Ref<ItemT[]>, itemsPerPage: number) 
 
   const currentItems = computed<ItemT[]>(() => items.value.slice(activePage.value * itemsPerPage, (activePage.value + 1) * itemsPerPage))
 
-  watch(totalPages, (newTotalPages) => {
+  watch(totalPages, newTotalPages => {
     if (newTotalPages == 0) {
       activePage.value = 0
     } else if (activePage.value >= newTotalPages) {

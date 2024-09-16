@@ -33,7 +33,7 @@ function toggleValue(key: string) {
           :value="value"
           class="checkbox"
           @click="
-            (e) => {
+            e => {
               e.stopPropagation()
               toggleValue(key)
             }

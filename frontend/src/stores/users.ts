@@ -32,6 +32,6 @@ export const useUsersStore = defineStore({
   },
 
   getters: {
-    byId: (state) => (userId: string) => state.users.find((x) => x.id === userId) ?? null
+    byId: state => (userId: string) => state.users.find(x => x.id === userId) ?? null
   }
 })

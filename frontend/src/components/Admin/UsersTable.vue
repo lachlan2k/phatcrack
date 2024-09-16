@@ -50,7 +50,7 @@ watch(
 )
 
 function onEditUser(userId: string) {
-  const userToEdit = allUsers.value?.users?.find((x) => x.id === userId) ?? null
+  const userToEdit = allUsers.value?.users?.find(x => x.id === userId) ?? null
   if (!userToEdit) {
     return
   }
@@ -58,7 +58,7 @@ function onEditUser(userId: string) {
   editInputs.id = userId
   editInputs.username = userToEdit.username
 
-  const roleEntries = userAssignableRoles.map((x) => [x, userToEdit.roles.includes(x)])
+  const roleEntries = userAssignableRoles.map(x => [x, userToEdit.roles.includes(x)])
   editInputs.roleMap = Object.fromEntries(roleEntries)
 
   isUserEditOpen.value = true
@@ -100,14 +100,14 @@ const newUserGenPassword = ref(false)
 const newUserPassword = ref('')
 const newUserRole = ref(UserRole.Standard)
 
-watch(newUserLockPassword, (newVal) => {
+watch(newUserLockPassword, newVal => {
   if (newVal === true) {
     newUserPassword.value = ''
     newUserGenPassword.value = false
   }
 })
 
-watch(newUserGenPassword, (newVal) => {
+watch(newUserGenPassword, newVal => {
   if (newVal === true) {
     newUserPassword.value = ''
   }

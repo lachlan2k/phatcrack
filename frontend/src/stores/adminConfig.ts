@@ -39,6 +39,6 @@ export const useAdminConfigStore = defineStore({
   },
 
   getters: {
-    loading: (state) => state.loadingCount > 0
+    loading: state => state.loadingCount > 0
   }
 })

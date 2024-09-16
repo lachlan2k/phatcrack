@@ -29,7 +29,7 @@ export const useConfigStore = defineStore({
   },
 
   getters: {
-    isCredentialAuthEnabled: (state) => state.config?.auth.enabled_methods?.includes(AuthMethodCredentials) ?? false,
-    isOIDCAuthEnabled: (state) => state.config?.auth.enabled_methods?.includes(AuthMethodOIDC) ?? false
+    isCredentialAuthEnabled: state => state.config?.auth.enabled_methods?.includes(AuthMethodCredentials) ?? false,
+    isOIDCAuthEnabled: state => state.config?.auth.enabled_methods?.includes(AuthMethodOIDC) ?? false
   }
 })

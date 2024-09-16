@@ -16,7 +16,7 @@ const agentSettings = reactive({
   split_jobs_per_agent: adminConfig.value?.agent?.split_jobs_per_agent ?? 1
 })
 
-watch(adminConfig, (newSettings) => {
+watch(adminConfig, newSettings => {
   const agent = newSettings?.agent
   if (agent == null) {
     return
