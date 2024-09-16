@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# GO111MODULE=off go get github.com/tkrajina/typescriptify-golang-structs/tscriptify
-# GO111MODULE=off go get github.com/tkrajina/typescriptify-golang-structs
+# go install github.com/tkrajina/typescriptify-golang-structs/tscriptify@latest
+# go get github.com/tkrajina/typescriptify-golang-structs
 
 cd common
 tscriptify -package=github.com/lachlan2k/phatcrack/common/pkg/apitypes -target=../frontend/src/api/types.ts -interface ./pkg/apitypes/*
