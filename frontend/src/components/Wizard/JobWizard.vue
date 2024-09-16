@@ -10,9 +10,16 @@ import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import HrOr from '@/components/HrOr.vue'
+
 import { createHashlist, createProject, createAttack, startAttack, getProject, getHashlist } from '@/api/project'
-import { useProjectsStore } from '@/stores/projects'
 import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
+
+import { useToastError } from '@/composables/useToastError'
+
+import { useResourcesStore } from '@/stores/resources'
+import { useProjectsStore } from '@/stores/projects'
+import { useListfilesStore } from '@/stores/listfiles'
+
 import {
   AttackModeCombinator,
   AttackModeDictionary,
@@ -21,9 +28,6 @@ import {
   AttackModeMask,
   attackModes
 } from '@/util/hashcat'
-import { useResourcesStore } from '@/stores/resources'
-import { useToastError } from '@/composables/useToastError'
-import { useListfilesStore } from '@/stores/listfiles'
 
 /*
  * Props

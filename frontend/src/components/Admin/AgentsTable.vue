@@ -6,11 +6,14 @@ import ConfirmModal from '../ConfirmModal.vue'
 
 import Modal from '@/components/Modal.vue'
 import IconButton from '@/components/IconButton.vue'
-import { formatDeviceName } from '@/util/formatDeviceName'
+
 import { adminCreateAgent, adminDeleteAgent } from '@/api/admin'
-import { useApi } from '@/composables/useApi'
 import { getAllAgents } from '@/api/agent'
+
+import { useApi } from '@/composables/useApi'
 import { useToastError } from '@/composables/useToastError'
+
+import { formatDeviceName } from '@/util/formatDeviceName'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
 const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'

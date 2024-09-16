@@ -4,7 +4,9 @@ import { storeToRefs } from 'pinia'
 
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
 import HashesInput from '@/components/HashesInput.vue'
+
 import { useWizardHashDetect } from '@/composables/useWizardHashDetect'
+
 import { useResourcesStore } from '@/stores/resources'
 
 const props = defineProps<{

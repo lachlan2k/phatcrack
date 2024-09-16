@@ -9,15 +9,18 @@ import ProjectShare from '@/components/ProjectShare.vue'
 import IconButton from '@/components/IconButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
+import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
+
 import { getProject, getHashlistsForProject, deleteHashlist, deleteProject } from '@/api/project'
+
 import { useApi } from '@/composables/useApi'
-import { useResourcesStore } from '@/stores/resources'
 import { useToastError } from '@/composables/useToastError'
+
+import { useResourcesStore } from '@/stores/resources'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
 import { useActiveAttacksStore } from '@/stores/activeAttacks'
-import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
 
 const projId = useRoute().params.id as string
 

@@ -6,6 +6,10 @@ import { useToast } from 'vue-toastification'
 
 import Modal from '@/components/Modal.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
+import JobWizard from '@/components/Wizard/JobWizard.vue'
+import AttackDetailsModal from '@/components/AttackDetailsModal/index.vue'
+import HashesInput from '@/components/HashesInput.vue'
+
 import {
   JobStatusAwaitingStart,
   JobStatusCreated,
@@ -17,20 +21,23 @@ import {
   getHashlist,
   getAttacksWithJobsForHashlist
 } from '@/api/project'
-import { exportResults, ExportFormat } from '@/util/exportHashlist'
+import type { AttackWithJobsDTO } from '@/api/types'
+
 import { useApi } from '@/composables/useApi'
-import { useResourcesStore } from '@/stores/resources'
-import decodeHex from '@/util/decodeHex'
 import { usePagination } from '@/composables/usePagination'
+import { useHashesInput } from '@/composables/useHashesInput'
+import { useToastError } from '@/composables/useToastError'
+
+import { useResourcesStore } from '@/stores/resources'
+import { useProjectsStore } from '@/stores/projects'
+
+import { exportResults, ExportFormat } from '@/util/exportHashlist'
+import decodeHex from '@/util/decodeHex'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import { timeDurationToReadable } from '@/util/units'
-import type { AttackWithJobsDTO } from '@/api/types'
-import JobWizard from '@/components/Wizard/JobWizard.vue'
-import AttackDetailsModal from '@/components/AttackDetailsModal/index.vue'
-import { useProjectsStore } from '@/stores/projects'
-import { useHashesInput } from '@/composables/useHashesInput'
-import HashesInput from '@/components/HashesInput.vue'
-import { useToastError } from '@/composables/useToastError'
+
+
+
 
 const hashlistId = useRoute().params.id as string
 const { data: hashlistData, isLoading: isLoadingHashlist, silentlyRefresh: refreshHashlist } = useApi(() => getHashlist(hashlistId))

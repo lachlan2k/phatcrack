@@ -3,12 +3,16 @@ import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
 
 import EmptyTable from '@/components/EmptyTable.vue'
-import { useAgentsStore } from '@/stores/agents'
-import { formatDeviceName } from '@/util/formatDeviceName'
+
 import { adminAgentSetMaintenance } from '@/api/admin'
 import type { AgentDTO } from '@/api/types'
-import { useAuthStore } from '@/stores/auth'
+
 import { useToastError } from '@/composables/useToastError'
+
+import { useAuthStore } from '@/stores/auth'
+import { useAgentsStore } from '@/stores/agents'
+
+import { formatDeviceName } from '@/util/formatDeviceName'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
 const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'

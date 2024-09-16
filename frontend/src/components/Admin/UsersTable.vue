@@ -7,13 +7,16 @@ import Modal from '@/components/Modal.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import IconButton from '@/components/IconButton.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
+import CheckboxSet from '@/components/CheckboxSet.vue'
+
 import { adminCreateServiceAccount, adminCreateUser, adminDeleteUser, adminGetAllUsers, adminUpdateUser } from '@/api/admin'
+import { userAssignableRoles, UserRole, userSignupRoles } from '@/api/users'
+
 import { useApi } from '@/composables/useApi'
 import { usePagination } from '@/composables/usePagination'
 import { useToastError } from '@/composables/useToastError'
+
 import { useAuthStore } from '@/stores/auth'
-import { userAssignableRoles, UserRole, userSignupRoles } from '@/api/users'
-import CheckboxSet from '@/components/CheckboxSet.vue'
 
 const isUserCreateOpen = ref(false)
 const isServiceAccountCreateOpen = ref(false)

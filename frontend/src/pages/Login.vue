@@ -4,10 +4,13 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 
-import { finishMFAChallenge, startMFAEnrollment, startMFAChallenge, finishMFAEnrollment, changeTemporaryPassword } from '@/api/auth'
-import { useAuthStore } from '@/stores/auth'
-import { useToastError } from '@/composables/useToastError'
 import HrOr from '@/components/HrOr.vue'
+
+import { finishMFAChallenge, startMFAEnrollment, startMFAChallenge, finishMFAEnrollment, changeTemporaryPassword } from '@/api/auth'
+
+import { useToastError } from '@/composables/useToastError'
+
+import { useAuthStore } from '@/stores/auth'
 import { useConfigStore } from '@/stores/config'
 
 const toast = useToast()

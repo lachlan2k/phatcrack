@@ -3,9 +3,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { onMounted, ref } from 'vue'
 
+import { adminGetVersion } from '@/api/admin'
+
 import { useAuthStore } from '@/stores/auth'
 import { useConfigStore } from '@/stores/config'
-import { adminGetVersion } from '@/api/admin'
 
 const authStore = useAuthStore()
 const { loggedInUser, isAdmin } = storeToRefs(authStore)

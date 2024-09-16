@@ -20,7 +20,16 @@ module.exports = {
   },
   rules: {
     'vue/multi-word-component-names': 0 ,
-    'import/order': ['error', { 'newlines-between': 'always' }],
+    'import/order': ['error', {
+      'newlines-between': 'always', 
+      pathGroups: [
+        { pattern: '@/components/**', group: 'internal', position: 'before' },
+        { pattern: '@/api/**', group: 'internal', position: 'before' },
+        { pattern: '@/composables/**', group: 'internal', position: 'before' },
+        { pattern: '@/stores/**', group: 'internal', position: 'before' },
+        { pattern: '@/util/**', group: 'internal', position: 'before' },
+      ]
+    }],
     'import/newline-after-import': 'error',
     'import/first': 'error'
   },

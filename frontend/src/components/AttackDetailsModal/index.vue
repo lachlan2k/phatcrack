@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 
 import Overview from './Overview.vue'
 
+import Modal from '@/components/Modal.vue'
+
 import {
   JobStatusAwaitingStart,
   JobStatusCreated,
@@ -11,8 +13,8 @@ import {
   JobStopReasonFinished,
   JobStopReasonUserStopped
 } from '@/api/project'
-import Modal from '@/components/Modal.vue'
 import type { AttackWithJobsDTO, JobDTO } from '@/api/types'
+
 import { useAgentsStore } from '@/stores/agents'
 
 const props = defineProps<{

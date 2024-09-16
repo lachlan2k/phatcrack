@@ -3,11 +3,14 @@ import { computed, reactive, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { storeToRefs } from 'pinia'
 
-import { useConfigStore } from '@/stores/config'
-import { useToastError } from '@/composables/useToastError'
-import { useAdminConfigStore } from '@/stores/adminConfig'
 import { AuthMethodCredentials, AuthMethodOIDC } from '@/api/config'
 import type { AdminConfigRequestDTO, AuthOIDCConfigDTO, GeneralAuthConfigDTO } from '@/api/types'
+
+import { useToastError } from '@/composables/useToastError'
+
+import { useConfigStore } from '@/stores/config'
+import { useAdminConfigStore } from '@/stores/adminConfig'
+
 
 const configStore = useConfigStore()
 const adminConfigStore = useAdminConfigStore()

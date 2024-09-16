@@ -2,8 +2,10 @@
 import { computed } from 'vue'
 
 import type { HashcatParams } from '@/api/types'
-import { modeHasMask } from '@/util/hashcat'
+
 import { useListfilesStore } from '@/stores/listfiles'
+
+import { modeHasMask } from '@/util/hashcat'
 
 const props = defineProps<{
   hashcatParams: HashcatParams
