@@ -56,7 +56,14 @@ type AdminServiceAccountCreateResponseDTO struct {
 }
 
 type AdminGetAllUsersResponseDTO struct {
-	Users []UserDTO `json:"users"`
+	Users []AdminGetUserDTO `json:"users"`
+}
+
+type AdminGetUserDTO struct {
+	ID               string   `json:"id"`
+	Username         string   `json:"username"`
+	Roles            []string `json:"roles"`
+	IsPasswordLocked bool     `json:"is_password_locked"`
 }
 
 type AdminAgentSetMaintanceRequestDTO struct {

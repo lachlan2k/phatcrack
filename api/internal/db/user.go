@@ -31,6 +31,15 @@ func (u *User) ToDTO() apitypes.UserDTO {
 	}
 }
 
+func (u *User) ToAdminDTO() apitypes.AdminGetUserDTO {
+	return apitypes.AdminGetUserDTO{
+		ID:               u.ID.String(),
+		Username:         u.Username,
+		Roles:            u.Roles,
+		IsPasswordLocked: u.IsPasswordLocked(),
+	}
+}
+
 func (u *User) ToMinimalDTO() apitypes.UserMinimalDTO {
 	return apitypes.UserMinimalDTO{
 		ID:       u.ID.String(),

@@ -91,14 +91,16 @@ export interface AdminServiceAccountCreateResponseDTO {
   roles: string[]
   api_key: string
 }
-export interface UserDTO {
+export interface AdminGetUserDTO {
   id: string
   username: string
   roles: string[]
+  is_password_locked: boolean
 }
 export interface AdminGetAllUsersResponseDTO {
-  users: UserDTO[]
+  users: AdminGetUserDTO[]
 }
+
 export interface AdminAgentSetMaintanceRequestDTO {
   is_maintenance_mode: boolean
 }
@@ -534,7 +536,11 @@ export interface ProjectAddShareRequestDTO {
 export interface ProjectSharesDTO {
   user_ids: string[]
 }
-
+export interface UserDTO {
+  id: string
+  username: string
+  roles: string[]
+}
 export interface UserMinimalDTO {
   id: string
   username: string

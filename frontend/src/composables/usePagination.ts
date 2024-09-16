@@ -1,4 +1,4 @@
-import { toRefs, watch, type Ref } from 'vue'
+import { watch, type Ref } from 'vue'
 import { ref, computed } from 'vue'
 
 export function usePagination<ItemT>(items: Ref<ItemT[]>, itemsPerPage: number) {

@@ -108,9 +108,9 @@ func HookAdminEndpoints(api *echo.Group) {
 			return util.ServerError("Failed to get users", err)
 		}
 
-		userDTOs := make([]apitypes.UserDTO, len(users))
+		userDTOs := make([]apitypes.AdminGetUserDTO, len(users))
 		for i := range users {
-			userDTOs[i] = users[i].ToDTO()
+			userDTOs[i] = users[i].ToAdminDTO()
 		}
 
 		return c.JSON(http.StatusOK, apitypes.AdminGetAllUsersResponseDTO{

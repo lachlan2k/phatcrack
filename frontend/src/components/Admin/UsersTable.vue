@@ -323,6 +323,7 @@ async function onDeleteUser(id: string) {
       <tr>
         <th>Username</th>
         <th>Roles</th>
+        <th>Has Password Set?</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -333,6 +334,9 @@ async function onDeleteUser(id: string) {
         </td>
         <td>
           {{ user.roles.join(', ') }}
+        </td>
+        <td>
+          <font-awesome-icon icon="fa-solid fa-check" v-if="!user.is_password_locked" />
         </td>
         <td>
           <ConfirmModal @on-confirm="() => onDeleteUser(user.id)">
