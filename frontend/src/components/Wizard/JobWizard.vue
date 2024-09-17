@@ -167,12 +167,18 @@ const projectStepValidationError = computed(() => {
   if (inputs.projectName == '' && inputs.selectedProjectId == '') {
     return 'Please select an existing project or input a new project name'
   }
+  if (inputs.projectName.length < 3) {
+    return 'Project name too short (3 min)'
+  }
   return null
 })
 
 const hashlistStepValidationError = computed(() => {
   if (inputs.hashlistName == '') {
     return 'Please name the hashlist'
+  }
+  if (inputs.hashlistName.length < 3) {
+    return 'Hashlist name too short (3 min)'
   }
 
   if (hashesArr.value.length == 0) {

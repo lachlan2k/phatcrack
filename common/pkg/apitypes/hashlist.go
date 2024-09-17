@@ -2,7 +2,7 @@ package apitypes
 
 type HashlistCreateRequestDTO struct {
 	ProjectID    string   `json:"project_id" validate:"required,uuid"`
-	Name         string   `json:"name" validate:"required,standardname,min=5,max=30"`
+	Name         string   `json:"name" validate:"required,standardname,min=3,max=64"`
 	HashType     int      `json:"hash_type" validate:"hashtype"`
 	InputHashes  []string `json:"input_hashes" validate:"required,min=1,dive,required,min=4"`
 	HasUsernames bool     `json:"has_usernames"`
