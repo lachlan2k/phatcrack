@@ -9,7 +9,14 @@ import IconButton from '@/components/IconButton.vue'
 import PaginationControls from '@/components/PaginationControls.vue'
 import CheckboxSet from '@/components/CheckboxSet.vue'
 
-import { adminCreateServiceAccount, adminCreateUser, adminDeleteUser, adminGetAllUsers, adminUpdateUser } from '@/api/admin'
+import {
+  adminCreateServiceAccount,
+  adminCreateUser,
+  adminDeleteUser,
+  adminGetAllUsers,
+  adminUpdateUser,
+  adminUpdateUserPassword
+} from '@/api/admin'
 import { userAssignableRoles, UserRole, userSignupRoles } from '@/api/users'
 
 import { useApi } from '@/composables/useApi'
@@ -21,8 +28,18 @@ import { useAuthStore } from '@/stores/auth'
 const isUserCreateOpen = ref(false)
 const isServiceAccountCreateOpen = ref(false)
 const isUserEditOpen = ref(false)
+const isUserManagePasswordOpen = ref(false)
+const userIdToManagePassword = ref('')
 
-const { data: allUsers, fetchData: fetchUsers, silentlyRefresh: silentlyFetchUsers, isLoading } = useApi(adminGetAllUsers)
+const { data: _allUsers, fetchData: fetchUsers, silentlyRefresh: silentlyFetchUsers, isLoading } = useApi(adminGetAllUsers)
+
+const allUsers = computed(() => {
+  return {
+    users: [...(_allUsers.value?.users ?? [])].sort((a, b) => a.username.localeCompare(b.username))
+  }
+})
+
+const userToManagePassword = computed(() => allUsers.value?.users.find(x => x.id === userIdToManagePassword.value))
 
 const editInputs = reactive({
   id: '',
@@ -53,7 +70,7 @@ watch(
   }
 )
 
-function onEditUser(userId: string) {
+function onOpenEditUser(userId: string) {
   const userToEdit = allUsers.value?.users?.find(x => x.id === userId) ?? null
   if (!userToEdit) {
     return
@@ -66,6 +83,11 @@ function onEditUser(userId: string) {
   editInputs.roleMap = Object.fromEntries(roleEntries)
 
   isUserEditOpen.value = true
+}
+
+function onOpenManagePassword(userId: string) {
+  userIdToManagePassword.value = userId
+  isUserManagePasswordOpen.value = true
 }
 
 async function onSaveUser() {
@@ -209,10 +231,58 @@ async function onDeleteUser(id: string) {
     fetchUsers()
   }
 }
+
+async function onRemovePassword(id: string) {
+  try {
+    await adminUpdateUserPassword(id, 'remove')
+    const username = userToManagePassword.value?.username ?? 'Unknown User'
+    toast.info('Removed password from ' + username)
+  } catch (e) {
+    catcher(e)
+  } finally {
+    fetchUsers()
+  }
+}
+
+async function onGenerateNewPassword(id: string) {
+  try {
+    const res = await adminUpdateUserPassword(id, 'generate')
+    const username = userToManagePassword.value?.username ?? 'Unknown User'
+    toast.info(`Generated new password for ${username} (note this down, won't be displayed again):\n${res.generated_password}`, {
+      // force user to dismiss this
+      timeout: false,
+      closeOnClick: false,
+      draggable: false
+    })
+  } catch (e) {
+    catcher(e)
+  } finally {
+    fetchUsers()
+  }
+}
 </script>
 
 <template>
   <div class="flex flex-row justify-between">
+    <Modal v-model:is-open="isUserManagePasswordOpen">
+      <h3 class="text-lg font-bold mr-12 mb-4">Manage {{ userToManagePassword?.username }}'s Password</h3>
+
+      <p v-if="userToManagePassword?.is_password_locked">User does not have a password set.</p>
+      <p v-else>User currently has a password set.</p>
+
+      <div class="form-control mt-2">
+        <label class="label font-bold"><span class="label-text">Actions</span></label>
+      </div>
+      <button
+        class="btn w-full btn-sm mb-2"
+        @click="() => onRemovePassword(userIdToManagePassword)"
+        v-if="!userToManagePassword?.is_password_locked"
+      >
+        Remove Password
+      </button>
+      <button class="btn w-full btn-sm" @click="() => onGenerateNewPassword(userIdToManagePassword)">Generate new password</button>
+    </Modal>
+
     <Modal v-model:is-open="isUserEditOpen">
       <h3 class="text-lg font-bold">Edit User</h3>
 
@@ -346,7 +416,8 @@ async function onDeleteUser(id: string) {
           <ConfirmModal @on-confirm="() => onDeleteUser(user.id)">
             <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
           </ConfirmModal>
-          <IconButton icon="fa-solid fa-pencil" color="primary" tooltip="Edit" @click="() => onEditUser(user.id)" />
+          <IconButton icon="fa-solid fa-pencil" color="primary" tooltip="Edit" @click="() => onOpenEditUser(user.id)" />
+          <IconButton icon="fa-solid fa-key" color="primary" tooltip="Manage Password" @click="() => onOpenManagePassword(user.id)" />
         </td>
       </tr>
     </tbody>

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/hex"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"crypto/rand"
 
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
@@ -139,6 +141,7 @@ func HookAdminEndpoints(api *echo.Group) {
 	api.POST("/agent-registration-key/create", handleAgentRegistrationKeyCreate)
 
 	api.PUT("/user/:id", handleUpdateUser)
+	api.PUT("/user/:id/password", handleUpdateUserPassword)
 
 	api.DELETE("/user/:id", handleDeleteUser)
 	api.DELETE("/agent/:id", handleDeleteAgent)
@@ -387,4 +390,66 @@ func handleDeleteAgent(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, "ok")
+}
+
+func handleUpdateUserPassword(c echo.Context) error {
+	req, err := util.BindAndValidate[apitypes.AdminUserUpdatePasswordRequestDTO](c)
+	if err != nil {
+		return err
+	}
+
+	id := c.Param("id")
+	if !util.AreValidUUIDs(id) {
+		return echo.ErrBadRequest
+	}
+
+	user, err := db.GetUserByID(id)
+	if errors.Is(err, db.ErrNotFound) || user == nil {
+		return echo.ErrNotFound
+	}
+	if err != nil {
+		return util.GenericServerError(err)
+	}
+
+	switch req.Action {
+	case "remove":
+		user.PasswordHash = db.UserPasswordLocked
+		err := db.Save(user)
+		if err != nil {
+			return util.ServerError("Couldn't save user with locked password", err)
+		}
+
+		return c.JSON(http.StatusOK, apitypes.AdminUserUpdatePasswordResponseDTO{
+			GeneratedPassword: "",
+		})
+
+	case "generate":
+		genBuff := make([]byte, 16)
+		_, err := rand.Read(genBuff)
+		if err != nil {
+			return util.GenericServerError(err)
+		}
+		newPass := hex.EncodeToString(genBuff)
+		newHash, err := bcrypt.GenerateFromPassword([]byte(newPass), bcrypt.DefaultCost)
+		if err != nil {
+			return util.GenericServerError(err)
+		}
+
+		if config.Get().Auth.General.RequirePasswordChangeOnFirstLogin && !user.HasRole(roles.UserRoleRequiresPasswordChange) {
+			user.Roles = append(user.Roles, roles.UserRoleRequiresPasswordChange)
+		}
+
+		user.PasswordHash = string(newHash)
+		err = db.Save(user)
+		if err != nil {
+			return util.ServerError("Couldn't save user with new password", err)
+		}
+
+		return c.JSON(http.StatusOK, apitypes.AdminUserUpdatePasswordResponseDTO{
+			GeneratedPassword: newPass,
+		})
+
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "Unknown action %s", req.Action)
+	}
 }

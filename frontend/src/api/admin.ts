@@ -9,6 +9,8 @@ import type {
   AdminServiceAccountCreateResponseDTO,
   AdminUserCreateRequestDTO,
   AdminUserCreateResponseDTO,
+  AdminUserUpdatePasswordRequestDTO,
+  AdminUserUpdatePasswordResponseDTO,
   AdminUserUpdateRequestDTO,
   UserDTO
 } from './types'
@@ -25,6 +27,12 @@ export function adminCreateUser(newUserData: AdminUserCreateRequestDTO): Promise
 
 export function adminUpdateUser(id: string, userData: AdminUserUpdateRequestDTO): Promise<UserDTO> {
   return client.put('/api/v1/admin/user/' + id, userData).then(res => res.data)
+}
+
+export type AdminUserUpdatePasswordAction = 'remove' | 'generate'
+
+export function adminUpdateUserPassword(id: string, action: AdminUserUpdatePasswordAction): Promise<AdminUserUpdatePasswordResponseDTO> {
+  return client.put(`/api/v1/admin/user/${id}/password`, { action } as AdminUserUpdatePasswordRequestDTO).then(res => res.data)
 }
 
 export function adminCreateServiceAccount(

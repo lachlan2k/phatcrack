@@ -77,6 +77,12 @@ export interface AdminUserCreateResponseDTO {
   roles: string[]
   generated_password: string
 }
+export interface AdminUserUpdatePasswordRequestDTO {
+  action: string
+}
+export interface AdminUserUpdatePasswordResponseDTO {
+  generated_password: string
+}
 export interface AdminUserUpdateRequestDTO {
   username: string
   roles: string[]
