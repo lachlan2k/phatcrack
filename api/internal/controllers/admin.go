@@ -168,7 +168,7 @@ func handleCreateUser(c echo.Context) error {
 
 		generatedPassword = hex.EncodeToString(genBuff)
 		password = generatedPassword
-	} else {
+	} else if !req.LockPassword {
 		if pwordOk, pwordFb := util.ValidatePasswordStrength(password); !pwordOk {
 			return echo.NewHTTPError(http.StatusBadRequest, "Password did not meet strength requirements: "+pwordFb)
 		}
@@ -179,7 +179,7 @@ func handleCreateUser(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "One or more provided roles are not allowed on registration")
 	}
 
-	if config.Get().Auth.General.RequirePasswordChangeOnFirstLogin {
+	if config.Get().Auth.General.RequirePasswordChangeOnFirstLogin && !req.LockPassword {
 		req.Roles = append(req.Roles, roles.UserRoleRequiresPasswordChange)
 	}
 

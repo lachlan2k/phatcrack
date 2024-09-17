@@ -129,7 +129,7 @@ const newUserValidationError = computed(() => {
     return 'Username too short'
   }
 
-  if (!newUserGenPassword.value && newUserPassword.value.length < 16) {
+  if (!newUserLockPassword.value && !newUserGenPassword.value && newUserPassword.value.length < 16) {
     return 'Password too short'
   }
 
