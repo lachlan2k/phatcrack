@@ -18,10 +18,7 @@ import { useToastError } from '@/composables/useToastError'
 import { useListfilesStore } from '@/stores/listfiles'
 import { useAuthStore } from '@/stores/auth'
 
-
-
 import { bytesToReadable } from '@/util/units'
-
 
 const listfilesStore = useListfilesStore()
 const { load: loadListfiles } = listfilesStore

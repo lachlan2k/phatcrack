@@ -11,7 +11,6 @@ import { useToastError } from '@/composables/useToastError'
 import { useConfigStore } from '@/stores/config'
 import { useAdminConfigStore } from '@/stores/adminConfig'
 
-
 const configStore = useConfigStore()
 const adminConfigStore = useAdminConfigStore()
 const { config: adminConfig } = storeToRefs(adminConfigStore)

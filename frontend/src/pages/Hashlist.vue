@@ -36,9 +36,6 @@ import decodeHex from '@/util/decodeHex'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import { timeDurationToReadable } from '@/util/units'
 
-
-
-
 const hashlistId = useRoute().params.id as string
 const { data: hashlistData, isLoading: isLoadingHashlist, silentlyRefresh: refreshHashlist } = useApi(() => getHashlist(hashlistId))
 
