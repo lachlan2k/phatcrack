@@ -22,6 +22,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
 import { useActiveAttacksStore } from '@/stores/activeAttacks'
 
+import { Icons } from '@/util/icons'
+
 const projId = useRoute().params.id as string
 
 const router = useRouter()
@@ -106,16 +108,16 @@ const quantityStr = (num: number, str: string) => {
         <div>
           <h1 class="inline text-4xl font-bold">{{ projectData?.name }}</h1>
           <span class="ml-2 text-xs font-normal text-slate-500" v-if="projectData != null && projectData.owner_user_id != loggedInUser?.id">
-            <font-awesome-icon icon="fa-solid fa-link" /> Shared by
+            <font-awesome-icon :icon="Icons.Share" /> Shared by
             {{ usersStore.byId(projectData?.owner_user_id)?.username ?? 'Unknown user' }}
           </span>
         </div>
         <div class="flex items-center">
           <button v-if="hasOwnereshipRights" class="btn btn-ghost btn-sm" @click="() => (isShareModalOpen = true)">
-            <font-awesome-icon icon="fa-solid fa-link" />Share with others
+            <font-awesome-icon :icon="Icons.Share" />Share with others
           </button>
           <ConfirmModal v-if="hasOwnereshipRights" @on-confirm="() => onDeleteProject(projId)"
-            ><button class="btn btn-ghost btn-sm"><font-awesome-icon icon="fa-solid fa-trash" />Delete</button></ConfirmModal
+            ><button class="btn btn-ghost btn-sm"><font-awesome-icon :icon="Icons.Delete" />Delete</button></ConfirmModal
           >
         </div>
       </div>
@@ -179,7 +181,7 @@ const quantityStr = (num: number, str: string) => {
                     </td>
                     <td class="w-0 text-center">
                       <ConfirmModal @on-confirm="() => onDeleteHashlist(hashlist.id)">
-                        <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                        <IconButton :icon="Icons.Delete" color="error" tooltip="Delete" />
                       </ConfirmModal>
                     </td>
                   </tr>

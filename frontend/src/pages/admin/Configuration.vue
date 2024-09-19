@@ -6,9 +6,11 @@ import AgentConfig from '@/components/Admin/AgentConfig.vue'
 import GeneralConfig from '@/components/Admin/GeneralConfig.vue'
 import AuthConfig from '@/components/Admin/AuthConfig.vue'
 
+import { Icons } from '@/util/icons'
+
 const tab = (name: string, icon: string, component: Component) => ({ name, icon, component })
 
-const tabs = [tab('General', 'fa-gear', GeneralConfig), tab('Auth', 'fa-passport', AuthConfig), tab('Agent', 'fa-robot', AgentConfig)]
+const tabs = [tab('General', Icons.Config, GeneralConfig), tab('Auth', Icons.Auth, AuthConfig), tab('Agent', Icons.Agent, AgentConfig)]
 
 const activeTab = ref(0)
 const ComponentToRender = computed(() => tabs[activeTab.value].component)
@@ -32,7 +34,7 @@ const ComponentToRender = computed(() => tabs[activeTab.value].component)
               :class="activeTab == i ? 'tab-active' : ''"
               @click="activeTab = i"
             >
-              <span class="mx-2"> <font-awesome-icon :icon="'fa-solid ' + tab.icon" class="mr-2" />{{ tab.name }} </span>
+              <span class="mx-2"> <font-awesome-icon :icon="tab.icon" class="mr-2" />{{ tab.name }} </span>
             </a>
             <a class="tab-bordered tab grow">
               <span></span>

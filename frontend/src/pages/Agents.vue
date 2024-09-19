@@ -12,6 +12,7 @@ import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
 import { useAgentsStore } from '@/stores/agents'
 
+import { Icons } from '@/util/icons'
 import { formatDeviceName } from '@/util/formatDeviceName'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
@@ -56,7 +57,7 @@ async function toggleMaintenance(agent: AgentDTO) {
                 >{{ allAgents.filter(x => x.agent_info.status == AgentStatusHealthy).length ?? '?' }}/{{ allAgents.length ?? '?' }}</span
               >
               <span class="mt-1 text-2xl text-primary">
-                <font-awesome-icon icon="fa-solid fa-robot" />
+                <font-awesome-icon :icon="Icons.Agent" />
               </span>
             </div>
           </div>
@@ -84,8 +85,8 @@ async function toggleMaintenance(agent: AgentDTO) {
                 <td v-if="isAdmin" class="font-mono">{{ agent.agent_info.version }}</td>
                 <td>
                   <span v-for="device in agent.agent_devices" :key="device.device_id + device.device_name">
-                    <font-awesome-icon icon="fa-solid fa-memory" v-if="device.device_type == 'GPU'" />
-                    <font-awesome-icon icon="fa-solid fa-microchip" v-else />
+                    <font-awesome-icon :icon="Icons.GPU" v-if="device.device_type == 'GPU'" />
+                    <font-awesome-icon :icon="Icons.CPU" v-else />
                     {{ formatDeviceName(device.device_name) }} ({{ device.temp }} °c)
                     <br />
                   </span>
@@ -122,7 +123,7 @@ async function toggleMaintenance(agent: AgentDTO) {
                   />
                 </td>
                 <td v-else-if="agent.is_maintenance_mode">
-                  <font-awesome-icon icon="fa-solid fa-warning" /><span class="ml-2">In maintenance</span>
+                  <font-awesome-icon :icon="Icons.Maintenance" /><span class="ml-2">In maintenance</span>
                 </td>
               </tr>
             </tbody>

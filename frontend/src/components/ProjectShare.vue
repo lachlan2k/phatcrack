@@ -15,6 +15,8 @@ import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
 
+import { Icons } from '@/util/icons'
+
 const props = defineProps<{
   projectId: string
 }>()
@@ -119,7 +121,7 @@ async function onDeleteShare(user: UserMinimalDTO) {
           <tr v-for="(user, i) in tableRows" :key="user.id + i">
             <td class="w-full">{{ user?.username }}</td>
             <td class="text-center">
-              <IconButton icon="fa-solid fa-xmark" color="error" tooltip="Remove" @click="() => onDeleteShare(user)" />
+              <IconButton :icon="Icons.Remove" color="error" tooltip="Remove" @click="() => onDeleteShare(user)" />
             </td>
           </tr>
         </tbody>

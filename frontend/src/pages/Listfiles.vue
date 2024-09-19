@@ -19,6 +19,7 @@ import { useListfilesStore } from '@/stores/listfiles'
 import { useAuthStore } from '@/stores/auth'
 
 import { bytesToReadable } from '@/util/units'
+import { Icons } from '@/util/icons'
 
 const listfilesStore = useListfilesStore()
 const { load: loadListfiles } = listfilesStore
@@ -28,9 +29,9 @@ const listfiles = computed(() => Object.values(groupedByType.value).flat())
 const isListfileUploadOpen = ref(false)
 
 const listfileTypes = {
-  Rulefile: { icon: 'fa-rectangle-list' },
-  Wordlist: { icon: 'fa-book-open' },
-  Charset: { icon: 'fa-arrow-down-a-z' }
+  Rulefile: { icon: Icons.Rulefile },
+  Wordlist: { icon: Icons.Wordlist },
+  Charset: { icon: Icons.Charset }
 } as { [key: string]: { icon: string } }
 
 const listfileTypesFilter = ref(
@@ -45,7 +46,7 @@ const filteredListfiles = computed(() => {
   return listfiles.value.filter(x => listfileTypesFilter.value[x.file_type] ?? listfileTypesFilter.value['Unknown'] ?? true)
 })
 
-const getIconForType = (type: string) => listfileTypes[type]?.icon ?? 'fa-question'
+const getIconForType = (type: string) => listfileTypes[type]?.icon ?? Icons.Unknown
 
 loadListfiles(true)
 
@@ -142,19 +143,19 @@ async function onDeleteListfile(listfile: ListfileDTO) {
               >
                 <td class="text-center">
                   <div class="tooltip" :data-tip="listfile.file_type">
-                    <font-awesome-icon :icon="'fa-solid ' + getIconForType(listfile.file_type)" />
+                    <font-awesome-icon :icon="getIconForType(listfile.file_type)" />
                   </div>
                 </td>
                 <td>
                   <strong>{{ listfile.name }}</strong>
                   <span class="pl-2 text-sm text-gray-500" v-if="!listfile.available_for_use">
                     <div class="tooltip" data-tip="Syncing...">
-                      <font-awesome-icon icon="fa-solid fa-hourglass-end" />
+                      <font-awesome-icon :icon="Icons.Awaiting" />
                     </div>
                   </span>
                   <span class="pl-2 text-sm text-gray-500" v-if="listfile.pending_delete">
                     <div class="tooltip" data-tip="Marked for death">
-                      <font-awesome-icon icon="fa-solid fa-skull-crossbones" title="" />
+                      <font-awesome-icon :icon="Icons.Dead" title="" />
                     </div>
                   </span>
                 </td>
@@ -163,11 +164,11 @@ async function onDeleteListfile(listfile: ListfileDTO) {
                 <td>{{ listfile.lines }}</td>
                 <td class="text-center">
                   <ConfirmModal @on-confirm="() => onDeleteListfile(listfile)" v-if="canDelete(listfile)">
-                    <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                    <IconButton :icon="Icons.Delete" color="error" tooltip="Delete" />
                   </ConfirmModal>
                   <div v-else class="tooltip cursor-not-allowed text-gray-300" :data-tip="'You can\'t delete this'">
                     <button class="btn btn-ghost btn-xs cursor-not-allowed">
-                      <font-awesome-icon icon="fa-solid fa-lock" />
+                      <font-awesome-icon :icon="Icons.Locked" />
                     </button>
                   </div>
                 </td>

@@ -25,6 +25,7 @@ import { useToastError } from '@/composables/useToastError'
 import { useAgentsStore } from '@/stores/agents'
 
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
+import { Icons } from '@/util/icons'
 import { timeBetween, timeDurationToReadable } from '@/util/units'
 
 const props = defineProps<{
@@ -155,23 +156,23 @@ async function onDeleteAttack() {
   <div class="mt-8 flex flex-row justify-center">
     <div class="join">
       <button @click="() => start()" class="btn join-item btn-sm" v-if="attack.jobs.length == 0">
-        <font-awesome-icon icon="fa-solid fa-play" />
+        <font-awesome-icon :icon="Icons.Start" />
         Start
       </button>
 
       <button @click="() => cloneAndStart()" class="btn join-item btn-sm" v-else>
-        <font-awesome-icon icon="fa-solid fa-clone" />
+        <font-awesome-icon :icon="Icons.Clone" />
         Clone & Start
       </button>
 
       <button @click="() => stop()" class="btn join-item btn-sm" v-if="canStop">
-        <font-awesome-icon icon="fa-solid fa-stop" />
+        <font-awesome-icon :icon="Icons.Stop" />
         Stop
       </button>
 
       <ConfirmModal @on-confirm="() => onDeleteAttack()" v-else>
         <button class="btn join-item btn-sm">
-          <font-awesome-icon icon="fa-solid fa-trash" />
+          <font-awesome-icon :icon="Icons.Delete" />
           Delete
         </button>
       </ConfirmModal>

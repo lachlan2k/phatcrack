@@ -11,6 +11,8 @@ import { useToastError } from '@/composables/useToastError'
 import { useConfigStore } from '@/stores/config'
 import { useAdminConfigStore } from '@/stores/adminConfig'
 
+import { Icons } from '@/util/icons'
+
 const configStore = useConfigStore()
 const adminConfigStore = useAdminConfigStore()
 const { config: adminConfig } = storeToRefs(adminConfigStore)
@@ -216,7 +218,7 @@ async function onSave() {
                 v-if="oidcAuthSettings.base_url.length == 0"
               >
                 <button class="btn btn-ghost btn-sm" @click="autoFillBaseURL">
-                  <font-awesome-icon icon="fa-solid fa-pen-to-square"></font-awesome-icon>
+                  <font-awesome-icon :icon="Icons.Autofill"></font-awesome-icon>
                 </button>
               </span>
             </span>

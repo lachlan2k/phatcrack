@@ -8,6 +8,8 @@ import { adminGetVersion } from '@/api/admin'
 import { useAuthStore } from '@/stores/auth'
 import { useConfigStore } from '@/stores/config'
 
+import { Icons } from '@/util/icons'
+
 const authStore = useAuthStore()
 const { loggedInUser, isAdmin } = storeToRefs(authStore)
 
@@ -19,17 +21,17 @@ const router = useRouter()
 const route = useRoute()
 
 const pageLinks = [
-  { name: 'Project Dashboard', icon: 'fa-folder', to: '/dashboard' },
-  { name: 'Listfiles', icon: 'fa-file', to: '/listfiles' },
-  { name: 'Hash Search', icon: 'fa-magnifying-glass', to: '/hash-search' },
-  { name: 'Utilisation', icon: 'fa-gauge', to: '/utilisation' },
-  { name: 'Agents', icon: 'fa-robot', to: '/agents' }
+  { name: 'Project Dashboard', icon: Icons.Dashboard, to: '/dashboard' },
+  { name: 'Listfiles', icon: Icons.Listfiles, to: '/listfiles' },
+  { name: 'Hash Search', icon: Icons.HashSearch, to: '/hash-search' },
+  { name: 'Utilisation', icon: Icons.Utilisation, to: '/utilisation' },
+  { name: 'Agents', icon: Icons.Agent, to: '/agents' }
 ]
 
 const adminPageLinks = [
-  { name: 'Configuration', icon: 'fa-gear', to: '/admin/general' },
-  { name: 'Manage Users', icon: 'fa-users', to: '/admin/users' },
-  { name: 'Manage Agents', icon: 'fa-robot', to: '/admin/agents' }
+  { name: 'Configuration', icon: Icons.Config, to: '/admin/general' },
+  { name: 'Manage Users', icon: Icons.User, to: '/admin/users' },
+  { name: 'Manage Agents', icon: Icons.Agent, to: '/admin/agents' }
 ]
 
 const version = ref('')
@@ -65,7 +67,7 @@ async function logout() {
           data-tip="Your administrator has put Phatcrack in maintenance. You can't start new attacks."
         >
           <button class="btn btn-warning btn-sm mb-1 mt-4 w-full py-1">
-            <font-awesome-icon icon="fa-solid fa-warning" />
+            <font-awesome-icon :icon="Icons.Maintenance" />
             Maintenance Mode
           </button>
         </div>
@@ -73,7 +75,7 @@ async function logout() {
         <RouterLink to="/wizard">
           <a class="btn btn-neutral w-full gap-2 bg-slate-600">
             <span>
-              <font-awesome-icon icon="fa-solid fa-pencil" />
+              <font-awesome-icon :icon="Icons.Edit" />
             </span>
             Get Cracking
           </a>
@@ -82,7 +84,7 @@ async function logout() {
         <ul class="menu mt-4">
           <li v-for="link in pageLinks" :key="link.name" :class="route.path == link.to ? 'bordered' : 'hover-bordered'" class="mt-2">
             <RouterLink :to="link.to" :class="route.path == link.to ? 'active' : ''">
-              <span class="w-6 text-center"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
+              <span class="w-6 text-center"><font-awesome-icon :icon="link.icon" /></span>
 
               {{ link.name }}
             </RouterLink>
@@ -95,14 +97,14 @@ async function logout() {
           <li class="hover-bordered" :class="route.path.startsWith('/admin') ? 'bordered' : 'hover-bordered'" v-if="isAdmin">
             <div class="text-content-neutral dropdown dropdown-top">
               <label tabindex="0" class="col-span-2 w-full cursor-pointer">
-                <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-lock" /></span>
+                <span class="w-6 text-center"><font-awesome-icon :icon="Icons.Admin" /></span>
                 <span>Admin Tools</span>
               </label>
 
               <ul tabindex="0" class="menu dropdown-content rounded-box mb-2 w-52 bg-base-100 p-2 pb-4 text-black shadow">
                 <li v-for="link in adminPageLinks" :key="link.name">
                   <RouterLink :to="link.to">
-                    <span class="min-w-[20px] text-center"><font-awesome-icon :icon="'fa-solid ' + link.icon" /></span>
+                    <span class="min-w-[20px] text-center"><font-awesome-icon :icon="link.icon" /></span>
                     <span>{{ link.name }}</span>
                   </RouterLink>
                 </li>
@@ -113,7 +115,7 @@ async function logout() {
           <li class="hover-bordered" :class="route.path == '/account' ? 'bordered' : 'hover-bordered'">
             <div class="text-content-neutral dropdown dropdown-top">
               <label tabindex="0" class="col-span-2 w-full cursor-pointer">
-                <span class="w-6 text-center"><font-awesome-icon icon="fa-solid fa-user" /></span>
+                <span class="w-6 text-center"><font-awesome-icon :icon="Icons.User" /></span>
                 <span
                   >Welcome, <strong>{{ loggedInUser?.username }}</strong></span
                 >
@@ -122,13 +124,13 @@ async function logout() {
               <ul tabindex="0" class="menu dropdown-content rounded-box w-52 bg-base-100 p-2 pb-4 text-black shadow">
                 <li>
                   <RouterLink to="/account">
-                    <span><font-awesome-icon icon="fa-solid fa-user" /></span>
+                    <span><font-awesome-icon :icon="Icons.User" /></span>
                     <span>My account</span>
                   </RouterLink>
                 </li>
                 <li>
                   <a @click="logout()">
-                    <span><font-awesome-icon icon="fa-solid fa-sign-out" /></span>
+                    <span><font-awesome-icon :icon="Icons.SignOut" /></span>
                     <span>Sign out</span>
                   </a>
                 </li>

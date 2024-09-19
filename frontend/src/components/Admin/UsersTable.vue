@@ -25,6 +25,8 @@ import { useToastError } from '@/composables/useToastError'
 
 import { useAuthStore } from '@/stores/auth'
 
+import { Icons } from '@/util/icons'
+
 const isUserCreateOpen = ref(false)
 const isServiceAccountCreateOpen = ref(false)
 const isUserEditOpen = ref(false)
@@ -324,7 +326,7 @@ async function onGenerateNewPassword(id: string) {
         <label class="label font-bold">
           <span class="label-text">Password</span>
           <span @click="() => (newUserGenPassword = !newUserGenPassword)" class="tooltip cursor-pointer" v-if="!newUserLockPassword">
-            <font-awesome-icon icon="fa-solid fa-dice" />
+            <font-awesome-icon :icon="Icons.RandomlyGenerated" />
           </span>
         </label>
         <input
@@ -410,14 +412,14 @@ async function onGenerateNewPassword(id: string) {
           {{ user.roles.join(', ') }}
         </td>
         <td>
-          <font-awesome-icon icon="fa-solid fa-check" v-if="!user.is_password_locked" />
+          <font-awesome-icon :icon="Icons.Tick" v-if="!user.is_password_locked" />
         </td>
         <td>
           <ConfirmModal @on-confirm="() => onDeleteUser(user.id)">
-            <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+            <IconButton :icon="Icons.Delete" color="error" tooltip="Delete" />
           </ConfirmModal>
-          <IconButton icon="fa-solid fa-pencil" color="primary" tooltip="Edit" @click="() => onOpenEditUser(user.id)" />
-          <IconButton icon="fa-solid fa-key" color="primary" tooltip="Manage Password" @click="() => onOpenManagePassword(user.id)" />
+          <IconButton :icon="Icons.Edit" color="primary" tooltip="Edit" @click="() => onOpenEditUser(user.id)" />
+          <IconButton :icon="Icons.Password" color="primary" tooltip="Manage Password" @click="() => onOpenManagePassword(user.id)" />
         </td>
       </tr>
     </tbody>

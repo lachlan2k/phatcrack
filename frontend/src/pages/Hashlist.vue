@@ -35,6 +35,7 @@ import { exportResults, ExportFormat } from '@/util/exportHashlist'
 import decodeHex from '@/util/decodeHex'
 import { getAttackModeName, hashrateStr } from '@/util/hashcat'
 import { timeDurationToReadable } from '@/util/units'
+import { Icons } from '@/util/icons'
 
 const hashlistId = useRoute().params.id as string
 const { data: hashlistData, isLoading: isLoadingHashlist, silentlyRefresh: refreshHashlist } = useApi(() => getHashlist(hashlistId))
@@ -248,7 +249,7 @@ async function onAppendHashes() {
                 <div>
                   <div class="tooltip" data-tip="Add more hashes">
                     <button class="btn btn-ghost btn-sm" @click="() => (isHashAddModalOpen = true)">
-                      <font-awesome-icon icon="fa-solid fa-plus-circle" />
+                      <font-awesome-icon :icon="Icons.Add" />
                     </button>
                   </div>
 
@@ -257,7 +258,7 @@ async function onAppendHashes() {
                       class="btn btn-ghost btn-sm"
                       @click="() => exportResults(hashlistId, ExportFormat.ColonSeparated, onlyShowCracked)"
                     >
-                      <font-awesome-icon icon="fa-solid fa-download" />
+                      <font-awesome-icon :icon="Icons.Download" />
                     </button>
                   </div>
                 </div>
@@ -294,7 +295,7 @@ async function onAppendHashes() {
                         data-tip="This hash was unexpected and automatically appended (issue #22)"
                         v-if="hash.is_unexpected"
                       >
-                        <font-awesome-icon icon="fa-solid fa-circle-exclamation" class="align-middle" />
+                        <font-awesome-icon :icon="Icons.Warning" class="align-middle" />
                       </div>
                       <span
                         class="inline-block overflow-hidden text-ellipsis whitespace-nowrap align-middle font-mono"

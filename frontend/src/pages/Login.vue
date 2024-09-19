@@ -13,6 +13,8 @@ import { useToastError } from '@/composables/useToastError'
 import { useAuthStore } from '@/stores/auth'
 import { useConfigStore } from '@/stores/config'
 
+import { Icons } from '@/util/icons'
+
 const toast = useToast()
 const authStore = useAuthStore()
 const router = useRouter()
@@ -233,7 +235,7 @@ const cardTitle = computed(() => {
         <div v-if="activeScreen == ActiveScreens.MFAVerification" class="text-center">
           <p>We need to verify your identity</p>
           <div class="cursor-pointer" @click="verifyKey">
-            <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem" />
+            <font-awesome-icon :icon="Icons.Password" class="my-8" style="font-size: 5rem" />
           </div>
           <div>
             <button class="btn btn-ghost" @click="verifyKey">Verify</button>
@@ -243,7 +245,7 @@ const cardTitle = computed(() => {
         <div v-if="activeScreen == ActiveScreens.MFAEnrollment" class="text-center">
           <p>You are required to enroll a security key</p>
           <div class="cursor-pointer" @click="enrollKey">
-            <font-awesome-icon icon="fa-solid fa-key" class="my-8" style="font-size: 5rem" />
+            <font-awesome-icon :icon="Icons.Password" class="my-8" style="font-size: 5rem" />
           </div>
           <div>
             <button class="btn btn-primary" @click="enrollKey">Enroll Key</button>
@@ -279,7 +281,7 @@ const cardTitle = computed(() => {
 
         <div v-if="activeScreen == ActiveScreens.Done" class="text-center">
           <p>Welcome</p>
-          <font-awesome-icon icon="fa-solid fa-check" class="my-8 text-success" style="font-size: 5rem" />
+          <font-awesome-icon :icon="Icons.Tick" class="my-8 text-success" style="font-size: 5rem" />
         </div>
       </div>
     </div>

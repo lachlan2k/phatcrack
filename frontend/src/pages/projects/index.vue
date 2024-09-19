@@ -16,6 +16,8 @@ import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
 import { useActiveAttacksStore } from '@/stores/activeAttacks'
 
+import { Icons } from '@/util/icons'
+
 const projectsStore = useProjectsStore()
 projectsStore.load(true)
 
@@ -83,7 +85,7 @@ const quantityStr = (num: number, str: string) => {
                       {{ quantityStr(activeAttacksStore.jobsForProject(project.id).length, 'job') }} running
                     </div>
                     <span class="ml-1 text-xs font-normal text-slate-500" v-if="project.owner_user_id != loggedInUser?.id">
-                      <font-awesome-icon icon="fa-solid fa-link" /> Shared by
+                      <font-awesome-icon :icon="Icons.Share" /> Shared by
                       {{ usersStore.byId(project.owner_user_id)?.username ?? 'Unknown user' }}
                     </span>
                   </td>
@@ -92,7 +94,7 @@ const quantityStr = (num: number, str: string) => {
                   </td>
                   <td class="w-0 text-center">
                     <ConfirmModal @on-confirm="() => onDeleteProject(project.id)">
-                      <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+                      <IconButton :icon="Icons.Delete" color="error" tooltip="Delete" />
                     </ConfirmModal>
                   </td>
                 </tr>
@@ -102,7 +104,7 @@ const quantityStr = (num: number, str: string) => {
           <EmptyTable v-if="projects.length == 0" text="No Projects Yet" icon="fa-folder" />
 
           <p class="mt-2">
-            <span class="text-sm text-slate-500"> <font-awesome-icon icon="fa-solid fa-link" /> = Shared </span>
+            <span class="text-sm text-slate-500"> <font-awesome-icon :icon="Icons.Share" /> = Shared </span>
           </p>
         </div>
       </div>

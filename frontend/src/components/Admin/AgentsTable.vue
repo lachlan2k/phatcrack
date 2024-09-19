@@ -13,6 +13,7 @@ import { getAllAgents } from '@/api/agent'
 import { useApi } from '@/composables/useApi'
 import { useToastError } from '@/composables/useToastError'
 
+import { Icons } from '@/util/icons'
 import { formatDeviceName } from '@/util/formatDeviceName'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
@@ -113,8 +114,8 @@ async function onDeleteAgent(id: string) {
         <td class="font-mono">{{ agent.agent_info.version }}</td>
         <td>
           <span v-for="device in agent.agent_devices" :key="device.device_id + device.device_name">
-            <font-awesome-icon icon="fa-solid fa-memory" v-if="device.device_type == 'GPU'" />
-            <font-awesome-icon icon="fa-solid fa-microchip" v-else />
+            <font-awesome-icon :icon="Icons.GPU" v-if="device.device_type == 'GPU'" />
+            <font-awesome-icon :icon="Icons.CPU" v-else />
             {{ formatDeviceName(device.device_name) }} ({{ device.temp }} °c)
             <br />
           </span>
@@ -139,7 +140,7 @@ async function onDeleteAgent(id: string) {
 
         <td class="text-center">
           <ConfirmModal @on-confirm="() => onDeleteAgent(agent.id)">
-            <IconButton icon="fa-solid fa-trash" color="error" tooltip="Delete" />
+            <IconButton :icon="Icons.Delete" color="error" tooltip="Delete" />
           </ConfirmModal>
         </td>
       </tr>
