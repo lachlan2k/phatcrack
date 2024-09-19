@@ -11,6 +11,7 @@ import { useListfilesStore } from './stores/listfiles'
 import { useAgentsStore } from './stores/agents'
 import { useUsersStore } from './stores/users'
 import { useActiveAttacksStore } from './stores/activeAttacks'
+import { useAttackTemplatesStore } from './stores/attackTemplates'
 
 const AUTH_REFRESH_RATE = 0.5 * 60 * 1000 // Every 5 minutes
 const authRefreshInterval = ref(0)
@@ -24,6 +25,7 @@ const listfileStore = useListfilesStore()
 const agentsStore = useAgentsStore()
 const usersStore = useUsersStore()
 const activeAttacksStore = useActiveAttacksStore()
+const attackTemplatesStore = useAttackTemplatesStore()
 
 const { hasCompletedAuth, hasTriedAuth, loggedInUser, isLoggedIn } = storeToRefs(authStore)
 
@@ -64,6 +66,7 @@ watch(hasCompletedAuth, (newHasCompletedAuth, prevHasCompletedAuth) => {
     projectStore.load(true)
     agentsStore.load(true)
     usersStore.load(true)
+    attackTemplatesStore.load(true)
     activeAttacksStore.load()
   }
 })

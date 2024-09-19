@@ -80,6 +80,7 @@ func Listen(port string) error {
 	controllers.HookListsEndpoints(api.Group("/listfiles"))
 	controllers.HookHashlistEndpoints(api.Group("/hashlist"))
 	controllers.HookAttackEndpoints(api.Group(("/attack")))
+	controllers.HookAttackTemplateEndpoints(api.Group(("/attack-template")))
 	controllers.HookAgentEndpoints(api.Group("/agent"))
 	controllers.HookJobEndpoints(api.Group("/job"))
 	controllers.HookAccountEndpoints(api.Group("/account"))

@@ -23,6 +23,7 @@ const route = useRoute()
 const pageLinks = [
   { name: 'Project Dashboard', icon: Icons.Dashboard, to: '/dashboard' },
   { name: 'Listfiles', icon: Icons.Listfiles, to: '/listfiles' },
+  { name: 'Attack Templates', icon: Icons.AttackTemplate, to: '/attack-templates' },
   { name: 'Hash Search', icon: Icons.HashSearch, to: '/hash-search' },
   { name: 'Utilisation', icon: Icons.Utilisation, to: '/utilisation' },
   { name: 'Agents', icon: Icons.Agent, to: '/agents' }

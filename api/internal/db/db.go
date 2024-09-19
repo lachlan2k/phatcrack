@@ -41,6 +41,24 @@ func Save[T any](obj *T) error {
 	return GetInstance().Save(obj).Error
 }
 
+func GetByID[T any](id string) (*T, error) {
+	var res T
+	err := GetInstance().First(&res, "id = ?", id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func GetAll[T any]() ([]T, error) {
+	res := []T{}
+	err := GetInstance().Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 var dbInstance *gorm.DB = nil
 
 var ErrNotFound = gorm.ErrRecordNotFound
@@ -104,6 +122,8 @@ func runMigrations() {
 	instance.AutoMigrate(&Hashlist{})
 	instance.AutoMigrate(&HashlistHash{})
 	instance.AutoMigrate(&Attack{})
+	instance.AutoMigrate(&AttackTemplate{})
+	instance.AutoMigrate(&AttackTemplateSet{})
 
 	instance.AutoMigrate(&User{})
 

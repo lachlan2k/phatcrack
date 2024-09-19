@@ -45,6 +45,8 @@ const router = createRouter({
 
     route('/listfiles', 'Listfiles', () => import('@/pages/Listfiles.vue')),
 
+    route('/attack-templates', 'Attack Templates', () => import('@/pages/AttackTemplates.vue')),
+
     route('/wizard', 'Wizard', () => import('@/pages/Wizard.vue')),
 
     route('/account', 'Account', () => import('@/pages/Account.vue')),

@@ -265,6 +265,27 @@ export interface AttackStartResponseDTO {
   new_job_ids: string[]
   still_processing: boolean
 }
+export interface AttackTemplateDTO {
+  id: string
+  name: string
+  description: string
+  hashcat_params?: HashcatParams
+  created_by_user_id: string
+  attack_template_ids?: string[]
+}
+export interface AttackTemplateGetAllResponseDTO {
+  attack_templates: AttackTemplateDTO[]
+}
+export interface AttackTemplateCreateRequestDTO {
+  name: string
+  description: string
+  hashcat_params: HashcatParams
+}
+export interface AttaackTemplateCreateSetRequestDTO {
+  name: string
+  description: string
+  attack_template_ids: string[]
+}
 export interface AuthLoginRequestDTO {
   username: string
   password: string

@@ -18,9 +18,11 @@ export const Icons = {
 
   Listfile: 'fa-solid fa-file-lines',
 
-  Rulefile: 'fa-solid fa-blender',
+  Rulefile: 'fa-solid fa-shuffle',
   Wordlist: 'fa-solid fa-book-open',
   Charset: 'fa-solid fa-arrow-down-a-z',
+
+  AttackTemplate: 'fa-solid fa-pizza-slice',
 
   // pages
   Dashboard: 'fa-solid fa-folder',
