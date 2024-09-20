@@ -96,9 +96,7 @@ const quantityStr = (num: number, str: string) => {
 
 <template>
   <main class="h-full w-full p-4">
-    <div v-if="isLoading" class="flex h-full w-full justify-center">
-      <span class="loading loading-spinner loading-lg"></span>
-    </div>
+    <PageLoading v-if="isLoading" />
     <div v-else>
       <Modal v-model:isOpen="isShareModalOpen" v-if="hasOwnereshipRights">
         <ProjectShare :projectId="projId" />

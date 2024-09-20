@@ -11,7 +11,6 @@ type AttackTemplate struct {
 	UUIDBaseModel
 
 	Name          string
-	Description   string
 	HashcatParams datatypes.JSONType[hashcattypes.HashcatParams]
 
 	CreatedByUser   User      `gorm:"constraint:OnDelete:SET NULL;"`
@@ -22,7 +21,6 @@ type AttackTemplateSet struct {
 	UUIDBaseModel
 
 	Name              string
-	Description       string
 	AttackTemplateIDs datatypes.JSONSlice[string]
 
 	CreatedByUser   User      `gorm:"constraint:OnDelete:SET NULL;"`
@@ -40,7 +38,6 @@ func (at AttackTemplate) ToDTO() apitypes.AttackTemplateDTO {
 
 		Type:              AttackTemplateType,
 		Name:              at.Name,
-		Description:       at.Description,
 		HashcatParams:     &params,
 		AttackTemplateIDs: nil,
 
@@ -56,7 +53,6 @@ func (at AttackTemplateSet) ToDTO() apitypes.AttackTemplateDTO {
 
 		Type:              AttackTemplateSetType,
 		Name:              at.Name,
-		Description:       at.Description,
 		HashcatParams:     nil,
 		AttackTemplateIDs: ids,
 
@@ -89,9 +85,9 @@ func GetAttackTemplateSet(id string) (*AttackTemplateSet, error) {
 }
 
 func DeleteAttackTemplate(id string) error {
-	return GetInstance().Unscoped().Delete(&AttackTemplate{}, id).Error
+	return GetInstance().Unscoped().Delete(&AttackTemplate{}, "id = ?",id).Error
 }
 
 func DeleteAttackTemplateSet(id string) error {
-	return GetInstance().Unscoped().Delete(&AttackTemplateSet{}, id).Error
+	return GetInstance().Unscoped().Delete(&AttackTemplateSet{}, "id = ?", id).Error
 }

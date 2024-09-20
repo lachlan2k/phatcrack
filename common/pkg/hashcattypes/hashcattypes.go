@@ -18,6 +18,7 @@ type HashcatParams struct {
 	AdditionalArgs    []string `json:"additional_args"`
 	OptimizedKernels  bool     `json:"optimized_kernels"`
 	SlowCandidates    bool     `json:"slow_candidates"`
+	EnableLoopback    bool     `json:"enable_loopback"`
 
 	Skip  int64 `json:"skip"`
 	Limit int64 `json:"limit"`

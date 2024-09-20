@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { reactive, toRefs, type UnwrapRef } from 'vue'
 
-import { useToastError } from './useToastError'
+import { useToastError } from '@/composables/useToastError'
 
 import { useAuthStore } from '@/stores/auth'
 

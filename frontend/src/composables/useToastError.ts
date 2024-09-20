@@ -12,7 +12,9 @@ export function useToastError() {
       errorString = e.message
     }
 
-    toast.error(prefixString + errorString)
+    const paddedPrefixString = prefixString.endsWith(' ') ? prefixString : prefixString + ' '
+
+    toast.error(paddedPrefixString + errorString)
   }
 
   return {

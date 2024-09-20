@@ -83,7 +83,7 @@ async function logout() {
         </RouterLink>
 
         <ul class="menu mt-4">
-          <li v-for="link in pageLinks" :key="link.name" :class="route.path == link.to ? 'bordered' : 'hover-bordered'" class="mt-2">
+          <li v-for="link in pageLinks" :key="link.name" :class="route.path == link.to ? 'bordered' : 'hover-bordered'">
             <RouterLink :to="link.to" :class="route.path == link.to ? 'active' : ''">
               <span class="w-6 text-center"><font-awesome-icon :icon="link.icon" /></span>
 

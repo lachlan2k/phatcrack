@@ -3,8 +3,8 @@ import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { useToast } from 'vue-toastification'
 
-import SearchableDropdown from './SearchableDropdown.vue'
-import IconButton from './IconButton.vue'
+import SearchableDropdown from '@/components/SearchableDropdown.vue'
+import IconButton from '@/components/IconButton.vue'
 
 import { addProjectShare, deleteProjectShare, getProjectShares } from '@/api/project'
 import type { UserMinimalDTO } from '@/api/types'

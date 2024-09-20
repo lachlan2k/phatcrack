@@ -1,20 +1,26 @@
-export const AttackModeDictionary = 0
-export const AttackModeCombinator = 1
-export const AttackModeMask = 3
-export const AttackModeHybridDM = 6
-export const AttackModeHybridMD = 7
+import type { AttackSettingsT } from '@/components/Wizard/AttackSettings.vue'
+
+import type { HashcatParams } from '@/api/types'
+
+export enum AttackMode {
+  Dictionary = 0,
+  Combinator = 1,
+  Mask = 3,
+  HybridDM = 6,
+  HybridMD = 7
+}
 
 export const attackModes = [
-  { name: 'Wordlist', value: 0 },
-  { name: 'Combinator', value: 1 },
-  { name: 'Brute-force/Mask', value: 3 },
+  { name: 'Wordlist', value: AttackMode.Dictionary },
+  { name: 'Combinator', value: AttackMode.Combinator },
+  { name: 'Brute-force/Mask', value: AttackMode.Mask },
   {
     name: 'Wordlist + Mask',
-    value: 6
+    value: AttackMode.HybridDM
   },
   {
     name: 'Mask + Wordlist',
-    value: 7
+    value: AttackMode.HybridMD
   }
 ]
 
@@ -55,4 +61,65 @@ export function hashrateStr(hashrate: number): string {
   }
 
   return `${x.toFixed(1)} ${hashrateUnits[n]}`
+}
+
+export function makeHashcatParams(hashType: number, attackSettings: AttackSettingsT): HashcatParams {
+  console.log('received attack settings', attackSettings)
+
+  const baseParams: HashcatParams = {
+    attack_mode: attackSettings.attackMode,
+    hash_type: hashType,
+
+    mask: '',
+    mask_increment: false,
+    mask_increment_min: 0,
+    mask_increment_max: 0,
+    mask_custom_charsets: [],
+    mask_sharded_charset: '',
+
+    wordlist_filenames: [],
+    rules_filenames: [],
+
+    optimized_kernels: attackSettings.optimizedKernels,
+    slow_candidates: attackSettings.slowCandidates,
+    enable_loopback: attackSettings.enableLoopback,
+
+    additional_args: [],
+    skip: 0,
+    limit: 0
+  }
+
+  switch (attackSettings.attackMode) {
+    case AttackMode.Dictionary:
+      return {
+        ...baseParams,
+        wordlist_filenames: attackSettings.selectedWordlists.slice(0, 1),
+        rules_filenames: attackSettings.selectedRulefiles
+      }
+
+    case AttackMode.Combinator:
+      return {
+        ...baseParams,
+        wordlist_filenames: attackSettings.selectedWordlists
+      }
+
+    case AttackMode.Mask:
+      return {
+        ...baseParams,
+        mask: attackSettings.mask,
+        mask_increment: attackSettings.maskIncrement
+      }
+
+    case AttackMode.HybridDM:
+    case AttackMode.HybridMD:
+      return {
+        ...baseParams,
+        mask: attackSettings.mask,
+        mask_increment: attackSettings.maskIncrement,
+        wordlist_filenames: attackSettings.selectedWordlists.slice(0, 1)
+      }
+
+    default:
+      return baseParams
+  }
 }

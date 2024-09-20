@@ -220,9 +220,7 @@ async function onAppendHashes() {
   </Modal>
 
   <main class="h-full w-full p-4">
-    <div v-if="isLoading" class="flex h-full w-full justify-center">
-      <span class="loading loading-spinner loading-lg"></span>
-    </div>
+    <PageLoading v-if="isLoading" />
     <div v-else>
       <h1 class="text-4xl font-bold">{{ hashlistData?.name }} - {{ hashTypeStr }}</h1>
       <div class="breadcrumbs pl-1 text-sm">

@@ -3,31 +3,22 @@ import { computed, watch, reactive } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
 
-import HashlistInputs from './HashlistInputs.vue'
-import MaskInput from './MaskInput.vue'
-
+import HashlistInputs from '@/components/Wizard/HashlistInputs.vue'
+import AttackSettings from '@/components/Wizard/AttackSettings.vue'
 import AttackConfigDetails from '@/components/AttackConfigDetails.vue'
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
-import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import HrOr from '@/components/HrOr.vue'
 
 import { createHashlist, createProject, createAttack, startAttack, getProject, getHashlist } from '@/api/project'
-import type { AttackDTO, HashcatParams, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
+import type { AttackDTO, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
 
 import { useToastError } from '@/composables/useToastError'
+import { useAttackSettings } from '@/composables/useAttackSettings'
 
 import { useResourcesStore } from '@/stores/resources'
 import { useProjectsStore } from '@/stores/projects'
-import { useListfilesStore } from '@/stores/listfiles'
 
-import {
-  AttackModeCombinator,
-  AttackModeDictionary,
-  AttackModeHybridDM,
-  AttackModeHybridMD,
-  AttackModeMask,
-  attackModes
-} from '@/util/hashcat'
+import { makeHashcatParams } from '@/util/hashcat'
 
 /*
  * Props
@@ -70,10 +61,6 @@ const projectSelectOptions = computed(() => [
   }))
 ])
 
-const listfileStore = useListfilesStore()
-listfileStore.load(true)
-const { wordlists, rulefiles } = storeToRefs(listfileStore)
-
 const steps = [
   { name: 'Choose or Create Project' },
   { name: 'Add Hashlist' },
@@ -103,32 +90,10 @@ const inputs = reactive({
   hashes: '',
   hasUsernames: false,
 
-  attackMode: 0,
-  selectedWordlists: [] as string[],
-  selectedRulefiles: [] as string[],
-  mask: '',
-  maskIncrement: true,
-  optimizedKernels: false,
-  slowCandidates: false,
-  enableLoopback: true,
-
-  combinatorLeft: [] as string[],
-  combinatorRight: [] as string[],
-
-  isDistributed: true,
-
   activeStep: props.firstStep
 })
 
-// TODO: refactor so that selectedWordlists isn't the source of truth
-watch(
-  () => inputs.combinatorLeft,
-  newLeft => (inputs.selectedWordlists = [...newLeft, ...inputs.combinatorRight])
-)
-watch(
-  () => inputs.combinatorRight,
-  newRight => (inputs.selectedWordlists = [...inputs.combinatorLeft, ...newRight])
-)
+const { attackSettings } = useAttackSettings()
 
 // If a user starts typing in a new project name, then de-select existing project
 watch(
@@ -167,7 +132,7 @@ const projectStepValidationError = computed(() => {
   if (inputs.projectName == '' && inputs.selectedProjectId == '') {
     return 'Please select an existing project or input a new project name'
   }
-  if (inputs.projectName.length < 3) {
+  if (inputs.projectName.length < 3 && inputs.selectedProjectId == '') {
     return 'Project name too short (3 min)'
   }
   return null
@@ -244,66 +209,8 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
   }
 }
 
-function makeHashcatParams(): HashcatParams {
-  const baseParams: HashcatParams = {
-    attack_mode: inputs.attackMode,
-    hash_type: Number(inputs.hashType),
-
-    mask: '',
-    mask_increment: false,
-    mask_increment_min: 0,
-    mask_increment_max: 0,
-    mask_custom_charsets: [],
-    mask_sharded_charset: '',
-
-    wordlist_filenames: [],
-    rules_filenames: [],
-
-    optimized_kernels: inputs.optimizedKernels,
-    slow_candidates: inputs.slowCandidates,
-
-    additional_args: [],
-    skip: 0,
-    limit: 0
-  }
-
-  switch (inputs.attackMode) {
-    case AttackModeDictionary:
-      return {
-        ...baseParams,
-        wordlist_filenames: inputs.selectedWordlists.slice(0, 1),
-        rules_filenames: inputs.selectedRulefiles
-      }
-
-    case AttackModeCombinator:
-      return {
-        ...baseParams,
-        wordlist_filenames: inputs.selectedWordlists
-      }
-
-    case AttackModeMask:
-      return {
-        ...baseParams,
-        mask: inputs.mask,
-        mask_increment: inputs.maskIncrement
-      }
-
-    case AttackModeHybridDM:
-    case AttackModeHybridMD:
-      return {
-        ...baseParams,
-        mask: inputs.mask,
-        mask_increment: inputs.maskIncrement,
-        wordlist_filenames: inputs.selectedWordlists.slice(0, 1)
-      }
-
-    default:
-      return baseParams
-  }
-}
-
 const computedHashcatParams = computed(() => {
-  return makeHashcatParams()
+  return makeHashcatParams(Number(inputs.hashType), attackSettings)
 })
 
 async function saveUptoAttack(): Promise<AttackDTO> {
@@ -312,8 +219,8 @@ async function saveUptoAttack(): Promise<AttackDTO> {
   try {
     const attack = await createAttack({
       hashlist_id: hashlist.id,
-      hashcat_params: makeHashcatParams(),
-      is_distributed: inputs.isDistributed
+      hashcat_params: computedHashcatParams.value,
+      is_distributed: attackSettings.isDistributed
     })
     toast.success('Created attack!')
     return attack
@@ -415,88 +322,7 @@ async function saveAndStartAttack() {
 
         <!-- Attack settings -->
         <template v-if="inputs.activeStep == StepIndex.Attack">
-          <div class="join self-center">
-            <input
-              type="radio"
-              name="options"
-              :data-title="attackMode.name"
-              class="btn btn-neutral join-item"
-              :key="attackMode.value"
-              :value="attackMode.value"
-              v-model="inputs.attackMode"
-              :aria-label="attackMode.name"
-              v-for="attackMode in attackModes"
-            />
-          </div>
-
-          <div class="my-2"></div>
-
-          <!-- Wordlist -->
-          <div v-if="inputs.attackMode === 0">
-            <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="inputs.selectedWordlists" :limit="1" />
-            <hr class="my-4" />
-            <WordlistSelect label-text="Select Rule File(s)" :list="rulefiles" v-model="inputs.selectedRulefiles" :limit="Infinity" />
-          </div>
-
-          <!-- Combinator -->
-          <div v-if="inputs.attackMode === 1">
-            <WordlistSelect label-text="Select Left Wordlist" :list="wordlists" v-model="inputs.combinatorLeft" :limit="1" />
-            <hr class="my-4" />
-            <WordlistSelect label-text="Select Right Wordlist" :list="wordlists" v-model="inputs.combinatorRight" :limit="1" />
-          </div>
-
-          <!-- Brute-force/Mask -->
-          <div v-if="inputs.attackMode === 3">
-            <MaskInput v-model="inputs.mask" />
-            <label class="label cursor-pointer justify-start">
-              <input type="checkbox" v-model="inputs.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
-              <span><span class="label-text ml-4 font-bold">Mask increment?</span></span>
-            </label>
-          </div>
-
-          <!-- Wordlist + Mask -->
-          <div v-if="inputs.attackMode === 6">
-            <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="inputs.selectedWordlists" :limit="1" />
-            <hr class="my-4" />
-            <MaskInput v-model="inputs.mask" />
-            <label class="label cursor-pointer justify-start">
-              <input type="checkbox" v-model="inputs.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
-              <span><span class="label-text ml-4 font-bold">Mask increment?</span></span>
-            </label>
-          </div>
-
-          <!-- Mask + Wordlist -->
-          <div v-if="inputs.attackMode === 7">
-            <MaskInput v-model="inputs.mask" />
-            <hr class="my-4" />
-            <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="inputs.selectedWordlists" :limit="1" />
-            <label class="label cursor-pointer justify-start">
-              <input type="checkbox" v-model="inputs.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
-              <span><span class="label-text ml-4 font-bold">Mask increment?</span></span>
-            </label>
-          </div>
-
-          <hr class="my-4" />
-
-          <label class="label font-bold">Additional Options</label>
-          <div>
-            <label class="label cursor-pointer justify-start">
-              <input type="checkbox" v-model="inputs.isDistributed" class="checkbox-primary checkbox checkbox-xs" />
-              <span><span class="label-text ml-4 font-bold">Distribute attack?</span></span>
-            </label>
-            <label class="label cursor-pointer justify-start">
-              <input type="checkbox" v-model="inputs.enableLoopback" class="checkbox-primary checkbox checkbox-xs" />
-              <span><span class="label-text ml-4 font-bold">Loopback?</span> (--loopback)</span>
-            </label>
-            <label class="label cursor-pointer justify-start">
-              <input type="checkbox" v-model="inputs.optimizedKernels" class="checkbox-primary checkbox checkbox-xs" />
-              <span><span class="label-text ml-4 font-bold">Optimized Kernels?</span> (-O)</span>
-            </label>
-            <label class="label cursor-pointer justify-start">
-              <input type="checkbox" v-model="inputs.slowCandidates" class="checkbox-primary checkbox checkbox-xs" />
-              <span><span class="label-text ml-4 font-bold">Slow Candidates?</span> (-S)</span>
-            </label>
-          </div>
+          <AttackSettings v-model="attackSettings" />
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
@@ -562,7 +388,10 @@ async function saveAndStartAttack() {
 
           <div class="mt-6">
             <h3 class="text-lg font-bold">Attack Settings</h3>
-            <AttackConfigDetails :hashcatParams="computedHashcatParams" :is-distributed="inputs.isDistributed"></AttackConfigDetails>
+            <AttackConfigDetails
+              :hashcatParams="computedHashcatParams"
+              :is-distributed="attackSettings.isDistributed"
+            ></AttackConfigDetails>
           </div>
 
           <div class="mt-8 flex justify-between">

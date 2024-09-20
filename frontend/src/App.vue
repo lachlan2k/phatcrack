@@ -4,14 +4,14 @@ import { useToast } from 'vue-toastification'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 
-import { useAuthStore } from './stores/auth'
-import { useConfigStore } from './stores/config'
-import { useProjectsStore } from './stores/projects'
-import { useListfilesStore } from './stores/listfiles'
-import { useAgentsStore } from './stores/agents'
-import { useUsersStore } from './stores/users'
-import { useActiveAttacksStore } from './stores/activeAttacks'
-import { useAttackTemplatesStore } from './stores/attackTemplates'
+import { useAuthStore } from '@/stores/auth'
+import { useConfigStore } from '@/stores/config'
+import { useProjectsStore } from '@/stores/projects'
+import { useListfilesStore } from '@/stores/listfiles'
+import { useAgentsStore } from '@/stores/agents'
+import { useUsersStore } from '@/stores/users'
+import { useActiveAttacksStore } from '@/stores/activeAttacks'
+import { useAttackTemplatesStore } from '@/stores/attackTemplates'
 
 const AUTH_REFRESH_RATE = 0.5 * 60 * 1000 // Every 5 minutes
 const authRefreshInterval = ref(0)

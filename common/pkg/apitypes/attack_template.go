@@ -7,9 +7,8 @@ import (
 type AttackTemplateDTO struct {
 	ID string `json:"id"`
 
-	Type          string
+	Type          string                      `json:"type"`
 	Name          string                      `json:"name"`
-	Description   string                      `json:"description"`
 	HashcatParams *hashcattypes.HashcatParams `json:"hashcat_params,omitempty"`
 
 	CreatedByUserID string `json:"created_by_user_id"`
@@ -22,13 +21,19 @@ type AttackTemplateGetAllResponseDTO struct {
 }
 
 type AttackTemplateCreateRequestDTO struct {
-	Name          string                     `json:"name"`
-	Description   string                     `json:"description"`
+	Name          string                     `json:"name" validate:"required,standardname,min=3,max=64"`
 	HashcatParams hashcattypes.HashcatParams `json:"hashcat_params" validate:"required"`
 }
 
-type AttaackTemplateCreateSetRequestDTO struct {
-	Name              string   `json:"name"`
-	Description       string   `json:"description"`
-	AttackTemplateIDs []string `json:"attack_template_ids"`
+type AttackTemplateCreateSetRequestDTO struct {
+	Name              string   `json:"name" validate:"required,standardname,min=3,max=64"`
+	AttackTemplateIDs []string `json:"attack_template_ids" validate:"min=1,max=32,dive,uuid4"`
+}
+
+type AttackTemplateUpdateRequestDTO struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+
+	HashcatParams     *hashcattypes.HashcatParams `json:"hashcat_params,omitempty"`
+	AttackTemplateIDs []string                    `json:"attack_template_ids,omitempty"`
 }

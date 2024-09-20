@@ -22,7 +22,8 @@ export const Icons = {
   Wordlist: 'fa-solid fa-book-open',
   Charset: 'fa-solid fa-arrow-down-a-z',
 
-  AttackTemplate: 'fa-solid fa-pizza-slice',
+  AttackTemplate: 'fa-solid fa-sliders',
+  AttackTemplateSet: 'fa-solid fa-layer-group',
 
   // pages
   Dashboard: 'fa-solid fa-folder',

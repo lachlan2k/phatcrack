@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import Overview from './Overview.vue'
-
+import Overview from '@/components/AttackDetailsModal/Overview.vue'
 import Modal from '@/components/Modal.vue'
 
 import {

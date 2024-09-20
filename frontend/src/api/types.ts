@@ -162,6 +162,7 @@ export interface HashcatParams {
   additional_args: string[]
   optimized_kernels: boolean
   slow_candidates: boolean
+  enable_loopback: boolean
   skip: number
   limit: number
 }
@@ -267,8 +268,8 @@ export interface AttackStartResponseDTO {
 }
 export interface AttackTemplateDTO {
   id: string
+  type: string
   name: string
-  description: string
   hashcat_params?: HashcatParams
   created_by_user_id: string
   attack_template_ids?: string[]
@@ -278,13 +279,17 @@ export interface AttackTemplateGetAllResponseDTO {
 }
 export interface AttackTemplateCreateRequestDTO {
   name: string
-  description: string
   hashcat_params: HashcatParams
 }
-export interface AttaackTemplateCreateSetRequestDTO {
+export interface AttackTemplateCreateSetRequestDTO {
   name: string
-  description: string
   attack_template_ids: string[]
+}
+export interface AttackTemplateUpdateRequestDTO {
+  type: string
+  name: string
+  hashcat_params?: HashcatParams
+  attack_template_ids?: string[]
 }
 export interface AuthLoginRequestDTO {
   username: string
