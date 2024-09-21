@@ -18,7 +18,9 @@ import { useAttackSettings } from '@/composables/useAttackSettings'
 import { useResourcesStore } from '@/stores/resources'
 import { useProjectsStore } from '@/stores/projects'
 
-import { makeHashcatParams } from '@/util/hashcat'
+import { AttackMode, makeHashcatParams } from '@/util/hashcat'
+import { useAttackTemplatesStore } from '@/stores/attackTemplates'
+import { AttackTemplateSetType, AttackTemplateType } from '@/api/attackTemplate'
 
 /*
  * Props
@@ -93,7 +95,8 @@ const inputs = reactive({
   activeStep: props.firstStep
 })
 
-const { attackSettings } = useAttackSettings()
+const { attackSettings, validationError: attackSettingsValidationError } = useAttackSettings()
+const attackTemplateStore = useAttackTemplatesStore()
 
 // If a user starts typing in a new project name, then de-select existing project
 watch(
@@ -213,17 +216,71 @@ const computedHashcatParams = computed(() => {
   return makeHashcatParams(Number(inputs.hashType), attackSettings)
 })
 
-async function saveUptoAttack(): Promise<AttackDTO> {
+async function saveUptoAttack(): Promise<AttackDTO[]> {
   const hashlist = await saveOrGetHashlist()
 
-  try {
+  const saveAttackFromTemplate = async () => {
+    const tmpl = attackTemplateStore.byId(attackSettings.selectedTemplateId)
+
+    if (tmpl == null) {
+      throw new Error('Template was null')
+    }
+
+    if (tmpl.type === AttackTemplateType) {
+      if (tmpl.hashcat_params == null) {
+        throw new Error('Template settings were null')
+      }
+
+      const attack = await createAttack({
+        hashlist_id: hashlist.id,
+        hashcat_params: tmpl.hashcat_params,
+        is_distributed: attackSettings.isDistributed
+      })
+
+      return [attack]
+    } else if (tmpl.type === AttackTemplateSetType) {
+      const attacks = []
+
+      if (tmpl.attack_template_ids == null || tmpl.attack_template_ids.length == 0) {
+        throw new Error('Template settings were null')
+      }
+
+      for (const tmplId of tmpl.attack_template_ids) {
+        const subTmpl = attackTemplateStore.byId(tmplId)
+        if (subTmpl == null || subTmpl.hashcat_params == null) {
+          throw new Error('Template settings were null')
+        }
+        
+        const attack = await createAttack({
+          hashlist_id: hashlist.id,
+          hashcat_params: subTmpl.hashcat_params,
+          is_distributed: attackSettings.isDistributed
+        })
+        attacks.push(attack)
+      }
+
+      return attacks
+    } else {
+      throw new Error(`Unknown attack templaet type ${tmpl.type}`)
+    }
+  }
+
+  const saveAttack = async () => {
     const attack = await createAttack({
-      hashlist_id: hashlist.id,
-      hashcat_params: computedHashcatParams.value,
-      is_distributed: attackSettings.isDistributed
-    })
+        hashlist_id: hashlist.id,
+        hashcat_params: computedHashcatParams.value,
+        is_distributed: attackSettings.isDistributed
+      })
     toast.success('Created attack!')
-    return attack
+    return [attack]
+  }
+
+  try {
+    if (attackSettings.attackMode === AttackMode.Template) {
+      return saveAttackFromTemplate()
+    }
+
+    return saveAttack()
   } catch (err: any) {
     catcher(err, 'Failed to create attack. ')
     throw err
@@ -231,18 +288,22 @@ async function saveUptoAttack(): Promise<AttackDTO> {
 }
 
 async function saveAndStartAttack() {
-  const attack = await saveUptoAttack()
-  try {
-    await startAttack(attack.id)
-    emit('successfulStart', {
-      projectId: inputs.selectedProjectId,
-      hashlistId: inputs.selectedHashlistId,
-      attackId: attack.id
-    })
-    toast.success('Started attack!')
-  } catch (err: any) {
-    catcher(err, 'Failed to start attack. ')
+  const attacks = await saveUptoAttack()
+
+  for (const attack of attacks) {
+    try {
+      await startAttack(attack.id)
+      emit('successfulStart', {
+        projectId: inputs.selectedProjectId,
+        hashlistId: inputs.selectedHashlistId,
+        attackId: attack.id
+      })
+    } catch (err: any) {
+      catcher(err, `Failed to start attack ${attack.id}. `)
+    }
   }
+
+  toast.success(`Started attack${attacks.length === 1 ? '' : 's'}!`)
 }
 </script>
 
@@ -257,10 +318,13 @@ async function saveAndStartAttack() {
         {{ step.name }}
       </li>
     </ul>
-    <div class="card min-w-max self-center bg-base-100 shadow-xl" style="min-width: 800px; max-width: 80%">
+    <div class="card min-w-max self-center bg-base-100 shadow-xl" style="min-width: 800px;">
       <div class="card-body">
         <h2 class="card-title mb-4 w-96 justify-center self-center text-center">
           Step {{ inputs.activeStep + 1 - props.firstStep }}. {{ steps[inputs.activeStep].name }}
+          <span v-if="inputs.activeStep == StepIndex.Attack">
+            
+          </span>
         </h2>
 
         <!-- Create/Select Project -->
@@ -322,16 +386,19 @@ async function saveAndStartAttack() {
 
         <!-- Attack settings -->
         <template v-if="inputs.activeStep == StepIndex.Attack">
-          <AttackSettings v-model="attackSettings" />
+          <AttackSettings v-model="attackSettings" enableTemplate />
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
-              <button class="link" @click="saveUptoAttack">Save attack and finish</button>
+              <button class="link" @click="saveUptoAttack" v-if="attackSettingsValidationError != null">Save attack and finish</button>
             </div>
 
             <div class="card-actions justify-end">
               <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
-              <button class="btn btn-primary" @click="inputs.activeStep++">Next</button>
+
+              <div class="tooltip" :data-tip="attackSettingsValidationError">
+                <button class="btn btn-primary" @click="inputs.activeStep++" :disabled="attackSettingsValidationError != null">Next</button>
+              </div>
             </div>
           </div>
         </template>

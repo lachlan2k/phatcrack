@@ -85,7 +85,7 @@ func GetAttackTemplateSet(id string) (*AttackTemplateSet, error) {
 }
 
 func DeleteAttackTemplate(id string) error {
-	return GetInstance().Unscoped().Delete(&AttackTemplate{}, "id = ?",id).Error
+	return GetInstance().Unscoped().Delete(&AttackTemplate{}, "id = ?", id).Error
 }
 
 func DeleteAttackTemplateSet(id string) error {

@@ -1,7 +1,19 @@
 import { defineStore } from 'pinia'
 
-import { createAttackTemplate, deleteAttackTemplate, getAllAttackTemplates, updateAttackTemplate } from '@/api/attackTemplate'
-import type { AttackTemplateCreateRequestDTO, AttackTemplateDTO, AttackTemplateUpdateRequestDTO } from '@/api/types'
+import {
+  AttackTemplateSetType,
+  createAttackTemplate,
+  createAttackTemplateSet,
+  deleteAttackTemplate,
+  getAllAttackTemplates,
+  updateAttackTemplate
+} from '@/api/attackTemplate'
+import type {
+  AttackTemplateCreateRequestDTO,
+  AttackTemplateCreateSetRequestDTO,
+  AttackTemplateDTO,
+  AttackTemplateUpdateRequestDTO
+} from '@/api/types'
 
 export type AttackTemplatesStore = {
   templates: AttackTemplateDTO[]
@@ -30,7 +42,16 @@ export const useAttackTemplatesStore = defineStore({
       try {
         this.loading = true
         const { attack_templates } = await getAllAttackTemplates()
-        this.templates = attack_templates
+        const sorted = attack_templates.sort((a, b) => {
+          if (a.type === AttackTemplateSetType && b.type !== AttackTemplateSetType) {
+            return -1
+          }
+          if (a.type !== AttackTemplateSetType && b.type === AttackTemplateSetType) {
+            return 1
+          }
+          return a.name.localeCompare(b.name)
+        })
+        this.templates = sorted
       } finally {
         this.loading = false
       }
@@ -44,6 +65,12 @@ export const useAttackTemplatesStore = defineStore({
 
     async create(newTemplate: AttackTemplateCreateRequestDTO) {
       const res = await createAttackTemplate(newTemplate)
+      this.load(true)
+      return res
+    },
+
+    async createSet(newTemplate: AttackTemplateCreateSetRequestDTO) {
+      const res = await createAttackTemplateSet(newTemplate)
       this.load(true)
       return res
     },

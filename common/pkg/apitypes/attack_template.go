@@ -4,6 +4,9 @@ import (
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 )
 
+const AttackTemplateType = "attack-template"
+const AttackTemplateSetType = "attack-template-set"
+
 type AttackTemplateDTO struct {
 	ID string `json:"id"`
 

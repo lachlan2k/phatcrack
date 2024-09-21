@@ -14,195 +14,201 @@ import (
 )
 
 func HookAttackTemplateEndpoints(api *echo.Group) {
-	api.GET("/all", func(c echo.Context) error {
-		ats, err := db.GetAllAttackTemplates()
-		if err != nil {
-			return util.GenericServerError(err)
-		}
-		atsets, err := db.GetAllAttackTemplateSets()
-		if err != nil {
-			return util.GenericServerError(err)
-		}
+	api.GET("/all", handleGetAllAttackTemplates)
+	api.POST("/create", handleCreateAttackTemplate)
+	api.POST("/create-set", handleCreateAttackTemplateSet)
+	api.PUT("/:id", handleUpdateAttackTemplate)
+	api.DELETE("/:id", handleDeleteAttackTemplate)
+}
 
-		dtos := make([]apitypes.AttackTemplateDTO, 0)
+func handleGetAllAttackTemplates(c echo.Context) error {
+	ats, err := db.GetAllAttackTemplates()
+	if err != nil {
+		return util.GenericServerError(err)
+	}
+	atsets, err := db.GetAllAttackTemplateSets()
+	if err != nil {
+		return util.GenericServerError(err)
+	}
 
-		for _, at := range ats {
-			dtos = append(dtos, at.ToDTO())
-		}
+	dtos := make([]apitypes.AttackTemplateDTO, 0)
 
-		for _, atset := range atsets {
-			dtos = append(dtos, atset.ToDTO())
-		}
+	for _, at := range ats {
+		dtos = append(dtos, at.ToDTO())
+	}
 
-		return c.JSON(http.StatusOK, apitypes.AttackTemplateGetAllResponseDTO{
-			AttackTemplates: dtos,
-		})
+	for _, atset := range atsets {
+		dtos = append(dtos, atset.ToDTO())
+	}
+
+	return c.JSON(http.StatusOK, apitypes.AttackTemplateGetAllResponseDTO{
+		AttackTemplates: dtos,
 	})
+}
 
-	api.POST("/create", func(c echo.Context) error {
-		user := auth.UserFromReq(c)
-		if user == nil {
-			return echo.ErrForbidden
-		}
+func handleCreateAttackTemplate(c echo.Context) error {
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
 
-		req, err := util.BindAndValidate[apitypes.AttackTemplateCreateRequestDTO](c)
-		if err != nil {
-			return err
-		}
+	req, err := util.BindAndValidate[apitypes.AttackTemplateCreateRequestDTO](c)
+	if err != nil {
+		return err
+	}
 
-		newAttackTemplate, err := db.CreateAttackTemplate(&db.AttackTemplate{
-			Name:            req.Name,
-			HashcatParams:   datatypes.NewJSONType(req.HashcatParams),
-			CreatedByUserID: user.ID,
-		})
-		if err != nil {
-			return util.ServerError("Failed to create new attack template", err)
-		}
-
-		return c.JSON(http.StatusOK, newAttackTemplate.ToDTO())
+	newAttackTemplate, err := db.CreateAttackTemplate(&db.AttackTemplate{
+		Name:            req.Name,
+		HashcatParams:   datatypes.NewJSONType(req.HashcatParams),
+		CreatedByUserID: user.ID,
 	})
+	if err != nil {
+		return util.ServerError("Failed to create new attack template", err)
+	}
 
-	api.POST("/create-set", func(c echo.Context) error {
-		user := auth.UserFromReq(c)
-		if user == nil {
-			return echo.ErrForbidden
-		}
+	return c.JSON(http.StatusOK, newAttackTemplate.ToDTO())
+}
 
-		req, err := util.BindAndValidate[apitypes.AttackTemplateCreateSetRequestDTO](c)
-		if err != nil {
-			return err
-		}
+func handleCreateAttackTemplateSet(c echo.Context) error {
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
 
-		newAttackTemplateSet, err := db.CreateAttackTemplateSet(&db.AttackTemplateSet{
-			Name:              req.Name,
-			AttackTemplateIDs: req.AttackTemplateIDs,
-			CreatedByUserID:   user.ID,
-		})
-		if err != nil {
-			return util.ServerError("Failed to create new attack template set", err)
-		}
+	req, err := util.BindAndValidate[apitypes.AttackTemplateCreateSetRequestDTO](c)
+	if err != nil {
+		return err
+	}
 
-		return c.JSON(http.StatusOK, newAttackTemplateSet.ToDTO())
+	newAttackTemplateSet, err := db.CreateAttackTemplateSet(&db.AttackTemplateSet{
+		Name:              req.Name,
+		AttackTemplateIDs: req.AttackTemplateIDs,
+		CreatedByUserID:   user.ID,
 	})
+	if err != nil {
+		return util.ServerError("Failed to create new attack template set", err)
+	}
 
-	api.PUT("/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		if !util.AreValidUUIDs(id) {
-			return echo.ErrBadRequest
-		}
+	return c.JSON(http.StatusOK, newAttackTemplateSet.ToDTO())
+}
 
-		user := auth.UserFromReq(c)
-		if user == nil {
-			return echo.ErrForbidden
-		}
+func handleUpdateAttackTemplate(c echo.Context) error {
+	id := c.Param("id")
+	if !util.AreValidUUIDs(id) {
+		return echo.ErrBadRequest
+	}
 
-		req, err := util.BindAndValidate[apitypes.AttackTemplateUpdateRequestDTO](c)
-		if err != nil {
-			return err
-		}
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
 
-		switch req.Type {
-		case "attack-template":
-			{
-				attackTemplate, err := db.GetAttackTemplate(id)
-				if errors.Is(err, db.ErrNotFound) {
-					return echo.ErrNotFound
-				}
-				if err != nil {
-					return util.GenericServerError(err)
-				}
-				if !(user.HasRole(roles.UserRoleAdmin) || attackTemplate.CreatedByUserID.String() == user.ID.String()) {
-					return echo.ErrForbidden
-				}
-				if req.HashcatParams == nil {
-					return echo.ErrBadRequest
-				}
+	req, err := util.BindAndValidate[apitypes.AttackTemplateUpdateRequestDTO](c)
+	if err != nil {
+		return err
+	}
 
-				attackTemplate.Name = req.Name
-				attackTemplate.HashcatParams = datatypes.NewJSONType(*req.HashcatParams)
-
-				err = db.Save(attackTemplate)
-				if err != nil {
-					return util.ServerError("Failed to save attack template", err)
-				}
-
-				return c.JSON(http.StatusOK, attackTemplate.ToDTO())
+	switch req.Type {
+	case apitypes.AttackTemplateType:
+		{
+			attackTemplate, err := db.GetAttackTemplate(id)
+			if errors.Is(err, db.ErrNotFound) {
+				return echo.ErrNotFound
 			}
-
-		case "attack-template-set":
-			{
-				attackTemplateSet, err := db.GetAttackTemplateSet(id)
-				if errors.Is(err, db.ErrNotFound) {
-					return echo.ErrNotFound
-				}
-				if err != nil {
-					return util.GenericServerError(err)
-				}
-				if !(user.HasRole(roles.UserRoleAdmin) || attackTemplateSet.CreatedByUserID.String() == user.ID.String()) {
-					return echo.ErrForbidden
-				}
-				if req.AttackTemplateIDs == nil {
-					return echo.ErrBadRequest
-				}
-
-				attackTemplateSet.Name = req.Name
-				attackTemplateSet.AttackTemplateIDs = req.AttackTemplateIDs
-
-				err = db.Save(attackTemplateSet)
-				if err != nil {
-					return util.ServerError("Failed to save attack template set", err)
-				}
-
-				return c.JSON(http.StatusOK, attackTemplateSet.ToDTO())
+			if err != nil {
+				return util.GenericServerError(err)
 			}
-
-		default:
-			return echo.NewHTTPError(http.StatusBadRequest, "Unknown type %q", req.Type)
-		}
-	})
-
-	api.DELETE("/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		if !util.AreValidUUIDs(id) {
-			return echo.ErrBadRequest
-		}
-
-		user := auth.UserFromReq(c)
-		if user == nil {
-			return echo.ErrForbidden
-		}
-
-		attackTemplate, err := db.GetAttackTemplate(id)
-		if err == nil {
 			if !(user.HasRole(roles.UserRoleAdmin) || attackTemplate.CreatedByUserID.String() == user.ID.String()) {
 				return echo.ErrForbidden
 			}
-
-			err := db.DeleteAttackTemplate(id)
-			if err != nil {
-				return util.ServerError("Failed to delete attack template", err)
+			if req.HashcatParams == nil {
+				return echo.ErrBadRequest
 			}
 
-			return c.JSON(http.StatusOK, "ok")
+			attackTemplate.Name = req.Name
+			attackTemplate.HashcatParams = datatypes.NewJSONType(*req.HashcatParams)
+
+			err = db.Save(attackTemplate)
+			if err != nil {
+				return util.ServerError("Failed to save attack template", err)
+			}
+
+			return c.JSON(http.StatusOK, attackTemplate.ToDTO())
 		}
 
-		attackTemplateSet, err := db.GetAttackTemplateSet(id)
-		if errors.Is(err, db.ErrNotFound) {
-			return echo.ErrNotFound
-		}
-		if err != nil {
-			return util.GenericServerError(err)
+	case apitypes.AttackTemplateSetType:
+		{
+			attackTemplateSet, err := db.GetAttackTemplateSet(id)
+			if errors.Is(err, db.ErrNotFound) {
+				return echo.ErrNotFound
+			}
+			if err != nil {
+				return util.GenericServerError(err)
+			}
+			if !(user.HasRole(roles.UserRoleAdmin) || attackTemplateSet.CreatedByUserID.String() == user.ID.String()) {
+				return echo.ErrForbidden
+			}
+			if req.AttackTemplateIDs == nil {
+				return echo.ErrBadRequest
+			}
+
+			attackTemplateSet.Name = req.Name
+			attackTemplateSet.AttackTemplateIDs = req.AttackTemplateIDs
+
+			err = db.Save(attackTemplateSet)
+			if err != nil {
+				return util.ServerError("Failed to save attack template set", err)
+			}
+
+			return c.JSON(http.StatusOK, attackTemplateSet.ToDTO())
 		}
 
-		if !(user.HasRole(roles.UserRoleAdmin) || attackTemplateSet.CreatedByUserID.String() == user.ID.String()) {
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "Unknown type %q", req.Type)
+	}
+}
+
+func handleDeleteAttackTemplate(c echo.Context) error {
+	id := c.Param("id")
+	if !util.AreValidUUIDs(id) {
+		return echo.ErrBadRequest
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	attackTemplate, err := db.GetAttackTemplate(id)
+	if err == nil {
+		if !(user.HasRole(roles.UserRoleAdmin) || attackTemplate.CreatedByUserID.String() == user.ID.String()) {
 			return echo.ErrForbidden
 		}
 
-		err = db.DeleteAttackTemplateSet(id)
+		err := db.DeleteAttackTemplate(id)
 		if err != nil {
 			return util.ServerError("Failed to delete attack template", err)
 		}
 
 		return c.JSON(http.StatusOK, "ok")
-	})
+	}
+
+	attackTemplateSet, err := db.GetAttackTemplateSet(id)
+	if errors.Is(err, db.ErrNotFound) {
+		return echo.ErrNotFound
+	}
+	if err != nil {
+		return util.GenericServerError(err)
+	}
+
+	if !(user.HasRole(roles.UserRoleAdmin) || attackTemplateSet.CreatedByUserID.String() == user.ID.String()) {
+		return echo.ErrForbidden
+	}
+
+	err = db.DeleteAttackTemplateSet(id)
+	if err != nil {
+		return util.ServerError("Failed to delete attack template", err)
+	}
+
+	return c.JSON(http.StatusOK, "ok")
 }

@@ -7,7 +7,8 @@ export enum AttackMode {
   Combinator = 1,
   Mask = 3,
   HybridDM = 6,
-  HybridMD = 7
+  HybridMD = 7,
+  Template = 999
 }
 
 export const attackModes = [
@@ -21,6 +22,10 @@ export const attackModes = [
   {
     name: 'Mask + Wordlist',
     value: AttackMode.HybridMD
+  },
+  {
+    name: 'From Template',
+    value: AttackMode.Template
   }
 ]
 
@@ -64,8 +69,6 @@ export function hashrateStr(hashrate: number): string {
 }
 
 export function makeHashcatParams(hashType: number, attackSettings: AttackSettingsT): HashcatParams {
-  console.log('received attack settings', attackSettings)
-
   const baseParams: HashcatParams = {
     attack_mode: attackSettings.attackMode,
     hash_type: hashType,

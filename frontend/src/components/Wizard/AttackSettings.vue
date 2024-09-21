@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import MaskInput from '@/components/Wizard/MaskInput.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'
+import SearchableDropdown from '@/components/SearchableDropdown.vue'
 
 import { useListfilesStore } from '@/stores/listfiles'
 
-import type { AttackMode } from '@/util/hashcat'
+import { AttackMode } from '@/util/hashcat'
 import { attackModes } from '@/util/hashcat'
+import { useAttackTemplatesStore } from '@/stores/attackTemplates'
 
 export interface AttackSettingsT {
   attackMode: AttackMode
+
+  selectedTemplateId: string
 
   selectedWordlists: string[]
   selectedRulefiles: string[]
@@ -31,6 +35,7 @@ export interface AttackSettingsT {
 
 const props = defineProps<{
   modelValue: AttackSettingsT
+  enableTemplate?: boolean
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -40,9 +45,27 @@ const attackSettings = computed({
   set: newVal => emit('update:modelValue', newVal)
 })
 
+const availableAttackModes = computed(() => {
+  if (props.enableTemplate) {
+    return attackModes
+  } else {
+    return attackModes.filter(x => x.value != AttackMode.Template)
+  }
+})
+
 const listfileStore = useListfilesStore()
 listfileStore.load(true)
 const { wordlists, rulefiles } = storeToRefs(listfileStore)
+
+const attackTemplatesStore = useAttackTemplatesStore()
+const { templates } = storeToRefs(attackTemplatesStore)
+
+const attackTemplatesToSelect = computed(() => templates.value.map(x => {
+  return {
+    text: x.name,
+    value: x.id
+  }
+}))
 
 watch(
   () => attackSettings.value.combinatorLeft,
@@ -60,33 +83,34 @@ watch(
       type="radio"
       name="options"
       :data-title="attackMode.name"
-      class="btn btn-neutral join-item"
+      class="btn join-item"
+      :class="attackMode.value === AttackMode.Template ? '' : 'btn-neutral'"
       :key="attackMode.value"
       :value="attackMode.value"
       v-model="attackSettings.attackMode"
       :aria-label="attackMode.name"
-      v-for="attackMode in attackModes"
+      v-for="attackMode in availableAttackModes"
     />
   </div>
 
   <div class="my-2"></div>
 
   <!-- Wordlist -->
-  <div v-if="attackSettings.attackMode === 0">
+  <div v-if="attackSettings.attackMode === AttackMode.Dictionary">
     <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="attackSettings.selectedWordlists" :limit="1" />
     <hr class="my-4" />
     <WordlistSelect label-text="Select Rule File(s)" :list="rulefiles" v-model="attackSettings.selectedRulefiles" :limit="Infinity" />
   </div>
 
   <!-- Combinator -->
-  <div v-if="attackSettings.attackMode === 1">
+  <div v-if="attackSettings.attackMode === AttackMode.Combinator">
     <WordlistSelect label-text="Select Left Wordlist" :list="wordlists" v-model="attackSettings.combinatorLeft" :limit="1" />
     <hr class="my-4" />
     <WordlistSelect label-text="Select Right Wordlist" :list="wordlists" v-model="attackSettings.combinatorRight" :limit="1" />
   </div>
 
   <!-- Brute-force/Mask -->
-  <div v-if="attackSettings.attackMode === 3">
+  <div v-if="attackSettings.attackMode === AttackMode.Mask">
     <MaskInput v-model="attackSettings.mask" />
     <label class="label cursor-pointer justify-start">
       <input type="checkbox" v-model="attackSettings.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
@@ -95,7 +119,7 @@ watch(
   </div>
 
   <!-- Wordlist + Mask -->
-  <div v-if="attackSettings.attackMode === 6">
+  <div v-if="attackSettings.attackMode === AttackMode.HybridDM">
     <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="attackSettings.selectedWordlists" :limit="1" />
     <hr class="my-4" />
     <MaskInput v-model="attackSettings.mask" />
@@ -106,7 +130,7 @@ watch(
   </div>
 
   <!-- Mask + Wordlist -->
-  <div v-if="attackSettings.attackMode === 7">
+  <div v-if="attackSettings.attackMode === AttackMode.HybridMD">
     <MaskInput v-model="attackSettings.mask" />
     <hr class="my-4" />
     <WordlistSelect label-text="Select Wordlist" :list="wordlists" v-model="attackSettings.selectedWordlists" :limit="1" />
@@ -114,6 +138,20 @@ watch(
       <input type="checkbox" v-model="attackSettings.maskIncrement" class="checkbox-primary checkbox checkbox-xs" />
       <span><span class="label-text ml-4 font-bold">Mask increment?</span></span>
     </label>
+  </div>
+
+
+  <div v-if="attackSettings.attackMode === AttackMode.Template">
+    <div class="form-control">
+      <label class="label font-bold">
+        <span class="label-text">Select Template</span>
+      </label>
+      <SearchableDropdown
+          v-model="attackSettings.selectedTemplateId"
+          :options="attackTemplatesToSelect"
+          placeholderText="Select an attack template..."
+        />
+    </div>
   </div>
 
   <hr class="my-4" />

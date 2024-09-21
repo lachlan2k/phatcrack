@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { computed, reactive } from 'vue'
 
 import type { AttackSettingsT } from '@/components/Wizard/AttackSettings.vue'
 
@@ -8,6 +8,8 @@ import { AttackMode, makeHashcatParams } from '@/util/hashcat'
 
 const startingAttackSettings: AttackSettingsT = {
   attackMode: AttackMode.Dictionary,
+
+  selectedTemplateId: '',
 
   selectedWordlists: [],
   selectedRulefiles: [],
@@ -25,16 +27,14 @@ const startingAttackSettings: AttackSettingsT = {
 }
 
 export const useAttackSettings = () => {
-  const attackSettings = reactive<AttackSettingsT>(startingAttackSettings)
+  const attackSettings = reactive<AttackSettingsT>({ ...startingAttackSettings })
 
   const resetAttackSettings = () => {
     Object.assign(attackSettings, { ...startingAttackSettings })
   }
 
   const asHashcatParams = (hashType: number) => {
-    const xx = makeHashcatParams(hashType, { ...attackSettings })
-    console.log(xx)
-    return xx
+    return makeHashcatParams(hashType, { ...attackSettings })
   }
 
   const loadFromHashcatParams = (params: HashcatParams) => {
@@ -81,5 +81,54 @@ export const useAttackSettings = () => {
     }
   }
 
-  return { attackSettings, resetAttackSettings, loadFromHashcatParams, asHashcatParams }
+  const validationError = computed(() => {
+    switch (attackSettings.attackMode) {
+      case AttackMode.Dictionary: {
+        if (attackSettings.selectedWordlists.length < 1) {
+          return 'Please select a wordlist'
+        }
+
+        break
+      }
+
+      case AttackMode.Combinator: {
+        if (attackSettings.selectedWordlists.length != 2) {
+          return 'Please select two wordlists'
+        }
+
+        break
+      }
+
+      case AttackMode.Mask: {
+        if (attackSettings.mask.length < 1) {
+          return 'Please enter a mask'
+        }
+
+        break
+      }
+
+      case AttackMode.HybridDM:
+      case AttackMode.HybridMD: {
+        if (attackSettings.mask.length < 1) {
+          return 'Please enter a mask'
+        }
+
+        if (attackSettings.selectedWordlists.length < 1) {
+          return 'Please select a wordlist'
+        }
+
+        break
+      }
+
+      case AttackMode.Template: {
+        if (attackSettings.selectedTemplateId == null || attackSettings.selectedTemplateId == '') {
+          return 'Select an attack template'
+        }
+      }
+    }
+
+    return null
+  })
+
+  return { attackSettings, resetAttackSettings, loadFromHashcatParams, asHashcatParams, validationError }
 }

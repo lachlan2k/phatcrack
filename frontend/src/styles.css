@@ -27,3 +27,7 @@ table.table-first-col-bold tr > td:first-of-type {
 .btn.normal-case {
   text-transform: none;
 }
+
+.label {
+  padding-left: 0px !important;
+}
