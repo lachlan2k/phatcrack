@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 
 import MaskInput from '@/components/Wizard/MaskInput.vue'
 import WordlistSelect from '@/components/Wizard/ListSelect.vue'
 import SearchableDropdown from '@/components/SearchableDropdown.vue'
 
-import { useListfilesStore } from '@/stores/listfiles'
+import { AttackTemplateSetType, AttackTemplateType } from '@/api/attackTemplate'
 
-import { AttackMode } from '@/util/hashcat'
-import { attackModes } from '@/util/hashcat'
+import { useListfilesStore } from '@/stores/listfiles'
 import { useAttackTemplatesStore } from '@/stores/attackTemplates'
+
+import { AttackMode , attackModes } from '@/util/hashcat'
+import { Icons } from '@/util/icons'
 
 export interface AttackSettingsT {
   attackMode: AttackMode
@@ -60,12 +62,34 @@ const { wordlists, rulefiles } = storeToRefs(listfileStore)
 const attackTemplatesStore = useAttackTemplatesStore()
 const { templates } = storeToRefs(attackTemplatesStore)
 
-const attackTemplatesToSelect = computed(() => templates.value.map(x => {
-  return {
-    text: x.name,
-    value: x.id
-  }
-}))
+const attackTemplatesToSelect = computed(() =>
+  templates.value.map(x => {
+    const getIcon = () => {
+      if (x.type === AttackTemplateType) {
+        return Icons.AttackTemplate
+      }
+      if (x.type === AttackTemplateSetType) {
+        return Icons.AttackTemplateSet
+      }
+    }
+
+    const getTooltip = () => {
+      if (x.type === AttackTemplateType) {
+        return 'Attack template'
+      }
+      if (x.type === AttackTemplateSetType) {
+        return 'Template set'
+      }
+    }
+
+    return {
+      text: x.name,
+      value: x.id,
+      icon: getIcon(),
+      iconTooltip: getTooltip()
+    }
+  })
+)
 
 watch(
   () => attackSettings.value.combinatorLeft,
@@ -140,17 +164,16 @@ watch(
     </label>
   </div>
 
-
   <div v-if="attackSettings.attackMode === AttackMode.Template">
     <div class="form-control">
       <label class="label font-bold">
         <span class="label-text">Select Template</span>
       </label>
       <SearchableDropdown
-          v-model="attackSettings.selectedTemplateId"
-          :options="attackTemplatesToSelect"
-          placeholderText="Select an attack template..."
-        />
+        v-model="attackSettings.selectedTemplateId"
+        :options="attackTemplatesToSelect"
+        placeholderText="Select an attack template..."
+      />
     </div>
   </div>
 

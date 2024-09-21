@@ -4,6 +4,8 @@ import { ref, computed, watch } from 'vue'
 interface OptionT {
   value: string
   text: string
+  icon?: string
+  iconTooltip?: string
 }
 
 const props = defineProps<{
@@ -66,6 +68,9 @@ function unfocus() {
         class="dropdown-content-option hover mx-1 my-1 cursor-pointer px-2 py-1"
         @mousedown="selectOption(option)"
       >
+        <div class="tooltip tooltip-right" v-if="option.icon != null && option.icon != ''" :data-tip="option.iconTooltip">
+          <font-awesome-icon :icon="option.icon" class="mr-2" />
+        </div>
         {{ option.text }}
       </div>
     </div>

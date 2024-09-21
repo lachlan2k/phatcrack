@@ -25,7 +25,7 @@ const value = computed({
 <template>
   <label class="label pl-0 font-bold">Enter Mask</label>
   <input type="text" placeholder="Mask" v-model="value" class="input input-bordered w-full max-w-xs" />
-  <p class="text-xs mt-1">Length: {{effectiveLength}}</p>
+  <p class="text-xs mt-1">Length: {{ effectiveLength }}</p>
   <div class="mt-4">
     <span
       class="tooltip tooltip-bottom"

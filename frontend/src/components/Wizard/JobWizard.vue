@@ -11,16 +11,16 @@ import HrOr from '@/components/HrOr.vue'
 
 import { createHashlist, createProject, createAttack, startAttack, getProject, getHashlist } from '@/api/project'
 import type { AttackDTO, HashlistCreateResponseDTO, ProjectDTO } from '@/api/types'
+import { AttackTemplateSetType, AttackTemplateType } from '@/api/attackTemplate'
 
 import { useToastError } from '@/composables/useToastError'
 import { useAttackSettings } from '@/composables/useAttackSettings'
 
 import { useResourcesStore } from '@/stores/resources'
 import { useProjectsStore } from '@/stores/projects'
+import { useAttackTemplatesStore } from '@/stores/attackTemplates'
 
 import { AttackMode, makeHashcatParams } from '@/util/hashcat'
-import { useAttackTemplatesStore } from '@/stores/attackTemplates'
-import { AttackTemplateSetType, AttackTemplateType } from '@/api/attackTemplate'
 
 /*
  * Props
@@ -250,7 +250,7 @@ async function saveUptoAttack(): Promise<AttackDTO[]> {
         if (subTmpl == null || subTmpl.hashcat_params == null) {
           throw new Error('Template settings were null')
         }
-        
+
         const attack = await createAttack({
           hashlist_id: hashlist.id,
           hashcat_params: subTmpl.hashcat_params,
@@ -267,10 +267,10 @@ async function saveUptoAttack(): Promise<AttackDTO[]> {
 
   const saveAttack = async () => {
     const attack = await createAttack({
-        hashlist_id: hashlist.id,
-        hashcat_params: computedHashcatParams.value,
-        is_distributed: attackSettings.isDistributed
-      })
+      hashlist_id: hashlist.id,
+      hashcat_params: computedHashcatParams.value,
+      is_distributed: attackSettings.isDistributed
+    })
     toast.success('Created attack!')
     return [attack]
   }
@@ -318,13 +318,11 @@ async function saveAndStartAttack() {
         {{ step.name }}
       </li>
     </ul>
-    <div class="card min-w-max self-center bg-base-100 shadow-xl" style="min-width: 800px;">
+    <div class="card min-w-max self-center bg-base-100 shadow-xl" style="min-width: 800px">
       <div class="card-body">
         <h2 class="card-title mb-4 w-96 justify-center self-center text-center">
           Step {{ inputs.activeStep + 1 - props.firstStep }}. {{ steps[inputs.activeStep].name }}
-          <span v-if="inputs.activeStep == StepIndex.Attack">
-            
-          </span>
+          <span v-if="inputs.activeStep == StepIndex.Attack"> </span>
         </h2>
 
         <!-- Create/Select Project -->
