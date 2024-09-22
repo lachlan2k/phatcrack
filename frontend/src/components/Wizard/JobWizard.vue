@@ -305,6 +305,12 @@ async function saveAndStartAttack() {
 
   toast.success(`Started attack${attacks.length === 1 ? '' : 's'}!`)
 }
+
+// Most of the action functions bubble errors in here, but emit UI warnings
+// So, this is to help that
+function callBubblewrapped(fn: () => Promise<any>) {
+  fn().catch(() => null)
+}
 </script>
 
 <template>
@@ -347,7 +353,7 @@ async function saveAndStartAttack() {
 
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
-                <button class="link" @click="saveOrGetProject" v-if="inputs.projectName != ''">Create empty project and finish</button>
+                <button class="link" @click="() => callBubblewrapped(saveOrGetProject)" v-if="projectStepValidationError == null">Create empty project and finish</button>
               </div>
               <div class="card-actions justify-end">
                 <div class="tooltip" :data-tip="projectStepValidationError">
@@ -370,7 +376,7 @@ async function saveAndStartAttack() {
 
             <div class="mt-8 flex justify-between">
               <div class="flex justify-start">
-                <button class="link" @click="saveOrGetHashlist" v-if="hashlistStepValidationError == null">Save hashlist and finish</button>
+                <button class="link" @click="() => callBubblewrapped(saveOrGetHashlist)" v-if="hashlistStepValidationError == null">Save hashlist and finish</button>
               </div>
               <div class="card-actions justify-end">
                 <button class="btn btn-ghost" @click="inputs.activeStep--">Previous</button>
@@ -388,7 +394,7 @@ async function saveAndStartAttack() {
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
-              <button class="link" @click="saveUptoAttack" v-if="attackSettingsValidationError != null">Save attack and finish</button>
+              <button class="link" @click="() => callBubblewrapped(saveUptoAttack)" v-if="attackSettingsValidationError != null">Save attack and finish</button>
             </div>
 
             <div class="card-actions justify-end">
@@ -461,7 +467,7 @@ async function saveAndStartAttack() {
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
-              <button class="link" @click="saveUptoAttack">Save attack and finish</button>
+              <button class="link" @click="() => callBubblewrapped(saveUptoAttack)">Save attack and finish</button>
             </div>
 
             <div class="card-actions justify-end">
