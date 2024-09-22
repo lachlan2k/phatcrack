@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
@@ -26,7 +25,7 @@ func makeSessionHandler() auth.SessionHandler {
 func Listen(port string) error {
 	e := echo.New()
 
-	validator := &util.RequestValidator{Validator: validator.New()}
+	validator := &util.RequestValidator{}
 	validator.Init()
 	e.Validator = validator
 
