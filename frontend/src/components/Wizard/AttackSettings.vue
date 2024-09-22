@@ -11,7 +11,7 @@ import { AttackTemplateSetType, AttackTemplateType } from '@/api/attackTemplate'
 import { useListfilesStore } from '@/stores/listfiles'
 import { useAttackTemplatesStore } from '@/stores/attackTemplates'
 
-import { AttackMode , attackModes } from '@/util/hashcat'
+import { AttackMode, attackModes } from '@/util/hashcat'
 import { Icons } from '@/util/icons'
 
 export interface AttackSettingsT {

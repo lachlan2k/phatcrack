@@ -22,15 +22,15 @@ app.use(Toast, {})
 app.use(router)
 
 const toast = useToast()
-app.config.errorHandler = (err) => {    
-    if (err instanceof Error) {
-        toast.error('Unexpected frontend error:\n\n' + err.message)
-    } else if (err?.toString != null) {
-        toast.error('Unexpected frontend error:\n\n' + err.toString())
-    } else {
-        toast.error('Unexpected frontend error. Check console for details.')
-    }
-    console.error(err)
+app.config.errorHandler = err => {
+  if (err instanceof Error) {
+    toast.error('Unexpected frontend error:\n\n' + err.message)
+  } else if (err?.toString != null) {
+    toast.error('Unexpected frontend error:\n\n' + err.toString())
+  } else {
+    toast.error('Unexpected frontend error. Check console for details.')
+  }
+  console.error(err)
 }
 
 app.mount('#app')
