@@ -49,6 +49,8 @@ jobs:
         run: |
           cd api
           npm ci
+          cd ../../frontend
+          npm ci
 
       - name: Run Jest tests
         run: |
