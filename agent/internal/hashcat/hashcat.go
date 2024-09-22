@@ -141,6 +141,10 @@ func (params HashcatParams) ToCmdArgs(conf *config.Config, session, tempHashFile
 
 	args = append(args, params.AdditionalArgs...)
 
+	if params.EnableLoopback {
+		args = append(args, "--loopback")
+	}
+
 	if params.OptimizedKernels {
 		args = append(args, "-O")
 	}
@@ -351,11 +355,11 @@ func (sess *HashcatSession) Kill() error {
 	}
 
 	err := sess.proc.Process.Kill()
-	
+
 	if errors.Is(err, os.ErrProcessDone) {
 		return nil
 	}
-	
+
 	return err
 }
 
