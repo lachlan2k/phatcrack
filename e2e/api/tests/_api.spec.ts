@@ -2,6 +2,7 @@ import * as api from '../../../frontend/src/api'
 import axios, { AxiosError } from 'axios'
 import tough from 'tough-cookie'
 import { HttpsCookieAgent } from 'http-cookie-agent/http'
+import { dummyApiRequests } from './dummyRequests'
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
@@ -110,63 +111,7 @@ describe('Unauthenticated Tests', () => {
   })
 
   describe('Disallowed Endpoints', () => {
-    const t = (name: string, run: any) => ({ name, run })
-
-    const tests = [
-      t('accountChangePassword', () => api.accountChangePassword({} as any)),
-      t('adminGetAllUsers', () => api.adminGetAllUsers()),
-      t('adminCreateUser', () => api.adminCreateUser({} as any)),
-      t('adminUpdateUser', () => api.adminUpdateUser('z', {} as any)),
-      t('adminUpdateUserPassword', () => api.adminUpdateUserPassword('z', {} as any)),
-      t('adminCreateServiceAccount', () => api.adminCreateServiceAccount({} as any)),
-      t('adminDeleteUser', () => api.adminDeleteUser({} as any)),
-      t('adminDeleteAgent', () => api.adminDeleteAgent({} as any)),
-      t('adminCreateAgent', () => api.adminCreateAgent({} as any)),
-      t('adminAgentSetMaintenance', () => api.adminAgentSetMaintenance('z', {} as any)),
-      t('adminGetConfig', () => api.adminGetConfig()),
-      t('adminSetConfig', () => api.adminSetConfig({} as any)),
-      t('adminGetVersion', () => api.adminGetVersion()),
-      t('getAllAgents', () => api.getAllAgents()),
-      t('getAllAttackTemplates', () => api.getAllAttackTemplates()),
-      t('deleteAttackTemplate', () => api.deleteAttackTemplate('z')),
-      t('createAttackTemplate', () => api.createAttackTemplate({} as any)),
-      t('createAttackTemplateSet', () => api.createAttackTemplateSet({} as any)),
-      t('updateAttackTemplate', () => api.updateAttackTemplate('', {} as any)),
-      t('startMFAEnrollment', () => api.startMFAEnrollment()),
-      t('startMFAChallenge', () => api.startMFAChallenge()),
-      t('changeTemporaryPassword', () => api.changeTemporaryPassword({} as any)),
-      t('refreshAuth', () => api.refreshAuth()),
-      t('loadHashTypes', () => api.loadHashTypes()),
-      t('detectHashType', () => api.detectHashType({} as any)),
-      t('getAllListfiles', () => api.getAllListfiles()),
-      t('getListfilesForProject', () => api.getListfilesForProject('z')),
-      t('deleteListfile', () => api.deleteListfile({} as any)),
-      t('searchPotfile', () => api.searchPotfile({} as any)),
-      t('createProject', () => api.createProject('', '')),
-      t('deleteProject', () => api.deleteProject('z')),
-      t('getAllProjects', () => api.getAllProjects()),
-      t('getProject', () => api.getProject('z')),
-      t('getProjectShares', () => api.getProjectShares('z')),
-      t('addProjectShare', () => api.addProjectShare('z', {} as any)),
-      t('deleteProjectShare', () => api.deleteProjectShare('z', {} as any)),
-      t('createHashlist', () => api.createHashlist({} as any)),
-      t('appendToHashlist', () => api.appendToHashlist('z', {} as any)),
-      t('createAttack', () => api.createAttack({} as any)),
-      t('deleteAttack', () => api.deleteAttack('z')),
-      t('stopAttack', () => api.stopAttack('z')),
-      t('startAttack', () => api.startAttack('z')),
-      t('getHashlistsForProject', () => api.getHashlistsForProject('z')),
-      t('getHashlist', () => api.getHashlist('z')),
-      t('deleteHashlist', () => api.deleteHashlist('z')),
-      t('getAttacksForHashlist', () => api.getAttacksForHashlist('z')),
-      t('getAttacksWithJobsForHashlist', () => api.getAttacksWithJobsForHashlist('z', {} as any)),
-      t('getAttacksInitialising', () => api.getAttacksInitialising()),
-      t('getRunningJobs', () => api.getRunningJobs()),
-      t('getJobCountPerUser', () => api.getJobCountPerUser()),
-      t('getAllUsers', () => api.getAllUsers())
-    ]
-
-    for (const test of tests) {
+    for (const test of dummyApiRequests) {
       it('should return 401 for ' + test.name, async () => {
         await expect(test.run()).rejects.toThrow(re401)
       })
@@ -522,6 +467,20 @@ describe('User Provisioning & Credential Authentication', () => {
       await expect(api.getAllProjects()).rejects.toThrow(re401)
     })
   })
+})
+
+describe('Admin authz', () => {
+  const u = credsMap.alice
+  beforeAllSetupClientWithLogin(u)
+
+  const adminEndpionts = dummyApiRequests.filter(x => x.name.toLowerCase().includes('admin'))
+  for (const test of adminEndpionts) {
+    it('should return access 401 for alice accessing ' + test.name, () => {
+      async () => {
+        await expect(test.run()).rejects.toThrow(re401)
+      }
+    })
+  }
 })
 
 describe('Projects', () => {
