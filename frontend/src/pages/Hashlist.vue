@@ -9,6 +9,7 @@ import PaginationControls from '@/components/PaginationControls.vue'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
 import AttackDetailsModal from '@/components/AttackDetailsModal/index.vue'
 import HashesInput from '@/components/HashesInput.vue'
+import PageLoading from '@/components/PageLoading.vue'
 
 import {
   JobStatusAwaitingStart,

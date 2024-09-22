@@ -10,6 +10,7 @@ import IconButton from '@/components/IconButton.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import JobWizard from '@/components/Wizard/JobWizard.vue'
 import TimeSinceDisplay from '@/components/TimeSinceDisplay.vue'
+import PageLoading from '@/components/PageLoading.vue'
 
 import { getProject, getHashlistsForProject, deleteHashlist, deleteProject } from '@/api/project'
 
