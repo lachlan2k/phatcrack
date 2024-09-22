@@ -25,31 +25,32 @@ jobs:
       ## Playwright E2E Browser Tests
       ##
       - name: Install test dependencies
-        working-directory: ./e2e/browser
-        run: npm ci
-
-      - name: Install playwright browsers
-        working-directory: ./e2e/browser
-        run: npx playwright install --with-deps
+        run: |
+          cd browser
+          npm ci
+          npx playwright install --with-deps
 
       - name: Run tests
-        working-directory: ./e2e/browser
-        run: npx playwright test --trace on
+        run: |
+          cd browser
+          npx playwright test --trace on
 
-      - uses: actions/upload-artifact@v3
-        working-directory: ./e2e/browser
+      - name: Upload Playwright Test Results
+        uses: actions/upload-artifact@v3
         with:
           name: playwright-test-results
-          path: e2e/playwright-report
+          path: e2e/browser/playwright-report
           retention-days: 7
 
       ##
       ## Jest API Tests
       ##
       - name: Install test dependencies
-        working-directory: ./e2e/api
-        run: npm ci
+        run: |
+          cd api
+          npm ci
 
-      - name: Run tests
-        working-directory: ./e2e/api
-        run: npm test
+      - name: Run Jest tests
+        run: |
+          cd api
+          npm test
