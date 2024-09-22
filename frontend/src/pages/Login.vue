@@ -15,6 +15,8 @@ import { useConfigStore } from '@/stores/config'
 
 import { Icons } from '@/util/icons'
 
+import { ApiResponseOK } from '@/api'
+
 const toast = useToast()
 const authStore = useAuthStore()
 const router = useRouter()
@@ -94,7 +96,7 @@ async function doPasswordChange(event: Event) {
       old_password: password.value,
       new_password: newPassword.value
     })
-    if (res === 'Ok') {
+    if (res === ApiResponseOK) {
       toast.success('Password changed successfully')
     } else {
       toast.warning('Unexpected API response: ' + res)
