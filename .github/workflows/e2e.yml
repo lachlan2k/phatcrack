@@ -1,11 +1,11 @@
-name: E2E Playwright Tests
+name: E2E Tests
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-  playwright:
-    name: 'Playwright Tests'
+  tests:
+    name: "E2E Tests"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -21,17 +21,35 @@ jobs:
       - name: Start application
         run: docker compose -f docker-compose.test.yml up -d --wait --build --force-recreate
 
+      ##
+      ## Playwright E2E Browser Tests
+      ##
       - name: Install test dependencies
+        working-directory: ./e2e/browser
         run: npm ci
 
       - name: Install playwright browsers
+        working-directory: ./e2e/browser
         run: npx playwright install --with-deps
 
       - name: Run tests
+        working-directory: ./e2e/browser
         run: npx playwright test --trace on
 
       - uses: actions/upload-artifact@v3
+        working-directory: ./e2e/browser
         with:
-          name: test-reuslts
+          name: playwright-test-results
           path: e2e/playwright-report
           retention-days: 7
+
+      ##
+      ## Jest API Tests
+      ##
+      - name: Install test dependencies
+        working-directory: ./e2e/api
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./e2e/api
+        run: npm test

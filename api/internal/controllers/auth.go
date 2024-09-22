@@ -110,7 +110,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 			return util.ServerError("Failed to update password", err)
 		}
 
-		return c.JSON(http.StatusOK, "Ok")
+		return c.JSON(http.StatusOK, "ok")
 	})
 
 	api.GET("/mfa/is-awaiting-challenge", func(c echo.Context) error {
@@ -186,7 +186,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 
 		AuditLog(c, nil, "User successfully finished MFA enrollment")
 
-		return c.JSON(http.StatusCreated, "Ok")
+		return c.JSON(http.StatusCreated, "ok")
 	})
 
 	api.POST("/mfa/start-challenge", func(c echo.Context) error {
@@ -270,7 +270,7 @@ func HookAuthEndpoints(api *echo.Group, sessHandler auth.SessionHandler) {
 		}
 
 		AuditLog(c, nil, "User has authenticated")
-		return c.JSON(http.StatusOK, "Ok")
+		return c.JSON(http.StatusOK, "ok")
 	})
 }
 
