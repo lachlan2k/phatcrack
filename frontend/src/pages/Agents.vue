@@ -32,7 +32,7 @@ const { catcher } = useToastError()
 
 async function toggleMaintenance(agent: AgentDTO) {
   try {
-    const is_maintenance_mode = !agent.is_maintenance_mode  
+    const is_maintenance_mode = !agent.is_maintenance_mode
     await adminAgentSetMaintenance(agent.id, {
       is_maintenance_mode
     })
