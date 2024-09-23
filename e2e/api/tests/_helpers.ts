@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios'
-import tough from 'tough-cookie'
+import * as tough from 'tough-cookie'
 import { HttpsCookieAgent } from 'http-cookie-agent/http'
 import * as api from '../../../frontend/src/api'
 
