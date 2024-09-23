@@ -24,13 +24,13 @@ jobs:
       ##
       ## Playwright E2E Browser Tests
       ##
-      - name: Install test dependencies
+      - name: Install Playwright test dependencies
         run: |
           cd browser
           npm ci
           npx playwright install --with-deps
 
-      - name: Run tests
+      - name: Run Playwright E2E tests
         run: |
           cd browser
           npx playwright test --trace on
@@ -45,14 +45,14 @@ jobs:
       ##
       ## Jest API Tests
       ##
-      - name: Install test dependencies
+      - name: Install Jest API test dependencies
         run: |
           cd api
           npm ci
           cd ../../frontend
           npm ci
 
-      - name: Run Jest tests
+      - name: Run Jest API tests
         run: |
           cd api
           npm test
