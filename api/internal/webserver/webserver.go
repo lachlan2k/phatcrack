@@ -22,8 +22,18 @@ func makeSessionHandler() auth.SessionHandler {
 	}
 }
 
-func Listen(port string) error {
+func Listen(baseURL string,port string) error {
 	e := echo.New()
+
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			origin := c.Request().Header.Get("Origin")
+			if origin != "" && origin != baseURL {
+				return echo.NewHTTPError(http.StatusForbidden, "Origin not allowed")
+			}
+			return next(c)
+		}
+	})
 
 	validator := util.NewRequestValidator()
 	e.Validator = validator
@@ -72,6 +82,7 @@ func Listen(port string) error {
 		[]string{roles.UserRoleAdmin, roles.UserRoleStandard},
 		[]string{roles.UserRoleRequiresPasswordChange}, // disallowed
 	))
+
 
 	controllers.HookHashcatEndpoints(api.Group("/hashcat"))
 	controllers.HookProjectEndpoints(api.Group("/project"))

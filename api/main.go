@@ -3,6 +3,7 @@ package main
 import (
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/lachlan2k/phatcrack/api/internal/auth"
 	"github.com/lachlan2k/phatcrack/api/internal/config"
@@ -77,7 +78,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = webserver.Listen(port)
+	baseURL := strings.TrimSuffix(os.Getenv("BASE_URL"), "/")
+
+	err = webserver.Listen(baseURL, port)
 	if err != nil {
 		log.Fatalf("couldn't run server: %v", err)
 	}
