@@ -15,8 +15,11 @@ import (
 
 func BindAndValidate[DTO interface{}](c echo.Context) (DTO, error) {
 	var req DTO
+	if c.Request().Header.Get("Content-Type") != "application/json" {
+		return req, echo.NewHTTPError(http.StatusUnsupportedMediaType, "Only application/json content type is supported")
+	}
 	if err := c.Bind(&req); err != nil {
-		return req, echo.NewHTTPError(http.StatusBadRequest, "Bad request").SetInternal(err)
+		return req, echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 	err := c.Validate(&req)
 	if err != nil {
