@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest "
+    "test": "jest",
+    "format": "prettier --cache --write tests/"
   },
   "keywords": [],
   "author": "",
@@ -21,5 +22,8 @@
     "tough-cookie": "^4.1.4",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
   }
 }
