@@ -30,13 +30,15 @@ type RequestValidator struct {
 	translator ut.Translator
 }
 
-func (v *RequestValidator) Init() {
+func NewRequestValidator() *RequestValidator {
+	v := &RequestValidator{}
+
 	eng := english.New()
 	uni := ut.New(eng, eng)
-	trans, _ := uni.GetTranslator("en")
+	translator, _ := uni.GetTranslator("en")
 	v.Validator = validator.New()
-	v.translator = trans
-	_ = en.RegisterDefaultTranslations(v.Validator, trans)
+	v.translator = translator
+	_ = en.RegisterDefaultTranslations(v.Validator, translator)
 
 	// Register other validators
 	v.Validator.RegisterValidation("userroles", func(fl validator.FieldLevel) bool {
@@ -79,6 +81,8 @@ func (v *RequestValidator) Init() {
 		_, ok = resources.GetHashTypeMap()[t]
 		return ok
 	})
+
+	return v
 }
 
 func (v *RequestValidator) Validate(i interface{}) error {

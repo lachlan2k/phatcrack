@@ -25,8 +25,7 @@ func makeSessionHandler() auth.SessionHandler {
 func Listen(port string) error {
 	e := echo.New()
 
-	validator := &util.RequestValidator{}
-	validator.Init()
+	validator := util.NewRequestValidator()
 	e.Validator = validator
 
 	e.Use(makeLoggerMiddleware())
