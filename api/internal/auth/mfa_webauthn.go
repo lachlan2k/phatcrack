@@ -62,7 +62,16 @@ func InitWebAuthn(baseURL url.URL) {
 	}
 }
 
+func IsWebAuthnAvailable() bool {
+	return webauthnHandler.Config != nil
+}
+
 func MFAWebAuthnBeginRegister(c echo.Context, sessHandler SessionHandler) (marshalledJSONResponse []byte, userPresentableErr error, internalErr error) {
+	if !IsWebAuthnAvailable() {
+		userPresentableErr = errors.New("webauthn is not available")
+		return
+	}
+
 	user, sessData := UserAndSessFromReq(c)
 	if user == nil {
 		internalErr = errors.New("failed to get user from req")
@@ -118,6 +127,11 @@ func MFAWebAuthnBeginRegister(c echo.Context, sessHandler SessionHandler) (marsh
 }
 
 func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (userPresentableErr error, internalErr error) {
+	if !IsWebAuthnAvailable() {
+		userPresentableErr = errors.New("webauthn is not available")
+		return
+	}
+
 	user, sessData := UserAndSessFromReq(c)
 	if user == nil {
 		internalErr = fmt.Errorf("failed to get user from req")
@@ -172,6 +186,11 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 }
 
 func MFAWebAuthnBeginLogin(c echo.Context, sessHandler SessionHandler) (marshalledJSONResponse []byte, userPresentableErr error, internalErr error) {
+	if !IsWebAuthnAvailable() {
+		userPresentableErr = errors.New("webauthn is not available")
+		return
+	}
+
 	user := UserFromReq(c)
 	if user == nil {
 		internalErr = fmt.Errorf("failed to get user from req")
@@ -216,6 +235,11 @@ func MFAWebAuthnBeginLogin(c echo.Context, sessHandler SessionHandler) (marshall
 }
 
 func MFAWebAuthnFinishLogin(c echo.Context, sessHandler SessionHandler) (userPresentableErr error, internalErr error) {
+	if !IsWebAuthnAvailable() {
+		userPresentableErr = errors.New("webauthn is not available")
+		return
+	}
+
 	user, sessData := UserAndSessFromReq(c)
 	if user == nil {
 		internalErr = fmt.Errorf("failed to get user from req")

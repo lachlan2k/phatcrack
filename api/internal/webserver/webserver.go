@@ -22,18 +22,20 @@ func makeSessionHandler() auth.SessionHandler {
 	}
 }
 
-func Listen(baseURL string,port string) error {
+func Listen(baseURL string, insecureOrigin bool, port string) error {
 	e := echo.New()
 
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			origin := c.Request().Header.Get("Origin")
-			if origin != "" && origin != baseURL {
-				return echo.NewHTTPError(http.StatusForbidden, "Origin not allowed")
+	if !insecureOrigin {
+		e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				origin := c.Request().Header.Get("Origin")
+				if origin != "" && origin != baseURL {
+					return echo.NewHTTPError(http.StatusForbidden, "Origin not allowed")
+				}
+				return next(c)
 			}
-			return next(c)
-		}
-	})
+		})
+	}
 
 	validator := util.NewRequestValidator()
 	e.Validator = validator
@@ -44,6 +46,9 @@ func Listen(baseURL string,port string) error {
 	sessionHandler := makeSessionHandler()
 
 	api := e.Group("/api/v1")
+	api.POST("/check-cors", func(c echo.Context) error {
+		return c.String(http.StatusOK, "ok")
+	})
 
 	// Agent auth is done separately in the controller, so it can go before auth middleware
 	controllers.HookAgentHandlerEndpoints(api.Group("/agent-handler"))
@@ -82,7 +87,6 @@ func Listen(baseURL string,port string) error {
 		[]string{roles.UserRoleAdmin, roles.UserRoleStandard},
 		[]string{roles.UserRoleRequiresPasswordChange}, // disallowed
 	))
-
 
 	controllers.HookHashcatEndpoints(api.Group("/hashcat"))
 	controllers.HookProjectEndpoints(api.Group("/project"))

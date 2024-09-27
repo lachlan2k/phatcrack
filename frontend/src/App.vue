@@ -3,6 +3,9 @@ import { storeToRefs } from 'pinia'
 import { useToast } from 'vue-toastification'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
+import { AxiosError } from 'axios'
+
+import { checkCors } from './api'
 
 import { useAuthStore } from '@/stores/auth'
 import { useConfigStore } from '@/stores/config'
@@ -29,8 +32,29 @@ const attackTemplatesStore = useAttackTemplatesStore()
 
 const { hasCompletedAuth, hasTriedAuth, loggedInUser, isLoggedIn } = storeToRefs(authStore)
 
+const toast = useToast()
+
 onMounted(async () => {
   await router.isReady()
+
+  try {
+    await checkCors()
+  } catch (e) {
+    // check if axios error
+    if (e instanceof AxiosError) {
+      if (e.response?.data?.message.toLowerCase() === 'origin not allowed') {
+        toast.error(
+          'The request origin is not allowed. Phatcrack will not work.\n\nPlease ensure your administrator sets BASE_URL correctly. Alternatively, consider setting INSECURE_ORIGIN=1 if this is a local development instance.',
+          {
+            // force user to dismiss this
+            timeout: false,
+            closeOnClick: false,
+            draggable: false
+          }
+        )
+      }
+    }
+  }
 
   router.beforeEach(() => {
     authStore.refreshAuth()
@@ -56,8 +80,6 @@ onBeforeUnmount(() => {
   clearInterval(authRefreshInterval.value)
   clearInterval(activeAttacksRefreshInterval.value)
 })
-
-const toast = useToast()
 
 watch(hasCompletedAuth, (newHasCompletedAuth, prevHasCompletedAuth) => {
   if (newHasCompletedAuth && !prevHasCompletedAuth) {

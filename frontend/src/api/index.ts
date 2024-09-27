@@ -10,6 +10,10 @@ export function ping(): Promise<string> {
   return client.get('/api/v1/ping').then(res => res.data)
 }
 
+export function checkCors(): Promise<string> {
+  return client.post('/api/v1/check-cors').then(res => res.data)
+}
+
 export const ApiResponseOK = 'ok'
 
 export * from './account'

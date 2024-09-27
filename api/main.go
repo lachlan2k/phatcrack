@@ -61,9 +61,16 @@ func main() {
 		log.Fatalf("BASE_URL was not specified")
 	}
 
-	parsedBaseURL, err := url.Parse(os.Getenv("BASE_URL"))
+	baseURL := strings.TrimSuffix(os.Getenv("BASE_URL"), "/")
+
+	parsedBaseURL, err := url.Parse(baseURL)
 	if err != nil {
 		log.Fatalf("Provided BASE_URL could not be parsed: %v", err)
+	}
+
+	insecureOrigin := os.Getenv("INSECURE_ORIGIN") != ""
+	if insecureOrigin {
+		log.Warnf("INSECURE_ORIGIN is enabled. Please do not use this in production. Instead, ensure BASE_URL is set correctly.\n")
 	}
 
 	auth.InitWebAuthn(*parsedBaseURL)
@@ -78,9 +85,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	baseURL := strings.TrimSuffix(os.Getenv("BASE_URL"), "/")
-
-	err = webserver.Listen(baseURL, port)
+	err = webserver.Listen(baseURL, insecureOrigin, port)
 	if err != nil {
 		log.Fatalf("couldn't run server: %v", err)
 	}
