@@ -55,7 +55,7 @@ func (h *Handler) downloadFile(fileID string) error {
 		return err
 	}
 
-	if response.StatusCode != 200 {
+	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("expected response code 200 when downloading file, got %d", response.StatusCode)
 	}
 

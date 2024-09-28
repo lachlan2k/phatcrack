@@ -1,6 +1,7 @@
 # This Dockerfile builds and serves the agent
 FROM golang:1.23 AS builder
 
+
 COPY agent /app/agent
 COPY common /app/common
 COPY .git /app/.git
@@ -12,10 +13,18 @@ WORKDIR /app/agent
 RUN bash build.sh
 
 FROM caddy:2-alpine
+ENV HASHCAT_VERSION=6.2.6
 
 WORKDIR /usr/share/caddy
 RUN rm index.html
-RUN wget -O hashcat.7z https://github.com/hashcat/hashcat/releases/download/v6.2.6/hashcat-6.2.6.7z
+WORKDIR /usr/share/caddy/agent-assets
+RUN wget -O hashcat.7z https://github.com/hashcat/hashcat/releases/download/v$HASHCAT_VERSION/hashcat-$HASHCAT_VERSION.7z \ 
+    && apk add --update --no-cache p7zip                                                                                  \
+    && 7z x hashcat.7z                                                                                                    \
+    && tar czvf hashcat.tar.gz hashcat-$HASHCAT_VERSION                                                                    \
+    && rm -r hashcat.7z hashcat-$HASHCAT_VERSION
+
 COPY agent/install.sh install.sh    
 
-COPY --from=builder /app/agent/phatcrack-agent /usr/share/caddy/
+
+COPY --from=builder /app/agent/phatcrack-agent /usr/share/caddy/agent-assets/phatcrack-agent

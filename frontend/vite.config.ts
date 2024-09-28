@@ -19,6 +19,10 @@ export default defineConfig({
         target: process.env.DEV_API_URL,
         changeOrigin: true,
         ws: true
+      },
+      '/agent-assets': {
+        target: process.env.DEV_AGENT_SERVER_URL,
+        changeOrigin: true
       }
     }
   }

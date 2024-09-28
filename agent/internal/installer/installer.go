@@ -32,6 +32,7 @@ type InstallConfig struct {
 	ListfileDirectory      string
 	APIEndpoint            string
 	DisableTLSVerification bool
+	InstallHashcat         bool
 }
 
 //go:embed template.service
@@ -154,6 +155,10 @@ func Run(installConf InstallConfig) {
 	log.Println("Writing key file...")
 	writeAuthKeyFile(installConf)
 
+	if installConf.InstallHashcat {
+		installHashcat(installConf)
+	}
+
 	log.Println("Done! Run 'systemctl enable --now phatcrack-agent' to start the agent")
 }
 
@@ -166,6 +171,8 @@ func applyDefaults(installConf *InstallConfig) {
 			installConf.AgentUser = "phatcrack-agent"
 		}
 	}
+
+	installConf.InstallHashcat = true
 
 	if installConf.AgentGroup == "" {
 		g, err := user.LookupGroup("phatcrack-agent")
@@ -285,7 +292,10 @@ func checkConf(installConf InstallConfig) error {
 		return errors.New("listfile directory is not set")
 	}
 
-	// Blank API Endpoint is fine, assuming user is maybe setting up agents before server
+	// Blank API Endpoint is fine, assuming user is maybe setting up agents before server, but if they're looking for us to install hashcat we have to be up and running
+	if installConf.APIEndpoint == "" && installConf.InstallHashcat {
+		return errors.New("install hashcat was selected, but no download (api endpoint) server was specified")
+	}
 
 	return nil
 }
@@ -294,6 +304,7 @@ func RunInteractive() {
 	flagSet := flag.NewFlagSet("install", flag.ExitOnError)
 
 	useDefaultsP := flagSet.Bool("defaults", false, "Use basic defaults for intallation? (stores everything in /opt/phatcrack-agent)")
+
 	userP := flagSet.String("user", "", "Which user to run the agent as")
 	groupP := flagSet.String("group", "", "Which user group to run the agent as")
 	agentBinPathP := flagSet.String("agent-bin", "", "Path to agent (defaults to running executable)")
@@ -303,6 +314,9 @@ func RunInteractive() {
 	hashcatPathP := flagSet.String("hashcat-path", "", "Path to hashcat executable")
 	listfilePathP := flagSet.String("listfile-directory", "", "Path to directory to hold listfiles")
 	apiEndpointP := flagSet.String("api-endpoint", "", "API endpoint (format: https://phatcrack.lan/api/v1)")
+
+	autoInstallHashcatP := flagSet.Bool("download-hashcat", false, "Install hashcat from agent asset server (requires api endpoint to be set)")
+
 	disableTLSVerificationP := flagSet.Bool("disable-tls-verification", false, "Whether to disable TLS Verification")
 
 	flagSet.Parse(os.Args[2:])
@@ -322,6 +336,7 @@ func RunInteractive() {
 		ListfileDirectory:      *listfilePathP,
 		APIEndpoint:            *apiEndpointP,
 		DisableTLSVerification: *disableTLSVerificationP,
+		InstallHashcat:         *autoInstallHashcatP,
 	}
 
 	if installConf.Defaults {
@@ -333,7 +348,7 @@ func RunInteractive() {
 
 	err := checkConf(installConf)
 	if err != nil {
-		panic(err)
+		log.Fatal("config was invalid:", err)
 	}
 
 	Run(installConf)

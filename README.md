@@ -63,15 +63,8 @@ usermod -aG video phatcrack-agent
 
 cd /opt/phatcrack-agent
 
-# Download hashcat
-wget https://github.com/hashcat/hashcat/releases/download/v6.2.6/hashcat-6.2.6.7z -q -O hashcat.7z
-7z x hashcat.7z
-rm hashcat.7z
-mv hashcat-6.2.6 hashcat
-chown -R phatcrack-agent:phatcrack-agent ./hashcat
-
 # Download the phatcrack-agent program from the local server
-wget https://phatcrack.lan/phatcrack-agent
+wget https://phatcrack.lan/agent-assets/phatcrack-agent
 # Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download/v0.5.2/phatcrack-agent
 
 chmod +x ./phatcrack-agent

@@ -9,12 +9,13 @@ import (
 )
 
 type Config struct {
-	AuthKeyFile            string `json:"auth_key_file"`
-	AuthKey                string `json:"auth_key"`
-	HashcatPath            string `json:"hashcat_binary"`
-	ListfileDirectory      string `json:"listfile_directory"`
-	APIEndpoint            string `json:"api_endpoint"`
-	DisableTLSVerification bool   `json:"disable_tls_verification"`
+	AuthKeyFile       string `json:"auth_key_file"`
+	AuthKey           string `json:"auth_key"`
+	HashcatPath       string `json:"hashcat_binary"`
+	ListfileDirectory string `json:"listfile_directory"`
+	APIEndpoint       string `json:"api_endpoint"`
+
+	DisableTLSVerification bool `json:"disable_tls_verification"`
 }
 
 func LoadConfig(configPath string) (config Config) {

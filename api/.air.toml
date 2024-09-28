@@ -3,5 +3,5 @@ tmp_dir = "/tmp/air/"
 
 [build]
   bin = "/tmp/air/main"
-  cmd = "go build -ldflags=\"-X github.com/lachlan2k/phatcrack/api/internal/version.version=$(git describe --tags)-DEV\" -o /tmp/air/main ."
+  cmd = "go build -buildvcs=false -ldflags=\"-X github.com/lachlan2k/phatcrack/api/internal/version.version=$(git describe --tags)-DEV\" -o /tmp/air/main ."
   include_ext = ["go"]

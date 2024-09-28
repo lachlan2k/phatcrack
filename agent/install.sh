@@ -17,10 +17,6 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-if ! command -v 7z &> /dev/null; then
-    echo "7z is not installed. Please install 7-Zip to continue."
-    exit 1
-fi
 
 download_file() {
     local url="$1"
@@ -52,15 +48,8 @@ usermod -aG video phatcrack-agent || true
 
 cd /opt/phatcrack-agent
 
-echo "Downloading binaries"
-download_file $PHATCRACK_HOST/agent-assets/hashcat.7z hashcat.7z
+echo "Downloading agent"
 download_file $PHATCRACK_HOST/agent-assets/phatcrack-agent phatcrack-agent
-
-7z x hashcat.7z
-rm hashcat.7z
-mv hashcat-* hashcat
-
-chown -R phatcrack-agent:phatcrack-agent ./hashcat
 chmod +x ./phatcrack-agent
 
 local tls_arg=""

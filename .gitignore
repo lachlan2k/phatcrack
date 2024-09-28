@@ -4,3 +4,4 @@ certs/cert.pem
 certs/key.pem
 filerepo/*
 */tmp
+agent/phatcrack-agent

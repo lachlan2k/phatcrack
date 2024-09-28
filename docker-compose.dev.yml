@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     environment:
       - DEV_API_URL=http://api:3000
+      - DEV_AGENT_SERVER_URL=http://agent-server
     ports:
       - ${APP_PORT:-3000}:5173
     volumes:
@@ -36,6 +37,13 @@ services:
       - db-data-dev:/var/lib/postgresql/data
     ports:
       - ${DB_DEV_PORT:-5432}:5432
+
+    # Optional: just a local server for the agent binary
+  agent-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    restart: unless-stopped
 
 volumes:
   db-data-dev:
