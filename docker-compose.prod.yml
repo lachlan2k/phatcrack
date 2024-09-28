@@ -21,6 +21,7 @@ services:
         condition: service_healthy
     user: ${PHATCRACK_USER:-root}
     environment:
+      - INSECURE_ORIGIN
       - PORT=3000
       - DB_DSN=host=db user=phatcrack password=${DB_PASS:-phatcrack} dbname=phatcrack
       - FILEREPO_PATH=/srv/filerepo
@@ -41,7 +42,6 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
-  # Optional: just a local server for the agent binary
   agent-server:
     image: ghcr.io/lachlan2k/phatcrack/agent-server:${PHATCRACK_VERSION_TAG:-latest}
     restart: unless-stopped
