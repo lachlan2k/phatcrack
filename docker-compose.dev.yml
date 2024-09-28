@@ -38,7 +38,6 @@ services:
     ports:
       - ${DB_DEV_PORT:-5432}:5432
 
-    # Optional: just a local server for the agent binary
   agent-server:
     build:
       context: .
