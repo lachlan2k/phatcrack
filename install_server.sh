@@ -1,6 +1,9 @@
 #!/bin/bash
 
-export PHATCRACK_VERSION_TAG=v0.5.2
+# Only set if not already set
+if [ -z "$PHATCRACK_VERSION_TAG" ]; then
+    export PHATCRACK_VERSION_TAG=v0.5.2
+fi
 
 set -e
 
@@ -73,6 +76,7 @@ if [ "$server_hostname" == "" ]; then
 
     echo "HOST_NAME=:443" >> .env
     echo "TLS_OPTS=\"tls internal {\\non_demand\\n}\"" >> .env
+    echo "INSECURE_ORIGIN=1" >> .env
 
 else
     echo "HOST_NAME=$server_hostname" >> .env
