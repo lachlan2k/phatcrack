@@ -16,6 +16,8 @@ import (
 )
 
 func installHashcat(installConf InstallConfig) {
+	log.Println("Installing hashcat...")
+
 	if _, err := os.Stat(installConf.HashcatPath); err == nil {
 		log.Printf("hashcat binary was already found at %q, skipping install", installConf.HashcatPath)
 		return
