@@ -16,14 +16,13 @@ import (
 )
 
 func installHashcat(installConf InstallConfig) {
-
 	if _, err := os.Stat(installConf.HashcatPath); err == nil {
 		log.Printf("hashcat binary was already found at %q, skipping install", installConf.HashcatPath)
 		return
 	}
 
 	if installConf.Defaults {
-		os.MkdirAll("/opt/phatcrack-agent/hashcat", 0700)
+		os.MkdirAll("/opt/phatcrack-agent/hashcat", 0755)
 	}
 
 	installDirectory := filepath.Dir(installConf.HashcatPath)
