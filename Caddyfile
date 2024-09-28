@@ -12,7 +12,7 @@
         Referrer-Policy no-referrer-when-downgrade
     }
 
-    handle_path /agent-assets/* {
+    handle /agent-assets/* {
         reverse_proxy http://agent-server
     }
 
