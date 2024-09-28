@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -xe
+set -e
 
 if [ -z "$PHATCRACK_HOST" ]; then
   echo "PHATCRACK_HOST is not set. Exiting."
@@ -61,6 +61,8 @@ if [[ -n "$DISABLE_TLS_VERIFICATION" ]]; then
 fi
 
 ./phatcrack-agent install -defaults -api-endpoint $PHATCRACK_HOST/api/v1 -auth-key $PHATCRACK_API_KEY $tls_arg
+
+echo "Starting service..."
 
 systemctl daemon-reload
 systemctl enable --now phatcrack-agent
