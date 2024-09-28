@@ -11,6 +11,7 @@ import (
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
+	"github.com/sirupsen/logrus"
 )
 
 var ErrJobDoesntExist = errors.New("job doesn't exist")
@@ -88,7 +89,7 @@ func scheduleJobUnsafe(jobIds []string) ([]string, error) {
 
 	for _, jobId := range jobIds {
 		jobDb, err := db.GetJob(jobId, false)
-		if err == db.ErrNotFound {
+		if err == db.ErrNotFound || jobDb == nil {
 			return nil, ErrJobDoesntExist
 		}
 		jobs = append(jobs, jobDb.ToDTO())
@@ -120,7 +121,12 @@ func scheduleJobUnsafe(jobIds []string) ([]string, error) {
 			job := jobs[0]
 			jobs = jobs[1:]
 
-			agentConnection := fleet[agent.ID.String()]
+			agentConnection, ok := fleet[agent.ID.String()]
+			if !ok || agentConnection == nil {
+				// Shouldn't happen because we've already collected the agents and we have a lock
+				logrus.WithField("agent_id", agent.ID.String()).Warn("Agent was supposed to be online, but couldn't be found in the fleet")
+				continue
+			}
 			agentsJobsScheduledTo = append(agentsJobsScheduledTo, agent.ID.String())
 
 			db.SetJobScheduled(job.ID, agent.ID.String())

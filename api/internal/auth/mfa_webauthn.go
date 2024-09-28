@@ -73,7 +73,7 @@ func MFAWebAuthnBeginRegister(c echo.Context, sessHandler SessionHandler) (marsh
 	}
 
 	user, sessData := UserAndSessFromReq(c)
-	if user == nil {
+	if user == nil || sessData == nil {
 		internalErr = errors.New("failed to get user from req")
 		return
 	}
@@ -133,7 +133,7 @@ func MFAWebAuthnFinishRegister(c echo.Context, sessHandler SessionHandler) (user
 	}
 
 	user, sessData := UserAndSessFromReq(c)
-	if user == nil {
+	if user == nil || sessData == nil {
 		internalErr = fmt.Errorf("failed to get user from req")
 		return
 	}
@@ -241,7 +241,7 @@ func MFAWebAuthnFinishLogin(c echo.Context, sessHandler SessionHandler) (userPre
 	}
 
 	user, sessData := UserAndSessFromReq(c)
-	if user == nil {
+	if user == nil || sessData == nil {
 		internalErr = fmt.Errorf("failed to get user from req")
 		return
 	}

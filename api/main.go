@@ -66,6 +66,7 @@ func main() {
 	parsedBaseURL, err := url.Parse(baseURL)
 	if err != nil {
 		log.Fatalf("Provided BASE_URL could not be parsed: %v", err)
+		return
 	}
 
 	insecureOrigin := os.Getenv("INSECURE_ORIGIN") != ""

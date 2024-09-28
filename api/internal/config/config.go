@@ -180,9 +180,11 @@ func Reload() error {
 			return errors.New("failed to fetch configuration even after seeding: " + err.Error())
 		}
 	}
-
 	if err != nil {
 		return err
+	}
+	if newConf == nil {
+		return errors.New("database config was nil")
 	}
 
 	if newConf.ConfigVersion < latestConfigVersion {
