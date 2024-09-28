@@ -17,6 +17,9 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+if [[ $PHATCRACK_HOST != https://* ]]; then
+  PHATCRACK_HOST=https://$PHATCRACK_HOST
+fi
 
 download_file() {
     local url="$1"
@@ -52,7 +55,7 @@ echo "Downloading agent"
 download_file $PHATCRACK_HOST/agent-assets/phatcrack-agent phatcrack-agent
 chmod +x ./phatcrack-agent
 
-local tls_arg=""
+tls_arg=""
 if [[ -n "$DISABLE_TLS_VERIFICATION" ]]; then
     tls_arg="-disable-tls-verification"
 fi
