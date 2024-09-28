@@ -12,7 +12,7 @@
         Referrer-Policy no-referrer-when-downgrade
     }
 
-    handle /phatcrack-agent {
+    handle_path /agent-assets/* {
         reverse_proxy http://agent-server
     }
 

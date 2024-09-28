@@ -53,8 +53,8 @@ usermod -aG video phatcrack-agent || true
 cd /opt/phatcrack-agent
 
 echo "Downloading binaries"
-download_file $PHATCRACK_HOST/hashcat.7z hashcat.7z
-download_file $PHATCRACK_HOST/phatcrack-agent phatcrack-agent
+download_file $PHATCRACK_HOST/agent-assets/hashcat.7z hashcat.7z
+download_file $PHATCRACK_HOST/agent-assets/phatcrack-agent phatcrack-agent
 
 7z x hashcat.7z
 rm hashcat.7z
