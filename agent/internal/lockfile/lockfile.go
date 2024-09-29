@@ -163,7 +163,6 @@ func (l *Lockfile) write(create bool) error {
 		ID:      l.id,
 	}
 
-	// buff, err := json.Marshal(d)
 	err = json.NewEncoder(f).Encode(d)
 	if err != nil {
 		return err
