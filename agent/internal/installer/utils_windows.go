@@ -36,12 +36,12 @@ func installService(installConf InstallConfig) {
 	newService, err := m.OpenService(ServiceName)
 	if err == nil {
 		newService.Close()
-		log.Fatal("service %q already exists", ServiceName)
+		log.Fatalf("service %q already exists", ServiceName)
 	}
 
 	newService, err = m.CreateService(ServiceName, installConf.AgentBinPath, mgr.Config{DisplayName: "", StartType: mgr.StartAutomatic})
 	if err != nil {
-		log.Fatal("failed to create service %q: %s", ServiceName, err)
+		log.Fatalf("failed to create service %q: %s", ServiceName, err)
 	}
 	defer newService.Close()
 	err = eventlog.InstallAsEventCreate(ServiceName, eventlog.Error|eventlog.Warning|eventlog.Info)
