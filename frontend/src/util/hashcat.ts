@@ -69,6 +69,10 @@ export function hashrateStr(hashrate: number): string {
 }
 
 export function makeHashcatParams(hashType: number, attackSettings: AttackSettingsT): HashcatParams {
+  // --loopback is only valid in wodlist attacks where there are valid rules to be looped back through
+  const enable_loopback =
+    attackSettings.enableLoopback && attackSettings.attackMode == AttackMode.Dictionary && attackSettings.selectedRulefiles.length > 0
+
   const baseParams: HashcatParams = {
     attack_mode: attackSettings.attackMode,
     hash_type: hashType,
@@ -85,7 +89,7 @@ export function makeHashcatParams(hashType: number, attackSettings: AttackSettin
 
     optimized_kernels: attackSettings.optimizedKernels,
     slow_candidates: attackSettings.slowCandidates,
-    enable_loopback: attackSettings.enableLoopback,
+    enable_loopback,
 
     additional_args: [],
     skip: 0,
