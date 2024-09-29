@@ -229,7 +229,9 @@ func handleCreateServiceAccount(c echo.Context) error {
 		return util.ServerError("Couldn't create service account", err)
 	}
 
-	allRoles := append(req.Roles, roles.UserRoleMFAExempt, roles.UserRoleServiceAccount)
+	var allRoles []string
+	allRoles = append(allRoles, req.Roles...)
+	allRoles = append(allRoles, roles.UserRoleMFAExempt, roles.UserRoleServiceAccount)
 
 	newUser, err := db.RegisterServiceAccount(req.Username, apiKey, allRoles)
 	if err != nil {
