@@ -2,6 +2,7 @@ package handler
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -53,6 +54,9 @@ func (h *Handler) downloadFile(fileID string) error {
 	response, err := client.Do(request)
 	if err != nil {
 		return err
+	}
+	if response == nil {
+		return errors.New("response was nil")
 	}
 
 	if response.StatusCode != http.StatusOK {
