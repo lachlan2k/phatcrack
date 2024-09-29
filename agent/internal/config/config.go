@@ -9,11 +9,12 @@ import (
 )
 
 type Config struct {
-	AuthKeyFile       string `json:"auth_key_file"`
-	AuthKey           string `json:"auth_key"`
-	HashcatPath       string `json:"hashcat_binary"`
-	ListfileDirectory string `json:"listfile_directory"`
-	APIEndpoint       string `json:"api_endpoint"`
+	AuthKeyFile             string `json:"auth_key_file"`
+	AuthKey                 string `json:"auth_key"`
+	HashcatPath             string `json:"hashcat_binary"`
+	ListfileDirectory       string `json:"listfile_directory"`
+	APIEndpoint             string `json:"api_endpoint"`
+	DisableDownloadLockfile bool   `json:"disable_download_lockfile"`
 
 	DisableTLSVerification bool `json:"disable_tls_verification"`
 }

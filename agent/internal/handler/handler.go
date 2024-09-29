@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"runtime"
 	"sync"
 	"time"
 
@@ -32,7 +33,7 @@ type Handler struct {
 	fileDownloadLock  sync.Mutex
 	isDownloadingFile bool
 	activeJobs        map[string]*ActiveJob
-	fileLock          *lockfile.Lockfile
+	downloadLockfile  Lockfile
 }
 
 func (h *Handler) sendMessage(msgType string, payload interface{}) error {
@@ -170,11 +171,18 @@ func run(conf *config.Config) error {
 		DisableTLSVerification: conf.DisableTLSVerification,
 	}
 
+	var downloadLockfile Lockfile
+	if conf.DisableDownloadLockfile || runtime.GOOS == "windows" {
+		downloadLockfile = lockfile.NewDummy()
+	} else {
+		downloadLockfile = lockfile.New(path.Join(conf.ListfileDirectory, "agent.lock"))
+	}
+
 	h := &Handler{
-		conn:       conn,
-		conf:       conf,
-		activeJobs: make(map[string]*ActiveJob),
-		fileLock:   lockfile.New(path.Join(conf.ListfileDirectory, "agent.lock")),
+		conn:             conn,
+		conf:             conf,
+		activeJobs:       make(map[string]*ActiveJob),
+		downloadLockfile: downloadLockfile,
 	}
 
 	conn.Setup()

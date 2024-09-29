@@ -16,6 +16,11 @@ import (
 	"github.com/lachlan2k/phatcrack/common/pkg/wstypes"
 )
 
+type Lockfile interface {
+	AcquireWithTimeout(time.Duration) error
+	Unlock()
+}
+
 func (h *Handler) getFilePath(fileID string) (string, error) {
 	filename := filepath.Base(filepath.Clean(fileID))
 	if filename == "." || filename == ".." || filename == "/" {
@@ -81,11 +86,11 @@ func (h *Handler) handleDownloadFileRequest(msg *wstypes.Message) error {
 	h.fileDownloadLock.Lock()
 	defer h.fileDownloadLock.Unlock()
 
-	err := h.fileLock.AcquireWithTimeout(10 * time.Second)
+	err := h.downloadLockfile.AcquireWithTimeout(10 * time.Second)
 	if err != nil {
 		return err
 	}
-	defer h.fileLock.Unlock()
+	defer h.downloadLockfile.Unlock()
 
 	h.isDownloadingFile = true
 	defer func() {
