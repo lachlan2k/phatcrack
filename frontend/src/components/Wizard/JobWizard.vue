@@ -398,7 +398,7 @@ function callBubblewrapped(fn: () => Promise<any>) {
 
           <div class="mt-8 flex justify-between">
             <div class="flex justify-start">
-              <button class="link" @click="() => callBubblewrapped(saveUptoAttack)" v-if="attackSettingsValidationError != null">
+              <button class="link" @click="() => callBubblewrapped(saveUptoAttack)" v-if="attackSettingsValidationError == null">
                 Save attack and finish
               </button>
             </div>
