@@ -39,7 +39,7 @@ func installService(installConf InstallConfig) {
 		log.Fatalf("service %q already exists", ServiceName)
 	}
 
-	newService, err = m.CreateService(ServiceName, installConf.AgentBinPath, mgr.Config{DisplayName: "", StartType: mgr.StartAutomatic})
+	newService, err = m.CreateService(ServiceName, installConf.AgentBinPath, mgr.Config{DisplayName: "phatcrack-agent", StartType: mgr.StartAutomatic})
 	if err != nil {
 		log.Fatalf("failed to create service %q: %s", ServiceName, err)
 	}
