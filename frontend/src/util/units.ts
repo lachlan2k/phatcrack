@@ -9,9 +9,16 @@ export function timeSince(timestamp: number): string {
   ]
 
   const date = new Date(timestamp)
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
-  const interval = intervals.find(i => i.seconds < seconds) ?? intervals[0]
-  const count = Math.floor(seconds / interval.seconds)
+  const secondsSince = Math.floor((Date.now() - date.getTime()) / 1000)
+  if (secondsSince === 0) {
+    return 'Just now'
+  }
+  if (secondsSince < 0) {
+    return 'In the future 😱'
+  }
+
+  const interval = intervals.find(i => i.seconds < secondsSince) ?? intervals[0]
+  const count = Math.floor(secondsSince / interval.seconds)
   return `${count} ${interval!.label}${count !== 1 ? 's' : ''} ago`
 }
 
