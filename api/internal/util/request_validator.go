@@ -64,7 +64,7 @@ func NewRequestValidator() *RequestValidator {
 		return standardNameRegex.MatchString(name)
 	})
 
-	usernameRegex := regexp.MustCompile(`^[\w\.@_]+$`)
+	usernameRegex := regexp.MustCompile(`^[\w\.@\-_]+$`)
 
 	v.Validator.RegisterValidation("username", func(fl validator.FieldLevel) bool {
 		username, ok := fl.Field().Interface().(string)
