@@ -11,7 +11,7 @@ import { AttackTemplateSetType, AttackTemplateType } from '@/api/attackTemplate'
 import { useListfilesStore } from '@/stores/listfiles'
 import { useAttackTemplatesStore } from '@/stores/attackTemplates'
 
-import { AttackMode, attackModes } from '@/util/hashcat'
+import { AttackMode, attackModes, isLoopbackValid } from '@/util/hashcat'
 import { Icons } from '@/util/icons'
 
 export interface AttackSettingsT {
@@ -185,7 +185,7 @@ watch(
       <input type="checkbox" v-model="attackSettings.isDistributed" class="checkbox-primary checkbox checkbox-xs" />
       <span><span class="label-text ml-4 font-bold">Distribute attack?</span></span>
     </label>
-    <label class="label cursor-pointer justify-start">
+    <label class="label cursor-pointer justify-start" v-if="isLoopbackValid(attackSettings)">
       <input type="checkbox" v-model="attackSettings.enableLoopback" class="checkbox-primary checkbox checkbox-xs" />
       <span><span class="label-text ml-4 font-bold">Loopback?</span> (--loopback)</span>
     </label>
