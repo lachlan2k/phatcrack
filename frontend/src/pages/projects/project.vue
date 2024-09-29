@@ -38,7 +38,12 @@ const { loggedInUser, isAdmin } = storeToRefs(authStore)
 const projectsStore = useProjectsStore()
 
 const { data: projectData, isLoading: isLoadingProject } = useApi(() => getProject(projId))
-const { data: hashlistData, isLoading: isLoadingHashlists, fetchData: fetchHashlists } = useApi(() => getHashlistsForProject(projId))
+const {
+  data: hashlistData,
+  isLoading: isLoadingHashlists,
+  fetchData: fetchHashlists,
+  silentlyRefresh: refreshHashlists
+} = useApi(() => getHashlistsForProject(projId))
 
 const isShareModalOpen = ref(false)
 const isWizardOpen = ref(false)
@@ -137,7 +142,7 @@ const quantityStr = (num: number, str: string) => {
               <button class="btn btn-primary btn-sm" @click="() => (isWizardOpen = true)">New Hashlist</button>
 
               <Modal v-model:isOpen="isWizardOpen">
-                <JobWizard :firstStep="1" :existingProjectId="projId" />
+                <JobWizard :firstStep="1" :existingProjectId="projId" @created-hashlist="refreshHashlists()" />
               </Modal>
             </div>
             <table class="table w-full">

@@ -44,13 +44,13 @@ const { data: hashlistData, isLoading: isLoadingHashlist, silentlyRefresh: refre
 const {
   data: attacksData,
   isLoading: isLoadingAttacksData,
-  silentlyRefresh: refreshAttack
+  silentlyRefresh: refreshAttacks
 } = useApi(() => getAttacksWithJobsForHashlist(hashlistId))
 
 const intervalId = ref<number | null>(null)
 
 async function intervalLoop() {
-  await Promise.all([refreshAttack(), refreshHashlist()])
+  await Promise.all([refreshAttacks(), refreshHashlist()])
   intervalId.value = setTimeout(intervalLoop, 5 * 1000)
 }
 
@@ -325,7 +325,12 @@ async function onAppendHashes() {
             <div class="card-body">
               <div class="flex flex-row justify-between">
                 <Modal v-model:isOpen="isAttackWizardOpen">
-                  <JobWizard :firstStep="2" :existingHashlistId="hashlistId" :existingProjectId="hashlistData?.project_id" />
+                  <JobWizard
+                    :firstStep="2"
+                    :existingHashlistId="hashlistId"
+                    :existingProjectId="hashlistData?.project_id"
+                    @created-attack="refreshAttacks()"
+                  />
                 </Modal>
                 <h2 class="card-title">Attacks</h2>
                 <button class="btn btn-primary btn-sm" @click="() => (isAttackWizardOpen = true)">New Attack</button>

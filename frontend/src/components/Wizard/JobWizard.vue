@@ -45,6 +45,8 @@ interface StartEmitDetails {
 
 const emit = defineEmits<{
   (e: 'successfulStart', details: StartEmitDetails): void
+  (e: 'createdHashlist'): void
+  (e: 'createdAttack'): void
 }>()
 
 const projectsStore = useProjectsStore()
@@ -178,6 +180,8 @@ async function saveOrGetProject(): Promise<ProjectDTO> {
     catcher(err, 'Failed to create project. ')
     // Throw up so our caller knows an error happened
     throw err
+  } finally {
+    projectsStore.load(true)
   }
 }
 
@@ -200,6 +204,8 @@ async function saveOrGetHashlist(): Promise<HashlistCreateResponseDTO> {
       input_hashes: hashesArr.value,
       has_usernames: inputs.hasUsernames
     })
+
+    emit('createdHashlist')
 
     toast.success(`Created hashlist "${inputs.hashlistName}"!`)
 
@@ -277,10 +283,14 @@ async function saveUptoAttack(): Promise<AttackDTO[]> {
 
   try {
     if (attackSettings.attackMode === AttackMode.Template) {
-      return saveAttackFromTemplate()
+      const res = await saveAttackFromTemplate()
+      emit('createdAttack')
+      return res
     }
 
-    return saveAttack()
+    const res = await saveAttack()
+    emit('createdAttack')
+    return res
   } catch (err: any) {
     catcher(err, 'Failed to create attack. ')
     throw err
