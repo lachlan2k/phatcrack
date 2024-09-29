@@ -153,7 +153,7 @@ func apiEndpointToWSEndpoint(apiEndpoint string) (string, error) {
 	return wsUrl.String(), nil
 }
 
-func Run(conf *config.Config) error {
+func run(conf *config.Config) error {
 	headers := http.Header{
 		"Authorization": []string{conf.AuthKey},
 	}

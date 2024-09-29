@@ -13,6 +13,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
 )
 
 func installHashcat(installConf InstallConfig) {
@@ -24,7 +26,7 @@ func installHashcat(installConf InstallConfig) {
 	}
 
 	if installConf.Defaults {
-		os.MkdirAll("/opt/phatcrack-agent/hashcat", 0755)
+		os.MkdirAll(DefaultPathJoin("hashcat"), 0755)
 	}
 
 	installDirectory := filepath.Dir(installConf.HashcatPath)
@@ -62,7 +64,7 @@ func installHashcat(installConf InstallConfig) {
 		log.Fatal("failed to extract hashcat.tar.gz: ", err)
 	}
 
-	_, err = os.Stat(filepath.Join(installDirectory, "hashcat.bin"))
+	_, err = os.Stat(filepath.Join(installDirectory, hashcat.Hashcat))
 	if err != nil {
 		log.Fatalf("did not find hashcat.bin within install directory %q, invalid tar.gz has been passed", installDirectory)
 	}
@@ -88,7 +90,7 @@ func extractTarGz(targetDirectory string, stream io.Reader) error {
 		}
 
 		safePath := filepath.Join("/", filepath.Clean(header.Name))
-		// Split off the hashcat-x.x.x parent directory so we're installing hashcat.bin directly to the folder
+		// Split off the hashcat-x.x.x parent directory so we're installing hashcat binary directly to the folder
 		excludingHashcatFolder := strings.SplitN(safePath, string(os.PathSeparator), 3)
 		safePath = filepath.Join(targetDirectory, excludingHashcatFolder[len(excludingHashcatFolder)-1])
 

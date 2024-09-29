@@ -19,7 +19,7 @@ func main() {
 		return
 	}
 
-	configPath := flag.String("config", "/opt/phatcrack-agent/config.json", "Location of config file")
+	configPath := flag.String("config", installer.DefaultPathJoin("config.json"), "Location of config file")
 	versionP := flag.Bool("version", false, "Print version")
 	flag.Parse()
 

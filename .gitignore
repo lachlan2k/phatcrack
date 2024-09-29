@@ -5,3 +5,4 @@ certs/key.pem
 filerepo/*
 */tmp
 agent/phatcrack-agent
+agent/phatcrack-agent.exe

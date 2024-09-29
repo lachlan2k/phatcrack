@@ -10,11 +10,12 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"strconv"
+	"path/filepath"
+	"runtime"
 	"strings"
-	"text/template"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
+	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
 )
 
 type InstallConfig struct {
@@ -40,22 +41,6 @@ var serviceFileTemplateString string
 
 const serviceUnitFilePath = "/etc/systemd/system/phatcrack-agent.service"
 
-func getUidAndGid(installConf InstallConfig) (int, int) {
-	runningUser, err := user.Lookup(installConf.AgentUser)
-	if runningUser == nil || err != nil {
-		log.Fatalf("Couldn't look up user %q for installation: %v", installConf.AgentUser, err)
-	}
-
-	runningGroup, err := user.LookupGroup(installConf.AgentGroup)
-	if runningGroup == nil || err != nil {
-		log.Fatalf("Couldn't look up user group %q for installation: %v", installConf.AgentGroup, err)
-	}
-
-	uid, _ := strconv.Atoi(runningUser.Uid)
-	gid, _ := strconv.Atoi(runningGroup.Gid)
-	return uid, gid
-}
-
 func writeAuthKeyFile(installConf InstallConfig) {
 	f, err := os.OpenFile(installConf.AuthKeyFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
@@ -68,32 +53,10 @@ func writeAuthKeyFile(installConf InstallConfig) {
 		log.Fatalf("Couldn't write key to auth key file: %v", err)
 	}
 
-	uid, gid := getUidAndGid(installConf)
-	f.Chown(uid, gid)
-}
-
-func writeServiceFile(installConf InstallConfig) {
-	serviceFileTmpl, err := template.New("Service File").Parse(serviceFileTemplateString)
-	if err != nil {
-		log.Fatalf("Couldn't compile template: %v", err)
-	}
-
-	f, err := os.OpenFile(serviceUnitFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		log.Fatalf("Couldn't open systemd unit file for writing: %v", err)
-	}
-	defer f.Close()
-
-	err = serviceFileTmpl.Execute(f, installConf)
-	if err != nil {
-		log.Fatalf("Failed to write service file: %v", err)
-	}
-
-	f.Chown(0, 0)
+	adjustPerms(f, installConf)
 }
 
 func writeConfigFile(installConf InstallConfig) {
-	uid, gid := getUidAndGid(installConf)
 
 	marshalled, err := json.MarshalIndent(config.Config{
 		AuthKeyFile:            installConf.AuthKeyFile,
@@ -118,36 +81,28 @@ func writeConfigFile(installConf InstallConfig) {
 		log.Fatalf("Failed to write config file: %v", err)
 	}
 
-	f.Chown(uid, gid)
+	adjustPerms(f, installConf)
 }
 
 func setupPaths(installConf InstallConfig) {
-	uid, gid := getUidAndGid(installConf)
 
 	if installConf.Defaults {
-		os.MkdirAll("/opt/phatcrack-agent/", 0700)
-		os.Chown("/opt/phatcrack-agent/", uid, gid)
+		os.MkdirAll(DefaultPathJoin(), 0700)
+		adjustPermsPath(DefaultPathJoin(), installConf)
 	}
 
 	os.MkdirAll(installConf.ListfileDirectory, 0700)
-	os.Chown(installConf.ListfileDirectory, uid, gid)
+	adjustPermsPath(installConf.ListfileDirectory, installConf)
 }
 
 func Run(installConf InstallConfig) {
-	user, err := user.Current()
-	if err != nil {
-		log.Fatalf("Couldn't get current user for installation: %v", err)
-	}
 
-	if user.Uid != "0" || user.Gid != "0" {
-		log.Fatalf("Agent installer must be run as root")
+	if err := isElevated(); err != nil {
+		log.Fatal(err)
 	}
 
 	log.Println("Setting up paths...")
 	setupPaths(installConf)
-
-	log.Println("Writing service file...")
-	writeServiceFile(installConf)
 
 	log.Println("Writing config file...")
 	writeConfigFile(installConf)
@@ -159,14 +114,30 @@ func Run(installConf InstallConfig) {
 		installHashcat(installConf)
 	}
 
-	log.Println("Done! Run 'systemctl enable --now phatcrack-agent' to start the agent")
+	log.Println("Installing service...")
+	installService(installConf)
+
+	if runtime.GOOS != "windows" {
+		log.Println("Done! Run 'systemctl enable --now phatcrack-agent' to start the agent")
+	} else {
+		log.Println("Done! Execute agent binary as administrator to start agent")
+
+	}
+
 }
 
 func applyDefaults(installConf *InstallConfig) {
 	if installConf.AgentUser == "" {
 		u, err := user.Lookup("phatcrack-agent")
 		if err != nil || u == nil {
+
 			installConf.AgentUser = "root"
+			if runtime.GOOS == "windows" {
+				// On windows we dont have the concept of a root user, so just use the current user. We check that the binary has been elevated before doing any of the actual install stuff
+				user, _ := user.Current()
+				installConf.AgentUser = user.Uid
+			}
+
 		} else {
 			installConf.AgentUser = "phatcrack-agent"
 		}
@@ -178,6 +149,10 @@ func applyDefaults(installConf *InstallConfig) {
 		g, err := user.LookupGroup("phatcrack-agent")
 		if err != nil || g == nil {
 			installConf.AgentGroup = "root"
+			if runtime.GOOS == "windows" {
+				user, _ := user.Current()
+				installConf.AgentGroup = user.Gid
+			}
 		} else {
 			installConf.AgentGroup = "phatcrack-agent"
 		}
@@ -191,32 +166,33 @@ func applyDefaults(installConf *InstallConfig) {
 	}
 
 	if installConf.AuthKeyFile == "" {
-		installConf.AuthKeyFile = "/opt/phatcrack-agent/auth.key"
+		installConf.AuthKeyFile = DefaultPathJoin("auth.key")
 	}
 
 	if installConf.ConfigPath == "" {
-		installConf.ConfigPath = "/opt/phatcrack-agent/config.json"
+		installConf.ConfigPath = DefaultPathJoin("config.json")
 	}
 
 	if installConf.HashcatPath == "" {
 		path, err := exec.LookPath("hashcat")
 		if err != nil || path == "" {
-			path, err = exec.LookPath("hashcat.bin")
+			path, err = exec.LookPath(hashcat.Hashcat)
 			if err != nil || path == "" {
-				path = "/opt/phatcrack-agent/hashcat/hashcat.bin"
+				path = DefaultPathJoin("hashcat/" + hashcat.Hashcat)
 			}
 		}
 		installConf.HashcatPath = path
 	}
 
 	if installConf.ListfileDirectory == "" {
-		installConf.ListfileDirectory = "/opt/phatcrack-agent/listfiles/"
+		installConf.ListfileDirectory = DefaultPathJoin("listfiles/")
 	}
+
 }
 
-func input(prompt string) string {
+func input(p string, a ...any) string {
 	var res string
-	fmt.Print(prompt)
+	fmt.Printf(p, a...)
 	fmt.Scanln(&res)
 	return strings.TrimSuffix(strings.TrimSpace(res), "\n")
 }
@@ -241,11 +217,11 @@ func getOptionsInteractive(installConf *InstallConfig) {
 	}
 
 	if installConf.AuthKeyFile == "" {
-		installConf.AuthKeyFile = input("Auth key file to write (default: /opt/phatcrack-agent/auth.key): ")
+		installConf.AuthKeyFile = input("Auth key file to write (default: %s): ", DefaultPathJoin("auth.key"))
 	}
 
 	if installConf.ConfigPath == "" {
-		installConf.ConfigPath = input("Config file to write (default: /opt/phatcrack-agent/config.json): ")
+		installConf.ConfigPath = input("Config file to write (default: %s): ", DefaultPathJoin("config.json"))
 	}
 
 	if installConf.HashcatPath == "" {
@@ -253,7 +229,7 @@ func getOptionsInteractive(installConf *InstallConfig) {
 	}
 
 	if installConf.ListfileDirectory == "" {
-		installConf.ListfileDirectory = input("Directory to store listfiles (default: /opt/phatcrack-agent/listfiles/): ")
+		installConf.ListfileDirectory = input("Directory to store listfiles (default: %s): ", DefaultPathJoin("listfiles/"))
 	}
 
 	if installConf.APIEndpoint == "" {
@@ -303,7 +279,7 @@ func checkConf(installConf InstallConfig) error {
 func RunInteractive() {
 	flagSet := flag.NewFlagSet("install", flag.ExitOnError)
 
-	useDefaultsP := flagSet.Bool("defaults", false, "Use basic defaults for intallation? (stores everything in /opt/phatcrack-agent)")
+	useDefaultsP := flagSet.Bool("defaults", false, "Use basic defaults for intallation? (stores everything in "+DefaultPathJoin()+")")
 
 	userP := flagSet.String("user", "", "Which user to run the agent as")
 	groupP := flagSet.String("group", "", "Which user group to run the agent as")
@@ -348,8 +324,29 @@ func RunInteractive() {
 
 	err := checkConf(installConf)
 	if err != nil {
-		log.Fatal("config was invalid:", err)
+		log.Fatal("config was invalid: ", err)
 	}
 
 	Run(installConf)
+}
+
+func DefaultPathJoin(parts ...string) string {
+	path := "/opt/phatcrack-agent"
+	if runtime.GOOS == "windows" {
+		var err error
+		path, err = os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	parts = append([]string{path}, parts...)
+	return filepath.Join(parts...)
+
+}
+
+func adjustPermsPath(path string, installConf InstallConfig) {
+	// No op on windows
+	f, _ := os.OpenFile(path, os.O_WRONLY, 0700)
+	adjustPerms(f, installConf)
 }

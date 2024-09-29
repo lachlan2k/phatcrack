@@ -18,7 +18,7 @@ import (
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
 
-	"github.com/hpcloud/tail"
+	"github.com/nxadm/tail"
 )
 
 type HashcatParams hashcattypes.HashcatParams
@@ -226,9 +226,9 @@ func findBinary(conf *config.Config) (path string, err error) {
 
 	path, err = exec.LookPath("hashcat")
 	if err != nil {
-		path, err = exec.LookPath("hashcat.bin")
+		path, err = exec.LookPath(Hashcat)
 		if err != nil {
-			err = errors.New("couldn't find hashcat or hashcat.bin in path, and hashcat_binary was not specified")
+			err = errors.New("couldn't find hashcat or " + Hashcat + " in path, and hashcat_binary was not specified")
 			return
 		}
 	}
@@ -261,6 +261,9 @@ func (sess *HashcatSession) Start() error {
 	}
 
 	log.Printf("Running hashcat command: %q", sess.proc.String())
+
+	// Hashcat on windows (or perhaps where hashcat is not in PATH) fails to load its resources
+	sess.proc.Dir = filepath.Dir(sess.proc.Path)
 
 	err = sess.proc.Start()
 	if err != nil {
@@ -423,13 +426,13 @@ func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *c
 		return nil, err
 	}
 
-	hashFile, err = os.CreateTemp("/tmp", "phatcrack-hashes")
+	hashFile, err = os.CreateTemp(os.TempDir(), "phatcrack-hashes")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't make a temp file to store hashes: %v", err)
 	}
 	hashFile.Chmod(0600)
 
-	outFile, err = os.CreateTemp("/tmp", "phatcrack-output")
+	outFile, err = os.CreateTemp(os.TempDir(), "phatcrack-output")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't make a temp file to store output: %v", err)
 	}
@@ -437,7 +440,7 @@ func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *c
 
 	charsetFiles = []*os.File{}
 	for i, charset := range params.MaskCustomCharsets {
-		charsetFile, err := os.CreateTemp("/tmp", "phatcrack-charset")
+		charsetFile, err := os.CreateTemp(os.TempDir(), "phatcrack-charset")
 		if err != nil {
 			return nil, fmt.Errorf("couldn't make a temp file to store charset")
 		}
@@ -451,7 +454,7 @@ func NewHashcatSession(id string, hashes []string, params HashcatParams, conf *c
 	}
 
 	if params.MaskShardedCharset != "" {
-		shardedCharsetFile, err = os.CreateTemp("/tmp", "phatcrack-charset")
+		shardedCharsetFile, err = os.CreateTemp(os.TempDir(), "phatcrack-charset")
 		if err != nil {
 			return nil, fmt.Errorf("couldn't make a temp file to store charset")
 		}

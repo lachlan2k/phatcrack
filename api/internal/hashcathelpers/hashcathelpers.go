@@ -140,7 +140,7 @@ func CalculateKeyspace(params hashcattypes.HashcatParams) (int64, error) {
 }
 
 func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
-	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-identify")
+	tmpFile, err := os.CreateTemp(os.TempDir(), "phatcrack-hash-identify")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %w", err)
 	}
@@ -226,7 +226,7 @@ func SplitUsername(hash string) (string, string, error) {
 }
 
 func NormalizeHashes(hashes []string, hashType int, hasUsernames bool) ([]string, error) {
-	tmpFile, err := os.CreateTemp("/tmp", "phatcrack-hash-normalize")
+	tmpFile, err := os.CreateTemp(os.TempDir(), "phatcrack-hash-normalize")
 	if err != nil {
 		return nil, fmt.Errorf("couldn't create temporary file to store hashes: %w", err)
 	}

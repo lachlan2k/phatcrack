@@ -10,7 +10,8 @@ WORKDIR /app/common
 RUN go mod download -x
 
 WORKDIR /app/agent
-RUN bash build.sh
+RUN bash build.sh linux
+RUN bash build.sh windows
 
 FROM caddy:2-alpine
 ENV HASHCAT_VERSION=6.2.6
@@ -26,5 +27,5 @@ RUN wget -O hashcat.7z https://github.com/hashcat/hashcat/releases/download/v$HA
 
 COPY agent/install.sh install.sh    
 
-
+COPY --from=builder /app/agent/phatcrack-agent.exe /usr/share/caddy/agent-assets/phatcrack-agent.exe
 COPY --from=builder /app/agent/phatcrack-agent /usr/share/caddy/agent-assets/phatcrack-agent
