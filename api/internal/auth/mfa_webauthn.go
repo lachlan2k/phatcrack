@@ -40,8 +40,8 @@ func (w webauthnUser) WebAuthnCredentials() []*webauthn.Credential {
 	return creds
 }
 
-func (w webauthnUser) WebAuthnCredential(ID []byte) *webauthn.Credential {
-	return w.CredentialMap[hex.EncodeToString(ID)]
+func (w webauthnUser) WebAuthnCredential(id []byte) *webauthn.Credential {
+	return w.CredentialMap[hex.EncodeToString(id)]
 }
 
 func (w webauthnUser) WebAuthnIcon() string {
