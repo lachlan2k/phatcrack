@@ -192,30 +192,7 @@ func IdentifyHashTypes(exampleHash string, hasUsername bool) ([]int, error) {
 	return candidates, nil
 }
 
-type hashAndUsername struct {
-	username string
-	hash     string
-}
-
 const usernameSeparator = ":"
-
-func splitUsernames(hashes []string) ([]hashAndUsername, error) {
-	results := make([]hashAndUsername, len(hashes))
-
-	for i := range hashes {
-		split := strings.SplitN(hashes[i], usernameSeparator, 2)
-		if len(split) != 2 {
-			return nil, fmt.Errorf("line %d did not contain username separator %q", i, usernameSeparator)
-		}
-
-		results[i] = hashAndUsername{
-			username: split[0],
-			hash:     split[1],
-		}
-	}
-
-	return results, nil
-}
 
 func SplitUsername(hash string) (string, string, error) {
 	username, hash, found := strings.Cut(hash, usernameSeparator)
