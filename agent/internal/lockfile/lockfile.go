@@ -72,7 +72,8 @@ func (l *Lockfile) Acquire(ctx context.Context) error {
 }
 
 func (l *Lockfile) AcquireWithTimeout(timeout time.Duration) error {
-	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(timeout))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(timeout))
+	defer cancel()
 	return l.Acquire(ctx)
 }
 
