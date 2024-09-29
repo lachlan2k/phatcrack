@@ -64,7 +64,11 @@ func (h *Handler) downloadFile(fileID string) error {
 	}
 
 	_, err = io.Copy(outFile, response.Body)
-	return err
+	if err != nil {
+		return err
+	}
+	log.Printf("Downloaded file %q", fileID)
+	return nil
 }
 
 func (h *Handler) handleDownloadFileRequest(msg *wstypes.Message) error {
