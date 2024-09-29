@@ -85,7 +85,7 @@ func handleCredentialLogin(sessHandler auth.SessionHandler) echo.HandlerFunc {
 		AuditLog(c, log.Fields{
 			"authenticated_username": user.Username,
 			"auth_type":              "credentials",
-		}, logMessage)
+		}, "%s", logMessage)
 
 		return c.JSON(http.StatusOK, response)
 	}

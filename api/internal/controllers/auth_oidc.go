@@ -229,7 +229,7 @@ func handleOIDCCallback(sessHandler auth.SessionHandler) echo.HandlerFunc {
 		AuditLog(c, log.Fields{
 			"authenticated_username": userToAuth.Username,
 			"auth_type":              "oidc",
-		}, logMessage)
+		}, "%s", logMessage)
 
 		return c.JSON(http.StatusOK, response)
 	}
