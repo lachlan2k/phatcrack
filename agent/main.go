@@ -30,7 +30,7 @@ func main() {
 
 	conf := config.LoadConfig(*configPath)
 
-	log.Printf("Starting phatcrack-agent " + version.Version())
+	log.Printf("Starting phatcrack-agent %s", version.Version())
 	err := handler.Run(&conf)
 
 	if err != nil {
