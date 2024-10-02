@@ -13,15 +13,26 @@ type AdminAgentCreateResponseDTO struct {
 }
 
 type AdminAgentRegistrationKeyCreateRequestDTO struct {
-	Name      string `json:"name" validate:"required,min=4,max=64,username"`
-	Ephemeral bool   `json:"ephemeral"`
+	Name              string `json:"name" validate:"required,min=4,max=64,username"`
+	ForEphemeralAgent bool   `json:"for_ephemeral_agent"`
 }
 
 type AdminAgentRegistrationKeyCreateResponseDTO struct {
-	Ephemeral bool   `json:"ephemeral"`
-	Name      string `json:"name"`
-	ID        string `json:"id"`
-	Key       string `json:"key"`
+	Name              string `json:"name"`
+	ID                string `json:"id"`
+	Key               string `json:"key"`
+	ForEphemeralAgent bool   `json:"for_ephemeral_agent"`
+}
+
+type AdminGetAgentRegistrationKeyDTO struct {
+	ID                string `json:"id"`
+	Name              string `json:"name"`
+	KeyHint           string `json:"key_hint"`
+	ForEphemeralAgent bool   `json:"for_ephemeral_agent"`
+}
+
+type AdminGetAllAgentRegistrationKeysResponseDTO struct {
+	AgentRegistrationKeys []AdminGetAgentRegistrationKeyDTO `json:"agent_registration_keys"`
 }
 
 type AdminUserCreateRequestDTO struct {

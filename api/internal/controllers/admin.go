@@ -139,6 +139,7 @@ func HookAdminEndpoints(api *echo.Group) {
 	})
 
 	api.POST("/agent-registration-key/create", handleAgentRegistrationKeyCreate)
+	api.GET("/agent-registration-key/all", handleGetAllAgentRegistrationKeys)
 
 	api.PUT("/user/:id", handleUpdateUser)
 	api.PUT("/user/:id/password", handleUpdateUserPassword)
@@ -278,7 +279,7 @@ func handleAgentRegistrationKeyCreate(c echo.Context) error {
 		return err
 	}
 
-	newRegKey, key, err := db.CreateAgentRegistrationKey(req.Name, req.Ephemeral)
+	newRegKey, key, err := db.CreateAgentRegistrationKey(req.Name, req.ForEphemeralAgent)
 	if err != nil {
 		return util.ServerError("Failed to create agent registration key", err)
 	}
@@ -289,10 +290,10 @@ func handleAgentRegistrationKeyCreate(c echo.Context) error {
 	}, "New agent registration key created")
 
 	return c.JSON(http.StatusCreated, apitypes.AdminAgentRegistrationKeyCreateResponseDTO{
-		Ephemeral: newRegKey.Ephemeral,
-		Name:      newRegKey.Name,
-		ID:        strconv.Itoa(int(newRegKey.ID)),
-		Key:       key,
+		ForEphemeralAgent: newRegKey.ForEphemeralAgent,
+		Name:              newRegKey.Name,
+		ID:                strconv.Itoa(int(newRegKey.ID)),
+		Key:               key,
 	})
 }
 
@@ -454,4 +455,19 @@ func handleUpdateUserPassword(c echo.Context) error {
 	default:
 		return echo.NewHTTPError(http.StatusBadRequest, "Unknown action %s", req.Action)
 	}
+}
+
+func handleGetAllAgentRegistrationKeys(c echo.Context) error {
+	keys, err := db.GetAllAgentRegistrationKeys()
+	if err != nil {
+		return util.ServerError("Failed to get agent registration keys", err)
+	}
+	keysDTO := make([]apitypes.AdminGetAgentRegistrationKeyDTO, len(keys))
+	for i, key := range keys {
+		keysDTO[i] = key.ToDTO()
+	}
+
+	return c.JSON(http.StatusOK, apitypes.AdminGetAllAgentRegistrationKeysResponseDTO{
+		AgentRegistrationKeys: keysDTO,
+	})
 }

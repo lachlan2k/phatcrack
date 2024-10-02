@@ -68,3 +68,11 @@ export function adminSetConfig(newConfig: AdminConfigRequestDTO): Promise<AdminC
 export function adminGetVersion(): Promise<string> {
   return client.get('/api/v1/admin/version').then(res => res.data)
 }
+
+export function adminGetAgentRegistrationKeys(): Promise<AdminGetAllUsersResponseDTO> {
+  return client.get('/api/v1/admin/agent-registration-key/all').then(res => res.data)
+}
+
+export function adminCreateAgentRegistrationKey(newKeyData: AdminAgentCreateRequestDTO): Promise<AdminAgentCreateResponseDTO> {
+  return client.post('/api/v1/admin/agent-registration-key/create', newKeyData).then(res => res.data)
+}

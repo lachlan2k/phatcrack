@@ -119,7 +119,7 @@ func handleAgentRegister(c echo.Context) error {
 
 	// TODO: make this not-racey
 	// currently if the key is only allowed to be used once and two requests are made simultaneously, it could allow two registrations
-	newAgent, newAuthKey, err := db.CreateAgent(name, keyData.Ephemeral)
+	newAgent, newAuthKey, err := db.CreateAgent(name, keyData.ForEphemeralAgent)
 	if err != nil {
 		return util.GenericServerError(err)
 	}

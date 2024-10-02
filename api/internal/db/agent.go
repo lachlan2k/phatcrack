@@ -1,6 +1,7 @@
 package db
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,9 +30,21 @@ type Agent struct {
 
 type AgentRegistrationKey struct {
 	SimpleBaseModel
-	Name      string
-	KeyHash   string
-	Ephemeral bool
+
+	Name    string
+	KeyHint string
+	KeyHash string
+
+	ForEphemeralAgent bool
+}
+
+func (a AgentRegistrationKey) ToDTO() apitypes.AdminGetAgentRegistrationKeyDTO {
+	return apitypes.AdminGetAgentRegistrationKeyDTO{
+		ID:                strconv.FormatUint(uint64(a.ID), 10),
+		Name:              a.Name,
+		KeyHint:           a.KeyHint,
+		ForEphemeralAgent: a.ForEphemeralAgent,
+	}
 }
 
 type AgentFile struct {
@@ -112,10 +125,13 @@ func CreateAgentRegistrationKey(name string, ephemeral bool) (newKey *AgentRegis
 		return
 	}
 
+	keyHint := plaintextKey[:4] + "..." + plaintextKey[len(plaintextKey)-4:]
+
 	key := &AgentRegistrationKey{
-		Name:      name,
-		KeyHash:   keyHash,
-		Ephemeral: ephemeral,
+		Name:              name,
+		KeyHash:           keyHash,
+		KeyHint:           keyHint,
+		ForEphemeralAgent: ephemeral,
 	}
 
 	err = GetInstance().Create(key).Error
@@ -125,6 +141,15 @@ func CreateAgentRegistrationKey(name string, ephemeral bool) (newKey *AgentRegis
 
 	newKey = key
 	return
+}
+
+func GetAllAgentRegistrationKeys() ([]AgentRegistrationKey, error) {
+	agentRegistrationKeys := []AgentRegistrationKey{}
+	err := GetInstance().Find(&agentRegistrationKeys).Error
+	if err != nil {
+		return nil, err
+	}
+	return agentRegistrationKeys, nil
 }
 
 func GetAgentRegistrationKeyByKey(key string) (*AgentRegistrationKey, error) {
