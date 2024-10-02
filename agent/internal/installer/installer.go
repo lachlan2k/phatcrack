@@ -1,21 +1,26 @@
 package installer
 
 import (
+	"bytes"
 	_ "embed"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/user"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
+	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
 type InstallConfig struct {
@@ -27,6 +32,7 @@ type InstallConfig struct {
 
 	AuthKey     string
 	AuthKeyFile string
+	RegistrationKey string
 	ConfigPath  string
 
 	HashcatPath            string
@@ -212,8 +218,11 @@ func getOptionsInteractive(installConf *InstallConfig) {
 		installConf.AgentBinPath = input("Where is the phatcrack agent binary? (default: current binary): ")
 	}
 
-	if installConf.AuthKey == "" {
-		installConf.AuthKey = input("Auth key from server (this is okay to leave blank for now): ")
+	if installConf.AuthKey == "" && installConf.RegistrationKey == "" {
+		installConf.RegistrationKey	= input("Registration key from server (leave blank to specify an auth key): ")
+		if installConf.RegistrationKey == "" {
+			installConf.AuthKey = input("Auth key from server (this is okay to leave blank for now): ")
+		}
 	}
 
 	if installConf.AuthKeyFile == "" {
@@ -234,6 +243,61 @@ func getOptionsInteractive(installConf *InstallConfig) {
 
 	if installConf.APIEndpoint == "" {
 		installConf.APIEndpoint = input("API Endpoint (format: https://phatcrack.lan/api/v1): ")
+	}
+}
+
+func registerIfRequired(installConf *InstallConfig) {
+	if installConf.RegistrationKey != "" {
+		u, err := url.Parse(installConf.APIEndpoint)
+		if err != nil {
+			log.Fatal("failed to parse API endpoint to register agent: ", err)
+			return
+		}
+
+		name, err := os.Hostname()
+		if err != nil || name == "" {
+			log.Printf("Warn: couldn't get hostname for agent registration: %v\n", err)
+			name = "unknown"
+		}
+
+		reqBody := apitypes.AgentRegisterRequestDTO{
+			Name: name,
+		}
+
+		reqBodyBytes, err := json.Marshal(reqBody)
+		if err != nil {
+			log.Fatalf("Failed to marshal agent registration request: %v", err)
+		}
+
+		u.Path = path.Join(u.Path, "/agent-handler/register")
+
+		req, err := http.NewRequest("POST", u.String(), bytes.NewReader(reqBodyBytes))
+		if err != nil {
+			log.Fatalf("Failed to create agent registration request: %v", err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", installConf.RegistrationKey)
+
+		resp, err := makeHttpClient(*installConf).Do(req)
+		if err != nil {
+			log.Fatalf("Failed to register agent: %v", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Fatalf("Failed to register agent: got status code %d", resp.StatusCode)
+		}
+		
+		var respBody apitypes.AgentRegisterResponseDTO
+		err = json.NewDecoder(resp.Body).Decode(&respBody)
+		if err != nil {
+			log.Fatalf("Failed to decode agent registration response: %v", err)
+		}
+
+		log.Print("Registered agent with server as " + respBody.Name + " with ID " + respBody.ID)
+
+		installConf.AuthKey = respBody.Key
 	}
 }
 
@@ -284,6 +348,7 @@ func RunInteractive() {
 	userP := flagSet.String("user", "", "Which user to run the agent as")
 	groupP := flagSet.String("group", "", "Which user group to run the agent as")
 	agentBinPathP := flagSet.String("agent-bin", "", "Path to agent (defaults to running executable)")
+	registrationKeyP := flagSet.String("registration-key", "", "Registration key for agent")
 	authKeyFileP := flagSet.String("auth-keyfile", "", "Path to file containing agent key")
 	authKeyP := flagSet.String("auth-key", "", "Path to file containing agent key")
 	configPathP := flagSet.String("config-path", "", "Path to config json file to install")
@@ -304,6 +369,7 @@ func RunInteractive() {
 		AgentGroup:   *groupP,
 		AgentBinPath: *agentBinPathP,
 
+		RegistrationKey: *registrationKeyP,
 		AuthKey:     *authKeyP,
 		AuthKeyFile: *authKeyFileP,
 		ConfigPath:  *configPathP,
@@ -315,12 +381,18 @@ func RunInteractive() {
 		InstallHashcat:         *autoInstallHashcatP,
 	}
 
+	if installConf.RegistrationKey != "" && installConf.AuthKey != "" {
+		log.Fatal("Registration key and auth key cannot be set at the same time")
+	}
+
 	if installConf.Defaults {
 		applyDefaults(&installConf)
 	} else {
 		getOptionsInteractive(&installConf)
 		applyDefaults(&installConf)
 	}
+
+	registerIfRequired(&installConf)
 
 	err := checkConf(installConf)
 	if err != nil {

@@ -3,8 +3,10 @@
 package installer
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/user"
 	"strconv"
@@ -63,4 +65,13 @@ func installService(installConf InstallConfig) {
 	}
 
 	f.Chown(0, 0)
+}
+
+func makeHttpClient(installConf InstallConfig) *http.Client {
+	tr := &http.Transport{}
+	if installConf.DisableTLSVerification {
+		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+	client := &http.Client{Transport: tr}
+	return client
 }
