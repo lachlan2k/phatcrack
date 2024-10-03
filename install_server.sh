@@ -69,7 +69,6 @@ echo "Downloading docker-compose.yml..."
 curl -qLO https://github.com/lachlan2k/phatcrack/releases/download/$PHATCRACK_VERSION_TAG/docker-compose.yml
 
 echo "PHATCRACK_VERSION_TAG=${PHATCRACK_VERSION_TAG}" >> .env
-chmod 600 .env
 
 read -p "What DNS hostname will resolve to your Phatcrack instance (leave blank for anything)?: " server_hostname
 if [ "$server_hostname" == "" ]; then
