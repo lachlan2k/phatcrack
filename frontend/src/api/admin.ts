@@ -6,7 +6,6 @@ import type {
   AdminAgentSetMaintanceRequestDTO,
   AdminConfigRequestDTO,
   AdminConfigResponseDTO,
-  AdminGetAgentRegistrationKeyDTO,
   AdminGetAllAgentRegistrationKeysResponseDTO,
   AdminGetAllUsersResponseDTO,
   AdminServiceAccountCreateRequestDTO,

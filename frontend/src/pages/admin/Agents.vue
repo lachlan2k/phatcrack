@@ -3,11 +3,17 @@ import { useToast } from 'vue-toastification'
 import { ref, computed } from 'vue'
 
 import ConfirmModal from '@/components/ConfirmModal.vue'
-
 import Modal from '@/components/Modal.vue'
 import IconButton from '@/components/IconButton.vue'
+import InfoTip from '@/components/InfoTip.vue'
 
-import { adminCreateAgentRegistrationKey, adminDeleteAgent, adminDeleteAgentRegistrationKey, adminGetAgentRegistrationKeys } from '@/api/admin'
+import {
+  adminAgentSetMaintenance,
+  adminCreateAgentRegistrationKey,
+  adminDeleteAgent,
+  adminDeleteAgentRegistrationKey,
+  adminGetAgentRegistrationKeys
+} from '@/api/admin'
 import { getAllAgents } from '@/api/agent'
 
 import { useApi } from '@/composables/useApi'
@@ -16,12 +22,15 @@ import { useToastError } from '@/composables/useToastError'
 import { Icons } from '@/util/icons'
 import { formatDeviceName } from '@/util/formatDeviceName'
 
+import type { AgentDTO } from '@/api'
+
 const AgentStatusHealthy = 'AgentStatusHealthy'
 const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'
 const AgentStatusUnhealthyAndDisconnected = 'AgentStatusUnhealthyAndDisconnected'
 
 const isRegistrationModalOpen = ref(false)
-const { data: agents, fetchData: fetchAgents, isLoading } = useApi(getAllAgents)
+
+const { data: agents, silentlyRefresh: fetchAgents, isLoading } = useApi(getAllAgents)
 
 const { data: registrationKeys, silentlyRefresh: fetchRegistrationKeys } = useApi(adminGetAgentRegistrationKeys)
 
@@ -93,21 +102,61 @@ async function onDeleteRegKey(id: string) {
     fetchRegistrationKeys()
   }
 }
+
+async function copyCommand() {
+  await navigator.clipboard.writeText(commandToRun.value)
+  toast.success('Copied to clipboard')
+}
+
+async function toggleMaintenance(agent: AgentDTO) {
+  try {
+    const is_maintenance_mode = !agent.is_maintenance_mode
+    await adminAgentSetMaintenance(agent.id, {
+      is_maintenance_mode
+    })
+    toast.info(`Set agent ${agent.name} maintenance to ${is_maintenance_mode}`)
+  } catch (e: any) {
+    catcher(e)
+  } finally {
+    fetchAgents()
+  }
+}
 </script>
 
 <template>
   <Modal v-model:isOpen="isDisplayKeyModalOpen">
     <div>
       <div>
-        <h3 class="text-lg font-bold">Command to enroll agent</h3>
-        <div class="form-control">
-          <label class="label font-bold"><span class="label-text">Disable TLS Verification?</span></label
-          ><input v-model="disableTlsVerification" type="checkbox" class="checkbox" />
+        <h3 class="text-lg font-bold">Agent enrolment script</h3>
+
+        <p>
+          Run the following script on the server you want to use for hash cracking. This script will install the agent and register it with
+          the server.
+        </p>
+
+        <div class="bg-slate-200 border-slate-200 mt-4 p-4 rounded-lg">
+          <pre class="whitespace-pre-line overflow-wrap break-words max-w-[60vw]">
+            {{ commandToRun }}
+          </pre>
+
+          <div class="flex justify-end">
+            <div class="tooltip" data-tip="Copy">
+              <button class="btn btn-xs btn-outline btn-ghost" @click="copyCommand">
+                <font-awesome-icon :icon="Icons.Clipboard" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <pre class="bg-slate-200 border-slate-200 mt-4 p-4 rounded-lg whitespace-pre-line overflow-wrap break-words max-w-[60vw]">
-          {{ commandToRun }}
-        </pre>
+        <div class="form-control">
+          <label class="label font-bold"
+            ><span class="label-text"
+              >Disable TLS Verification?
+              <InfoTip
+                tooltip="If this is checked, the agent will not verify the server's TLS certificate. This is not recommended, but can be useful if you are using a self-signed certificate."
+              /> </span></label
+          ><input v-model="disableTlsVerification" type="checkbox" class="checkbox" />
+        </div>
       </div>
     </div>
   </Modal>
@@ -174,6 +223,7 @@ async function onDeleteRegKey(id: string) {
                 <th>Version</th>
                 <th>Devices</th>
                 <th>Status</th>
+                <th>Maintenance</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -212,6 +262,15 @@ async function onDeleteRegKey(id: string) {
                     "
                   ></div>
                   <div class="badge badge-ghost badge-sm m-auto block" title="Dead" v-else></div>
+                </td>
+
+                <td>
+                  <input
+                    type="checkbox"
+                    class="toggle toggle-sm m-auto block"
+                    v-model="agent.is_maintenance_mode"
+                    @click="toggleMaintenance(agent)"
+                  />
                 </td>
 
                 <td class="text-center">

@@ -12,6 +12,7 @@ export const Icons = {
   SignOut: 'fa-solid fa-sign-out',
   Add: 'fa-solid fa-plus-circle',
   Info: 'fa-solid fa-circle-info',
+  Clipboard: 'fa-solid fa-clipboard',
 
   // objects
   Agent: 'fa-solid fa-robot',
