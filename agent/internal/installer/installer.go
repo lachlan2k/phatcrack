@@ -2,6 +2,7 @@ package installer
 
 import (
 	"bytes"
+	"crypto/tls"
 	_ "embed"
 	"encoding/json"
 	"errors"
@@ -440,4 +441,13 @@ func adjustPermsPath(path string, installConf InstallConfig) {
 	// No op on windows
 	f, _ := os.OpenFile(path, os.O_WRONLY, 0700)
 	adjustPerms(f, installConf)
+}
+
+func makeHttpClient(installConf InstallConfig) *http.Client {
+	tr := &http.Transport{}
+	if installConf.DisableTLSVerification {
+		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+	client := &http.Client{Transport: tr}
+	return client
 }
