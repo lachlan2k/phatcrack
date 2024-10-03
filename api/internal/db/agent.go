@@ -125,7 +125,7 @@ func CreateAgentRegistrationKey(name string, ephemeral bool) (newKey *AgentRegis
 		return
 	}
 
-	keyHint := plaintextKey[:4] + "..." + plaintextKey[len(plaintextKey)-4:]
+	keyHint := plaintextKey[:4] + "......" + plaintextKey[len(plaintextKey)-4:]
 
 	key := &AgentRegistrationKey{
 		Name:              name,
@@ -150,6 +150,10 @@ func GetAllAgentRegistrationKeys() ([]AgentRegistrationKey, error) {
 		return nil, err
 	}
 	return agentRegistrationKeys, nil
+}
+
+func DeleteAgentRegistrationKey(id string) error {
+	return GetInstance().Where("id = ?", id).Delete(&AgentRegistrationKey{}).Error
 }
 
 func GetAgentRegistrationKeyByKey(key string) (*AgentRegistrationKey, error) {

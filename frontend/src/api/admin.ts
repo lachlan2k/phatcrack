@@ -1,9 +1,13 @@
 import type {
   AdminAgentCreateRequestDTO,
   AdminAgentCreateResponseDTO,
+  AdminAgentRegistrationKeyCreateRequestDTO,
+  AdminAgentRegistrationKeyCreateResponseDTO,
   AdminAgentSetMaintanceRequestDTO,
   AdminConfigRequestDTO,
   AdminConfigResponseDTO,
+  AdminGetAgentRegistrationKeyDTO,
+  AdminGetAllAgentRegistrationKeysResponseDTO,
   AdminGetAllUsersResponseDTO,
   AdminServiceAccountCreateRequestDTO,
   AdminServiceAccountCreateResponseDTO,
@@ -69,10 +73,16 @@ export function adminGetVersion(): Promise<string> {
   return client.get('/api/v1/admin/version').then(res => res.data)
 }
 
-export function adminGetAgentRegistrationKeys(): Promise<AdminGetAllUsersResponseDTO> {
+export function adminGetAgentRegistrationKeys(): Promise<AdminGetAllAgentRegistrationKeysResponseDTO> {
   return client.get('/api/v1/admin/agent-registration-key/all').then(res => res.data)
 }
 
-export function adminCreateAgentRegistrationKey(newKeyData: AdminAgentCreateRequestDTO): Promise<AdminAgentCreateResponseDTO> {
+export function adminCreateAgentRegistrationKey(
+  newKeyData: AdminAgentRegistrationKeyCreateRequestDTO
+): Promise<AdminAgentRegistrationKeyCreateResponseDTO> {
   return client.post('/api/v1/admin/agent-registration-key/create', newKeyData).then(res => res.data)
+}
+
+export function adminDeleteAgentRegistrationKey(id: string): Promise<string> {
+  return client.delete(`/api/v1/admin/agent-registration-key/${id}`).then(res => res.data)
 }

@@ -7,8 +7,8 @@ if [ -z "$PHATCRACK_HOST" ]; then
   exit 1
 fi
 
-if [ -z "$PHATCRACK_API_KEY" ]; then
-  echo "PHATCRACK_API_KEY is not set. Exiting."
+if [ -z "$PHATCRACK_REGISTRATION_KEY" ]; then
+  echo "PHATCRACK_REGISTRATION_KEY is not set. Exiting."
   exit 1
 fi
 
@@ -60,7 +60,7 @@ if [[ -n "$DISABLE_TLS_VERIFICATION" ]]; then
     tls_arg="-disable-tls-verification"
 fi
 
-./phatcrack-agent install -defaults -api-endpoint $PHATCRACK_HOST/api/v1 -auth-key $PHATCRACK_API_KEY $tls_arg
+./phatcrack-agent install -defaults -api-endpoint $PHATCRACK_HOST/api/v1 -registration-key $PHATCRACK_REGISTRATION_KEY $tls_arg
 
 echo "Starting service..."
 

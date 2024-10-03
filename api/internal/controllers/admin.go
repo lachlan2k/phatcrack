@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -140,6 +141,7 @@ func HookAdminEndpoints(api *echo.Group) {
 
 	api.POST("/agent-registration-key/create", handleAgentRegistrationKeyCreate)
 	api.GET("/agent-registration-key/all", handleGetAllAgentRegistrationKeys)
+	api.DELETE("/agent-registration-key/:id", handleDeleteAgentRegistrationKey)
 
 	api.PUT("/user/:id", handleUpdateUser)
 	api.PUT("/user/:id/password", handleUpdateUserPassword)
@@ -470,4 +472,20 @@ func handleGetAllAgentRegistrationKeys(c echo.Context) error {
 	return c.JSON(http.StatusOK, apitypes.AdminGetAllAgentRegistrationKeysResponseDTO{
 		AgentRegistrationKeys: keysDTO,
 	})
+}
+
+func handleDeleteAgentRegistrationKey(c echo.Context) error {
+	id := c.Param("id")
+	re := regexp.MustCompile(`^[0-9]+$`)
+
+	if !re.MatchString(id) {
+		return echo.ErrBadRequest
+	}
+
+	err := db.DeleteAgentRegistrationKey(id)
+	if err != nil {
+		return util.ServerError("Failed to delete agent registration key", err)
+	}
+
+	return c.JSON(http.StatusOK, "ok")
 }

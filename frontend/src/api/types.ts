@@ -56,13 +56,22 @@ export interface AdminAgentCreateResponseDTO {
 }
 export interface AdminAgentRegistrationKeyCreateRequestDTO {
   name: string
-  ephemeral: boolean
+  for_ephemeral_agent: boolean
 }
 export interface AdminAgentRegistrationKeyCreateResponseDTO {
-  ephemeral: boolean
   name: string
   id: string
   key: string
+  for_ephemeral_agent: boolean
+}
+export interface AdminGetAgentRegistrationKeyDTO {
+  id: string
+  name: string
+  key_hint: string
+  for_ephemeral_agent: boolean
+}
+export interface AdminGetAllAgentRegistrationKeysResponseDTO {
+  agent_registration_keys: AdminGetAgentRegistrationKeyDTO[]
 }
 export interface AdminUserCreateRequestDTO {
   username: string

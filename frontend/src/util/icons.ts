@@ -11,10 +11,12 @@ export const Icons = {
   Clone: 'fa-solid fa-clone',
   SignOut: 'fa-solid fa-sign-out',
   Add: 'fa-solid fa-plus-circle',
+  Info: 'fa-solid fa-circle-info',
 
   // objects
   Agent: 'fa-solid fa-robot',
   User: 'fa-solid fa-user',
+  RegistrationKey: 'fa-solid fa-key',
 
   Listfile: 'fa-solid fa-file-lines',
 

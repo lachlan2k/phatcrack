@@ -13,7 +13,7 @@ type AdminAgentCreateResponseDTO struct {
 }
 
 type AdminAgentRegistrationKeyCreateRequestDTO struct {
-	Name              string `json:"name" validate:"required,min=4,max=64,username"`
+	Name              string `json:"name" validate:"max=64,username"`
 	ForEphemeralAgent bool   `json:"for_ephemeral_agent"`
 }
 
