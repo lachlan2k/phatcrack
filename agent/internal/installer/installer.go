@@ -30,10 +30,12 @@ type InstallConfig struct {
 	AgentGroup   string
 	AgentBinPath string
 
-	AuthKey     string
-	AuthKeyFile string
+	Name string
+
+	AuthKey         string
+	AuthKeyFile     string
 	RegistrationKey string
-	ConfigPath  string
+	ConfigPath      string
 
 	HashcatPath            string
 	ListfileDirectory      string
@@ -171,6 +173,13 @@ func applyDefaults(installConf *InstallConfig) {
 		}
 	}
 
+	if installConf.Name == "" {
+		installConf.Name, _ = os.Hostname()
+		if installConf.Name == "" {
+			installConf.Name = "unknown"
+		}
+	}
+
 	if installConf.AuthKeyFile == "" {
 		installConf.AuthKeyFile = DefaultPathJoin("auth.key")
 	}
@@ -218,8 +227,12 @@ func getOptionsInteractive(installConf *InstallConfig) {
 		installConf.AgentBinPath = input("Where is the phatcrack agent binary? (default: current binary): ")
 	}
 
+	if installConf.Name == "" {
+		installConf.Name = input("What name do you want to give the agent? (default: hostname): ")
+	}
+
 	if installConf.AuthKey == "" && installConf.RegistrationKey == "" {
-		installConf.RegistrationKey	= input("Registration key from server (leave blank to specify an auth key): ")
+		installConf.RegistrationKey = input("Registration key from server (leave blank to specify an auth key): ")
 		if installConf.RegistrationKey == "" {
 			installConf.AuthKey = input("Auth key from server (this is okay to leave blank for now): ")
 		}
@@ -254,14 +267,17 @@ func registerIfRequired(installConf *InstallConfig) {
 			return
 		}
 
-		name, err := os.Hostname()
-		if err != nil || name == "" {
-			log.Printf("Warn: couldn't get hostname for agent registration: %v\n", err)
-			name = "unknown"
+		if installConf.Name == "" {
+			name, err := os.Hostname()
+			if err != nil || name == "" {
+				log.Printf("Warn: couldn't get hostname for agent registration: %v\n", err)
+				name = "unknown"
+			}
+			installConf.Name = name
 		}
 
 		reqBody := apitypes.AgentRegisterRequestDTO{
-			Name: name,
+			Name: installConf.Name,
 		}
 
 		reqBodyBytes, err := json.Marshal(reqBody)
@@ -288,7 +304,7 @@ func registerIfRequired(installConf *InstallConfig) {
 		if resp.StatusCode != http.StatusOK {
 			log.Fatalf("Failed to register agent: got status code %d", resp.StatusCode)
 		}
-		
+
 		var respBody apitypes.AgentRegisterResponseDTO
 		err = json.NewDecoder(resp.Body).Decode(&respBody)
 		if err != nil {
@@ -348,6 +364,7 @@ func RunInteractive() {
 	userP := flagSet.String("user", "", "Which user to run the agent as")
 	groupP := flagSet.String("group", "", "Which user group to run the agent as")
 	agentBinPathP := flagSet.String("agent-bin", "", "Path to agent (defaults to running executable)")
+	nameP := flagSet.String("name", "", "Name of the agent (defaults to hostname)")
 	registrationKeyP := flagSet.String("registration-key", "", "Registration key for agent")
 	authKeyFileP := flagSet.String("auth-keyfile", "", "Path to file containing agent key")
 	authKeyP := flagSet.String("auth-key", "", "Path to file containing agent key")
@@ -369,10 +386,12 @@ func RunInteractive() {
 		AgentGroup:   *groupP,
 		AgentBinPath: *agentBinPathP,
 
+		Name: *nameP,
+
 		RegistrationKey: *registrationKeyP,
-		AuthKey:     *authKeyP,
-		AuthKeyFile: *authKeyFileP,
-		ConfigPath:  *configPathP,
+		AuthKey:         *authKeyP,
+		AuthKeyFile:     *authKeyFileP,
+		ConfigPath:      *configPathP,
 
 		HashcatPath:            *hashcatPathP,
 		ListfileDirectory:      *listfilePathP,
