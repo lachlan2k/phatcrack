@@ -33,9 +33,6 @@ const isUserEditOpen = ref(false)
 const isUserManagePasswordOpen = ref(false)
 const userIdToManagePassword = ref('')
 
-
-
-
 const { data: _allUsers, fetchData: fetchUsers, silentlyRefresh: silentlyFetchUsers, isLoading } = useApi(adminGetAllUsers)
 
 const allUsers = computed(() => {
@@ -122,10 +119,7 @@ const usersToPaginate = computed(() => {
     return arr
   }
 
-  return arr.filter(
-    x =>
-      x.username.toLowerCase().includes(filterText.value.trim())
-  )
+  return arr.filter(x => x.username.toLowerCase().includes(filterText.value.trim()))
 })
 
 const {
@@ -291,12 +285,14 @@ async function onGenerateNewPassword(id: string) {
       <div class="form-control mt-2">
         <label class="label font-bold"><span class="label-text">Actions</span></label>
       </div>
-      <button class="btn w-full btn-sm mb-2" @click="() => onRemovePassword(userIdToManagePassword)"
-        v-if="!userToManagePassword?.is_password_locked">
+      <button
+        class="btn w-full btn-sm mb-2"
+        @click="() => onRemovePassword(userIdToManagePassword)"
+        v-if="!userToManagePassword?.is_password_locked"
+      >
         Remove Password
       </button>
-      <button class="btn w-full btn-sm" @click="() => onGenerateNewPassword(userIdToManagePassword)">Generate new
-        password</button>
+      <button class="btn w-full btn-sm" @click="() => onGenerateNewPassword(userIdToManagePassword)">Generate new password</button>
     </Modal>
 
     <Modal v-model:is-open="isUserEditOpen">
@@ -304,8 +300,7 @@ async function onGenerateNewPassword(id: string) {
 
       <div class="form-control">
         <label for="" class="label font-bold"><span class="label-text">Username</span> </label>
-        <input v-model="editInputs.username" type="text" placeholder="j.smith"
-          class="input input-bordered w-full max-w-xs" />
+        <input v-model="editInputs.username" type="text" placeholder="j.smith" class="input input-bordered w-full max-w-xs" />
       </div>
 
       <div class="form-control mt-3">
@@ -329,8 +324,7 @@ async function onGenerateNewPassword(id: string) {
         <label class="label font-bold">
           <span class="label-text">Username</span>
         </label>
-        <input v-model="newUserUsername" type="text" placeholder="j.smith"
-          class="input input-bordered w-full max-w-xs" />
+        <input v-model="newUserUsername" type="text" placeholder="j.smith" class="input input-bordered w-full max-w-xs" />
       </div>
 
       <div class="form-control">
@@ -341,14 +335,17 @@ async function onGenerateNewPassword(id: string) {
       <div class="form-control">
         <label class="label font-bold">
           <span class="label-text">Password</span>
-          <span @click="() => (newUserGenPassword = !newUserGenPassword)" class="tooltip cursor-pointer"
-            v-if="!newUserLockPassword">
+          <span @click="() => (newUserGenPassword = !newUserGenPassword)" class="tooltip cursor-pointer" v-if="!newUserLockPassword">
             <font-awesome-icon :icon="Icons.RandomlyGenerated" />
           </span>
         </label>
-        <input v-model="newUserPassword" type="password"
+        <input
+          v-model="newUserPassword"
+          type="password"
           :placeholder="newUserLockPassword ? '(Locked)' : newUserGenPassword ? 'Randomly generated' : 'hunter2'"
-          class="input input-bordered w-full max-w-xs" :disabled="newUserGenPassword || newUserLockPassword" />
+          class="input input-bordered w-full max-w-xs"
+          :disabled="newUserGenPassword || newUserLockPassword"
+        />
       </div>
 
       <div class="form-control">
@@ -364,8 +361,7 @@ async function onGenerateNewPassword(id: string) {
 
       <div class="form-control mt-3">
         <span class="tooltip" :data-tip="newUserValidationError">
-          <button @click="onCreateUser" :disabled="newUserValidationError != null"
-            class="btn btn-primary w-full">Create</button>
+          <button @click="onCreateUser" :disabled="newUserValidationError != null" class="btn btn-primary w-full">Create</button>
         </span>
       </div>
     </Modal>
@@ -376,8 +372,7 @@ async function onGenerateNewPassword(id: string) {
         <label class="label font-bold">
           <span class="label-text">Service Account Name</span>
         </label>
-        <input v-model="newUserUsername" type="text" placeholder="mr.roboto"
-          class="input input-bordered w-full max-w-xs" />
+        <input v-model="newUserUsername" type="text" placeholder="mr.roboto" class="input input-bordered w-full max-w-xs" />
       </div>
 
       <div class="form-control">
@@ -393,8 +388,7 @@ async function onGenerateNewPassword(id: string) {
 
       <div class="form-control mt-3">
         <span class="tooltip" :data-tip="serviceAccountValidationError">
-          <button @click="onCreateServiceAccount" :disabled="serviceAccountValidationError != null"
-            class="btn btn-primary w-full">
+          <button @click="onCreateServiceAccount" :disabled="serviceAccountValidationError != null" class="btn btn-primary w-full">
             Create
           </button>
         </span>
@@ -405,13 +399,11 @@ async function onGenerateNewPassword(id: string) {
       <div class="form-control inline-block">
         <label class="label">
           <span class="label-text mr-2">Filter</span>
-          <input type="text" class="input input-bordered input-sm" placeholder="Username" v-model="filterText"/>
+          <input type="text" class="input input-bordered input-sm" placeholder="Username" v-model="filterText" />
         </label>
       </div>
       <button class="btn btn-primary btn-sm" @click="() => (isUserCreateOpen = true)">Create User</button>
-      <button class="btn btn-primary btn-sm ml-1" @click="() => (isServiceAccountCreateOpen = true)">Create Service
-        Account</button>
-
+      <button class="btn btn-primary btn-sm ml-1" @click="() => (isServiceAccountCreateOpen = true)">Create Service Account</button>
     </div>
   </div>
 
@@ -443,14 +435,12 @@ async function onGenerateNewPassword(id: string) {
             <IconButton :icon="Icons.Delete" color="error" tooltip="Delete" />
           </ConfirmModal>
           <IconButton :icon="Icons.Edit" color="primary" tooltip="Edit" @click="() => onOpenEditUser(user.id)" />
-          <IconButton :icon="Icons.Password" color="primary" tooltip="Manage Password"
-            @click="() => onOpenManagePassword(user.id)" />
+          <IconButton :icon="Icons.Password" color="primary" tooltip="Manage Password" @click="() => onOpenManagePassword(user.id)" />
         </td>
       </tr>
     </tbody>
   </table>
   <div class="mt-2 w-full text-center">
-    <PaginationControls @next="() => nextPage()" @prev="() => prevPage()" :current-page="activePage"
-      :total-pages="totalPages" />
+    <PaginationControls @next="() => nextPage()" @prev="() => prevPage()" :current-page="activePage" :total-pages="totalPages" />
   </div>
 </template>
