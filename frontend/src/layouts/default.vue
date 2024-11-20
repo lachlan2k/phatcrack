@@ -49,13 +49,13 @@ async function logout() {
 </script>
 
 <template>
-  <div class="drawer lg:drawer-open">
+  <div class="drawer lg:drawer-open h-screen bg-slate-100">
     <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content bg-slate-100">
       <router-view />
     </div>
-    <div class="drawer-side bg-neutral text-neutral-content">
-      <aside class="flex h-full w-72 flex-col p-4">
+    <div class="drawer-side">
+      <aside class="flex h-full w-72 flex-col p-4 bg-neutral text-neutral-content">
         <RouterLink to="/dashboard">
           <h2 class="btn btn-ghost w-full text-center text-3xl">Phatcrack</h2>
           <div class="w-full text-center" v-if="version != ''">
