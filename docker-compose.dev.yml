@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     environment:
       - DEV_API_URL=http://api:3000
+      - BASE_URL=http://192.168.122.1:${APP_PORT:-3000}
       - DEV_AGENT_SERVER_URL=http://agent-server
     ports:
       - ${APP_PORT:-3000}:5173

@@ -18,7 +18,11 @@ export default defineConfig({
       '/api': {
         target: process.env.DEV_API_URL,
         changeOrigin: true,
-        ws: true
+        secure: false,      
+        ws: true,
+        headers: {
+          origin: process.env.BASE_URL
+        }
       },
       '/agent-assets': {
         target: process.env.DEV_AGENT_SERVER_URL,
