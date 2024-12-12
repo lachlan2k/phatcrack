@@ -14,7 +14,7 @@ require (
 	github.com/lachlan2k/phatcrack/common v0.0.0
 	github.com/lib/pq v1.10.9
 	github.com/sirupsen/logrus v1.9.3
-	golang.org/x/crypto v0.27.0
+	golang.org/x/crypto v0.31.0
 	golang.org/x/oauth2 v0.23.0
 	gorm.io/datatypes v1.2.1
 	gorm.io/driver/postgres v1.5.9
@@ -46,9 +46,9 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/net v0.29.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.25.0 // indirect
-	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect
 )
