@@ -38,6 +38,7 @@ export interface AttackSettingsT {
 const props = defineProps<{
   modelValue: AttackSettingsT
   enableTemplate?: boolean
+  hideSchedulingRules?: boolean
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -181,10 +182,6 @@ watch(
 
   <label class="label font-bold">Additional Options</label>
   <div>
-    <label class="label cursor-pointer justify-start">
-      <input type="checkbox" v-model="attackSettings.isDistributed" class="checkbox-primary checkbox checkbox-xs" />
-      <span><span class="label-text ml-4 font-bold">Distribute attack?</span></span>
-    </label>
     <label class="label cursor-pointer justify-start" v-if="isLoopbackValid(attackSettings)">
       <input type="checkbox" v-model="attackSettings.enableLoopback" class="checkbox-primary checkbox checkbox-xs" />
       <span><span class="label-text ml-4 font-bold">Loopback?</span> (--loopback)</span>
@@ -198,4 +195,14 @@ watch(
       <span><span class="label-text ml-4 font-bold">Slow Candidates?</span> (-S)</span>
     </label>
   </div>
+  <template v-if="!props.hideSchedulingRules">
+    <hr class="my-4" />
+    <label class="label font-bold">Scheduling Rules</label>
+    <div>
+      <label class="label cursor-pointer justify-start">
+        <input type="checkbox" v-model="attackSettings.isDistributed" class="checkbox-primary checkbox checkbox-xs" />
+        <span><span class="label-text ml-4 font-bold">Distribute attack?</span></span>
+      </label>
+    </div>
+  </template>
 </template>

@@ -56,7 +56,7 @@ async function onCreateAttackTemplate() {
 
   <hr class="my-4" />
 
-  <AttackSettings v-model="attackSettings" />
+  <AttackSettings v-model="attackSettings" :hideSchedulingRules="true" />
 
   <hr class="my-4" />
   <div class="tooltip tooltip-left float-right" :data-tip="validationError">
