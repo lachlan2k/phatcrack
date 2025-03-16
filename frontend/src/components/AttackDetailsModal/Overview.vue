@@ -13,6 +13,7 @@ import {
   JobStatusStarted,
   JobStopReasonFinished,
   JobStopReasonUserStopped,
+  restartAttackFailedJobs,
   createAttack,
   deleteAttack,
   startAttack,
@@ -35,6 +36,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'selectJob', jobId: string): void
   (e: 'closed'): void
+  (e: 'requestRefresh'): void
 }>()
 
 const agentStore = useAgentsStore()
@@ -47,6 +49,10 @@ const canStop = computed(() => {
 
 const toast = useToast()
 const { catcher } = useToastError()
+
+const hasFailedJobs = computed(() => {
+  return props.attack.jobs.some(x => x.runtime_data.status === JobStatusExited && x.runtime_data.stop_reason !== JobStopReasonFinished)
+})
 
 async function start() {
   try {
@@ -86,6 +92,16 @@ async function onDeleteAttack() {
     await deleteAttack(props.attack.id)
     emit('closed')
     toast.info('Attack deleted')
+  } catch (e: any) {
+    catcher(e)
+  }
+}
+
+async function restartFailed() {
+  try {
+    await restartAttackFailedJobs(props.attack.id)
+    toast.success('Requested jobs to be restarted...')
+    emit('requestRefresh')
   } catch (e: any) {
     catcher(e)
   }
@@ -160,17 +176,26 @@ async function onDeleteAttack() {
         Start
       </button>
 
-      <button @click="() => cloneAndStart()" class="btn join-item btn-sm" v-else>
-        <font-awesome-icon :icon="Icons.Clone" />
-        Clone & Start
-      </button>
+      <div v-if="attack.jobs.length > 0" class="tooltip" data-tip="This recreates the entire attack. Useful if you have added new hashes.">
+        <button @click="() => cloneAndStart()" class="btn join-item btn-sm">
+          <font-awesome-icon :icon="Icons.Clone" />
+          Clone & Start
+        </button>
+      </div>
+
+      <div v-if="hasFailedJobs" class="tooltip" data-tip="This only restarts failed jobs. New hashes are not included.">
+        <button @click="() => restartFailed()" class="btn join-item btn-sm">
+          <font-awesome-icon :icon="Icons.Retry" />
+          Retry Failed Jobs
+        </button>
+      </div>
 
       <button @click="() => stop()" class="btn join-item btn-sm" v-if="canStop">
         <font-awesome-icon :icon="Icons.Stop" />
         Stop
       </button>
 
-      <ConfirmModal @on-confirm="() => onDeleteAttack()" v-else>
+      <ConfirmModal @on-confirm="() => onDeleteAttack()" v-if="!canStop">
         <button class="btn join-item btn-sm">
           <font-awesome-icon :icon="Icons.Delete" />
           Delete

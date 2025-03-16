@@ -23,7 +23,7 @@ const props = defineProps<{
 
 const selectedJobID = ref<string | null>(null)
 
-const emit = defineEmits(['update:isOpen'])
+const emit = defineEmits(['update:isOpen', 'requestRefresh'])
 
 const isOpen = computed({
   get: () => props.isOpen,
@@ -74,6 +74,7 @@ const logLines = computed<string>(() => {
           isOpen = false
         }
       "
+      @requestRefresh="emit('requestRefresh')"
     />
     <div v-else>
       <button class="btn btn-circle btn-ghost btn-sm absolute left-2 top-2 text-xl" @click="() => (selectedJobID = null)">&larr;</button>

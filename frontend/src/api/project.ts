@@ -83,6 +83,10 @@ export function startAttack(attackId: string): Promise<AttackStartResponseDTO> {
   return client.put(`/api/v1/attack/${attackId}/start`).then(res => res.data)
 }
 
+export function restartAttackFailedJobs(attackId: string): Promise<string> {
+  return client.put(`/api/v1/attack/${attackId}/restart-failed-jobs`).then(res => res.data)
+}
+
 export function getHashlistsForProject(projId: string): Promise<HashlistResponseMultipleDTO> {
   return client.get(`/api/v1/project/${projId}/hashlists`).then(res => res.data)
 }

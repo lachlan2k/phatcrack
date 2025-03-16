@@ -205,7 +205,12 @@ async function onAppendHashes() {
 </script>
 
 <template>
-  <AttackDetailsModal v-if="selectedAttack != null" :attack="selectedAttack" v-model:isOpen="isAttackModalOpen"></AttackDetailsModal>
+  <AttackDetailsModal
+    v-if="selectedAttack != null"
+    :attack="selectedAttack"
+    v-model:isOpen="isAttackModalOpen"
+    @requestRefresh="refreshAttacks()"
+  ></AttackDetailsModal>
 
   <Modal v-model:isOpen="isHashAddModalOpen">
     <div class="w-screen max-w-[600px]">
