@@ -561,7 +561,7 @@ func handleAttackRestartFailedJobs(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	jobs, err := db.GetJobsForAttack(attackId, false, false)
+	jobs, err := db.GetJobsForAttack(attackId, true, false)
 	if err != nil {
 		return util.ServerError("Failed to fetch jobs", err)
 	}
@@ -574,9 +574,16 @@ func handleAttackRestartFailedJobs(c echo.Context) error {
 		}
 	}
 
+	AuditLog(c, log.Fields{
+		"attack_id":    attackId,
+		"project_id":   projId,
+		"project_name": proj.Name,
+		"job_ids": failedJobIDs,
+	}, "User has restarted failed attack jobs")
+
 	_, err = fleet.ScheduleJobs(failedJobIDs)
 	if err != nil {
-		return util.ServerError("Failed to re-scheduled jobs", err)
+		return util.ServerError("Failed to re-schedule jobs", err)
 	}
 	return c.JSON(http.StatusOK, "ok")
 }
