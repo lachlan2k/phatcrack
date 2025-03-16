@@ -23,7 +23,7 @@ services:
       - PORT=3000
       - DB_DSN=host=db user=phatcrack password=${DB_PASS:-phatcrack} dbname=phatcrack
       - FILEREPO_PATH=/srv/filerepo
-      - BASE_URL=http://192.168.122.1:${APP_PORT:-3000}
+      - BASE_URL=${BASE_URL:-http://localhost:3000}
     volumes:
       - ./:/app/phatcrack:z
       - ./filerepo:/srv/filerepo:z
