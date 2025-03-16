@@ -45,7 +45,7 @@ func installHashcat(installConf InstallConfig) {
 
 	u.Path = "/agent-assets/hashcat.tar.gz"
 
-	resp, err := makeHttpClient(installConf).Get(u.String())
+	resp, err := makeHttpClient(installConf.DisableTLSVerification).Get(u.String())
 	if err != nil {
 		log.Fatalf("failed to get hashcat.tar.gz from download server %q: %s", u.String(), err)
 	}

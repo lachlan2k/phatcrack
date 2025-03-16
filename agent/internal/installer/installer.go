@@ -1,7 +1,6 @@
 package installer
 
 import (
-	"bytes"
 	"crypto/tls"
 	_ "embed"
 	"encoding/json"
@@ -10,18 +9,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"os/user"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
 
 	"github.com/lachlan2k/phatcrack/agent/internal/config"
 	"github.com/lachlan2k/phatcrack/agent/internal/hashcat"
-	"github.com/lachlan2k/phatcrack/common/pkg/apitypes"
 )
 
 type InstallConfig struct {
@@ -260,64 +256,6 @@ func getOptionsInteractive(installConf *InstallConfig) {
 	}
 }
 
-func registerIfRequired(installConf *InstallConfig) {
-	if installConf.RegistrationKey != "" {
-		u, err := url.Parse(installConf.APIEndpoint)
-		if err != nil {
-			log.Fatal("failed to parse API endpoint to register agent: ", err)
-			return
-		}
-
-		if installConf.Name == "" {
-			name, err := os.Hostname()
-			if err != nil || name == "" {
-				log.Printf("Warn: couldn't get hostname for agent registration: %v\n", err)
-				name = "unknown"
-			}
-			installConf.Name = name
-		}
-
-		reqBody := apitypes.AgentRegisterRequestDTO{
-			Name: installConf.Name,
-		}
-
-		reqBodyBytes, err := json.Marshal(reqBody)
-		if err != nil {
-			log.Fatalf("Failed to marshal agent registration request: %v", err)
-		}
-
-		u.Path = path.Join(u.Path, "/agent-handler/register")
-
-		req, err := http.NewRequest("POST", u.String(), bytes.NewReader(reqBodyBytes))
-		if err != nil {
-			log.Fatalf("Failed to create agent registration request: %v", err)
-		}
-
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", installConf.RegistrationKey)
-
-		resp, err := makeHttpClient(*installConf).Do(req)
-		if err != nil {
-			log.Fatalf("Failed to register agent: %v", err)
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			log.Fatalf("Failed to register agent: got status code %d", resp.StatusCode)
-		}
-
-		var respBody apitypes.AgentRegisterResponseDTO
-		err = json.NewDecoder(resp.Body).Decode(&respBody)
-		if err != nil {
-			log.Fatalf("Failed to decode agent registration response: %v", err)
-		}
-
-		log.Print("Registered agent with server as " + respBody.Name + " with ID " + respBody.ID)
-
-		installConf.AuthKey = respBody.Key
-	}
-}
-
 func checkConf(installConf InstallConfig) error {
 	if installConf.AgentUser == "" {
 		return errors.New("agent user is not set")
@@ -443,9 +381,9 @@ func adjustPermsPath(path string, installConf InstallConfig) {
 	adjustPerms(f, installConf)
 }
 
-func makeHttpClient(installConf InstallConfig) *http.Client {
+func makeHttpClient(disableTlsVerification bool) *http.Client {
 	tr := &http.Transport{}
-	if installConf.DisableTLSVerification {
+	if disableTlsVerification {
 		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	client := &http.Client{Transport: tr}
