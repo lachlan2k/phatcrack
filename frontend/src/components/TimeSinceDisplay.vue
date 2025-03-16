@@ -11,7 +11,10 @@ const timestampDisplayed = computed(() => new Date(props.timestamp).toLocaleDate
 </script>
 
 <template>
-  <div class="tooltip" :data-tip="timestampDisplayed">
+  <div class="tooltip" :data-tip="timestampDisplayed" v-if="props.timestamp > 0">
     <span>{{ timeSince(props.timestamp) }}</span>
+  </div>
+  <div v-else>
+    <span>Unknown</span>
   </div>
 </template>

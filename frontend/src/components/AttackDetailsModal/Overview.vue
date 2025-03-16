@@ -144,7 +144,7 @@ async function onDeleteAttack() {
         </td>
         <td v-else>-</td>
 
-        <td v-if="job.runtime_summary.stopped_time > 0">
+        <td v-if="job.runtime_summary.stopped_time > 0 && job.runtime_summary.started_time > 0">
           {{ timeBetween(job.runtime_summary.started_time * 1000, job.runtime_summary.stopped_time * 1000) }}
         </td>
         <td v-else>-</td>
