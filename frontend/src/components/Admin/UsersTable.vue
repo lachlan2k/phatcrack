@@ -119,7 +119,7 @@ const usersToPaginate = computed(() => {
     return arr
   }
 
-  return arr.filter(x => x.username.toLowerCase().includes(filterText.value.trim()))
+  return arr.filter(x => x.username.toLowerCase().includes(filterText.value.toLowerCase().trim()))
 })
 
 const {
