@@ -29,6 +29,7 @@ func HookAttackEndpoints(api *echo.Group) {
 	api.GET("/:attack-id", handleAttackGet)
 	api.GET("/all-initialising", handleAttacksGetInitialising)
 	api.PUT("/:attack-id/start", handleAttackStart)
+	api.PUT("/:attack-id/restart-failed-jobs", handleAttackRestartFailedJobs)
 	api.POST("/create", handleAttackCreate)
 
 	api.DELETE("/:attack-id/stop", handleAttackStopAllJobs)
@@ -527,4 +528,55 @@ func handleAttackStart(c echo.Context) error {
 			StillProcessing: true,
 		})
 	}
+}
+
+func handleAttackRestartFailedJobs(c echo.Context) error {
+	attackId := c.Param("attack-id")
+	if !util.AreValidUUIDs(attackId) {
+		return echo.ErrBadRequest
+	}
+
+	if config.Get().General.IsMaintenanceMode {
+		return echo.NewHTTPError(http.StatusServiceUnavailable, "Phatcrack is in maintenance mode. Attacks cannot be scheduled.")
+	}
+
+	user := auth.UserFromReq(c)
+	if user == nil {
+		return echo.ErrForbidden
+	}
+
+	projId, err := db.GetAttackProjID(attackId)
+	if err != nil {
+		return util.ServerError("Failed to fetch project id for attack", err)
+	}
+
+	proj, err := db.GetProjectForUser(projId, user)
+	if err == db.ErrNotFound {
+		return echo.ErrForbidden
+	}
+	if err != nil {
+		return util.ServerError("Failed to fetch project", err)
+	}
+	if !accesscontrol.HasRightsToProject(user, proj) {
+		return echo.ErrForbidden
+	}
+
+	jobs, err := db.GetJobsForAttack(attackId, false, false)
+	if err != nil {
+		return util.ServerError("Failed to fetch jobs", err)
+	}
+
+	failedJobIDs := make([]string, 0)
+
+	for _, job := range jobs {
+		if job.HasFailed() {
+			failedJobIDs = append(failedJobIDs, job.ID.String())
+		}
+	}
+
+	_, err = fleet.ScheduleJobs(failedJobIDs)
+	if err != nil {
+		return util.ServerError("Failed to re-scheduled jobs", err)
+	}
+	return c.JSON(http.StatusOK, "ok")
 }

@@ -14,9 +14,13 @@ import (
 )
 
 const (
+	// Created, not started
 	JobStatusCreated       = "JobStatus-Created"
+	// Created, started, assigned to agent, waiting for agent to confirm start
 	JobStatusAwaitingStart = "JobStatus-AwaitingStart"
+	// in progress
 	JobStatusStarted       = "JobStatus-Started"
+	// exited (could be good, could be bad)
 	JobStatusExited        = "JobStatus-Exited"
 )
 
@@ -50,6 +54,10 @@ type Job struct {
 
 	AssignedAgent   Agent      `gorm:"constraint:OnDelete:SET NULL;"`
 	AssignedAgentID *uuid.UUID `gorm:"type:uuid"`
+}
+
+func (j Job) HasFailed() bool {
+	return (j.RuntimeData.Status == JobStatusExited) && (j.RuntimeData.Status != JobStopReasonFinished)
 }
 
 type JobRuntimeData struct {

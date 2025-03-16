@@ -47,6 +47,7 @@ func handleAttackJobGet(c echo.Context) error {
 	if !util.AreValidUUIDs(jobId) {
 		return echo.ErrBadRequest
 	}
+	includeRuntimeData := c.QueryParams().Has("includeRuntimeData")
 
 	user := auth.UserFromReq(c)
 	if user == nil {
@@ -55,7 +56,7 @@ func handleAttackJobGet(c echo.Context) error {
 
 	projId, err := db.GetJobProjID(jobId)
 	if err != nil {
-		return util.ServerError("Failed to fetch project id for hashlist", err)
+		return util.ServerError("Failed to fetch project id for job", err)
 	}
 
 	proj, err := db.GetProjectForUser(projId, user)
@@ -70,7 +71,7 @@ func handleAttackJobGet(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
-	job, err := db.GetJob(jobId, c.QueryParams().Has("includeRuntimeData"))
+	job, err := db.GetJob(jobId, includeRuntimeData)
 
 	if err == db.ErrNotFound {
 		return echo.ErrNotFound
