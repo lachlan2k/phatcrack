@@ -117,9 +117,13 @@ func (w *WSWrapper) Run(notifyFirstConn *sync.Cond) error {
 		log.Printf("Dialing %s...", w.Endpoint)
 		w.lock.Lock()
 
-		conn, _, err := dialer.Dial(w.Endpoint, w.Headers)
+		conn, resp, err := dialer.Dial(w.Endpoint, w.Headers)
 		if err != nil {
-			log.Printf("failed to dial ws endpoint: %v, %v", conn, err)
+			if resp.StatusCode == 401 {
+				log.Printf("Connection denied, status %q", resp.Status)
+			} else {
+				log.Printf("failed to dial ws endpoint (status %q): %v, %v", resp.Status, conn, err)
+			}
 
 			if time.Since(lastValidConnectonTime) > w.MaximumDropoutTime {
 				w.lock.Unlock()
