@@ -127,6 +127,11 @@ async function toggleMaintenance(agent: AgentDTO) {
   <Modal v-model:isOpen="isDisplayKeyModalOpen">
     <div>
       <div>
+        <h3 class="text-lg font-bold">New key</h3>
+        <span class="font-mono">{{ keyToDisplay }}</span>
+
+        <hr class="my-4" />
+
         <h3 class="text-lg font-bold">Agent enrolment script</h3>
 
         <p>
