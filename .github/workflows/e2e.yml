@@ -36,7 +36,7 @@ jobs:
           npx playwright test --trace on
 
       - name: Upload Playwright Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-test-results
           path: e2e/browser/playwright-report
