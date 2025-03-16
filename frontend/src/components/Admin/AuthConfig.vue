@@ -258,7 +258,7 @@ async function onSave() {
         <tr>
           <td>Name of Role Claim (optional, only if requiring a role)</td>
           <td>
-            <input type="password" class="input input-bordered input-sm" v-model="oidcAuthSettings.roles_claim" placeholder="roles" />
+            <input type="type" class="input input-bordered input-sm" v-model="oidcAuthSettings.roles_claim" placeholder="roles" />
           </td>
         </tr>
         <tr>
