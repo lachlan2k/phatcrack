@@ -64,6 +64,7 @@ func RegisterWithKey(conf *InstallConfig) (*apitypes.AgentRegisterResponseDTO, e
 	}
 
 	log.Print("Registered agent with server as " + respBody.Name + " with ID " + respBody.ID)
+	installConf.AuthKey = resp.Key
 	return &respBody, nil
 }
 
