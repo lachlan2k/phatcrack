@@ -161,6 +161,7 @@ func (a *AgentConnection) handleHeartbeat(msg *wstypes.Message) error {
 
 	// Okay, so, any files that are left listfilesToCheckMap are unexpected files.
 	// Let's tell the agent to delete those files
+	delete(listfilesToCheckMap, "agent.lock") // this is allowed
 	for _, file := range listfilesToCheckMap {
 		log.WithField("agent_id", a.agentId).WithField("filename", file.Name).Warn("Found an unexpected file on an agent. Telling it to delete it.")
 		a.RequestFileDelete(file.Name)
