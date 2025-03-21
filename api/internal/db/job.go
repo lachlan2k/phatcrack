@@ -57,7 +57,7 @@ type Job struct {
 }
 
 func (j Job) HasFailed() bool {
-	return (j.RuntimeData.Status == JobStatusExited) && (j.RuntimeData.Status != JobStopReasonFinished)
+	return (j.RuntimeData.Status == JobStatusExited) && (j.RuntimeData.StopReason != JobStopReasonFinished)
 }
 
 type JobRuntimeData struct {
