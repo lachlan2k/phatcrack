@@ -22,7 +22,7 @@ useradd --system --create-home --home-dir /opt/phatcrack-server phatcrack-server
 
 cd /opt/phatcrack-server
 
-wget https://github.com/lachlan2k/phatcrack/releases/download/v0.6.4/docker-compose.yml
+wget https://github.com/lachlan2k/phatcrack/releases/download/v0.6.5/docker-compose.yml
 
 # Update your hostname here:
 echo "HOST_NAME=phatcrack.lan" >> .env
@@ -65,7 +65,7 @@ cd /opt/phatcrack-agent
 
 # Download the phatcrack-agent program from the local server
 wget https://phatcrack.lan/agent-assets/phatcrack-agent
-# Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download/v0.6.4/phatcrack-agent
+# Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download/v0.6.5/phatcrack-agent
 
 chmod +x ./phatcrack-agent
 ./phatcrack-agent install -defaults -api-endpoint https://phatcrack.lan/api/v1 -auth-key API_KEY_FROM_SERVER_HERE 
