@@ -14,6 +14,7 @@ import { useAgentsStore } from '@/stores/agents'
 
 import { Icons } from '@/util/icons'
 import { formatDeviceName } from '@/util/formatDeviceName'
+import { pluralise } from '@/util/util'
 
 const AgentStatusHealthy = 'AgentStatusHealthy'
 const AgentStatusUnhealthyButConnected = 'AgentStatusUnhealthyButConnected'
@@ -74,6 +75,7 @@ async function toggleMaintenance(agent: AgentDTO) {
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Active Job Count</th>
                 <th v-if="isAdmin">Version</th>
                 <th>Devices</th>
                 <th>Status</th>
@@ -83,6 +85,7 @@ async function toggleMaintenance(agent: AgentDTO) {
             <tbody class="first-col-bold">
               <tr class="hover" v-for="agent in allAgents" :key="agent.id">
                 <td>{{ agent.name }}</td>
+                <td>{{ pluralise(agent.agent_info.active_job_ids?.length ?? 0, 'active job') }}</td>
                 <td v-if="isAdmin" class="font-mono">{{ agent.agent_info.version }}</td>
                 <td>
                   <span v-for="device in agent.agent_devices" :key="device.device_id + device.device_name">
