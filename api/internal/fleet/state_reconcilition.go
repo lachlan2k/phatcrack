@@ -74,16 +74,18 @@ func stateReconciliation() error {
 
 		newInfo := info
 
+		validLastHeartbeat := !info.TimeOfLastHeartbeat.IsZero()
+
 		// Time-based state transitions
 		switch info.Status {
 		case db.AgentStatusHealthy:
-			if time.Since(info.TimeOfLastHeartbeat) > deadtimeToUnhealthy {
+			if validLastHeartbeat && time.Since(info.TimeOfLastHeartbeat) > deadtimeToUnhealthy {
 				newInfo.Status = db.AgentStatusUnhealthyButConnected
 				needsSave = true
 			}
 
 		case db.AgentStatusUnhealthyButConnected:
-			if time.Since(info.TimeOfLastHeartbeat) > deadtimetoDead {
+			if validLastHeartbeat && time.Since(info.TimeOfLastHeartbeat) > deadtimetoDead {
 				log.
 					WithField("agent_id", agent.ID.String()).
 					WithField("time_since_last_heartbeat", time.Since(info.TimeOfLastHeartbeat).Seconds()).
