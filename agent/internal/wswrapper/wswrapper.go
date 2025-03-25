@@ -119,7 +119,7 @@ func (w *WSWrapper) Run(notifyFirstConn *sync.Cond) error {
 
 		conn, resp, err := dialer.Dial(w.Endpoint, w.Headers)
 		if err != nil {
-			if resp.StatusCode == 401 {
+			if resp != nil && resp.StatusCode == 401 {
 				log.Printf("Connection denied, status %q", resp.Status)
 			} else {
 				log.Printf("failed to dial ws endpoint (status %q): %v, %v", resp.Status, conn, err)
