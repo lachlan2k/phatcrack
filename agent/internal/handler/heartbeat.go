@@ -18,8 +18,8 @@ func getFileDTOs(dir string) ([]wstypes.FileDTO, error) {
 		return nil, err
 	}
 
-	dtos := make([]wstypes.FileDTO, len(files))
-	for i, file := range files {
+	dtos := make([]wstypes.FileDTO, 0)
+	for _, file := range files {
 		if file.IsDir() {
 			continue
 		}
@@ -27,10 +27,10 @@ func getFileDTOs(dir string) ([]wstypes.FileDTO, error) {
 		if err != nil {
 			continue
 		}
-		dtos[i] = wstypes.FileDTO{
+		dtos = append(dtos, wstypes.FileDTO{
 			Name: file.Name(),
 			Size: info.Size(),
-		}
+		})
 	}
 
 	return dtos, nil
