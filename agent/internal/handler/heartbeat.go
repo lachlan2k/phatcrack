@@ -46,7 +46,7 @@ func (h *Handler) sendHeartbeat() error {
 		Time:           time.Now().Unix(),
 		Version:        version.Version(),
 		AgentStartTime: startTime.Unix(),
-		ActiveJobIDs:   make([]string, len(h.activeJobs)),
+		ActiveJobIDs:   make([]string, 0),
 	}
 
 	for id := range h.activeJobs {
