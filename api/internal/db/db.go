@@ -128,6 +128,7 @@ func runMigrations() {
 	instance.AutoMigrate(&User{})
 
 	instance.AutoMigrate(&Config{})
+	instance.AutoMigrate(&KeyspaceCache{})
 }
 
 func WipeEverything() error {

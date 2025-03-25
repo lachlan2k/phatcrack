@@ -1,12 +1,15 @@
 package attacksharder
 
 import (
+	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 
 	"github.com/lachlan2k/phatcrack/api/internal/db"
 	"github.com/lachlan2k/phatcrack/api/internal/hashcathelpers"
 	"github.com/lachlan2k/phatcrack/common/pkg/hashcattypes"
+	"github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -148,6 +151,38 @@ func shardMaskAttack(attack *db.Attack, numJobs int) ([]*db.Job, *db.Hashlist, e
 	return jobs, hashlist, nil
 }
 
+// Returns a sha256sum of the hashcat settings so we can uniquely identify the settings for keyspace calaculation
+func hashHashcatSettings(params hashcattypes.HashcatParams) (string, error) {
+	settingsBytes, err := json.Marshal(params)
+	if err != nil {
+		return "", err
+	}
+	hash := sha256.Sum256(settingsBytes)
+	return hex.EncodeToString(hash[:]), nil
+}
+
+func getKeyspace(params hashcattypes.HashcatParams) (int64, error) {
+	hashedParams, err := hashHashcatSettings(params)
+	if err == nil {
+		keyspace, err := db.GetKeyspaceCacheEntry(hashedParams)
+		if err == nil {
+			// cache hit
+			return keyspace, nil
+		}
+	}
+	// cache miss
+	keyspace, err := hashcathelpers.CalculateKeyspace(params)
+	if err != nil {
+		return 0, err
+	}
+	err = db.InsertKeyspaceCacheEntry(hashedParams, keyspace)
+	if err != nil {
+		// just log
+		logrus.WithError(err).Warn("Failed to insert keyspace cache entry")
+	}
+	return keyspace, nil
+}
+
 func shardAttackByKeyspace(attack *db.Attack, numJobs int) ([]*db.Job, *db.Hashlist, error) {
 	params := attack.HashcatParams.Data()
 	hashlist, err := db.GetHashlistWithHashes(attack.HashlistID.String())
@@ -162,7 +197,7 @@ func shardAttackByKeyspace(attack *db.Attack, numJobs int) ([]*db.Job, *db.Hashl
 		}
 	}
 
-	keyspace, err := hashcathelpers.CalculateKeyspace(params)
+	keyspace, err := getKeyspace(params)
 	if err != nil {
 		return nil, nil, fmt.Errorf("couldn't calculate keyspace for sharding: %w", err)
 	}
