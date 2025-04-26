@@ -50,9 +50,9 @@ You can then visit your local installation. The default credentials are `admin:c
 
 #### Agents
 
-For each agent you want to enroll, visit the admin GUI, and create a new agent. Note down the generated API key, as this won't be shown again.
+To enroll an agent, visit the admin GUI, and click "Register Agent". The web interface will provide a script that you can run on the agent to enroll it.
 
-On each agent, you can manually set up the agent as follows:
+However, if you want to set up an agent manually, you can do so with the following commands. You will need to replace `REGISTRATION_KEY_FROM_SERVER_HERE` with the key from the server.
 
 ```sh
 # Create a user for the phatcrack agent
@@ -68,7 +68,8 @@ wget https://phatcrack.lan/agent-assets/phatcrack-agent
 # Or, you can download from https://github.com/lachlan2k/phatcrack/releases/download/v0.6.6/phatcrack-agent
 
 chmod +x ./phatcrack-agent
-./phatcrack-agent install -defaults -api-endpoint https://phatcrack.lan/api/v1 -auth-key API_KEY_FROM_SERVER_HERE 
+# Optionally add -disable-tls-verification if you are using self-signed certs
+./phatcrack-agent install -defaults -api-endpoint https://phatcrack.lan/api/v1 -registration-key REGISTRATION_KEY_FROM_SERVER_HERE 
 
 systemctl enable phatcrack-agent
 systemctl start phatcrack-agent
