@@ -57,7 +57,7 @@ const commandToRun = computed(() => {
   const baseUrl = window.location.origin
   const key = keyToDisplay.value
 
-  return `curl ${baseUrl}/agent-assets/install.sh ${disableTlsVerification.value ? '-k ' : ''}| PHATCRACK_HOST=${baseUrl} PHATCRACK_REGISTRATION_KEY=${key}${disableTlsVerification.value ? ' DISABLE_TLS_VERIFICATON=1' : ''} bash`
+  return `curl ${baseUrl}/agent-assets/install.sh ${disableTlsVerification.value ? '-k ' : ''}| PHATCRACK_HOST=${baseUrl} PHATCRACK_REGISTRATION_KEY=${key}${disableTlsVerification.value ? ' DISABLE_TLS_VERIFICATION=1' : ''} bash`
 })
 
 async function onCreateNewRegistrationKey() {
