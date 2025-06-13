@@ -2,7 +2,7 @@
 
 # Only set if not already set
 if [ -z "$PHATCRACK_VERSION_TAG" ]; then
-    export PHATCRACK_VERSION_TAG=v0.6.7
+    export PHATCRACK_VERSION_TAG=v0.6.8
 fi
 
 set -e
