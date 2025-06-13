@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
@@ -74,6 +76,8 @@ func handleListfileDelete(c echo.Context) error {
 	return c.JSON(http.StatusOK, "ok")
 }
 
+var validListfileTypes = []string{db.ListfileTypeRulefile, db.ListfileTypeWordlist}
+
 func handleListfileUpload(c echo.Context) error {
 	user := auth.UserFromReq(c)
 	if user == nil {
@@ -81,8 +85,8 @@ func handleListfileUpload(c echo.Context) error {
 	}
 
 	fileType := c.FormValue("file-type")
-	if fileType != db.ListfileTypeRulefile && fileType != db.ListfileTypeWordlist {
-		return echo.ErrBadRequest
+	if !slices.Contains(validListfileTypes, fileType) {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid file type %s. Valid types are: %s", fileType, strings.Join(validListfileTypes, ", ")))
 	}
 
 	var projectID *uuid.UUID = nil
@@ -98,7 +102,7 @@ func handleListfileUpload(c echo.Context) error {
 		}
 		u, err := uuid.Parse(projectIDStr)
 		if err != nil {
-			return echo.ErrBadRequest
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid project ID %s", projectIDStr))
 		}
 		projectID = &u
 	}

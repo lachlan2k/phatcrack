@@ -30,8 +30,8 @@ const isListfileUploadOpen = ref(false)
 
 const listfileTypes = {
   Rulefile: { icon: Icons.Rulefile },
-  Wordlist: { icon: Icons.Wordlist },
-  Charset: { icon: Icons.Charset }
+  Wordlist: { icon: Icons.Wordlist }
+  // Charset: { icon: Icons.Charset }
 } as { [key: string]: { icon: string } }
 
 const listfileTypesFilter = ref(
