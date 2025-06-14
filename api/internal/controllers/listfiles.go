@@ -84,6 +84,11 @@ func handleListfileUpload(c echo.Context) error {
 		return echo.ErrForbidden
 	}
 
+	uploadedFile, err := c.FormFile("file")
+	if err != nil {
+		return util.ServerError("Failed to get file for upload. Perhaps disk space is low?", err)
+	}
+
 	fileType := c.FormValue("file-type")
 	if !slices.Contains(validListfileTypes, fileType) {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid file type %s. Valid types are: %s", fileType, strings.Join(validListfileTypes, ", ")))
@@ -105,11 +110,6 @@ func handleListfileUpload(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid project ID %s", projectIDStr))
 		}
 		projectID = &u
-	}
-
-	uploadedFile, err := c.FormFile("file")
-	if err != nil {
-		return util.ServerError("Failed to get file for upload. Perhaps disk space is low?", err)
 	}
 
 	filename := c.FormValue("file-name")
