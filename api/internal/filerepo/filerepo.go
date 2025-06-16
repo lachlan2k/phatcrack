@@ -51,3 +51,27 @@ func Delete(id uuid.UUID) error {
 
 	return os.Remove(filename)
 }
+
+func MakeTmp() (*os.File, string, error) {
+	tmpFilename := filepath.Join(basePath, fmt.Sprintf("tmp-%s", uuid.New().String()))
+
+	f, err := os.Create(tmpFilename)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return f, tmpFilename, nil
+}
+
+func CreateFromTmp(id uuid.UUID, tmpFilename string) error {
+	filename, err := GetPathToFile(id)
+	if err != nil {
+		return err
+	}
+
+	err = os.Rename(tmpFilename, filename)
+	if err != nil {
+		return err
+	}
+	return nil
+}
