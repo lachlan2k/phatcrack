@@ -4,7 +4,7 @@ Phatcrack is a modern solution for distributed hash cracking, designed for hacke
 
 Key features include:
 * Built on [Hashcat](https://hashcat.net), supporting most common Hashcat attacks and almost all hash types.
-* Excellent UX for manging projects, configuring attack settings, and viewing results.
+* Excellent UX for managing projects, configuring attack settings, and viewing results.
 * Distributes attacks, allowing both dictionary-based and mask-based attacks to be split across multiple workers.
 * Automatically synchronises wordlists & rulefiles to all workers. Low-privileged users can be granted permission to upload wordlists & rulefiles.
 * Modern web-interface, with multi-user support and project-based access control.
