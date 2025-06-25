@@ -1,6 +1,6 @@
 module github.com/lachlan2k/phatcrack/agent
 
-go 1.23
+go 1.23.0
 
 toolchain go1.32.2
 
@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/lachlan2k/phatcrack/common v0.0.0
 	github.com/nxadm/tail v1.4.11
-	golang.org/x/sys v0.25.0
+	golang.org/x/sys v0.33.0
 )
 
 require (
