@@ -2,6 +2,8 @@ module github.com/lachlan2k/phatcrack/api
 
 go 1.23
 
+toolchain go1.32.2
+
 require (
 	github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa
 	github.com/coreos/go-oidc/v3 v3.11.0

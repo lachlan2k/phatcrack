@@ -2,6 +2,8 @@ module github.com/lachlan2k/phatcrack/agent
 
 go 1.23
 
+toolchain go1.32.2
+
 replace github.com/lachlan2k/phatcrack/common v0.0.0 => ../common
 
 replace gopkg.in/fsnotify.v1 => github.com/fsnotify/fsnotify v1.6.0
