@@ -25,6 +25,12 @@
         "minor"
       ],
       "automerge": false
+    },
+    {
+      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
+      "matchDepTypes": ["golang"],
+      "gomodTidy": ["gomodTidy"]
     }
   ],
   "platformAutomerge": false,
