@@ -17,6 +17,5 @@
       "gomodTidy": ["gomodTidy"]
     }
   ],
-  "platformAutomerge": false,
   "prConcurrentLimit": 10
 }
