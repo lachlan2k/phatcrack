@@ -5,26 +5,10 @@
   ],
   "packageRules": [
     {
-      "groupName": "all patch dependencies",
-      "groupSlug": "all-patch",
-      "matchPackageNames": [
-        "*"
-      ],
       "matchUpdateTypes": [
         "patch"
       ],
       "automerge": true
-    },
-    {
-      "groupName": "all minor dependencies",
-      "groupSlug": "all-minor",
-      "matchPackageNames": [
-        "*"
-      ],
-      "matchUpdateTypes": [
-        "minor"
-      ],
-      "automerge": false
     },
     {
       "matchManagers": ["gomod"],
@@ -34,5 +18,5 @@
     }
   ],
   "platformAutomerge": false,
-  "prConcurrentLimit": 3
+  "prConcurrentLimit": 10
 }
