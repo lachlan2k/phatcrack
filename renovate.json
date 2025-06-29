@@ -17,5 +17,5 @@
       "gomodTidy": ["gomodTidy"]
     }
   ],
-  "prConcurrentLimit": 10
+  "prConcurrentLimit": 25
 }
