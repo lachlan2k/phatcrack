@@ -20,7 +20,7 @@ require (
 	golang.org/x/oauth2 v0.30.0
 	gorm.io/datatypes v1.2.1
 	gorm.io/driver/postgres v1.5.9
-	gorm.io/gorm v1.25.12
+	gorm.io/gorm v1.30.0
 )
 
 require (
