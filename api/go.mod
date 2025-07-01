@@ -2,7 +2,7 @@ module github.com/lachlan2k/phatcrack/api
 
 go 1.23.0
 
-toolchain go1.32.2
+toolchain go1.23.2
 
 require (
 	github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa
