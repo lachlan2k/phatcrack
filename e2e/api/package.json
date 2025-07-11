@@ -16,7 +16,7 @@
     "@types/node": "^22.5.5",
     "@types/tough-cookie": "^4.0.5",
     "axios": "^1.7.7",
-    "axios-cookiejar-support": "^5.0.2",
+    "axios-cookiejar-support": "^6.0.0",
     "http-cookie-agent": "^7.0.0",
     "jest": "^30.0.0",
     "tough-cookie": "^5.0.0",
