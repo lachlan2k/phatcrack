@@ -6,7 +6,7 @@ on:
 jobs:
   tests:
     name: "E2E Tests"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ./e2e
