@@ -31,7 +31,7 @@
     "@types/node": "^22.0.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/eslint-config-prettier": "^7.1.0",
-    "@vue/eslint-config-typescript": "^11.0.3",
+    "@vue/eslint-config-typescript": "^14.0.0",
     "@vue/tsconfig": "^0.7.0",
     "autoprefixer": "^10.4.20",
     "daisyui": "^4.12.10",
