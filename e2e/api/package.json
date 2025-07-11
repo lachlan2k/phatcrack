@@ -19,7 +19,7 @@
     "axios-cookiejar-support": "^5.0.2",
     "http-cookie-agent": "^7.0.0",
     "jest": "^30.0.0",
-    "tough-cookie": "^4.1.4",
+    "tough-cookie": "^5.0.0",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.2"
   },
