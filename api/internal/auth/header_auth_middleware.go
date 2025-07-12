@@ -23,7 +23,7 @@ func CreateHeaderAuthMiddleware() echo.MiddlewareFunc {
 
 			authHeader := c.Request().Header.Get("Authorization")
 			match := headerRe.FindStringSubmatch(authHeader)
-			if match == nil || len(match) < 2 {
+			if len(match) < 2 {
 				return next(c)
 			}
 

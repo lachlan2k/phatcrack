@@ -118,7 +118,8 @@ func handleUpdateAttackTemplate(c echo.Context) error {
 			if err != nil {
 				return util.GenericServerError(err)
 			}
-			if !(user.HasRole(roles.UserRoleAdmin) || attackTemplate.CreatedByUserID.String() == user.ID.String()) {
+			allowed := user.HasRole(roles.UserRoleAdmin) || attackTemplate.CreatedByUserID.String() == user.ID.String()
+			if !allowed {
 				return echo.ErrForbidden
 			}
 			if req.HashcatParams == nil {
@@ -145,7 +146,8 @@ func handleUpdateAttackTemplate(c echo.Context) error {
 			if err != nil {
 				return util.GenericServerError(err)
 			}
-			if !(user.HasRole(roles.UserRoleAdmin) || attackTemplateSet.CreatedByUserID.String() == user.ID.String()) {
+			allowed := user.HasRole(roles.UserRoleAdmin) || attackTemplateSet.CreatedByUserID.String() == user.ID.String()
+			if !allowed {
 				return echo.ErrForbidden
 			}
 			if req.AttackTemplateIDs == nil {
@@ -181,7 +183,8 @@ func handleDeleteAttackTemplate(c echo.Context) error {
 
 	attackTemplate, err := db.GetAttackTemplate(id)
 	if err == nil {
-		if !(user.HasRole(roles.UserRoleAdmin) || attackTemplate.CreatedByUserID.String() == user.ID.String()) {
+		allowed := user.HasRole(roles.UserRoleAdmin) || attackTemplate.CreatedByUserID.String() == user.ID.String()
+		if !allowed {
 			return echo.ErrForbidden
 		}
 
@@ -201,7 +204,8 @@ func handleDeleteAttackTemplate(c echo.Context) error {
 		return util.GenericServerError(err)
 	}
 
-	if !(user.HasRole(roles.UserRoleAdmin) || attackTemplateSet.CreatedByUserID.String() == user.ID.String()) {
+	allowed := user.HasRole(roles.UserRoleAdmin) || attackTemplateSet.CreatedByUserID.String() == user.ID.String()
+	if !allowed {
 		return echo.ErrForbidden
 	}
 

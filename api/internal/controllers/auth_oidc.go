@@ -176,7 +176,7 @@ func handleOIDCCallback(sessHandler auth.SessionHandler) echo.HandlerFunc {
 		// User is now verified, time to sign in
 		existingUser, err := db.GetUserByUsername(username)
 
-		var userToAuth *db.User = existingUser
+		userToAuth := existingUser
 
 		if err != nil && err != db.ErrNotFound {
 			return util.GenericServerError(err)

@@ -18,7 +18,7 @@ func isElevated() error {
 	}
 
 	if user.Uid != "0" || user.Gid != "0" {
-		return fmt.Errorf("Agent installer must be run as root")
+		return fmt.Errorf("agent installer must be run as root")
 	}
 
 	return nil

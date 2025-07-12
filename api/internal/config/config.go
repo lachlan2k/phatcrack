@@ -220,7 +220,7 @@ func Update(updateFunc func(*RuntimeConfig) error) error {
 	lock.Lock()
 	defer lock.Unlock()
 
-	var newConf RuntimeConfig = runningConf
+	newConf := runningConf
 	err := updateFunc(&newConf)
 	if err != nil {
 		return err
