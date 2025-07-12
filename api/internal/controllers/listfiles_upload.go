@@ -256,7 +256,7 @@ func parseListfileUploadForm(mpReader *multipart.Reader, tmpFile *os.File, maxFi
 }
 
 func detectFileLineCount(f *os.File) (int, error) {
-	n := 1
+	lineCount := 1
 
 	buf := make([]byte, 32*1024) // 32kb buffer
 	f.Seek(0, io.SeekStart)
@@ -268,11 +268,11 @@ func detectFileLineCount(f *os.File) (int, error) {
 			return 0, err
 		}
 
-		n += bytes.Count(buf[:n], lineSeparator)
+		lineCount += bytes.Count(buf[:n], lineSeparator)
 		if err != nil {
 			break
 		}
 	}
 
-	return n, nil
+	return lineCount, nil
 }
