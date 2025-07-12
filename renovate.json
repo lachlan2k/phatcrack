@@ -11,10 +11,18 @@
       "automerge": true
     },
     {
-      "matchManagers": ["gomod"],
-      "matchDepNames": ["go"],
-      "matchDepTypes": ["golang"],
-      "gomodTidy": ["gomodTidy"]
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "matchDepTypes": [
+        "golang"
+      ],
+      "postUpdateOptions": [
+        "gomodTidy"
+      ]
     }
   ],
   "prConcurrentLimit": 25
