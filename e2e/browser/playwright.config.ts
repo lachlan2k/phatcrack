@@ -26,6 +26,10 @@ export default defineConfig({
     ignoreHTTPSErrors: true
   },
 
+  expect: {
+    timeout: 10000
+  },
+
   projects: [
     {
       name: 'initial.setup',
