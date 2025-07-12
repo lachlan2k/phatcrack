@@ -9,7 +9,7 @@ import { useApi } from '@/composables/useApi'
 
 const { data, silentlyRefresh } = useApi(getJobCountPerUser)
 
-let intervalId = ref<number | null>(null)
+const intervalId = ref<number | null>(null)
 
 onMounted(() => {
   intervalId.value = setInterval(() => silentlyRefresh, 30 * 1000)

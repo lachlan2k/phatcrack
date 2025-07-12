@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { isAxiosError } from 'axios'
 import { reactive, toRefs, type UnwrapRef } from 'vue'
 
 import { useToastError } from '@/composables/useToastError'
@@ -35,7 +35,7 @@ export function useApi<DTOType>(apiFunc: () => Promise<DTOType>, options: UseAPI
       const response = await apiFunc()
       state.data = response as UnwrapRef<DTOType>
     } catch (err: any) {
-      if (axios.isAxiosError(err)) {
+      if (isAxiosError(err)) {
         if (options.toastOnError) {
           catcher(err)
         }
@@ -64,7 +64,7 @@ export function useApi<DTOType>(apiFunc: () => Promise<DTOType>, options: UseAPI
       const response = await apiFunc()
       state.data = response as UnwrapRef<DTOType>
     } catch (err: any) {
-      if (axios.isAxiosError(err)) {
+      if (isAxiosError(err)) {
         switch (err.response?.status) {
           case 401:
             // We have possibly been logged out, inform our auth store
