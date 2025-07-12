@@ -33,7 +33,7 @@
     "@vue/eslint-config-typescript": "^14.6.0",
     "@vue/tsconfig": "^0.7.0",
     "autoprefixer": "^10.4.20",
-    "daisyui": "^4.12.10",
+    "daisyui": "^5.0.0",
     "eslint": "^9.31.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
