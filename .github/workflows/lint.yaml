@@ -1,5 +1,11 @@
 name: Run lint checks
 
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
 jobs:
   frontend_lint:
     name: Frontend Lint
