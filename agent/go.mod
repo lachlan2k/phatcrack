@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 replace github.com/lachlan2k/phatcrack/common v0.0.0 => ../common
 
-replace gopkg.in/fsnotify.v1 => github.com/fsnotify/fsnotify v1.6.0
+replace gopkg.in/fsnotify.v1 => github.com/fsnotify/fsnotify v1.9.0
 
 require (
 	github.com/google/uuid v1.6.0
