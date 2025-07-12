@@ -13,9 +13,7 @@ export type AuthState = {
   isRefreshing: boolean
 }
 
-export const useAuthStore = defineStore({
-  id: 'auth-store',
-
+export const useAuthStore = defineStore('auth-store', {
   state: () =>
     ({
       whoamiDetails: null,

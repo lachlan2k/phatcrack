@@ -20,9 +20,7 @@ export type AttackTemplatesStore = {
   loading: boolean
 }
 
-export const useAttackTemplatesStore = defineStore({
-  id: 'attack-templates-store',
-
+export const useAttackTemplatesStore = defineStore('attack-templates-store', {
   state: () =>
     ({
       templates: [],

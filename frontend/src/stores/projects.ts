@@ -8,9 +8,7 @@ export type ProjectsState = {
   isLoading: boolean
 }
 
-export const useProjectsStore = defineStore({
-  id: 'projects-store',
-
+export const useProjectsStore = defineStore('projects-store', {
   state: () =>
     ({
       projects: [],

@@ -8,9 +8,7 @@ export type ConfigStore = {
   loading: boolean
 }
 
-export const useConfigStore = defineStore({
-  id: 'config-store',
-
+export const useConfigStore = defineStore('config-store', {
   state: () => ({ config: null, loading: false }) as ConfigStore,
 
   actions: {

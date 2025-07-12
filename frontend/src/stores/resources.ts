@@ -8,9 +8,7 @@ export type ResourceStore = {
   loading: boolean
 }
 
-export const useResourcesStore = defineStore({
-  id: 'resources-store',
-
+export const useResourcesStore = defineStore('resources-store', {
   state: () =>
     ({
       hashTypes: [],

@@ -8,9 +8,7 @@ export type UsersState = {
   isLoading: boolean
 }
 
-export const useUsersStore = defineStore({
-  id: 'users-store',
-
+export const useUsersStore = defineStore('users-store', {
   state: () =>
     ({
       users: [],

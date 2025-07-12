@@ -9,9 +9,7 @@ export type ActiveAttacksStore = {
   loading: boolean
 }
 
-export const useActiveAttacksStore = defineStore({
-  id: 'active-attacks-store',
-
+export const useActiveAttacksStore = defineStore('active-attacks-store', {
   state: () =>
     ({
       jobs: [],

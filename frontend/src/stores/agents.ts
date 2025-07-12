@@ -8,9 +8,7 @@ export type AgentsStore = {
   loading: boolean
 }
 
-export const useAgentsStore = defineStore({
-  id: 'agents-store',
-
+export const useAgentsStore = defineStore('agents-store', {
   state: () =>
     ({
       agents: [],

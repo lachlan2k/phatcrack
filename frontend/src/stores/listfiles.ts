@@ -10,9 +10,7 @@ export type ListfileStore = {
   loading: boolean
 }
 
-export const useListfilesStore = defineStore({
-  id: 'listfiles-store',
-
+export const useListfilesStore = defineStore('listfiles-store', {
   state: () =>
     ({
       listfiles: [],
