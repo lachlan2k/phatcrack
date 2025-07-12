@@ -42,7 +42,7 @@ onMounted(async () => {
   } catch (e) {
     // check if axios error
     if (e instanceof AxiosError) {
-      if (e.response?.data?.message.toLowerCase() === 'origin not allowed') {
+      if (e.response?.data?.message?.toLowerCase() === 'origin not allowed') {
         toast.error(
           'The request origin is not allowed. Phatcrack will not work.\n\nPlease ensure your administrator sets BASE_URL correctly. Alternatively, consider setting INSECURE_ORIGIN=1 if this is a local development instance.',
           {
