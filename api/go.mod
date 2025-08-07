@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa
-	github.com/coreos/go-oidc/v3 v3.14.1
+	github.com/coreos/go-oidc/v3 v3.15.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.27.0
