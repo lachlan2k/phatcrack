@@ -8,6 +8,7 @@
       "matchUpdateTypes": [
         "patch"
       ],
+      "matchCurrentVersion": "!/^0/",
       "automerge": true
     },
     {
@@ -25,5 +26,6 @@
       ]
     }
   ],
+  "platformAutomerge": false,
   "prConcurrentLimit": 25
 }
