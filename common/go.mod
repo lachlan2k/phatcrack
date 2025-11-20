@@ -1,8 +1,6 @@
 module github.com/lachlan2k/phatcrack/common
 
-go 1.23
-
-toolchain go1.23.2
+go 1.24.0
 
 require github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa
 
@@ -14,6 +12,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 )
