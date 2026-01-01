@@ -10,7 +10,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/labstack/echo/v4 v4.14.0
+	github.com/labstack/echo/v4 v4.15.0
 	github.com/lachlan2k/phatcrack/common v0.0.0
 	github.com/lib/pq v1.10.9
 	github.com/sirupsen/logrus v1.9.3
