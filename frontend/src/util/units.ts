@@ -17,9 +17,9 @@ export function timeSince(timestamp: number): string {
     return 'In the future 😱'
   }
 
-  const interval = intervals.find(i => i.seconds < secondsSince) ?? intervals[0]
+  const interval = intervals.find(i => i.seconds < secondsSince) ?? intervals[0]!
   const count = Math.floor(secondsSince / interval.seconds)
-  return `${count} ${interval!.label}${count !== 1 ? 's' : ''} ago`
+  return `${count} ${interval.label}${count !== 1 ? 's' : ''} ago`
 }
 
 export function timeBetween(startTime: number, endTime: number): string {
@@ -33,9 +33,9 @@ export function timeBetween(startTime: number, endTime: number): string {
   ]
 
   const seconds = Math.floor((endTime - startTime) / 1000)
-  const interval = intervals.find(i => i.seconds < seconds) ?? intervals[0]
+  const interval = intervals.find(i => i.seconds < seconds) ?? intervals[0]!
   const count = Math.floor(seconds / interval.seconds)
-  return `${count} ${interval!.label}${count !== 1 ? 's' : ''}`
+  return `${count} ${interval.label}${count !== 1 ? 's' : ''}`
 }
 
 export function timeDurationToReadable(durationInSeconds: number): string {
@@ -52,9 +52,9 @@ export function timeDurationToReadable(durationInSeconds: number): string {
     { label: 'second', seconds: 1 }
   ]
 
-  const interval = intervals.find(i => i.seconds < durationInSeconds) ?? intervals[0]
+  const interval = intervals.find(i => i.seconds < durationInSeconds) ?? intervals[0]!
   const count = Math.floor(durationInSeconds / interval.seconds)
-  return `${count} ${interval!.label}${count !== 1 ? 's' : ''}`
+  return `${count} ${interval.label}${count !== 1 ? 's' : ''}`
 }
 
 export function bytesToReadable(bytes: number): string {

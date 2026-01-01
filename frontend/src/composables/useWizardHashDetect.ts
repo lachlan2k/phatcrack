@@ -9,7 +9,7 @@ export function useWizardHashDetect(hashesArr: Ref<string[]>) {
     fetchData: fetchHashTypeSuggestions,
     isLoading: isLoadingSuggestions,
     data: suggestedHashTypes
-  } = useApi(() => detectHashType(hashesArr.value[0]), { immediate: false, toastOnError: true })
+  } = useApi(() => detectHashType(hashesArr.value[0]!), { immediate: false, toastOnError: true })
 
   function detectButtonClick() {
     // Reset

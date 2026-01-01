@@ -13,7 +13,7 @@ const tab = (name: string, icon: string, component: Component) => ({ name, icon,
 const tabs = [tab('General', Icons.Config, GeneralConfig), tab('Auth', Icons.Auth, AuthConfig), tab('Agent', Icons.Agent, AgentConfig)]
 
 const activeTab = ref(0)
-const ComponentToRender = computed(() => tabs[activeTab.value].component)
+const ComponentToRender = computed(() => tabs[activeTab.value]!.component)
 </script>
 
 <template>

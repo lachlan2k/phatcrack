@@ -110,7 +110,7 @@ async function onSubmit(event: Event) {
   const formData = new FormData()
 
   formData.append('file-name', fileName.value)
-  formData.append('file-type', selectedFileType.value)
+  formData.append('file-type', selectedFileType.value as string)
   formData.append('file-line-count', lineCount.value.toString())
   formData.append('file', fileToUpload.value)
   if (props.projectId != null && props.projectId == '') {

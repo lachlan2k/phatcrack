@@ -58,7 +58,7 @@ watch(suggestedHashTypes, newHashTypes => {
   if (!types || types.length == 0) {
     return
   }
-  hashType.value = types.sort()[0].toString()
+  hashType.value = types.sort()[0]!.toString()
 })
 
 const filteredHashTypes = computed(() => {

@@ -58,8 +58,8 @@ export const useAttackSettings = () => {
       case AttackMode.Combinator: {
         attackSettings.selectedWordlists = params.wordlist_filenames
         if (attackSettings.selectedWordlists.length >= 2) {
-          attackSettings.combinatorLeft = [attackSettings.selectedWordlists[0]]
-          attackSettings.combinatorRight = [attackSettings.selectedWordlists[1]]
+          attackSettings.combinatorLeft = [attackSettings.selectedWordlists[0]!]
+          attackSettings.combinatorRight = [attackSettings.selectedWordlists[1]!]
         }
 
         break

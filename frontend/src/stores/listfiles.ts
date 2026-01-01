@@ -62,7 +62,7 @@ export const useListfilesStore = defineStore('listfiles-store', {
       // map to { wordlists: [...], rulefiles: [...], etc... }
       const map = {} as { [key: string]: ListfileDTO[] }
 
-      const sortedInsert = (arr: ListfileDTO[] | null, val: ListfileDTO): ListfileDTO[] => {
+      const sortedInsert = (arr: ListfileDTO[] | undefined, val: ListfileDTO): ListfileDTO[] => {
         if (arr == null || arr.length == 0) {
           return [val]
         }

@@ -337,7 +337,7 @@ function callBubblewrapped(fn: () => Promise<any>) {
     <div class="card min-w-max self-center bg-base-100 shadow-xl" style="min-width: 800px">
       <div class="card-body">
         <h2 class="card-title mb-4 w-96 justify-center self-center text-center">
-          Step {{ inputs.activeStep + 1 - props.firstStep }}. {{ steps[inputs.activeStep].name }}
+          Step {{ inputs.activeStep + 1 - props.firstStep }}. {{ steps[inputs.activeStep]!.name }}
           <span v-if="inputs.activeStep == StepIndex.Attack"> </span>
         </h2>
 
