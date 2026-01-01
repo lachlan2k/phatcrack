@@ -8,7 +8,17 @@
       "matchUpdateTypes": [
         "patch"
       ],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": [
+        "minor"
+      ],
       "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    },
+    {
+      "matchFileNames": ["e2e/**/package.json"],
       "automerge": true
     },
     {
