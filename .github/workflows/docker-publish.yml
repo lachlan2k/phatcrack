@@ -36,7 +36,7 @@ jobs:
 
       - name: Install cosign
         if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@v3.9.2
+        uses: sigstore/cosign-installer@v4.0.0
         with:
           cosign-release: 'v2.2.2'
 
@@ -45,7 +45,7 @@ jobs:
 
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1
+        uses: docker/login-action@6862ffc5ab2cdb4405cf318a62a6f4c066e2298b
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Build and push API Docker image
         id: build-and-push-api
-        uses: docker/build-push-action@ccc2b40e9ea6518f9252a22a990f8e868370f62e
+        uses: docker/build-push-action@9e436ba9f2d7bcd1d038c8e55d039d37896ddc5d
         with:
           context: .
           file: Dockerfile.api
@@ -91,7 +91,7 @@ jobs:
 
       - name: Build and push frontend Docker image
         id: build-and-push-frontend
-        uses: docker/build-push-action@ccc2b40e9ea6518f9252a22a990f8e868370f62e
+        uses: docker/build-push-action@9e436ba9f2d7bcd1d038c8e55d039d37896ddc5d
         with:
           context: .
           file: Dockerfile.frontend
@@ -120,7 +120,7 @@ jobs:
 
       - name: Build and push agent server Docker image
         id: build-and-push-agent
-        uses: docker/build-push-action@ccc2b40e9ea6518f9252a22a990f8e868370f62e
+        uses: docker/build-push-action@9e436ba9f2d7bcd1d038c8e55d039d37896ddc5d
         with:
           context: .
           file: Dockerfile.agent
