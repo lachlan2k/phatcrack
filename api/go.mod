@@ -12,7 +12,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/labstack/echo/v4 v4.15.0
 	github.com/lachlan2k/phatcrack/common v0.0.0
-	github.com/lib/pq v1.11.0
+	github.com/lib/pq v1.11.1
 	github.com/sirupsen/logrus v1.9.4
 	golang.org/x/crypto v0.47.0
 	golang.org/x/oauth2 v0.34.0
