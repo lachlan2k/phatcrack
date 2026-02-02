@@ -56,7 +56,7 @@ jobs:
       #####
       - name: Extract Docker API metadata
         id: meta-api
-        uses: docker/metadata-action@ed95091677497158a9ff38b314264cd965388d5e
+        uses: docker/metadata-action@a60f0f62b5c12316066c8db464bfb2faafd7907b
         with:
           images: ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}
 
@@ -85,7 +85,7 @@ jobs:
       #####
       - name: Extract Docker frontend metadata
         id: meta-frontend
-        uses: docker/metadata-action@ed95091677497158a9ff38b314264cd965388d5e
+        uses: docker/metadata-action@a60f0f62b5c12316066c8db464bfb2faafd7907b
         with:
           images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
 
@@ -114,7 +114,7 @@ jobs:
       #####
       - name: Extract Docker agent server metadata
         id: meta-agent
-        uses: docker/metadata-action@ed95091677497158a9ff38b314264cd965388d5e
+        uses: docker/metadata-action@a60f0f62b5c12316066c8db464bfb2faafd7907b
         with:
           images: ${{ env.REGISTRY }}/${{ env.AGENT_SERVER_IMAGE_NAME }}
 
