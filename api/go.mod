@@ -15,7 +15,7 @@ require (
 	github.com/lib/pq v1.11.1
 	github.com/sirupsen/logrus v1.9.4
 	golang.org/x/crypto v0.47.0
-	golang.org/x/oauth2 v0.34.0
+	golang.org/x/oauth2 v0.35.0
 	gorm.io/datatypes v1.2.7
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
