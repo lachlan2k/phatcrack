@@ -30,7 +30,7 @@ services:
       - ./filerepo:/srv/filerepo:z
 
   db:
-    image: postgres:15
+    image: postgres:18
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U phatcrack"]
       interval: 5s
