@@ -29,7 +29,7 @@ services:
       - ./filerepo:/srv/filerepo:z
 
   db:
-    image: postgres:15
+    image: postgres:18
     environment:
       - POSTGRES_USER=phatcrack
       - POSTGRES_PASSWORD=${DB_PASS:-phatcrack}
