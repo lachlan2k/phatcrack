@@ -1,6 +1,6 @@
 module github.com/lachlan2k/phatcrack/api
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa
@@ -11,6 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/labstack/echo/v4 v4.15.0
+	github.com/labstack/echo/v5 v5.0.4
 	github.com/lachlan2k/phatcrack/common v0.0.0
 	github.com/lib/pq v1.11.2
 	github.com/sirupsen/logrus v1.9.4
@@ -45,7 +46,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/net v0.49.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
