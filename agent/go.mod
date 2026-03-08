@@ -1,6 +1,6 @@
 module github.com/lachlan2k/phatcrack/agent
 
-go 1.24.0
+go 1.25.0
 
 replace github.com/lachlan2k/phatcrack/common v0.0.0 => ../common
 
@@ -11,7 +11,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/lachlan2k/phatcrack/common v0.0.0
 	github.com/nxadm/tail v1.4.11
-	golang.org/x/sys v0.41.0
+	golang.org/x/sys v0.42.0
 )
 
 require (
