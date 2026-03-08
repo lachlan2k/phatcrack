@@ -1,6 +1,6 @@
 module github.com/lachlan2k/phatcrack/api
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa
@@ -15,7 +15,7 @@ require (
 	github.com/lib/pq v1.11.2
 	github.com/sirupsen/logrus v1.9.4
 	golang.org/x/crypto v0.47.0
-	golang.org/x/oauth2 v0.35.0
+	golang.org/x/oauth2 v0.36.0
 	gorm.io/datatypes v1.2.7
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
