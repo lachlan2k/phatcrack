@@ -1,6 +1,6 @@
 module github.com/lachlan2k/phatcrack/api
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa
@@ -14,7 +14,7 @@ require (
 	github.com/lachlan2k/phatcrack/common v0.0.0
 	github.com/lib/pq v1.11.2
 	github.com/sirupsen/logrus v1.9.4
-	golang.org/x/crypto v0.47.0
+	golang.org/x/crypto v0.51.0
 	golang.org/x/oauth2 v0.35.0
 	gorm.io/datatypes v1.2.7
 	gorm.io/driver/postgres v1.6.0
@@ -45,10 +45,10 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	gorm.io/driver/mysql v1.5.7 // indirect
 )
