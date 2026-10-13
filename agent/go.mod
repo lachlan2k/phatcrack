@@ -1,6 +1,6 @@
 module github.com/lachlan2k/phatcrack/agent
 
-go 1.24.0
+go 1.25.0
 
 replace github.com/lachlan2k/phatcrack/common v0.0.0 => ../common
 
@@ -11,7 +11,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/lachlan2k/phatcrack/common v0.0.0
 	github.com/nxadm/tail v1.4.11
-	golang.org/x/sys v0.41.0
+	golang.org/x/sys v0.45.0
 )
 
 require (
@@ -23,6 +23,6 @@ require (
 	github.com/google/go-tpm v0.9.8 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/crypto v0.46.0 // indirect
+	golang.org/x/crypto v0.52.0 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 )
