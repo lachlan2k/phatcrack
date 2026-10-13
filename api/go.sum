@@ -1,5 +1,7 @@
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
+filippo.io/edwards25519 v1.1.1 h1:YpjwWWlNmGIDyXOn8zLzqiD+9TyIlPhGFG96P39uBpw=
+filippo.io/edwards25519 v1.1.1/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa h1:z8Lo9+R9h4ZF5qvq2NTrWGVjL8gE92cPUv9J4i4yYKg=
 github.com/NHAS/webauthn v0.0.0-20240606085832-ea3172ef4dfa/go.mod h1:WfTnekCrJZ8MTDSlOeFACJTeGFvQnLInNzbZLRpoqTU=
 github.com/coreos/go-oidc/v3 v3.11.0 h1:Ia3MxdwpSw702YW0xgfmP1GVCMA9aEFWu12XUZ3/OtI=
